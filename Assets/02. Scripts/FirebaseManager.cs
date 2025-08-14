@@ -3,7 +3,9 @@ using System.Threading.Tasks;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
+using Google;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class FirebaseManager : Singleton<FirebaseManager>
 {
@@ -25,25 +27,25 @@ public class FirebaseManager : Singleton<FirebaseManager>
     private bool _isFirebaseReady;
     public bool IsFirebaseReady => _isFirebaseReady;
     
-    /*// 구글
-    [SerializeField] private string googleWebAPI = "1912177127-go83if3uk9pelsa2186ti52hu74qhv5g.apps.googleusercontent.com";
+    // 구글
+    [SerializeField] private string _googleWebAPI = "442492611135-dq4pgnvgurl1urko0ufe2hqbeql3psnu.apps.googleusercontent.com";
 
     private GoogleSignInConfiguration _configuration;
-    public GoogleSignInConfiguration Configuration { get { return _configuration; } }*/
+    public GoogleSignInConfiguration Configuration { get { return _configuration; } }
     
-    /*protected override void Awake()
+    protected override void Awake()
     {
         // GoogleSignIn에 사용할 인증 설정 초기화
         _configuration = new GoogleSignInConfiguration
         {
-            WebClientId = googleWebAPI,
+            WebClientId = _googleWebAPI,
             RequestIdToken = true,
             RequestEmail = true
         };
 
         // 초기화한 설정을 GoogleSignIn.Configuration에 적용
         GoogleSignIn.Configuration = _configuration;
-    }*/
+    }
 
     private void Start()
     {

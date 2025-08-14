@@ -4,7 +4,7 @@ using UnityEngine;
 public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
     private static object _lock = new object();
-    private static bool _isShootingDown = false;
+    private static bool _isShootingDown;
     
     [SerializeField]
     private bool _dontDestroyOnLoad = true;
