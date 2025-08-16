@@ -1,5 +1,7 @@
 
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public class GachaUIHandler : MonoBehaviour
 {
@@ -38,6 +40,32 @@ public class GachaUIHandler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 10연차 버튼에 연결할 함수입니다.
+    /// </summary>
+    public void OnGachaButtonPressed_10_Times()
+    {
+        if (gachaManager == null)
+        {
+            Debug.LogError("GachaManager가 GachaUIHandler에 연결되지 않았습니다!");
+            return;
+        }
+
+        // GachaManager의 10회 뽑기 함수를 호출합니다.
+        List<CharacterData> drawnCharacters = gachaManager.DrawMultipleCharacters(10);
+
+        // TODO: 여기에 10개의 결과 아이콘을 한 번에 보여주는 UI 로직을 추가하세요.
+        Debug.Log("--- 10회 뽑기 결과 ---");
+        int count = 1;
+        foreach (var character in drawnCharacters)
+        {
+            Debug.Log($"{count++}. [{character.rarity}] {character.characterName}");
+        }
+        Debug.Log("--------------------");
+
+        // 예시: 10개 결과를 보여주는 결과 창을 띄우는 함수 호출
+        // ShowGachaResultPopup_10_Times(drawnCharacters);
+    }
     // private void ShowGachaResultPopup(CharacterSO character)
     // {
     //     // 결과 창 UI를 활성화하고, 캐릭터 정보를 표시하는 코드...

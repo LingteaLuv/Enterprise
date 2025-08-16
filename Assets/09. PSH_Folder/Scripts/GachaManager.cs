@@ -100,6 +100,24 @@ public class GachaManager : MonoBehaviour
         return drawnCharacter;
     }
 
+    /// <summary>
+    /// 가챠를 지정된 횟수만큼 실행하고 결과 목록을 반환합니다.
+    /// </summary>
+    /// <param name="count">뽑을 횟수</param>
+    /// <returns>뽑힌 캐릭터들의 리스트</returns>
+    public List<CharacterData> DrawMultipleCharacters(int count)
+    {
+        List<CharacterData> results = new List<CharacterData>();
+        for (int i = 0; i < count; i++)
+        {
+            // 기존의 1회 뽑기 함수를 호출하여 결과에 추가합니다.
+            results.Add(DrawCharacter());
+        }
+
+        Debug.Log($"{count}회 연속 뽑기 완료! {results.Count}개의 결과를 반환합니다.");
+        return results;
+    }
+
     // 설정된 확률에 따라 등급을 뽑는 함수
     private Rarity GetRandomRarity()
     {
