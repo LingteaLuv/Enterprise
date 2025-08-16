@@ -3,7 +3,7 @@ using UnityEngine;
 
 public enum Rarity
 {
-    A,B,C
+    C = 1, B, A
 }
 
 [CreateAssetMenu(fileName = "New Character", menuName = "Test Character")]
