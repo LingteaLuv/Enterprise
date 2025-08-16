@@ -16,6 +16,9 @@ public class GachaManager : MonoBehaviour
         public float chance; // 등급별 확률
     }
 
+    [Header("UI 연결")]
+    public CharacterScrollViewUI characterScrollViewUI; // 캐릭터 목록 UI
+
     [Header("가챠 확률 설정")]
     public List<RarityChance> rarityChances;
 
@@ -77,9 +80,52 @@ public class GachaManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 가챠를 1회 실행하여 랜덤한 캐릭터를 반환합니다.
+    /// 가챠를 1회 실행하고 결과를 플레이어 데이터에 적용한 후 UI를 갱신합니다.
     /// </summary>
-    public CharacterData DrawCharacter()
+    public void PerformSingleGacha()
+    {
+        CharacterData drawnCharacter = DrawCharacter();
+        PlayerDataManager.Instance.AddCharacter(drawnCharacter);
+
+        // UI 갱신
+        if (characterScrollViewUI != null)
+        {
+            characterScrollViewUI.RefreshDisplay();
+        }
+        else
+        {
+            Debug.LogWarning("GachaManager에 CharacterScrollViewUI가 연결되지 않았습니다!");
+        }
+    }
+
+    /// <summary>
+    /// 가챠를 여러 번 실행하고 결과들을 플레이어 데이터에 적용한 후 UI를 갱신합니다.
+    /// </summary>
+    /// <param name="count">뽑을 횟수</param>
+    public void PerformMultipleGacha(int count)
+    {
+        List<CharacterData> results = DrawMultipleCharacters(count);
+        foreach (var character in results)
+        {
+            PlayerDataManager.Instance.AddCharacter(character);
+        }
+
+        // UI 갱신
+        if (characterScrollViewUI != null)
+        {
+            characterScrollViewUI.RefreshDisplay();
+        }
+        else
+        {
+            Debug.LogWarning("GachaManager에 CharacterScrollViewUI가 연결되지 않았습니다!");
+        }
+    }
+
+
+    /// <summary>
+    /// 가챠를 1회 실행하여 랜덤한 캐릭터를 반환합니다. (내부 로직용)
+    /// </summary>
+    private CharacterData DrawCharacter()
     {
         // 1. 등급 뽑기
         Rarity chosenRarity = GetRandomRarity();
@@ -101,11 +147,11 @@ public class GachaManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 가챠를 지정된 횟수만큼 실행하고 결과 목록을 반환합니다.
+    /// 가챠를 지정된 횟수만큼 실행하고 결과 목록을 반환합니다. (내부 로직용)
     /// </summary>
     /// <param name="count">뽑을 횟수</param>
     /// <returns>뽑힌 캐릭터들의 리스트</returns>
-    public List<CharacterData> DrawMultipleCharacters(int count)
+    private List<CharacterData> DrawMultipleCharacters(int count)
     {
         List<CharacterData> results = new List<CharacterData>();
         for (int i = 0; i < count; i++)
