@@ -90,7 +90,7 @@ public class StatManager : MonoBehaviour
         }
     }
 
-    private void UpdateMoneyDisplay()
+    public void UpdateMoneyDisplay()
     {
         if (moneyDisplayText != null)
         {
