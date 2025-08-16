@@ -20,6 +20,12 @@ public class StatManager : MonoBehaviour
 
     void Start()
     {
+        // 시작할 때 각 StatData의 BigInteger 값들을 초기화합니다.
+        foreach (var stat in stats)
+        {
+            stat.Validate();
+        }
+
         // 시작할 때 각 UI 패널을 초기화합니다.
         for (int i = 0; i < statDisplays.Count; i++)
         {
@@ -30,6 +36,19 @@ public class StatManager : MonoBehaviour
             }
         }
         UpdateMoneyDisplay();
+    }
+
+    // Unity 에디터에서 값이 변경될 때 호출됩니다.
+    private void OnValidate()
+    {
+        // stats 리스트에 있는 모든 StatData의 값을 검증/업데이트합니다.
+        if (stats != null)
+        {
+            foreach (var stat in stats)
+            {
+                stat.Validate();
+            }
+        }
     }
 
     // UI 패널로부터 업그레이드 요청을 받습니다.
@@ -51,7 +70,7 @@ public class StatManager : MonoBehaviour
     public BigInteger GetCurrentStatValue(int statIndex)
     {
         StatData stat = stats[statIndex];
-        return stat.baseStat + (BigInteger)(stat.level - 1) * stat.statIncreasePerLevel;
+        return stat.BaseStat + (BigInteger)(stat.level - 1) * stat.StatIncreasePerLevel;
     }
 
     // 특정 스탯의 묶음 업그레이드 비용을 계산합니다.
@@ -62,7 +81,7 @@ public class StatManager : MonoBehaviour
         for (int i = 0; i < upgradeAmount; i++)
         {
             int targetLevel = stat.level + i;
-            double cost = (double)stat.baseCost * Math.Pow(stat.costIncreaseRatio, targetLevel - 1);
+            double cost = (double)stat.BaseCost * Math.Pow(stat.costIncreaseRatio, targetLevel - 1);
             totalCost += (BigInteger)cost;
         }
         return totalCost;
