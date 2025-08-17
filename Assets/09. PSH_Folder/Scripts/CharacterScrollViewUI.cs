@@ -1,6 +1,7 @@
 
-using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class CharacterScrollViewUI : MonoBehaviour
 {
@@ -10,25 +11,28 @@ public class CharacterScrollViewUI : MonoBehaviour
     /// <summary>
     /// 현재 플레이어 데이터 기준으로 스크롤 뷰 전체를 다시 그립니다.
     /// </summary>
+
     public void RefreshDisplay()
     {
-        // 1. 기존에 있던 모든 UI 패널들을 삭제합니다.
+        // 1. 기존 UI 패널 제거
         foreach (Transform child in contentPanel)
         {
             Destroy(child.gameObject);
         }
 
-        // 2. 플레이어 데이터 매니저에서 보유 캐릭터 목록을 가져옵니다.
-        Dictionary<CharacterData, PlayerCharacterData> ownedCharacters = PlayerDataManager.Instance.ownedCharacters;
+        // 2. 정렬된 캐릭터 목록 가져오기 (성급 내림차순 → 이름순)
+        var sortedCharacters = PlayerDataManager.Instance.ownedCharacters.Values
+            .OrderByDescending(c => c.stars)
+            .ThenBy(c => c.characterdata.characterName)
+            .ToList();
 
-        // 3. 보유한 모든 캐릭터에 대해 UI 패널을 하나씩 생성합니다.
-        foreach (PlayerCharacterData charData in ownedCharacters.Values)
+        // 3. 정렬된 캐릭터 목록으로 UI 생성
+        foreach (PlayerCharacterData charData in sortedCharacters)
         {
             GameObject panelGO = Instantiate(characterPanelPrefab, contentPanel);
             CharacterPanelUI panelUI = panelGO.GetComponent<CharacterPanelUI>();
             if (panelUI != null)
             {
-                // 생성된 패널에 캐릭터 데이터를 넘겨주어 UI를 설정합니다.
                 panelUI.Setup(charData);
             }
         }
