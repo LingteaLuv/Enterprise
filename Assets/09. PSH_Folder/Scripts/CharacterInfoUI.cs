@@ -1,6 +1,6 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class CharacterInfoUI : MonoBehaviour
 {
@@ -18,6 +18,8 @@ public class CharacterInfoUI : MonoBehaviour
 
     private PlayerCharacterData currentCharacterData; // 현재 표시 중인 캐릭터 데이터
 
+    private CharacterScrollViewUI scrollView;
+
     void Awake()
     {
         // 초기에는 비활성화
@@ -28,6 +30,8 @@ public class CharacterInfoUI : MonoBehaviour
         {
             closeButton.onClick.AddListener(ClosePanel);
         }
+
+        scrollView = FindFirstObjectByType<CharacterScrollViewUI>();
     }
 
     /// <summary>
@@ -41,7 +45,7 @@ public class CharacterInfoUI : MonoBehaviour
         if (data != null)
         {
             characterNameText.text = data.characterdata.characterName;
-            //characterImage.sprite = data.characterdata.characterSprite;
+            characterImage.sprite = data.characterdata.characterSprite;
             levelText.text = $"Lv.{data.level}";
 
             // 승급 UI 업데이트
@@ -98,6 +102,9 @@ public class CharacterInfoUI : MonoBehaviour
         // 승급 버튼 클릭 이벤트 연결 (중복 연결 방지)
         upgradeButton.onClick.RemoveAllListeners();
         upgradeButton.onClick.AddListener(OnUpgradeButtonClicked);
+
+        //레벨 스텟 등 갱신
+        levelText.text = $"Lv.{currentCharacterData.level}";
     }
 
     /// <summary>
@@ -116,10 +123,6 @@ public class CharacterInfoUI : MonoBehaviour
             // 현재 정보 패널의 UI를 갱신
             Setup(currentCharacterData); // 현재 캐릭터 데이터로 다시 Setup 호출하여 UI 갱신
 
-            // CharacterScrollViewUI의 RefreshDisplay를 호출하여 전체 목록을 새로고침하는 것이 가장 간단합니다.
-            // CharacterScrollViewUI는 싱글톤이 아니므로, 참조를 가져와야 합니다.
-            // 여기서는 FindObjectOfType을 사용하지만, 실제 게임에서는 더 효율적인 방법(예: 이벤트, 직접 참조)을 사용해야 합니다.
-            CharacterScrollViewUI scrollView = FindFirstObjectByType<CharacterScrollViewUI>();
             if (scrollView != null)
             {
                 scrollView.RefreshDisplay();
@@ -138,5 +141,13 @@ public class CharacterInfoUI : MonoBehaviour
     public void ClosePanel()
     {
         gameObject.SetActive(false);
+    }
+
+    // 테스트용 레벨 업 진짜 레벨만 업함
+    public void LevelUp()
+    {
+        currentCharacterData.level++;
+        scrollView.RefreshDisplay();
+        UpdateUpgradeUI();
     }
 }
