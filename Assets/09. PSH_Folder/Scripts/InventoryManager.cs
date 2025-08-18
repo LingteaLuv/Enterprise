@@ -76,7 +76,7 @@ public class InventoryManager : MonoBehaviour
 
         // 테스트용 초기 재화 지급
         AddCurrency(CurrencyType.Gold, 10000000);
-        AddCurrency(CurrencyType.EnhancementStone, 500);
+        AddCurrency(CurrencyType.EnhancementStone, 1000);
         Debug.Log("[InventoryManager] 지갑 초기화 및 테스트 재화 지급 완료.");
         UpdateCurrencyUI();
     }
