@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using System.Collections.Generic; // List<>를 사용하기 위해 추가합니다.
 
@@ -16,13 +15,12 @@ public class PlayerCharacterData
     {
         characterdata = so;
         level = 1;
-        stars = (int)so.rarity;
+        stars = (int)so.rarity; // CharacterData의 rarity는 Enum이므로 int로 캐스팅
 
         // CharacterData에 정의된 기본 스탯들을 기반으로, 각 스탯의 초기 레벨을 1로 설정합니다.
         statLevels = new Dictionary<string, int>();
         foreach (var stat in so.baseStats)
         {
-            stat.Validate(); // BigInt 변환
             if (!statLevels.ContainsKey(stat.statName))
             {
                 statLevels.Add(stat.statName, 1);

@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using System.Numerics;
+// using System.Numerics; // BigInteger를 사용하지 않으므로 제거
 
 public class CharacterInfoUI : MonoBehaviour
 {
@@ -103,9 +103,17 @@ public class CharacterInfoUI : MonoBehaviour
         int characterId = currentCharacterData.characterdata.characterID;
         int currentFragments = 0;
 
-        PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments);
-
-        soulFragmentsText.text = $"Soul Fragments: {currentFragments}";
+        // PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments);
+        // PlayerDataManager.Instance가 BigInteger를 사용한다면, currentFragments도 BigInteger여야 합니다.
+        // 현재는 int로 가정합니다.
+        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments))
+        {
+            soulFragmentsText.text = $"Soul Fragments: {currentFragments}";
+        }
+        else
+        {
+            soulFragmentsText.text = "Soul Fragments: 0"; // 데이터를 찾을 수 없을 때 기본값
+        }
     }
 
     /// <summary>
@@ -116,12 +124,19 @@ public class CharacterInfoUI : MonoBehaviour
         if (currentCharacterData == null || levelUpCostText == null || levelUpButton == null) return;
 
         // 실제 레벨에 따른 레벨업 비용 계산 (PlayerDataManager에서 가져옴)
-        BigInteger cost = (BigInteger)((double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, currentCharacterData.level - 1));
+        // PlayerDataManager.Instance.baseLevelUpCost가 BigInteger라면 cost도 BigInteger
+        // PlayerDataManager.Instance.baseLevelUpCost가 float/double이라면 cost도 float/double
+        // 여기서는 BigInteger를 가정하고 double로 계산 후 BigInteger로 캐스팅
+        double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, currentCharacterData.level - 1);
+        System.Numerics.BigInteger cost = (System.Numerics.BigInteger)costDouble; // BigInteger로 캐스팅
+
         CurrencyType costType = CurrencyType.Gold; // 비용 재화 타입 (현재는 골드로 고정)
 
+        // DataUtility.FormatNumber가 BigInteger를 받는지 확인 필요. float을 받는다면 cost를 float으로 변경
         levelUpCostText.text = $"Cost: {DataUtility.FormatNumber(cost)} {costType}";
 
         // 재화가 충분한지 확인하여 버튼 활성화/비활성화
+        // InventoryManager.Instance.GetCurrency가 BigInteger를 반환한다고 가정
         if (InventoryManager.Instance != null && InventoryManager.Instance.GetCurrency(costType) >= cost)
         {
             levelUpButton.interactable = true;
@@ -150,21 +165,28 @@ public class CharacterInfoUI : MonoBehaviour
         // 다음 성급에 필요한 비용 가져오기
         int nextStarLevel = currentCharacterData.stars + 1;
         int cost = 0;
-        if (PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.stars, out cost))
+        // PlayerDataManager.Instance.TryGetUpgradeCost가 int cost를 반환한다고 가정
+        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.stars, out cost))
         {
             starUpgradeCostText.text = $"Cost: {cost} Soul Fragments";
 
             // 해당 캐릭터의 영혼 조각이 충분한지 확인하여 버튼 활성화/비활성화
             int currentFragments = 0;
-            PlayerDataManager.Instance.characterSoulFragments.TryGetValue(currentCharacterData.characterdata.characterID, out currentFragments);
-
-            if (currentFragments >= cost)
+            // PlayerDataManager.Instance.characterSoulFragments가 int를 저장한다고 가정
+            if (PlayerDataManager.Instance.characterSoulFragments.TryGetValue(currentCharacterData.characterdata.characterID, out currentFragments))
             {
-                starUpgradeButton.interactable = true;
+                if (currentFragments >= cost)
+                {
+                    starUpgradeButton.interactable = true;
+                }
+                else
+                {
+                    starUpgradeButton.interactable = false;
+                }
             }
             else
             {
-                starUpgradeButton.interactable = false;
+                starUpgradeButton.interactable = false; // 영혼 조각 데이터가 없으면 비활성화
             }
         }
         else
@@ -181,24 +203,28 @@ public class CharacterInfoUI : MonoBehaviour
     {
         if (currentCharacterData == null) return;
 
-        // HP 스탯 데이터 찾기
-        StatData hpStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "HP");
+        // HP 스탯 데이터 찾기 (CSV 헤더에 맞춰 "health"로 변경)
+        StatData hpStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "health");
         if (hpStatData != null)
         {
-            BigInteger hpValue = StatManager.CalculateStatValue(hpStatData, currentCharacterData.level);
-            hpDisplay.text = $"HP Lv{currentCharacterData.level} {DataUtility.FormatNumber(hpValue)}";
+            // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
+            float hpValue = StatManager.CalculateStatValue(hpStatData, currentCharacterData.level);
+            // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
+            hpDisplay.text = $"HP Lv{currentCharacterData.level} {hpValue.ToString("F0")}";
         }
         else
         {
             hpDisplay.text = "HP Stat Not Found"; // HP 스탯을 찾을 수 없습니다.
         }
 
-        // ATK 스탯 데이터 찾기
-        StatData atkStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "ATK");
+        // ATK 스탯 데이터 찾기 (CSV 헤더에 맞춰 "attackPower"로 변경)
+        StatData atkStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "attackPower");
         if (atkStatData != null)
         {
-            BigInteger atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.level);
-            atkDisplay.text = $"ATK Lv{currentCharacterData.level} {DataUtility.FormatNumber(atkValue)}";
+            // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
+            float atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.level);
+            // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
+            atkDisplay.text = $"ATK Lv{currentCharacterData.level} {atkValue.ToString("F0")}";
         }
         else
         {
@@ -267,8 +293,12 @@ public class CharacterInfoUI : MonoBehaviour
     // 테스트용 레벨업 (비용 없이 레벨만 증가)
     public void LevelUp()
     {
+        if (currentCharacterData == null) return; // null 체크 추가
         currentCharacterData.level++;
-        scrollView.RefreshDisplay();
+        if (scrollView != null) // null 체크 추가
+        {
+            scrollView.RefreshDisplay();
+        }
         UpdateLevelUpUI(); // 일관성을 위해 UpdateLevelUpUI 사용
     }
 }
