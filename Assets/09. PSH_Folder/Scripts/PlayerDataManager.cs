@@ -1,13 +1,20 @@
-
 using UnityEngine;
 using System.Collections.Generic;
-using TMPro;
+using TMPro; // TextMeshPro 네임스페이스 추가
+using System.Numerics; // BigInteger 사용을 위해 추가
 
 public class PlayerDataManager : MonoBehaviour
 {
     public static PlayerDataManager Instance { get; private set; }
 
-    // 보유한 모든 캐릭터 데이터를 저장하는 딕셔너리 (Key: CharacterData, Value: 해당 캐릭터의 상태 데이터)
+    [Header("UI 연결")]
+    public TextMeshProUGUI soulFragmentsText; // 영혼 조각을 표시할 TextMeshPro UI
+
+    [Header("캐릭터 레벨업 비용 설정")]
+    public BigInteger baseLevelUpCost = 1000; // 기본 레벨업 비용
+    public double levelUpCostIncreaseRatio = 1.07; // 레벨업 비용 증가율
+
+    // 보유한 모든 캐릭터 데이터를 저장하는 딕셔너리 (Key: CharacterSO, Value: 해당 캐릭터의 상태 데이터)
     public Dictionary<CharacterData, PlayerCharacterData> ownedCharacters = new Dictionary<CharacterData, PlayerCharacterData>();
 
     // 캐릭터별 영혼 조각 (Key: 캐릭터 ID, Value: 조각 개수)
@@ -159,5 +166,33 @@ public class PlayerDataManager : MonoBehaviour
     public bool TryGetUpgradeCost(int currentStarLevel, out int cost)
     {
         return starUpgradeCosts.TryGetValue(currentStarLevel, out cost);
+    }
+
+    /// <summary>
+    /// 특정 캐릭터의 레벨업을 시도합니다.
+    /// </summary>
+    /// <param name="character">레벨업할 대상 캐릭터</param>
+    /// <returns>성공 여부</returns>
+    public bool TryLevelUpCharacter(PlayerCharacterData character)
+    {
+        // 현재 레벨에 따른 레벨업 비용 계산
+        // BigInteger와 double의 곱셈 오류를 해결하기 위해 double로 캐스팅 후 계산
+        BigInteger levelUpCost = (BigInteger)((double)baseLevelUpCost * System.Math.Pow(levelUpCostIncreaseRatio, character.level - 1));
+        CurrencyType costType = CurrencyType.Gold; // 비용 재화 타입
+
+        // 재화 확인 및 소모
+        if (!InventoryManager.Instance.SpendCurrency(costType, levelUpCost))
+        {
+            Debug.LogWarning($"캐릭터 레벨업 실패: {costType} 재화 부족. 필요: {levelUpCost}");
+            return false;
+        }
+
+        // 레벨업 진행
+        character.level++;
+        Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.level - 1} -> Lv.{character.level})");
+
+        // TODO: 레벨업에 따른 추가 보상 로직 (스탯 증가 외)
+        InventoryManager.Instance.UpdateCurrencyUI();
+        return true;
     }
 }

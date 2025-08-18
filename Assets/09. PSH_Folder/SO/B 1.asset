@@ -14,7 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterID: 1004
   characterName: b2
-  characterSprite: {fileID: 4413357381803317139, guid: 6ad33ab0a58771c468ab7751a3c31064, type: 3}
   description: dddd
+  characterSprite: {fileID: 4413357381803317139, guid: 6ad33ab0a58771c468ab7751a3c31064, type: 3}
   rarity: 2
-  maxHealthString: 100
+  baseStats:
+  - statName: HP
+    baseStatString: 100
+    statIncreasePerLevelString: 10
+    baseCost:
+      currencyType: 1
+      costString: 100
+    costIncreaseRatio: 1.07
+  - statName: ATK
+    baseStatString: 10
+    statIncreasePerLevelString: 5
+    baseCost:
+      currencyType: 1
+      costString: 100
+    costIncreaseRatio: 1.07

@@ -1,39 +1,23 @@
-using System.Numerics;
-using UnityEngine;
 
+using System.Collections.Generic;
+using Unity.Android.Gradle.Manifest;
+using UnityEngine;
 public enum Rarity
 {
     C = 1, B, A
 }
 
-[CreateAssetMenu(fileName = "New Character", menuName = "Test Character")]
+// 에셋 메뉴에서 CharacterData를 생성할 수 있도록 메뉴를 추가합니다.
+[CreateAssetMenu(fileName = "CharacterData", menuName = "ScriptableObjects/CharacterData", order = 1)]
 public class CharacterData : ScriptableObject
 {
-    [Header("캐릭터 번호")]
+    // CSV의 각 열(column)에 해당하는 변수들을 선언합니다.
     public int characterID;
-
-    [Header("캐릭터 정보")]
     public string characterName;
-    public Sprite characterSprite;
-    [TextArea]
     public string description;
+    public Sprite characterSprite; // 캐릭터 이미지
+    public Rarity rarity; // 1, 2, 3성 등급
 
-    [Header("가챠 정보")]
-    public Rarity rarity; // 이 캐릭터의 등급
-
-    [Header("능력치 (BigInteger)")]
-    [SerializeField]
-    private string maxHealthString = "100";
-    public BigInteger MaxHealth { get; private set; }
-
-    private void OnValidate()
-    {
-        // 인스펙터에서 입력한 체력(문자열)을 실제 BigInteger 값으로 변환합니다.
-        if (!BigInteger.TryParse(maxHealthString, out BigInteger parsedValue))
-        {
-            parsedValue = 100;
-        }
-        MaxHealth = parsedValue;
-        maxHealthString = MaxHealth.ToString();
-    }
+    [Header("스탯 정보")]
+    public List<StatData> baseStats; // 이 캐릭터의 기본 스탯 목록
 }

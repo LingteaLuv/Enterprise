@@ -1,21 +1,31 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using System.Numerics;
 
 public class CharacterInfoUI : MonoBehaviour
 {
-    [Header("UI 요소 연결")]
+    [Header("UI 요소")]
     public TextMeshProUGUI characterNameText;
     public Image characterImage;
     public TextMeshProUGUI levelText;
-    public TextMeshProUGUI soulFragmentsText; // [추가] 캐릭터별 영혼 조각을 표시할 UI
+    public TextMeshProUGUI soulFragmentsText; // 캐릭터별 영혼 조각
 
     [Header("닫기 버튼")]
     public Button closeButton;
 
-    [Header("승급 UI")]
-    public TextMeshProUGUI upgradeCostText; // 승급 비용을 표시할 TextMeshPro UI
-    public Button upgradeButton; // 승급 버튼
+    [Header("캐릭터 레벨업 UI")]
+    public TextMeshProUGUI levelUpCostText; // 캐릭터 레벨업 비용
+    public HoldButton levelUpButton; // 캐릭터 레벨업 버튼 (HoldButton 타입)
+
+    [Header("성급 업그레이드 UI")]
+    public TextMeshProUGUI starUpgradeCostText; // 성급 업그레이드 비용 표시
+    public Button starUpgradeButton; // 성급 업그레이드 버튼
+
+    [Header("스탯 표시")]
+    public TextMeshProUGUI hpDisplay; // HP LvX Value 형식
+    public TextMeshProUGUI atkDisplay; // ATK LvX Value 형식
 
     private PlayerCharacterData currentCharacterData; // 현재 표시 중인 캐릭터 데이터
 
@@ -30,6 +40,18 @@ public class CharacterInfoUI : MonoBehaviour
         if (closeButton != null)
         {
             closeButton.onClick.AddListener(ClosePanel);
+        }
+
+        // 캐릭터 레벨업 버튼 이벤트 연결 (HoldButton의 onHoldAction 사용)
+        if (levelUpButton != null)
+        {
+            levelUpButton.onHoldAction.AddListener(OnLevelUpButtonClicked);
+        }
+
+        // 성급 업그레이드 버튼 이벤트 연결
+        if (starUpgradeButton != null)
+        {
+            starUpgradeButton.onClick.AddListener(OnStarUpgradeButtonClicked);
         }
 
         scrollView = FindFirstObjectByType<CharacterScrollViewUI>();
@@ -49,24 +71,30 @@ public class CharacterInfoUI : MonoBehaviour
             characterImage.sprite = data.characterdata.characterSprite;
             levelText.text = $"Lv.{data.level}";
 
-            // [수정] 캐릭터별 영혼 조각 UI 업데이트
+            // 캐릭터별 영혼 조각 UI 갱신
             UpdateSoulFragmentsUI();
 
-            // 승급 UI 업데이트
-            UpdateUpgradeUI();
+            // 캐릭터 레벨업 UI (비용, 버튼 활성화/비활성화) 갱신
+            UpdateLevelUpUI();
+
+            // 성급 업그레이드 UI 갱신
+            UpdateStarUpgradeUI();
+
+            // 모든 캐릭터 스탯 표시 갱신
+            UpdateCharacterStatsDisplay();
 
             // 패널 활성화
             gameObject.SetActive(true);
         }
         else
         {
-            Debug.LogWarning("CharacterInfoUI: 전달된 캐릭터 데이터가 null입니다.");
+            Debug.LogWarning("CharacterInfoUI: 전달된 캐릭터 데이터가 null입니다."); // 전달된 캐릭터 데이터가 null입니다.
             ClosePanel(); // 데이터가 없으면 패널 닫기
         }
     }
 
     /// <summary>
-    /// [추가] 현재 캐릭터의 영혼 조각 UI를 갱신합니다.
+    /// 캐릭터의 영혼 조각 UI를 갱신합니다.
     /// </summary>
     private void UpdateSoulFragmentsUI()
     {
@@ -75,74 +103,122 @@ public class CharacterInfoUI : MonoBehaviour
         int characterId = currentCharacterData.characterdata.characterID;
         int currentFragments = 0;
 
-        // PlayerDataManager에서 현재 캐릭터의 영혼 조각 개수를 가져옵니다.
         PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments);
 
-        soulFragmentsText.text = $"soulFragment: {currentFragments}";
+        soulFragmentsText.text = $"Soul Fragments: {currentFragments}";
     }
 
     /// <summary>
-    /// 승급 UI (비용, 버튼 활성화/비활성화)를 갱신합니다.
+    /// 캐릭터 레벨업 UI (비용, 버튼 활성화/비활성화)를 갱신합니다.
     /// </summary>
-    private void UpdateUpgradeUI()
+    private void UpdateLevelUpUI()
     {
-        if (currentCharacterData == null) return;
+        if (currentCharacterData == null || levelUpCostText == null || levelUpButton == null) return;
 
-        // 최대 성급인지 확인
-        if (currentCharacterData.stars >= 5) // 5성이 최대 성급이라고 가정
+        // 실제 레벨에 따른 레벨업 비용 계산 (PlayerDataManager에서 가져옴)
+        BigInteger cost = (BigInteger)((double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, currentCharacterData.level - 1));
+        CurrencyType costType = CurrencyType.Gold; // 비용 재화 타입 (현재는 골드로 고정)
+
+        levelUpCostText.text = $"Cost: {DataUtility.FormatNumber(cost)} {costType}";
+
+        // 재화가 충분한지 확인하여 버튼 활성화/비활성화
+        if (InventoryManager.Instance != null && InventoryManager.Instance.GetCurrency(costType) >= cost)
         {
-            upgradeCostText.text = "MAX";
-            upgradeButton.interactable = false;
+            levelUpButton.interactable = true;
+        }
+        else
+        {
+            levelUpButton.interactable = false;
+        }
+    }
+
+    /// <summary>
+    /// 성급 업그레이드 UI (비용, 버튼 활성화/비활성화)를 갱신합니다.
+    /// </summary>
+    private void UpdateStarUpgradeUI()
+    {
+        if (currentCharacterData == null || starUpgradeCostText == null || starUpgradeButton == null) return;
+
+        // 최대 성급 확인 (예: 5성이 최대라고 가정)
+        if (currentCharacterData.stars >= 5)
+        {
+            starUpgradeCostText.text = "MAX";
+            starUpgradeButton.interactable = false;
             return;
         }
 
         // 다음 성급에 필요한 비용 가져오기
-        if (PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.stars, out int cost))
+        int nextStarLevel = currentCharacterData.stars + 1;
+        int cost = 0;
+        if (PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.stars, out cost))
         {
-            upgradeCostText.text = $"cost: {cost}";
+            starUpgradeCostText.text = $"Cost: {cost} Soul Fragments";
 
-            // [수정] 해당 캐릭터의 영혼 조각이 충분한지 확인하여 버튼 활성화/비활성화
+            // 해당 캐릭터의 영혼 조각이 충분한지 확인하여 버튼 활성화/비활성화
             int currentFragments = 0;
             PlayerDataManager.Instance.characterSoulFragments.TryGetValue(currentCharacterData.characterdata.characterID, out currentFragments);
 
             if (currentFragments >= cost)
             {
-                upgradeButton.interactable = true;
+                starUpgradeButton.interactable = true;
             }
             else
             {
-                upgradeButton.interactable = false;
+                starUpgradeButton.interactable = false;
             }
         }
         else
         {
-            upgradeCostText.text = "-"; // 정의되지 않은 성급
-            upgradeButton.interactable = false;
+            starUpgradeCostText.text = "-"; // 정의되지 않은 성급
+            starUpgradeButton.interactable = false;
         }
-
-        // 승급 버튼 클릭 이벤트 연결 (중복 연결 방지)
-        upgradeButton.onClick.RemoveAllListeners();
-        upgradeButton.onClick.AddListener(OnUpgradeButtonClicked);
-
-        //레벨 스텟 등 갱신
-        levelText.text = $"Lv.{currentCharacterData.level}";
     }
 
     /// <summary>
-    /// 승급 버튼 클릭 시 호출됩니다.
+    /// 모든 캐릭터 스탯 표시를 갱신합니다. (HP, ATK)
     /// </summary>
-    private void OnUpgradeButtonClicked()
+    private void UpdateCharacterStatsDisplay()
     {
         if (currentCharacterData == null) return;
 
-        // PlayerDataManager를 통해 승급 시도
-        bool success = PlayerDataManager.Instance.TryUpgradeCharacterStar(currentCharacterData);
+        // HP 스탯 데이터 찾기
+        StatData hpStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "HP");
+        if (hpStatData != null)
+        {
+            BigInteger hpValue = StatManager.CalculateStatValue(hpStatData, currentCharacterData.level);
+            hpDisplay.text = $"HP Lv{currentCharacterData.level} {DataUtility.FormatNumber(hpValue)}";
+        }
+        else
+        {
+            hpDisplay.text = "HP Stat Not Found"; // HP 스탯을 찾을 수 없습니다.
+        }
+
+        // ATK 스탯 데이터 찾기
+        StatData atkStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "ATK");
+        if (atkStatData != null)
+        {
+            BigInteger atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.level);
+            atkDisplay.text = $"ATK Lv{currentCharacterData.level} {DataUtility.FormatNumber(atkValue)}";
+        }
+        else
+        {
+            atkDisplay.text = "ATK Stat Not Found"; // ATK 스탯을 찾을 수 없습니다.
+        }
+    }
+
+    /// <summary>
+    /// 캐릭터 레벨업 버튼 클릭 시 호출됩니다.
+    /// </summary>
+    private void OnLevelUpButtonClicked()
+    {
+        if (currentCharacterData == null) return;
+
+        bool success = PlayerDataManager.Instance.TryLevelUpCharacter(currentCharacterData);
 
         if (success)
         {
-            // 승급 성공 시 UI 갱신
-            // 현재 정보 패널의 UI를 갱신
-            Setup(currentCharacterData); // 현재 캐릭터 데이터로 다시 Setup 호출하여 UI 갱신
+            // 레벨업 성공 시 UI 갱신
+            Setup(currentCharacterData); // Setup을 다시 호출하여 모든 UI 요소 갱신
 
             if (scrollView != null)
             {
@@ -150,10 +226,34 @@ public class CharacterInfoUI : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신에 문제가 있을 수 있습니다.");
+                Debug.LogWarning("CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신이 불완전할 수 있습니다."); // CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신이 불완전할 수 있습니다.
             }
         }
-        // 실패 시 PlayerDataManager에서 이미 로그를 출력하므로 별도 처리 없음
+    }
+
+    /// <summary>
+    /// 성급 업그레이드 버튼 클릭 시 호출됩니다.
+    /// </summary>
+    private void OnStarUpgradeButtonClicked()
+    {
+        if (currentCharacterData == null) return;
+
+        bool success = PlayerDataManager.Instance.TryUpgradeCharacterStar(currentCharacterData);
+
+        if (success)
+        {
+            // 성급 업그레이드 성공 시 UI 갱신
+            Setup(currentCharacterData); // Setup을 다시 호출하여 모든 UI 요소 갱신
+
+            if (scrollView != null)
+            {
+                scrollView.RefreshDisplay();
+            }
+            else
+            {
+                Debug.LogWarning("CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신이 불완전할 수 있습니다."); // CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신이 불완전할 수 있습니다.
+            }
+        }
     }
 
     /// <summary>
@@ -164,11 +264,11 @@ public class CharacterInfoUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // 테스트용 레벨 업 진짜 레벨만 업함
+    // 테스트용 레벨업 (비용 없이 레벨만 증가)
     public void LevelUp()
     {
         currentCharacterData.level++;
         scrollView.RefreshDisplay();
-        UpdateUpgradeUI();
+        UpdateLevelUpUI(); // 일관성을 위해 UpdateLevelUpUI 사용
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class TestGoldUp : MonoBehaviour
 {
-    [SerializeField] StatManager statManager;
+    /*[SerializeField] StatManager statManager;
     void Start()
     {
         StartCoroutine(EarnGold());
@@ -18,5 +18,5 @@ public class TestGoldUp : MonoBehaviour
             yield return new WaitForSeconds(.5f);
         }
     }
-
+    */
 }

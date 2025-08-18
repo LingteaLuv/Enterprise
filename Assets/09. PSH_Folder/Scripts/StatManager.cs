@@ -1,119 +1,33 @@
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+
 using System.Numerics;
 using System;
-using TMPro;
 
-public class StatManager : MonoBehaviour
+// static 클래스로 변경하여, 어디서든 접근 가능한 스탯 계산기로 만듭니다.
+public static class StatManager
 {
-    [Header("--- 관리할 스탯 목록 ---")]
-    public List<StatData> stats = new List<StatData>();
-
-    [Header("--- 연결할 UI ---")]
-    public List<StatDisplayPanel> statDisplays = new List<StatDisplayPanel>();
-    public TextMeshProUGUI moneyDisplayText;
-
-    // 공용 데이터
-    public static BigInteger playerMoney = 100000;
-    private int upgradeAmount = 1;
-
-    void Start()
+    /// <summary>
+    /// 특정 스탯의 현재 레벨에 해당하는 최종 능력치를 계산합니다.
+    /// </summary>
+    /// <param name="stat">계산할 스탯의 원본 데이터 (기본값, 성장치 등)</param>
+    /// <param name="level">현재 스탯 레벨</param>
+    /// <returns>계산된 최종 능력치</returns>
+    public static System.Numerics.BigInteger CalculateStatValue(StatData stat, int level)
     {
-        // 시작할 때 각 StatData의 BigInteger 값들을 초기화합니다.
-        foreach (var stat in stats)
-        {
-            stat.Validate();
-        }
-
-        // 시작할 때 각 UI 패널을 초기화합니다.
-        for (int i = 0; i < statDisplays.Count; i++)
-        {
-            if (i < stats.Count)
-            {
-                statDisplays[i].Initialize(this, i); // UI 패널에 매니저와 인덱스 정보 제공
-                UpdateDisplayForStat(i);
-            }
-        }
-        UpdateMoneyDisplay();
+        if (level <= 0) level = 1;
+        return stat.BaseStat + (System.Numerics.BigInteger)(level - 1) * stat.StatIncreasePerLevel;
     }
 
-    // Unity 에디터에서 값이 변경될 때 호출됩니다.
-    private void OnValidate()
+    /// <summary>
+    /// 특정 스탯의 다음 레벨 업에 필요한 비용을 계산합니다.
+    /// </summary>
+    /// <param name="stat">계산할 스탯의 원본 데이터 (기본 비용, 비용 증가율 등)</param>
+    /// <param name="currentLevel">현재 스탯 레벨</param>
+    /// <returns>계산된 업그레이드 비용</returns>
+    public static System.Numerics.BigInteger CalculateUpgradeCost(StatData stat, int currentLevel)
     {
-        // stats 리스트에 있는 모든 StatData의 값을 검증/업데이트합니다.
-        if (stats != null)
-        {
-            foreach (var stat in stats)
-            {
-                stat.Validate();
-            }
-        }
-    }
-
-    // UI 패널로부터 업그레이드 요청을 받습니다.
-    public void AttemptUpgrade(int statIndex)
-    {
-        BigInteger totalCost = CalculateBatchCost(statIndex);
-
-        if (playerMoney >= totalCost)
-        {
-            playerMoney -= totalCost;
-            stats[statIndex].level += upgradeAmount;
-
-            UpdateDisplayForStat(statIndex);
-            UpdateMoneyDisplay();
-        }
-    }
-
-    // 특정 스탯의 현재 능력치 값을 계산합니다.
-    public BigInteger GetCurrentStatValue(int statIndex)
-    {
-        StatData stat = stats[statIndex];
-        return stat.BaseStat + (BigInteger)(stat.level - 1) * stat.StatIncreasePerLevel;
-    }
-
-    // 특정 스탯의 묶음 업그레이드 비용을 계산합니다.
-    public BigInteger CalculateBatchCost(int statIndex)
-    {
-        StatData stat = stats[statIndex];
-        BigInteger totalCost = 0;
-        for (int i = 0; i < upgradeAmount; i++)
-        {
-            int targetLevel = stat.level + i;
-            double cost = (double)stat.BaseCost * Math.Pow(stat.costIncreaseRatio, targetLevel - 1);
-            totalCost += (BigInteger)cost;
-        }
-        return totalCost;
-    }
-
-    // 업그레이드 단위를 변경하고 모든 UI를 갱신합니다.
-    public void SetUpgradeAmount(int amount)
-    {
-        upgradeAmount = amount;
-        for (int i = 0; i < stats.Count; i++)
-        {
-            UpdateDisplayForStat(i);
-        }
-    }
-
-    // 특정 스탯의 UI를 업데이트하도록 StatDisplayPanel에 요청합니다.
-    public void UpdateDisplayForStat(int statIndex)
-    {
-        if (statIndex < statDisplays.Count)
-        {
-            StatData stat = stats[statIndex];
-            BigInteger currentVal = GetCurrentStatValue(statIndex);
-            BigInteger cost = CalculateBatchCost(statIndex);
-            statDisplays[statIndex].UpdateDisplay(stat.statName, stat.level, currentVal, cost, upgradeAmount);
-        }
-    }
-
-    public void UpdateMoneyDisplay()
-    {
-        if (moneyDisplayText != null)
-        {
-            moneyDisplayText.text = $"gold: {DataUtility.FormatNumber(playerMoney)}";
-        }
+        if (currentLevel <= 0) currentLevel = 1;
+        // StatData에 있는 baseCost의 Cost(BigInteger) 값을 기반으로 계산합니다.
+        double cost = (double)stat.baseCost.Cost * Math.Pow(stat.costIncreaseRatio, currentLevel - 1);
+        return (System.Numerics.BigInteger)cost;
     }
 }
