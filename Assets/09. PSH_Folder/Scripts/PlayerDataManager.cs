@@ -1,20 +1,17 @@
 
 using UnityEngine;
 using System.Collections.Generic;
-using TMPro; // TextMeshPro 네임스페이스 추가
+using TMPro;
 
 public class PlayerDataManager : MonoBehaviour
 {
     public static PlayerDataManager Instance { get; private set; }
 
-    [Header("UI 연결")]
-    public TextMeshProUGUI soulFragmentsText; // 영혼 조각을 표시할 TextMeshPro UI
-
-    // 보유한 모든 캐릭터 데이터를 저장하는 딕셔너리 (Key: CharacterSO, Value: 해당 캐릭터의 상태 데이터)
+    // 보유한 모든 캐릭터 데이터를 저장하는 딕셔너리 (Key: CharacterData, Value: 해당 캐릭터의 상태 데이터)
     public Dictionary<CharacterData, PlayerCharacterData> ownedCharacters = new Dictionary<CharacterData, PlayerCharacterData>();
 
-    // 공용 재화
-    public int soulFragments = 0; // 영혼 조각
+    // 캐릭터별 영혼 조각 (Key: 캐릭터 ID, Value: 조각 개수)
+    public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
 
     // 성급 업그레이드 비용 (현재 성급 -> 다음 성급에 필요한 영혼 조각)
     private Dictionary<int, int> starUpgradeCosts;
@@ -25,7 +22,7 @@ public class PlayerDataManager : MonoBehaviour
         else { Destroy(gameObject); }
 
         InitializeUpgradeCosts(); // 성급 업그레이드 비용 초기화
-        UpdateSoulFragmentsUI(); // 게임 시작 시 UI 초기화
+        // UpdateSoulFragmentsUI(); // TODO: UI 로직을 캐릭터별로 수정해야 함
     }
 
     private void InitializeUpgradeCosts()
@@ -50,31 +47,49 @@ public class PlayerDataManager : MonoBehaviour
         {
             // 중복 획득: 등급에 따라 영혼 조각으로 변환
             int fragmentsGained = 0;
-            switch (characterdata.rarity)
+            switch (characterdata.rarity) // CharacterData에 rarity(성급) 변수가 있다고 가정
             {
-                case Rarity.C:
+                case Rarity.C: // 1성
                     fragmentsGained = 1;
                     break;
-                case Rarity.B:
+                case Rarity.B: // 2성
                     fragmentsGained = 4;
                     break;
-                case Rarity.A:
+                case Rarity.A: // 3성
                     fragmentsGained = 30;
                     break;
             }
-            soulFragments += fragmentsGained;
-            Debug.Log($"[중복] {characterdata.characterName}({characterdata.rarity}) 획득! 영혼 조각 +{fragmentsGained}. 현재 영혼 조각: {soulFragments}");
 
-            UpdateSoulFragmentsUI(); // 영혼 조각 UI 갱신
+            AddSoulFragments(characterdata.characterID, fragmentsGained);
         }
         else
         {
             // 신규 획득: 새로운 캐릭터 데이터 생성 후 딕셔너리에 추가
             PlayerCharacterData newCharData = new PlayerCharacterData(characterdata);
             ownedCharacters.Add(characterdata, newCharData);
-            Debug.Log($"[신규] {characterdata.characterName}({characterdata.rarity}) 획득!");
+            Debug.Log($"[신규] {characterdata.characterName}({characterdata.rarity}성) 획득!");
         }
     }
+
+    /// <summary>
+    /// 특정 캐릭터의 영혼 조각을 추가합니다.
+    /// </summary>
+    /// <param name="characterId">캐릭터의 고유 ID</param>
+    /// <param name="amount">추가할 조각의 양</param>
+    public void AddSoulFragments(int characterId, int amount)
+    {
+        if (characterSoulFragments.ContainsKey(characterId))
+        {
+            characterSoulFragments[characterId] += amount;
+        }
+        else
+        {
+            characterSoulFragments.Add(characterId, amount);
+        }
+        Debug.Log($"캐릭터 ID {characterId}의 영혼 조각 +{amount}. 현재: {characterSoulFragments[characterId]}개");
+        // TODO: 해당 캐릭터의 영혼 조각 UI 갱신 로직 필요
+    }
+
 
     /// <summary>
     /// 캐릭터의 성급을 업그레이드 시도합니다.
@@ -89,6 +104,8 @@ public class PlayerDataManager : MonoBehaviour
             return false;
         }
 
+        int characterId = playerCharData.characterdata.characterID;
+
         // 최대 성급 확인 (예: 5성이 최대라고 가정)
         if (playerCharData.stars >= 5)
         {
@@ -97,38 +114,40 @@ public class PlayerDataManager : MonoBehaviour
         }
 
         // 다음 성급에 필요한 비용 확인
-        int nextStarLevel = playerCharData.stars + 1;
         if (!starUpgradeCosts.TryGetValue(playerCharData.stars, out int cost))
         {
             Debug.LogError($"현재 성급 {playerCharData.stars}에서 다음 성급으로의 업그레이드 비용이 정의되지 않았습니다.");
             return false;
         }
 
-        // 영혼 조각 충분한지 확인
-        if (soulFragments < cost)
+        // 해당 캐릭터의 영혼 조각이 충분한지 확인
+        if (!characterSoulFragments.ContainsKey(characterId) || characterSoulFragments[characterId] < cost)
         {
-            Debug.LogWarning($"영혼 조각이 부족합니다! (필요: {cost}, 현재: {soulFragments})");
+            int currentFragments = characterSoulFragments.ContainsKey(characterId) ? characterSoulFragments[characterId] : 0;
+            Debug.LogWarning($"{playerCharData.characterdata.characterName}의 영혼 조각이 부족합니다! (필요: {cost}, 현재: {currentFragments})");
             return false;
         }
 
         // 업그레이드 진행
-        soulFragments -= cost;
-        playerCharData.stars = nextStarLevel;
+        characterSoulFragments[characterId] -= cost;
+        playerCharData.stars++;
         Debug.Log($"{playerCharData.characterdata.characterName}이(가) {playerCharData.stars}성으로 승급했습니다! 영혼 조각 {cost}개 소모.");
 
-        UpdateSoulFragmentsUI(); // 영혼 조각 UI 갱신
+        // TODO: UI 갱신 로직 필요
         return true;
     }
 
     /// <summary>
-    /// 영혼 조각 UI 텍스트를 현재 값으로 갱신합니다.
+    /// 영혼 조각 UI 텍스트를 현재 값으로 갱신합니다. (TODO: 캐릭터별 UI 로직으로 수정 필요)
     /// </summary>
     private void UpdateSoulFragmentsUI()
     {
-        if (soulFragmentsText != null)
-        {
-            soulFragmentsText.text = soulFragments.ToString();
-        }
+        // if (soulFragmentsText != null)
+        // {
+        //     // 이 함수는 이제 특정 캐릭터의 영혼 조각을 표시하도록 수정되어야 합니다.
+        //     // 예를 들어, 현재 선택된 캐릭터의 영혼 조각을 표시하는 방식으로 변경해야 합니다.
+        //     // soulFragmentsText.text = characterSoulFragments[selectedCharacterId].ToString();
+        // }
     }
 
     /// <summary>

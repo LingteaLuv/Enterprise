@@ -1,19 +1,22 @@
 
+
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 public class CharacterPanelUI : MonoBehaviour
 {
-    [Header("UI 요소 연결")]
+    [Header("기본 UI 요소")]
     public Image characterImage;
     public TextMeshProUGUI levelText;
-    public Image[] starImages; // 별 이미지 배열 추가
-    
-    public TextMeshProUGUI upgradeCostText; // 승급 비용을 표시할 TextMeshPro UI
+    public Image[] starImages; // 별 이미지 배열
     public Button button; // 캐릭터 인포 여는 버튼
-    public GameObject characterInfoUIPanel;
 
+    [Header("영혼 조각 UI")]
+    public TextMeshProUGUI soulFragmentText; // 예: "15 / 20"
+    public Slider soulFragmentSlider;
+
+    private GameObject characterInfoUIPanel;
     private PlayerCharacterData currentPlayerCharData; // 이 패널이 표시하는 캐릭터 데이터
 
     private void Start()
@@ -21,8 +24,8 @@ public class CharacterPanelUI : MonoBehaviour
         button = GetComponent<Button>();
         button.onClick.AddListener(OnPanelButtonClicked);
 
+        // 비활성화된 오브젝트를 포함하여 CharacterInfoUI를 찾습니다.
         characterInfoUIPanel = FindAnyObjectByType<CharacterInfoUI>(FindObjectsInactive.Include)?.gameObject;
-
     }
 
     /// <summary>
@@ -30,89 +33,66 @@ public class CharacterPanelUI : MonoBehaviour
     /// </summary>
     public void Setup(PlayerCharacterData data)
     {
-        currentPlayerCharData = data; // 현재 캐릭터 데이터 저장
+        currentPlayerCharData = data;
 
         // 캐릭터 기본 정보 설정
         characterImage.sprite = data.characterdata.characterSprite;
         levelText.text = $"Lv.{data.level}";
 
-        // 성급(별) 표시 (색상 변경)
+        // 성급(별) UI 업데이트
+        UpdateStarUI(data.stars);
+
+        // 영혼 조각 UI 업데이트
+        UpdateSoulFragmentUI();
+    }
+
+    /// <summary>
+    /// 성급(별) UI를 현재 성급에 맞게 갱신합니다.
+    /// </summary>
+    private void UpdateStarUI(int currentStars)
+    {
         for (int i = 0; i < starImages.Length; i++)
         {
-            if (i < data.stars)
-            {
-                starImages[i].color = Color.yellow; // 활성화된 별은 노란색
-            }
-            else
-            {
-                starImages[i].color = Color.grey; // 비활성화된 별은 회색
-            }
+            starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
         }
     }
 
     /// <summary>
-    /// 승급 UI (비용, 버튼 활성화/비활성화)를 갱신합니다.
+    /// 영혼 조각 텍스트와 슬라이더 UI를 갱신합니다.
     /// </summary>
-    private void UpdateUpgradeUI()
+    private void UpdateSoulFragmentUI()
     {
-        if (currentPlayerCharData == null) return;
+        int characterId = currentPlayerCharData.characterdata.characterID;
 
-        // 최대 성급인지 확인
-        if (currentPlayerCharData.stars >= 5) // 5성이 최대 성급이라고 가정
+        // 현재 보유량 가져오기
+        int currentFragments = 0;
+        PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments);
+
+        // 다음 성급 필요량 가져오기
+        bool hasNextStar = PlayerDataManager.Instance.TryGetUpgradeCost(currentPlayerCharData.stars, out int requiredFragments);
+
+        if (hasNextStar)
         {
-            upgradeCostText.text = "MAX";
-            button.interactable = false;
-            return;
-        }
-
-        // 다음 성급에 필요한 비용 가져오기
-        int nextStarLevel = currentPlayerCharData.stars + 1;
-        int cost = 0;
-        if (PlayerDataManager.Instance.TryGetUpgradeCost(currentPlayerCharData.stars, out cost))
-        {
-            upgradeCostText.text = $"0 / {cost}";
-
-            // 영혼 조각이 충분한지 확인하여 버튼 활성화/비활성화
-            if (PlayerDataManager.Instance.soulFragments >= cost)
+            // 승급 가능할 때
+            soulFragmentText.text = $"{currentFragments} / {requiredFragments}";
+            if (soulFragmentSlider != null)
             {
-                button.interactable = true;
-            }
-            else
-            {
-                button.interactable = false;
+                soulFragmentSlider.maxValue = requiredFragments;
+                soulFragmentSlider.value = currentFragments;
             }
         }
         else
         {
-            upgradeCostText.text = "mollu?"; // 정의되지 않은 성급
-            button.interactable = false;
+            // 최대 성급일 때
+            soulFragmentText.text = "MAX";
+            if (soulFragmentSlider != null)
+            {
+                soulFragmentSlider.maxValue = 1;
+                soulFragmentSlider.value = 1; // 슬라이더를 꽉 채움
+            }
         }
     }
 
-    /// <summary>
-    /// 승급 버튼 클릭 시 호출됩니다.
-    /// </summary>
-    private void OnUpgradeButtonClicked()
-    {
-        if (currentPlayerCharData == null) return;
-
-        // PlayerDataManager를 통해 승급 시도
-        bool success = PlayerDataManager.Instance.TryUpgradeCharacterStar(currentPlayerCharData);
-
-        if (success)
-        {
-            CharacterScrollViewUI scrollView = FindFirstObjectByType<CharacterScrollViewUI>();
-            if (scrollView != null)
-            {
-                scrollView.RefreshDisplay();
-            }
-            else
-            {
-                Debug.LogWarning("CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신에 문제가 있을 수 있습니다.");
-            }
-        }
-        // 실패 시 PlayerDataManager에서 이미 로그를 출력하므로 별도 처리 없음
-    }
 
     /// <summary>
     /// 패널 버튼 클릭 시 호출됩니다.
@@ -121,23 +101,22 @@ public class CharacterPanelUI : MonoBehaviour
     {
         if (characterInfoUIPanel != null)
         {
-            characterInfoUIPanel.SetActive(true); // 정보 패널 활성화
+            characterInfoUIPanel.SetActive(true);
 
-            // CharacterInfoUI 컴포넌트를 찾아서 데이터 설정
             CharacterInfoUI infoUI = characterInfoUIPanel.GetComponent<CharacterInfoUI>();
             if (infoUI != null)
             {
-                infoUI.Setup(currentPlayerCharData); // 캐릭터 데이터 전달
+                infoUI.Setup(currentPlayerCharData);
             }
             else
             {
-                Debug.LogWarning("CharacterInfoUI 컴포넌트를 찾을 수 없습니다. 캐릭터 정보 패널에 스크립트가 연결되어 있는지 확인하세요.");
+                Debug.LogWarning("CharacterInfoUI 컴포넌트를 찾을 수 없습니다.");
             }
         }
         else
         {
-            Debug.LogWarning("CharacterInfoUI Panel이 CharacterPanelUI에 연결되지 않았습니다.");
+            Debug.LogWarning("CharacterInfoUI Panel을 찾을 수 없습니다.");
         }
-        Debug.Log($"캐릭터 패널 클릭됨: {currentPlayerCharData.characterdata.characterName}");
     }
 }
+

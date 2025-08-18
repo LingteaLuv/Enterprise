@@ -9,6 +9,9 @@ public enum Rarity
 [CreateAssetMenu(fileName = "New Character", menuName = "Test Character")]
 public class CharacterData : ScriptableObject
 {
+    [Header("캐릭터 번호")]
+    public int characterID;
+
     [Header("캐릭터 정보")]
     public string characterName;
     public Sprite characterSprite;
