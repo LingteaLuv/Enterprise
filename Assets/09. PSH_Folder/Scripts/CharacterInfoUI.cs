@@ -141,7 +141,7 @@ public class CharacterInfoUI : MonoBehaviour
 
         // 재화가 충분한지 확인하여 버튼 활성화/비활성화
         // InventoryManager.Instance.GetCurrency가 BigInteger를 반환한다고 가정
-        if (InventoryManager.Instance != null && InventoryManager.Instance.GetCurrency(costType) >= cost)
+        if (CurrencyManager.Instance != null && CurrencyManager.Instance.GetCurrency(costType) >= cost)
         {
             levelUpButton.interactable = true;
         }

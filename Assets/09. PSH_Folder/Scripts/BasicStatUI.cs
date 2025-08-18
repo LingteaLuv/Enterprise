@@ -65,7 +65,7 @@ public class BasicStatUI : MonoBehaviour
             Debug.LogError("BasicStatManager가 초기화되지 않았습니다.");
             return;
         }
-        if (InventoryManager.Instance == null)
+        if (CurrencyManager.Instance == null)
         {
             Debug.LogError("InventoryManager가 초기화되지 않았습니다.");
             return;
@@ -105,7 +105,7 @@ public class BasicStatUI : MonoBehaviour
             // 레벨업 버튼 활성화/비활성화
             if (group.levelUpButton != null)
             {
-                BigInteger currentGold = InventoryManager.Instance.GetCurrency(costType);
+                BigInteger currentGold = CurrencyManager.Instance.GetCurrency(costType);
                 group.levelUpButton.interactable = (currentGold >= cost);
             }
         }
@@ -122,7 +122,7 @@ public class BasicStatUI : MonoBehaviour
         if (success)
         {
             RefreshUI(); // 레벨업 성공 시 UI 갱신
-            InventoryManager.Instance.UpdateCurrencyUI();
+            CurrencyManager.Instance.UpdateCurrencyUI();
         }
     }
 

@@ -178,7 +178,7 @@ public class PlayerDataManager : MonoBehaviour
         CurrencyType costType = CurrencyType.Gold; // 비용 재화 타입
 
         // 재화 확인 및 소모
-        if (!InventoryManager.Instance.SpendCurrency(costType, levelUpCost))
+        if (!CurrencyManager.Instance.SpendCurrency(costType, levelUpCost))
         {
             Debug.LogWarning($"캐릭터 레벨업 실패: {costType} 재화 부족. 필요: {levelUpCost}");
             return false;
@@ -189,7 +189,7 @@ public class PlayerDataManager : MonoBehaviour
         Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.level - 1} -> Lv.{character.level})");
 
         // TODO: 레벨업에 따른 추가 보상 로직 (스탯 증가 외)
-        InventoryManager.Instance.UpdateCurrencyUI();
+        CurrencyManager.Instance.UpdateCurrencyUI();
         return true;
     }
 }

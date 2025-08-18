@@ -136,12 +136,12 @@ Dictionary<BasicStatType, BasicStatData>();
         CurrencyType costType = CurrencyType.Gold; // 기본 스탯 레벨업 비용은 골드라고 가정
 
         // 재화 확인 및 소모
-        if (InventoryManager.Instance == null)
+        if (CurrencyManager.Instance == null)
         {
             Debug.LogError("InventoryManager.Instance가 초기화되지 않았습니다.");
             return false;
         }
-        if (!InventoryManager.Instance.SpendCurrency(costType, requiredCost))
+        if (!CurrencyManager.Instance.SpendCurrency(costType, requiredCost))
         {
             Debug.LogWarning($"기본 스탯 '{type}' 레벨업 실패: {costType} 재화 부족. 필요: {requiredCost}");
             return false;

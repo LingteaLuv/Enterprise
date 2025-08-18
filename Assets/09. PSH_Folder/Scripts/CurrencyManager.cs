@@ -38,9 +38,9 @@ public class CostInfo
 /// <summary>
 /// 플레이어의 모든 재화를 중앙에서 관리하는 싱글턴 매니저입니다.
 /// </summary>
-public class InventoryManager : MonoBehaviour
+public class CurrencyManager : MonoBehaviour
 {
-    public static InventoryManager Instance { get; private set; }
+    public static CurrencyManager Instance { get; private set; }
 
     // 각 재화(CurrencyType)를 얼마나 보유하고 있는지 저장하는 딕셔너리
     private Dictionary<CurrencyType, BigInteger> currencyWallet = new Dictionary<CurrencyType, BigInteger>();
@@ -77,7 +77,7 @@ public class InventoryManager : MonoBehaviour
         // 테스트용 초기 재화 지급
         AddCurrency(CurrencyType.Gold, 10000000);
         AddCurrency(CurrencyType.EnhancementStone, 1000);
-        Debug.Log("[InventoryManager] 지갑 초기화 및 테스트 재화 지급 완료.");
+        Debug.Log("[CurrencyManager] 지갑 초기화 및 테스트 재화 지급 완료.");
         UpdateCurrencyUI();
     }
 
@@ -108,7 +108,7 @@ public class InventoryManager : MonoBehaviour
         {
             currencyWallet.Add(type, amount);
         }
-        Debug.Log($"[InventoryManager] {type} 획득: +{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
+        Debug.Log($"[CurrencyManager] {type} 획득: +{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
         // TODO: 재화 UI 갱신 이벤트 호출
     }
 
@@ -121,18 +121,18 @@ public class InventoryManager : MonoBehaviour
         if (amount <= 0) return true; // 0 또는 음수 소모는 항상 성공
 
         BigInteger currentAmount = GetCurrency(type); // 현재 보유량 가져오기
-        Debug.Log($"[InventoryManager] {type} 소모 시도. 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
+        Debug.Log($"[CurrencyManager] {type} 소모 시도. 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
 
         if (currentAmount >= amount)
         {
             currencyWallet[type] -= amount;
-            Debug.Log($"[InventoryManager] {type} 소모 성공: -{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
+            Debug.Log($"[CurrencyManager] {type} 소모 성공: -{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
             // TODO: 재화 UI 갱신 이벤트 호출
             return true;
         }
         else
         {
-            Debug.LogWarning($"[InventoryManager] {type} 재화 부족! 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
+            Debug.LogWarning($"[CurrencyManager] {type} 재화 부족! 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
             return false;
         }
     }
