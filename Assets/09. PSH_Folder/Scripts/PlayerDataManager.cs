@@ -175,7 +175,7 @@ public class PlayerDataManager : MonoBehaviour
         // 현재 레벨에 따른 레벨업 비용 계산
         // BigInteger와 double의 곱셈 오류를 해결하기 위해 double로 캐스팅 후 계산
         BigInteger levelUpCost = (BigInteger)((double)baseLevelUpCost * System.Math.Pow(levelUpCostIncreaseRatio, character.level - 1));
-        CurrencyType costType = CurrencyType.Gold; // 비용 재화 타입
+        CurrencyType costType = CurrencyType.EnhancementStone; // 비용 재화 타입
 
         // 재화 확인 및 소모
         if (!CurrencyManager.Instance.SpendCurrency(costType, levelUpCost))

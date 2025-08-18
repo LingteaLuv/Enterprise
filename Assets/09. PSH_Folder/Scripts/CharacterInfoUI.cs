@@ -134,7 +134,7 @@ public class CharacterInfoUI : MonoBehaviour
         double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, currentCharacterData.level - 1);
         System.Numerics.BigInteger cost = (System.Numerics.BigInteger)costDouble; // BigInteger로 캐스팅
 
-        CurrencyType costType = CurrencyType.Gold; // 비용 재화 타입 (현재는 골드로 고정)
+        CurrencyType costType = CurrencyType.EnhancementStone; // 비용 재화 타입 (현재는 골드로 고정)
 
         // DataUtility.FormatNumber가 BigInteger를 받는지 확인 필요. float을 받는다면 cost를 float으로 변경
         levelUpCostText.text = $"Cost: {DataUtility.FormatNumber(cost)} {costType}";
