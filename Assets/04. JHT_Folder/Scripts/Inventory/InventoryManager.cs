@@ -7,41 +7,34 @@ namespace JHT
 {
     public class InventoryManager : Singleton<InventoryManager>
     {
-        public ItemObject[] items;
+        public List<ItemObject> itemList;
 
-        public Action<ItemObject,int> OnAddInventory; 
-        public void Init()
+        public Action<ItemObject> OnAddInventory;
+        public Action<ItemObject> OnRemoveInventory;
+
+        public InventoryMode currentMode;
+        public void Start()
         {
-            items = new ItemObject[30];
-
-            for (int i = 0; i < items.Length; i++)
-            {
-                items[i] = null;
-            }
+            if(itemList == null)
+                itemList = new();
 
             OnAddInventory += AddInventroyIndex;
+            OnRemoveInventory += RemoveInventroyIndex;
         }
 
         public void AddItem(ItemObject item)
         {
-            for (int i = 0; i < items.Length; i++)
-            {
-                if (items[i] == null)
-                {
-                    OnAddInventory?.Invoke(item,i);
-                    break;
-                }
-            }
+            OnAddInventory?.Invoke(item);
         }
 
         public void RemoveItem(ItemObject item)
         {
-
+            OnRemoveInventory?.Invoke(item);
         }
 
-        public void CleanItem(ItemObject item)
+        public void CleanInventroy()
         {
-
+            itemList.Clear();
         }
 
         public void SelectItem(ItemObject item)
@@ -49,9 +42,28 @@ namespace JHT
 
         }
 
-        private void AddInventroyIndex(ItemObject item, int index)
+        private void AddInventroyIndex(ItemObject item)
         {
-            items[index] = item;
+            itemList.Add(item);
+        }
+
+        private void RemoveInventroyIndex(ItemObject item)
+        {
+            itemList.Remove(item);
+        }
+
+
+        public void ItemLevelSort(bool isLevelSort)
+        {
+            itemList.Sort((a, b) => isLevelSort ? a.itemLevel.CompareTo(b.itemLevel)          //오름
+                                            : b.itemLevel.CompareTo(a.itemLevel));            //내림
         }
     }
+    public enum InventoryMode
+    {
+        Search,
+        CheckForUpgrade,
+        CheckForDelete
+    }
+
 }
