@@ -26,6 +26,10 @@ public class CharacterInfoUI : MonoBehaviour
     [Header("스탯 표시")]
     public TextMeshProUGUI hpDisplay; // HP LvX Value 형식
     public TextMeshProUGUI atkDisplay; // ATK LvX Value 형식
+    public TextMeshProUGUI defDisplay;
+    public TextMeshProUGUI criChanDisplay;
+    public TextMeshProUGUI criDmgDisplay;
+    public TextMeshProUGUI atkSpdDisplay;
 
     private PlayerCharacterData currentCharacterData; // 현재 표시 중인 캐릭터 데이터
 
@@ -201,7 +205,21 @@ public class CharacterInfoUI : MonoBehaviour
     /// </summary>
     private void UpdateCharacterStatsDisplay()
     {
-        if (currentCharacterData == null) return;
+        if (currentCharacterData == null) return;      
+
+        // ATK 스탯 데이터 찾기 (CSV 헤더에 맞춰 "attackPower"로 변경)
+        StatData atkStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "attackPower");
+        if (atkStatData != null)
+        {
+            // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
+            float atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.level);
+            // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
+            atkDisplay.text = $"ATK Lv{currentCharacterData.level} {atkValue.ToString("F0")}";
+        }
+        else
+        {
+            atkDisplay.text = "ATK Stat Not Found"; // ATK 스탯을 찾을 수 없습니다.
+        }
 
         // HP 스탯 데이터 찾기 (CSV 헤더에 맞춰 "health"로 변경)
         StatData hpStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "health");
@@ -217,19 +235,44 @@ public class CharacterInfoUI : MonoBehaviour
             hpDisplay.text = "HP Stat Not Found"; // HP 스탯을 찾을 수 없습니다.
         }
 
-        // ATK 스탯 데이터 찾기 (CSV 헤더에 맞춰 "attackPower"로 변경)
-        StatData atkStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "attackPower");
-        if (atkStatData != null)
+        // DEF 스탯 데이터 찾기 (CSV 헤더에 맞춰 "defensePower"로 변경)
+        StatData defStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "defensePower");
+        if (defStatData != null)
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
-            float atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.level);
+            float defValue = StatManager.CalculateStatValue(defStatData, currentCharacterData.level);
             // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
-            atkDisplay.text = $"ATK Lv{currentCharacterData.level} {atkValue.ToString("F0")}";
+            defDisplay.text = $"DEF Lv{currentCharacterData.level} {defValue.ToString("F0")}";
         }
         else
         {
-            atkDisplay.text = "ATK Stat Not Found"; // ATK 스탯을 찾을 수 없습니다.
+            defDisplay.text = "DEF Stat Not Found"; // DEF 스탯을 찾을 수 없습니다.
         }
+
+        // CritChance 데이터 가져오기 레벨업
+        StatData criChanStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "critChance");
+        if (criChanStatData != null)
+        {
+            float criChanValue = criChanStatData.value;
+            criChanDisplay.text = $"CRI {criChanValue}%";
+        }
+
+        // CritDmg 데이터 가져오기 레벨업
+        StatData criDmgStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "critDamage");
+        if (criDmgStatData != null)
+        {
+            float criDmgValue = criDmgStatData.value;
+            criDmgDisplay.text = $"CRIDmg {criDmgValue}%";
+        }
+
+        // ATKSpd 데이터 가져오기 레벨업
+        StatData atkSpdStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "attackSpeed");
+        if (atkSpdStatData != null)
+        {
+            float atkSpdValue = atkSpdStatData.value;
+            atkSpdDisplay.text = $"AtkSpd {atkSpdValue}";
+        }
+        // 치확 치피 공속 얘네는 나중에 다른 업글 수단 생기면 업데이트해야함 statmanager에서 따로 매서드 추가해야할듯
     }
 
     /// <summary>
