@@ -75,7 +75,7 @@ public class InventoryManager : MonoBehaviour
         // 예: LoadData();
 
         // 테스트용 초기 재화 지급
-        AddCurrency(CurrencyType.Gold, 1000000000000000000); // 100경 (테스트용으로 매우 큰 값)
+        AddCurrency(CurrencyType.Gold, 10000000);
         AddCurrency(CurrencyType.EnhancementStone, 500);
         Debug.Log("[InventoryManager] 지갑 초기화 및 테스트 재화 지급 완료.");
         UpdateCurrencyUI();
@@ -140,6 +140,6 @@ public class InventoryManager : MonoBehaviour
     public void UpdateCurrencyUI()
     {
         goldText.text = $"gold : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gold])}";
-        goldText.text = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
+        stoneText.text = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
     }
 }
