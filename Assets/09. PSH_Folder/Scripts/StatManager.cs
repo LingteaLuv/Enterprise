@@ -1,37 +1,57 @@
 using System;
+using System.Collections.Generic; // Dictionary를 사용하기 위해 추가
+using UnityEngine; // Debug.LogWarning을 사용하기 위해 추가
 
-// static 클래스로 변경하여, 어디서든 접근 가능한 스탯 계산기로 만듭니다.
 public static class StatManager
 {
-    /// <summary>
-    /// 특정 스탯의 현재 레벨에 해당하는 최종 능력치를 계산합니다.
-    /// (StatData.value가 이미 최종 스탯 값이라고 가정)
-    /// </summary>
-    /// <param name="stat">계산할 스탯의 원본 데이터 (StatData.value)</param>
-    /// <param name="level">현재 스탯 레벨 (현재 StatData.value가 최종값이면 이 파라미터는 사용되지 않음)</param>
-    /// <returns>계산된 최종 능력치 (float)</returns>
-    public static float CalculateStatValue(StatData stat, int level)
+    // 각 스탯의 레벨당 성장치를 저장하는 딕셔너리
+    private static Dictionary<string, float> statGrowthRates;
+
+    // static 생성자: 클래스가 처음 로드될 때 한 번만 실행됩니다.
+    static StatManager()
     {
-        // StatData.value가 이미 최종 스탯 값이라면, 레벨은 계산에 사용되지 않습니다.
-        // 만약 StatData.value가 '기본 스탯'이고 레벨에 따른 성장이 필요하다면,
-        // StatData에 '성장치' 필드를 추가하고 여기에 계산 로직을 구현해야 합니다.
-        return stat.value;
+        InitializeStatGrowthRates();
+    }
+
+    // 스탯 성장치 초기화 함수
+    private static void InitializeStatGrowthRates()
+    {
+        statGrowthRates = new Dictionary<string, float>
+        {
+            { "health", 100f },         // 체력: 레벨당 100 증가
+            { "attackPower", 20f },     // 공격력: 레벨당 20 증가
+            { "defensePower", 5f },     // 방어력: 레벨당 5 증가
+            //{ "critChance", 0.005f },   // 치명타 확률: 레벨당 0.5% 증가 (0.005 = 0.5%)
+            //{ "critDamage", 0.01f },    // 치명타 피해: 레벨당 1% 증가 (0.01 = 1%)
+            //{ "attackSpeed", 0.001f }   // 공격 속도: 레벨당 0.1% 증가
+        };
     }
 
     /// <summary>
-    /// 특정 스탯의 다음 레벨 업에 필요한 비용을 계산합니다.
-    /// (현재 StatData 클래스에는 비용 정보가 없으므로 이 함수는 작동할 수 없습니다.)
+    /// 특정 스탯의 현재 레벨에 해당하는 최종 능력치를 계산합니다。
+    /// StatData.value는 기본 스탯(Lv.1) 값으로 사용됩니다.
     /// </summary>
-    /// <param name="stat">계산할 스탯의 원본 데이터 (현재 비용 정보 없음)</param>
-    /// <param name="currentLevel">현재 스탯 레벨</param>
-    /// <returns>계산된 업그레이드 비용 (현재 구현 불가)</returns>
-    public static float CalculateUpgradeCost(StatData stat, int currentLevel)
+    /// <param name="stat">계산할 스탯의 원본 데이터 (StatData.value는 기본값)</param>
+    /// <param name="level">현재 스탯 레벨</param>
+    /// <returns>계산된 최종 능력치 (float)</returns>
+    public static float CalculateStatValue(StatData stat, int level)
     {
-        // StatData 클래스에 비용 관련 필드(예: baseCost, costIncreaseRatio)가 없으므로
-        // 이 함수는 현재 구현할 수 없습니다.
-        // 비용 계산이 필요하다면 StatData에 비용 관련 필드를 추가하거나,
-        // 별도의 비용 데이터 클래스를 정의해야 합니다.
-        UnityEngine.Debug.LogError("StatManager: CalculateUpgradeCost 함수는 StatData에 비용 정보가 없어 계산할 수 없습니다.");
-        return 0f; // 계산 불가 시 0 반환
+        if (level <= 0) level = 1; // 레벨은 최소 1
+
+        float baseStat = stat.value; // StatData.value는 기본 스탯 값 (Lv.1)
+        float growthPerLevel = 0f;
+
+        // 해당 스탯의 성장치를 딕셔너리에서 가져옵니다.
+        if (statGrowthRates.TryGetValue(stat.statName, out growthPerLevel))
+        {
+            // 공식: 기본 스탯 + (현재 레벨 - 1) * 레벨당 성장치
+            return baseStat + (level - 1) * growthPerLevel;
+        }
+        else
+        {
+            // 정의되지 않은 스탯의 경우 경고를 출력하고 기본 스탯 값을 반환합니다.
+            Debug.LogWarning($"StatManager: 스탯 '{stat.statName}'에 대한 성장치가 정의되지 않았습니다. 기본 스탯 값을 반환합니다.");
+            return baseStat;
+        }
     }
 }
