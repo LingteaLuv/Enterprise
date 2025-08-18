@@ -4191,6 +4191,7 @@ GameObject:
   - component: {fileID: 1267182343}
   - component: {fileID: 1267182342}
   - component: {fileID: 1267182341}
+  - component: {fileID: 1267182344}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -4300,6 +4301,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1267182339}
   m_CullTransparentMesh: 1
+--- !u!114 &1267182344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1267182339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a228621e9523f1049be21748548b7bd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDelay: 0.5
+  repeatInterval: 0.1
+  onHoldAction:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1271857900
 GameObject:
   m_ObjectHideFlags: 0
@@ -4522,19 +4540,19 @@ MonoBehaviour:
     levelText: {fileID: 1445596518}
     valueText: {fileID: 1816696210}
     costText: {fileID: 1741560724}
-    levelUpButton: {fileID: 1267182341}
+    levelUpButton: {fileID: 1267182344}
   - statType: 0
     statNameText: {fileID: 1840266747}
     levelText: {fileID: 1365152787}
     valueText: {fileID: 326275136}
     costText: {fileID: 1976652420}
-    levelUpButton: {fileID: 2029206583}
+    levelUpButton: {fileID: 2029206586}
   - statType: 1
     statNameText: {fileID: 2129061414}
     levelText: {fileID: 2077032706}
     valueText: {fileID: 291990493}
     costText: {fileID: 346212025}
-    levelUpButton: {fileID: 1858872277}
+    levelUpButton: {fileID: 0}
   levelUpMultiplierButton: {fileID: 1665893202}
   levelUpMultiplierText: {fileID: 1775365901}
 --- !u!114 &1311549209
@@ -6989,6 +7007,7 @@ GameObject:
   - component: {fileID: 1858872279}
   - component: {fileID: 1858872278}
   - component: {fileID: 1858872277}
+  - component: {fileID: 1858872280}
   m_Layer: 5
   m_Name: Button (2)
   m_TagString: Untagged
@@ -7098,6 +7117,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1858872275}
   m_CullTransparentMesh: 1
+--- !u!114 &1858872280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1858872275}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a228621e9523f1049be21748548b7bd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDelay: 0.5
+  repeatInterval: 0.1
+  onHoldAction:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1876066072
 GameObject:
   m_ObjectHideFlags: 0
@@ -7717,6 +7753,7 @@ GameObject:
   - component: {fileID: 2029206585}
   - component: {fileID: 2029206584}
   - component: {fileID: 2029206583}
+  - component: {fileID: 2029206586}
   m_Layer: 5
   m_Name: Button (1)
   m_TagString: Untagged
@@ -7826,6 +7863,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2029206581}
   m_CullTransparentMesh: 1
+--- !u!114 &2029206586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2029206581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a228621e9523f1049be21748548b7bd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDelay: 0.5
+  repeatInterval: 0.1
+  onHoldAction:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2077032704
 GameObject:
   m_ObjectHideFlags: 0
@@ -8131,7 +8185,7 @@ MonoBehaviour:
   - type: 2
     baseValue: 0
     growthPerLevel: 50
-    baseCostString: 1000
+    baseCostString: 1001
     costIncreaseRatio: 1.05
   - type: 0
     baseValue: 0
