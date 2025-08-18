@@ -7,9 +7,6 @@ public class PlayerDataManager : MonoBehaviour
 {
     public static PlayerDataManager Instance { get; private set; }
 
-    [Header("UI 연결")]
-    public TextMeshProUGUI soulFragmentsText; // 영혼 조각을 표시할 TextMeshPro UI
-
     [Header("캐릭터 레벨업 비용 설정")]
     public BigInteger baseLevelUpCost = 1000; // 기본 레벨업 비용
     public double levelUpCostIncreaseRatio = 1.07; // 레벨업 비용 증가율
