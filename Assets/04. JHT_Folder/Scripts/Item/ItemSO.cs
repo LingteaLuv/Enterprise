@@ -7,10 +7,10 @@ namespace JHT
     {
         [field: SerializeField] public string itemName { get; set; }
         [field: SerializeField] public ItemType itemType { get; set; }
-        [field: SerializeField] public Sprite icon { get; set; }
+        [field: SerializeField] public Sprite icon { get; set; } = null;
         [field: SerializeField] public Image backImage { get; set; }
         [field: SerializeField] public string desc { get; set; }
-        [field: SerializeField] public float attackRange { get; set; }
+        [field: SerializeField] public float attackDamage{ get; set; }
         [field: SerializeField] public bool isStrengthen { get; set; }
 
         public virtual void UseItem(ItemSO item) { }

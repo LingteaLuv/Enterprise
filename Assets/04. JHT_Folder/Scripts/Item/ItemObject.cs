@@ -1,5 +1,6 @@
 using JHT;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,9 +10,7 @@ namespace JHT
     public class ItemObject : MonoBehaviour
     {
         [field: SerializeField] public ItemSO weapon { get; private set; }
-        private Image icon;
-
-        public float attackRange;
+        [field: SerializeField] public Sprite itemIcon { get; private set; }
         public float attackDamage;
 
         public int itemLevel;
@@ -25,8 +24,8 @@ namespace JHT
 
         private void Init()
         {
-            icon.sprite = weapon.icon;
             itemLevel = 1;
+            attackDamage = weapon.attackDamage;
         }
 
         // 레벨이 오를경우
