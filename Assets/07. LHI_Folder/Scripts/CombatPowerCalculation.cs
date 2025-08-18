@@ -21,11 +21,18 @@ namespace LHI
         /// <param name="characterData"></param>
         public void AllCPCalculate(CharacterData characterData)
         {
-            combatPowerAttack += CPAttack(characterData);
-            combatPowerHealth += CPHealth(characterData);
-            combatPowerDefense += CPDefense(characterData);
-            combatPowerCritical += CPCritical(characterData);
-            combatPowerSpeed += CPSpeed(characterData);
+            combatPower = 0f;
+            combatPowerAttack = 0f;
+            combatPowerHealth = 0f;
+            combatPowerDefense = 0f;
+            combatPowerCritical = 0f;
+            combatPowerSpeed = 0f;
+
+            combatPowerAttack = CPAttack(characterData);
+            combatPowerHealth = CPHealth(characterData);
+            combatPowerDefense = CPDefense(characterData);
+            combatPowerCritical = CPCritical(characterData);
+            combatPowerSpeed = CPSpeed(characterData);
             combatPower = combatPowerAttack + combatPowerHealth + combatPowerDefense + combatPowerCritical + combatPowerSpeed;
         }
 
@@ -37,8 +44,6 @@ namespace LHI
         /// <returns></returns>
         public float CPAttack(CharacterData characterData)
         {
-            characterData.attack = 0f;
-
             switch (characterData.role)
             {
                 case Role.Captain:
@@ -62,8 +67,6 @@ namespace LHI
         /// <returns></returns>
         public float CPHealth(CharacterData characterData)
         {
-            characterData.health = 0f;
-
             switch (characterData.role)
             {   case Role.Captain:
                     return characterData.health * 0.3f; 
@@ -86,8 +89,6 @@ namespace LHI
         /// <returns></returns>
         public float CPDefense(CharacterData characterData)
         {
-            characterData.defense = 0f;
-
             switch (characterData.role)
             {
                 case Role.Captain:
@@ -111,8 +112,6 @@ namespace LHI
         /// <returns></returns>
         public float CPCritical(CharacterData characterData)
         {
-            characterData.criticalChance = 0f;
-
             switch (characterData.role)
             {
                 case Role.Captain:
@@ -137,18 +136,16 @@ namespace LHI
         /// <returns></returns>
         public float CPSpeed(CharacterData characterData)
         {
-            characterData.speed = 0f;
-
             switch (characterData.role)
             {
                 case Role.Captain:
-                    return characterData.speed * 0.3f;
+                    return characterData.speed * 1000f;
                 case Role.Boatswain:
-                    return characterData.speed * 0.4f;
+                    return characterData.speed * 1000f;
                 case Role.Sailor:
-                    return characterData.speed * 0.2f;
+                    return characterData.speed * 1000f;
                 case Role.Cook:
-                    return characterData.speed * 0.3f;
+                    return characterData.speed * 1000f;
                 default:
                     Debug.Log("캐릭터의 역할이 없습니다. 0을 반환합니다. (전투력 산출 속도 부분)");
                     return 0f;
