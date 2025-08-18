@@ -201,7 +201,7 @@ public class CharacterInfoUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 모든 캐릭터 스탯 표시를 갱신합니다. (HP, ATK)
+    /// 모든 캐릭터 스탯 표시를 갱신합니다.
     /// </summary>
     private void UpdateCharacterStatsDisplay()
     {
@@ -333,15 +333,4 @@ public class CharacterInfoUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // 테스트용 레벨업 (비용 없이 레벨만 증가)
-    public void LevelUp()
-    {
-        if (currentCharacterData == null) return; // null 체크 추가
-        currentCharacterData.level++;
-        if (scrollView != null) // null 체크 추가
-        {
-            scrollView.RefreshDisplay();
-        }
-        UpdateLevelUpUI(); // 일관성을 위해 UpdateLevelUpUI 사용
-    }
 }
