@@ -174,7 +174,7 @@ public class PlayerDataManager : MonoBehaviour
     {
         // 현재 레벨에 따른 레벨업 비용 계산
         // BigInteger와 double의 곱셈 오류를 해결하기 위해 double로 캐스팅 후 계산
-        BigInteger levelUpCost = (BigInteger)((double)baseLevelUpCost * System.Math.Pow(levelUpCostIncreaseRatio, character.level - 1));
+        BigInteger levelUpCost = (BigInteger)((double)baseLevelUpCost * System.Math.Pow(levelUpCostIncreaseRatio, character.characterLevel - 1));
         CurrencyType costType = CurrencyType.EnhancementStone; // 비용 재화 타입
 
         // 재화 확인 및 소모
@@ -185,8 +185,8 @@ public class PlayerDataManager : MonoBehaviour
         }
 
         // 레벨업 진행
-        character.level++;
-        Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.level - 1} -> Lv.{character.level})");
+        character.characterLevel++;
+        Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.characterLevel - 1} -> Lv.{character.characterLevel})");
 
         // TODO: 레벨업에 따른 추가 보상 로직 (스탯 증가 외)
         CurrencyManager.Instance.UpdateCurrencyUI();

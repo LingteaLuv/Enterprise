@@ -37,7 +37,7 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 캐릭터 기본 정보 설정
         characterImage.sprite = data.characterdata.characterSprite;
-        levelText.text = $"Lv.{data.level}";
+        levelText.text = $"Lv.{data.characterLevel}";
 
         // 성급(별) UI 업데이트
         UpdateStarUI(data.stars);

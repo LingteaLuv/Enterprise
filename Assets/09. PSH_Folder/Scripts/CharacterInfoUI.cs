@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 // using System.Numerics; // BigInteger를 사용하지 않으므로 제거
 
 public class CharacterInfoUI : MonoBehaviour
@@ -30,6 +30,8 @@ public class CharacterInfoUI : MonoBehaviour
     public TextMeshProUGUI criChanDisplay;
     public TextMeshProUGUI criDmgDisplay;
     public TextMeshProUGUI atkSpdDisplay;
+
+    public TextMeshProUGUI battlePoint;
 
     private PlayerCharacterData currentCharacterData; // 현재 표시 중인 캐릭터 데이터
 
@@ -73,7 +75,7 @@ public class CharacterInfoUI : MonoBehaviour
         {
             characterNameText.text = data.characterdata.characterName;
             characterImage.sprite = data.characterdata.characterSprite;
-            levelText.text = $"Lv.{data.level}";
+            levelText.text = $"Lv.{data.characterLevel}";
 
             // 캐릭터별 영혼 조각 UI 갱신
             UpdateSoulFragmentsUI();
@@ -131,7 +133,7 @@ public class CharacterInfoUI : MonoBehaviour
         // PlayerDataManager.Instance.baseLevelUpCost가 BigInteger라면 cost도 BigInteger
         // PlayerDataManager.Instance.baseLevelUpCost가 float/double이라면 cost도 float/double
         // 여기서는 BigInteger를 가정하고 double로 계산 후 BigInteger로 캐스팅
-        double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, currentCharacterData.level - 1);
+        double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, currentCharacterData.characterLevel - 1);
         System.Numerics.BigInteger cost = (System.Numerics.BigInteger)costDouble; // BigInteger로 캐스팅
 
         CurrencyType costType = CurrencyType.EnhancementStone; // 비용 재화 타입 (현재는 골드로 고정)
@@ -212,9 +214,10 @@ public class CharacterInfoUI : MonoBehaviour
         if (atkStatData != null)
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
-            float atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.level);
+            float atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.characterLevel);
             // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
-            atkDisplay.text = $"ATK Lv{currentCharacterData.level} {atkValue.ToString("F0")}";
+            atkDisplay.text = $"ATK Lv{currentCharacterData.characterLevel} {atkValue.ToString("F0")}";
+            currentCharacterData.characterStats["attackPower"] = atkValue;
         }
         else
         {
@@ -226,9 +229,10 @@ public class CharacterInfoUI : MonoBehaviour
         if (hpStatData != null)
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
-            float hpValue = StatManager.CalculateStatValue(hpStatData, currentCharacterData.level);
+            float hpValue = StatManager.CalculateStatValue(hpStatData, currentCharacterData.characterLevel);
             // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
-            hpDisplay.text = $"HP Lv{currentCharacterData.level} {hpValue.ToString("F0")}";
+            hpDisplay.text = $"HP Lv{currentCharacterData.characterLevel} {hpValue.ToString("F0")}";
+            currentCharacterData.characterStats["health"] = hpValue;
         }
         else
         {
@@ -240,9 +244,10 @@ public class CharacterInfoUI : MonoBehaviour
         if (defStatData != null)
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
-            float defValue = StatManager.CalculateStatValue(defStatData, currentCharacterData.level);
+            float defValue = StatManager.CalculateStatValue(defStatData, currentCharacterData.characterLevel);
             // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
-            defDisplay.text = $"DEF Lv{currentCharacterData.level} {defValue.ToString("F0")}";
+            defDisplay.text = $"DEF Lv{currentCharacterData.characterLevel} {defValue.ToString("F0")}";
+            currentCharacterData.characterStats["defensePower"] = defValue;
         }
         else
         {
@@ -273,6 +278,10 @@ public class CharacterInfoUI : MonoBehaviour
             atkSpdDisplay.text = $"AtkSpd {atkSpdValue}";
         }
         // 치확 치피 공속 얘네는 나중에 다른 업글 수단 생기면 업데이트해야함 statmanager에서 따로 매서드 추가해야할듯
+
+        // 전투력 계산
+        currentCharacterData.RecaculateStats();
+        battlePoint.text = DataUtility.FormatNumber(StatCalculator.ComputeFinalPower(currentCharacterData));
     }
 
     /// <summary>
