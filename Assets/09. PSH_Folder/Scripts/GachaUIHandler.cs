@@ -5,6 +5,7 @@ public class GachaUIHandler : MonoBehaviour
 {
     // 인스펙터에서 GachaManager를 연결해줘야 합니다.
     public GachaManager gachaManager;
+    public GachaListUI gachaListUI;
 
     /// <summary>
     /// 1회 뽑기 버튼에 연결할 함수입니다.
@@ -14,6 +15,7 @@ public class GachaUIHandler : MonoBehaviour
         if (gachaManager != null)
         {
             gachaManager.PerformSingleGacha();
+            gachaListUI.gameObject.SetActive(true);
             Debug.Log("UI 버튼 클릭으로 1회 뽑기를 실행했습니다.");
         }
         else
@@ -30,6 +32,7 @@ public class GachaUIHandler : MonoBehaviour
         if (gachaManager != null)
         {
             gachaManager.PerformMultipleGacha(10);
+            gachaListUI.gameObject.SetActive(true);
             Debug.Log("UI 버튼 클릭으로 10회 뽑기를 실행했습니다.");
         }
         else

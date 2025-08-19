@@ -44,14 +44,14 @@ public class PlayerDataManager : MonoBehaviour
     /// 새로운 캐릭터를 획득했을 때 호출되는 함수
     /// </summary>
     /// <param name="characterdata">획득한 캐릭터의 ScriptableObject</param>
-    public void AddCharacter(CharacterData characterdata)
+    public PlayerCharacterData AddCharacter(CharacterData characterdata)
     {
         // 이미 보유한 캐릭터인지 확인
-        if (ownedCharacters.ContainsKey(characterdata))
+        if (ownedCharacters.TryGetValue(characterdata, out PlayerCharacterData existingCharData))
         {
             // 중복 획득: 등급에 따라 영혼 조각으로 변환
             int fragmentsGained = 0;
-            switch (characterdata.rarity) // CharacterData에 rarity(성급) 변수가 있다고 가정
+            switch (characterdata.rarity)
             {
                 case Rarity.C: // 1성
                     fragmentsGained = 1;
@@ -65,6 +65,10 @@ public class PlayerDataManager : MonoBehaviour
             }
 
             AddSoulFragments(characterdata.characterID, fragmentsGained);
+            Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
+
+            // 기존에 있던 캐릭터 데이터를 반환
+            return existingCharData;
         }
         else
         {
@@ -72,6 +76,9 @@ public class PlayerDataManager : MonoBehaviour
             PlayerCharacterData newCharData = new PlayerCharacterData(characterdata);
             ownedCharacters.Add(characterdata, newCharData);
             Debug.Log($"[신규] {characterdata.characterName}({characterdata.rarity}성) 획득!");
+
+            // 새로 생성된 캐릭터 데이터를 반환
+            return newCharData;
         }
     }
 
