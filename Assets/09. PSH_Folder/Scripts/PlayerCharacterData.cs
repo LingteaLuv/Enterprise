@@ -37,6 +37,9 @@ public class PlayerCharacterData
         }
     }
 
+    /// <summary>
+    /// 캐릭터에 적용되는 모든 스탯을 계산합니다. (현재 기본스탯과 캐릭터 스탯 적용. 장비 유물 미적용)
+    /// </summary>
     public void RecaculateStats()
     {
         finalStats.Clear();
