@@ -6,6 +6,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
     public class QuestRewardSO : ScriptableObject
     {
         [System.Serializable]
+        // 리워드 물품과 숫자 구조체 묶음
         public struct RewardEntry
         {
             public string RewardType;
@@ -14,6 +15,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
     
         public RewardEntry[] Rewards;
 
+        // 해당하는 보상을 획득 처리
         public void AddReward(IRewardGiver giver)
         {
             foreach (var reward in Rewards)
