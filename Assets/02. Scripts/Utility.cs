@@ -2,8 +2,16 @@ using System.Threading.Tasks;
 using Firebase.Auth;
 using UnityEngine;
 
+// 전역적으로 사용되는 메서드를 모아두는 Utility class
 public static class Utility
 {
+
+    
+    
+    
+    
+    #region Legacy
+
     public static async Task SetGuestNickname(FirebaseUser currentUser)
     {
         UserProfile profile = new UserProfile();
@@ -29,4 +37,6 @@ public static class Utility
         Debug.Log("닉네임 설정 성공");
         Debug.Log($"변경된 유저 닉네임 : {currentUser.DisplayName}");
     }
+
+    #endregion
 }
