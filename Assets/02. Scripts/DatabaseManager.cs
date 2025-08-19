@@ -16,6 +16,8 @@ public class DatabaseManager : Singleton<DatabaseManager>
     private void Init()
     {
         _user = FirebaseManager.Auth.CurrentUser;
+        Debug.Log($"_user : {_user}");
+        Debug.Log($"_uid : {_user.UserId}");
         _uid = _user.UserId;
     }
     
@@ -36,18 +38,25 @@ public class DatabaseManager : Singleton<DatabaseManager>
 
     public async Task DeleteDataAsync()
     {
-        Dictionary<string, object> dictionary = new Dictionary<string, object>
-        {
-            [$"{_uid}"] = null
-        };
-        
-        await SaveDataAsync(dictionary);
+        Init();
+        await FirebaseManager.DataReference.Child(_uid).RemoveValueAsync();
     }
 
     #region Nickname
+    
     /// <summary>
-    /// 유저의 DisplayName을 입력받은 값으로 변경하는 메서드 
-    /// 연결: AccountPanel - 닉네임 변경 기능
+    /// Firebase DB - PublicData에 현재 설정된 닉네임을 저장하는 메서드
+    /// </summary>
+    private async Task SaveNicknameAsync(string nickname)
+    {
+        Dictionary<string, object> dictionary = new Dictionary<string, object>();
+        dictionary[$"{_uid}/PublicData/Nickname"] = nickname;
+
+        await SaveDataAsync(dictionary);
+    }
+    
+    /// <summary>
+    /// 유저의 닉네임을 입력받은 값으로 DB에 저장하는 메서드 
     /// </summary>
     /// <param name="newNickname">변경할 닉네임</param>
     public async Task SetNickname(string newNickname = "Guest")
@@ -66,19 +75,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
         await SaveNicknameAsync(nickname);
 
         OnChangedNickname?.Invoke();
-    }
-    
-    /// <summary>
-    /// Firebase DB - PublicData에 현재 설정된 닉네임을 저장하는 메서드
-    /// </summary>
-    private async Task SaveNicknameAsync(string nickname)
-    {
-        Init();
-
-        Dictionary<string, object> dictionary = new Dictionary<string, object>();
-        dictionary[$"{_uid}/PublicData/Nickname"] = nickname;
-
-        await SaveDataAsync(dictionary);
     }
     
     /// <summary>

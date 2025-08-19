@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Threading.Tasks;
 using Firebase;
@@ -24,8 +25,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
     private static DatabaseReference _dataReference;
     public static DatabaseReference DataReference { get { return _dataReference; } }
 
-    private bool _isFirebaseReady;
-    public bool IsFirebaseReady => _isFirebaseReady;
+    public Action OnFirebaseReady;
     
     // 구글
     [SerializeField] private string _googleWebAPI = "442492611135-dq4pgnvgurl1urko0ufe2hqbeql3psnu.apps.googleusercontent.com";
@@ -76,8 +76,8 @@ public class FirebaseManager : Singleton<FirebaseManager>
             _database = null;
             _dataReference = null;
         }
-        _isFirebaseReady = true;
-        Debug.Log($"IsFirebaseReady : {_isFirebaseReady}");
+
+        OnFirebaseReady?.Invoke();
     }
 
     public async Task<bool> IsLoggedIn()

@@ -1,0 +1,66 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public class LoginUIController : UIController<LoginUIController.LoginUIType>
+{
+    public enum LoginUIType
+    {
+        StartPanel,
+        LoginPanel,
+        InfoPanel
+    }
+
+    private void Start()
+    {
+        foreach (var ui in _uiList)
+        {
+            if (ui is StartPanel startPanel)
+            {
+                // 팝업 닫기 버튼
+                startPanel.OnTouchStartBtn = async () =>
+                {
+                    if (await AuthManager.Instance.AutoLogin())
+                    {
+                        HideUI(LoginUIType.StartPanel);
+                        ShowUI(LoginUIType.InfoPanel);
+                        Debug.Log("자동 로그인 성공");
+                    }
+                    else
+                    {
+                        HideUI(LoginUIType.StartPanel);
+                        ShowUI(LoginUIType.LoginPanel);
+                        Debug.Log("자동 로그인 실패 : 계정x , 게스트 계정");
+                    }
+                };
+            }
+            
+            else if (ui is LoginPanel loginPanel)
+            {
+                loginPanel.OnLoginCompleted = () =>
+                {
+                    HideUI(LoginUIType.LoginPanel);
+                    ShowUI(LoginUIType.InfoPanel);
+                    Debug.Log("로그인 성공");
+                };
+            }
+            
+            else if (ui is InfoPanel infoPanel)
+            {
+                infoPanel.OnGameStart = () =>
+                {
+                    HideUI(LoginUIType.InfoPanel);
+                    SceneTransitionManager.Instance.LoadSceneWithLoading("LoadingScene", "GameScene", 2f);
+                };
+                infoPanel.OnGameExit = () =>
+                {
+                    HideUI(LoginUIType.InfoPanel);
+                    ShowUI(LoginUIType.LoginPanel);
+                };
+            }
+        }
+        
+        ShowUI(LoginUIType.StartPanel);
+        HideUI(LoginUIType.LoginPanel);
+        HideUI(LoginUIType.InfoPanel);
+    }
+}
