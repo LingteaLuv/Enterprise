@@ -10,25 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 45b5e234c57780c42abd573cb62c9c5e, type: 3}
-  m_Name: C
+  m_Name: 1006
   m_EditorClassIdentifier: 
   characterID: 1006
-  characterName: c1
-  description: dddd
+  characterName: C1
+  description: c1
   characterSprite: {fileID: -1312822776244907393, guid: 3891c75f28ed6e648bffa8023ae93bd9, type: 3}
   rarity: 1
   baseStats:
-  - statName: HP
-    baseStatString: 100
-    statIncreasePerLevelString: 10
-    baseCost:
-      currencyType: 1
-      costString: 100
-    costIncreaseRatio: 1.07
-  - statName: ATK
-    baseStatString: 10
-    statIncreasePerLevelString: 5
-    baseCost:
-      currencyType: 1
-      costString: 100
-    costIncreaseRatio: 1.07
+  - statName: attackPower
+    value: 400
+  - statName: health
+    value: 1200
+  - statName: defensePower
+    value: 250
+  - statName: critChance
+    value: 10
+  - statName: critDamage
+    value: 150
+  - statName: attackSpeed
+    value: 1

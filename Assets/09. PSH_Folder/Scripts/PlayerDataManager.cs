@@ -7,9 +7,6 @@ public class PlayerDataManager : MonoBehaviour
 {
     public static PlayerDataManager Instance { get; private set; }
 
-    [Header("UI 연결")]
-    public TextMeshProUGUI soulFragmentsText; // 영혼 조각을 표시할 TextMeshPro UI
-
     [Header("캐릭터 레벨업 비용 설정")]
     public BigInteger baseLevelUpCost = 1000; // 기본 레벨업 비용
     public double levelUpCostIncreaseRatio = 1.07; // 레벨업 비용 증가율
@@ -178,10 +175,10 @@ public class PlayerDataManager : MonoBehaviour
         // 현재 레벨에 따른 레벨업 비용 계산
         // BigInteger와 double의 곱셈 오류를 해결하기 위해 double로 캐스팅 후 계산
         BigInteger levelUpCost = (BigInteger)((double)baseLevelUpCost * System.Math.Pow(levelUpCostIncreaseRatio, character.level - 1));
-        CurrencyType costType = CurrencyType.Gold; // 비용 재화 타입
+        CurrencyType costType = CurrencyType.EnhancementStone; // 비용 재화 타입
 
         // 재화 확인 및 소모
-        if (!InventoryManager.Instance.SpendCurrency(costType, levelUpCost))
+        if (!CurrencyManager.Instance.SpendCurrency(costType, levelUpCost))
         {
             Debug.LogWarning($"캐릭터 레벨업 실패: {costType} 재화 부족. 필요: {levelUpCost}");
             return false;
@@ -192,7 +189,7 @@ public class PlayerDataManager : MonoBehaviour
         Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.level - 1} -> Lv.{character.level})");
 
         // TODO: 레벨업에 따른 추가 보상 로직 (스탯 증가 외)
-        InventoryManager.Instance.UpdateCurrencyUI();
+        CurrencyManager.Instance.UpdateCurrencyUI();
         return true;
     }
 }

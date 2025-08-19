@@ -24,7 +24,7 @@ public class GachaManager : MonoBehaviour
 
     [Header("캐릭터 SO 자동 로드")]
     [Tooltip("캐릭터 SO 에셋들이 저장된 폴더 경로입니다.")]
-    public string characterDataFolderPath = "Assets/09. PSH_Folder/SO"; // 기본 경로 예시
+    public string characterDataFolderPath = "Assets/Resources/CharacterData"; // 기본 경로 예시
 
     [Header("전체 캐릭터 목록 (점3개 메뉴 클릭해서 불러오기)")]
     public List<CharacterData> allCharacters; // 모든 캐릭터 ScriptableObject를 여기에 연결
