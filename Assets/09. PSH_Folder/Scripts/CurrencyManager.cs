@@ -11,7 +11,7 @@ public enum CurrencyType
 {
     Gold,
     EnhancementStone,
-    Crystal
+    Gem
 }
 
 /// <summary>
@@ -47,6 +47,7 @@ public class CurrencyManager : MonoBehaviour
 
     public TextMeshProUGUI goldText;
     public TextMeshProUGUI stoneText;
+    public TextMeshProUGUI gemText;
     private void Awake()
     {
         if (Instance == null)
@@ -77,6 +78,7 @@ public class CurrencyManager : MonoBehaviour
         // 테스트용 초기 재화 지급
         AddCurrency(CurrencyType.Gold, 10000000);
         AddCurrency(CurrencyType.EnhancementStone, 5600000);
+        AddCurrency(CurrencyType.Gem, 15000);
         Debug.Log("[CurrencyManager] 지갑 초기화 및 테스트 재화 지급 완료.");
         UpdateCurrencyUI();
     }
@@ -141,5 +143,6 @@ public class CurrencyManager : MonoBehaviour
     {
         goldText.text = $"gold : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gold])}";
         stoneText.text = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
+        gemText.text = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gem])}";
     }
 }
