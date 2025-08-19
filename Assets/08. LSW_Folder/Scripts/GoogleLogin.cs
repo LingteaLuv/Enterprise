@@ -2,7 +2,6 @@ using Firebase.Auth;
 using Firebase.Extensions;
 using Google;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -42,7 +41,7 @@ public class GoogleLogin : MonoBehaviour
     private void OnGoogleSignOutClicked()
     {
         Debug.Log("구글 로그아웃 버튼 입력");
-        GoogleSignIn.DefaultInstance.SignOut();
+        GoogleSignIn.DefaultInstance.Disconnect();
         FirebaseManager.Auth.SignOut();
     }
 
@@ -104,10 +103,9 @@ public class GoogleLogin : MonoBehaviour
             // 구글 로그인 한 계정을 CurrentUser로 설정
             FirebaseUser user = FirebaseManager.Auth.CurrentUser;
 
-            await DatabaseManager.Instance.SaveNicknameAsync();
+            await DatabaseManager.Instance.SetNickname(user.DisplayName);
             await user.ReloadAsync();
-
-
+            
             // LoginPanel -> GameStartPanel 로 변경
             if (user != null)
             {
@@ -177,17 +175,12 @@ public class GoogleLogin : MonoBehaviour
                 }
     
                 // 구글 닉네임 변경 
-                await Utility.SetGoogleNickname(user, googleDisplayName);
+                await DatabaseManager.Instance.SetNickname(googleDisplayName);
+                //await Utility.SetGoogleNickname(user, googleDisplayName);
                 await user.ReloadAsync();
     
                 //GameStartPanel 닉네임 text 변경 이벤트 호출
                 //_gameStartPanel.OnSetNicknameField?.Invoke(user.DisplayName);
-    
-                Debug.Log("------유저 정보------");
-                Debug.Log($"유저 이름 : {user.DisplayName}");
-                Debug.Log($"유저 ID: {user.UserId}");
-                Debug.Log($"이메일 : {user.Email}");
-    
                 /*PopupManager.Instance.ShowOKPopup("구글 계정으로 전환 성공\r\n 다시 로그인 해주세요.", "OK", () =>
                 {
                     //PopupManager.Instance.HidePopup();
