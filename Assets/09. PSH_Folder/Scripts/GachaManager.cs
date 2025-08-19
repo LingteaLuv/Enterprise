@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Numerics;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -87,6 +89,15 @@ public class GachaManager : MonoBehaviour
     /// </summary>
     public void PerformSingleGacha()
     {
+        // 1. 재화 소모 시도
+        BigInteger cost = 100;
+        if (!CurrencyManager.Instance.SpendCurrency(CurrencyType.Gem, cost))
+        {
+            Debug.Log("가챠 실패: 재화(Gem)가 부족합니다.");
+            return; // 재화가 부족하면 함수 종료
+        }
+
+        // 2. 재화 소모 성공 시, 가챠 실행
         CharacterData drawnCharacterSO = DrawCharacter();
         PlayerCharacterData newCharacterInstance = PlayerDataManager.Instance.AddCharacter(drawnCharacterSO);
 
@@ -102,6 +113,7 @@ public class GachaManager : MonoBehaviour
         {
             Debug.LogWarning("GachaManager에 CharacterScrollViewUI가 연결되지 않았습니다!");
         }
+        CurrencyManager.Instance.UpdateCurrencyUI();
     }
 
     /// <summary>
@@ -110,6 +122,15 @@ public class GachaManager : MonoBehaviour
     /// <param name="count">뽑을 횟수</param>
     public void PerformMultipleGacha(int count)
     {
+        // 1. 재화 소모 시도
+        BigInteger cost = 100 * count;
+        if (!CurrencyManager.Instance.SpendCurrency(CurrencyType.Gem, cost))
+        {
+            Debug.Log("가챠 실패: 재화(Gem)가 부족합니다.");
+            return; // 재화가 부족하면 함수 종료
+        }
+
+        // 2. 재화 소모 성공 시, 가챠 실행
         List<CharacterData> drawnCharacters = DrawMultipleCharacters(count);
         lastGachaResults = new List<PlayerCharacterData>(); // 리스트 초기화
 
@@ -132,6 +153,7 @@ public class GachaManager : MonoBehaviour
         {
             Debug.LogWarning("GachaManager에 CharacterScrollViewUI가 연결되지 않았습니다!");
         }
+        CurrencyManager.Instance.UpdateCurrencyUI();
     }
 
 
