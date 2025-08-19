@@ -10,7 +10,7 @@ public class GuestLogin : MonoBehaviour
 
     private bool _isClicked;
     public event Action LoginCompleted;
-
+    
     private void Start()
     {
         _guestLoginButton.onClick.AddListener(() =>
@@ -55,18 +55,9 @@ public class GuestLogin : MonoBehaviour
             
             if (user != null)
             {
-                Debug.Log("게스트 생성 완료");
-                
                 await user.ReloadAsync();
-                // 게스트 닉네임 변경 
-                await Utility.SetGuestNickname(user);
                 // Firebase DB에 닉네임 저장
-                await DatabaseManager.Instance.SaveNicknameAsync();
-
-                Debug.Log("------유저 정보(GuestLogin)------");
-                Debug.Log($"유저 닉네임 : {user.DisplayName}");
-                Debug.Log($"유저 ID : {user.UserId}");
-                Debug.Log($"이메일 : {user.Email}");
+                await DatabaseManager.Instance.SetNickname();
                 
                 // LoginPanel -> GameStartPanel 로 변경
                 LoginCompleted?.Invoke();
