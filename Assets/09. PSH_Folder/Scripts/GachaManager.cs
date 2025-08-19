@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Numerics;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -28,6 +30,9 @@ public class GachaManager : MonoBehaviour
 
     [Header("전체 캐릭터 목록 (점3개 메뉴 클릭해서 불러오기)")]
     public List<CharacterData> allCharacters; // 모든 캐릭터 ScriptableObject를 여기에 연결
+
+    // 가장 마지막에 실행된 가챠 결과 리스트
+    public List<PlayerCharacterData> lastGachaResults { get; private set; }
 
     // 등급별로 캐릭터를 미리 분류해 놓은 딕셔너리. 가챠 실행 속도를 높여줍니다.
     private Dictionary<Rarity, List<CharacterData>> charactersByRarity;
@@ -82,10 +87,22 @@ public class GachaManager : MonoBehaviour
     /// <summary>
     /// 가챠를 1회 실행하고 결과를 플레이어 데이터에 적용한 후 UI를 갱신합니다.
     /// </summary>
-    public void PerformSingleGacha()
+    public bool PerformSingleGacha()
     {
-        CharacterData drawnCharacter = DrawCharacter();
-        PlayerDataManager.Instance.AddCharacter(drawnCharacter);
+        // 1. 재화 소모 시도
+        BigInteger cost = 100;
+        if (!CurrencyManager.Instance.SpendCurrency(CurrencyType.Gem, cost))
+        {
+            Debug.Log("가챠 실패: 재화(Gem)가 부족합니다.");
+            return false; // 재화가 부족하면 함수 종료
+        }
+
+        // 2. 재화 소모 성공 시, 가챠 실행
+        CharacterData drawnCharacterSO = DrawCharacter();
+        PlayerCharacterData newCharacterInstance = PlayerDataManager.Instance.AddCharacter(drawnCharacterSO);
+
+        // 마지막 결과 리스트를 새로 만들고, 이번에 뽑은 캐릭터 하나만 추가합니다.
+        lastGachaResults = new List<PlayerCharacterData> { newCharacterInstance };
 
         // UI 갱신
         if (characterScrollViewUI != null)
@@ -96,18 +113,36 @@ public class GachaManager : MonoBehaviour
         {
             Debug.LogWarning("GachaManager에 CharacterScrollViewUI가 연결되지 않았습니다!");
         }
+        CurrencyManager.Instance.UpdateCurrencyUI();
+        return true;
     }
 
     /// <summary>
     /// 가챠를 여러 번 실행하고 결과들을 플레이어 데이터에 적용한 후 UI를 갱신합니다.
     /// </summary>
     /// <param name="count">뽑을 횟수</param>
-    public void PerformMultipleGacha(int count)
+    public bool PerformMultipleGacha(int count)
     {
-        List<CharacterData> results = DrawMultipleCharacters(count);
-        foreach (var character in results)
+        // 1. 재화 소모 시도
+        BigInteger cost = 100 * count;
+        if (!CurrencyManager.Instance.SpendCurrency(CurrencyType.Gem, cost))
         {
-            PlayerDataManager.Instance.AddCharacter(character);
+            Debug.Log("가챠 실패: 재화(Gem)가 부족합니다.");
+            return false; // 재화가 부족하면 함수 종료
+        }
+
+        // 2. 재화 소모 성공 시, 가챠 실행
+        List<CharacterData> drawnCharacters = DrawMultipleCharacters(count);
+        lastGachaResults = new List<PlayerCharacterData>(); // 리스트 초기화
+
+        foreach (var characterSO in drawnCharacters)
+        {
+            // PlayerDataManager에 캐릭터를 추가하고, 생성된 PlayerCharacterData를 반환받는다고 가정합니다.
+            PlayerCharacterData newCharacterInstance = PlayerDataManager.Instance.AddCharacter(characterSO);
+            if (newCharacterInstance != null)
+            {
+                lastGachaResults.Add(newCharacterInstance);
+            }
         }
 
         // UI 갱신
@@ -119,6 +154,8 @@ public class GachaManager : MonoBehaviour
         {
             Debug.LogWarning("GachaManager에 CharacterScrollViewUI가 연결되지 않았습니다!");
         }
+        CurrencyManager.Instance.UpdateCurrencyUI();
+        return true;
     }
 
 
