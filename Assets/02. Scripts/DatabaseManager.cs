@@ -1,42 +1,143 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Firebase.Auth;
+using Firebase.Database;
+using Firebase.Extensions;
 using UnityEngine;
 
 public class DatabaseManager : Singleton<DatabaseManager>
 {
-    public async Task<bool> SaveNicknameAsync()
+    private FirebaseUser _user;
+    private string _uid;
+    
+    public event Action OnChangedNickname;
+    
+    private void Init()
     {
-        FirebaseUser currentUser = FirebaseManager.Auth.CurrentUser;
-        string uid = currentUser.UserId;
-        string userNickname = FirebaseManager.Auth.CurrentUser.DisplayName;
-
-        Dictionary<string, object> dictionary = new Dictionary<string, object>();
-
-        // 익명계정 RankData 저장 x
-        if (currentUser.IsAnonymous)
-        {
-            //dictionary[$"RankData/{uid}"] = new Dictionary<string, object>();
-            dictionary[$"UserData/{uid}/Nickname"] = userNickname;
-        }
-        else
-        {
-            dictionary[$"UserData/{uid}/Nickname"] = userNickname;
-            dictionary[$"RankData/{uid}/Nickname"] = userNickname;
-        }
-       
+        _user = FirebaseManager.Auth.CurrentUser;
+        _uid = _user.UserId;
+    }
+    
+    private async Task SaveDataAsync(Dictionary<string, object> dictionary)
+    {
         var task = FirebaseManager.DataReference.UpdateChildrenAsync(dictionary);
         await task; 
 
         if (task.IsCompletedSuccessfully)
         {
-            Debug.Log("UserData / RankData 에 닉네임 저장 성공");
-            return true;
+            Debug.Log("닉네임 저장 성공");
         }
         else
         {
             Debug.LogError("닉네임 저장 실패");
-            return false;
         }
+    }
+
+    public async Task DeleteDataAsync()
+    {
+        Dictionary<string, object> dictionary = new Dictionary<string, object>
+        {
+            [$"{_uid}"] = null
+        };
+        
+        await SaveDataAsync(dictionary);
+    }
+
+    #region Nickname
+    /// <summary>
+    /// 유저의 DisplayName을 입력받은 값으로 변경하는 메서드 
+    /// 연결: AccountPanel - 닉네임 변경 기능
+    /// </summary>
+    /// <param name="newNickname">변경할 닉네임</param>
+    public async Task SetNickname(string newNickname = "Guest")
+    {
+        Init();
+        string nickname;
+        if (_user.IsAnonymous)
+        {
+            nickname = $"게스트{UnityEngine.Random.Range(1000, 10000)}";
+        }
+        else
+        {
+            nickname = newNickname;
+        }
+
+        await SaveNicknameAsync(nickname);
+
+        OnChangedNickname?.Invoke();
+    }
+    
+    /// <summary>
+    /// Firebase DB - PublicData에 현재 설정된 닉네임을 저장하는 메서드
+    /// </summary>
+    private async Task SaveNicknameAsync(string nickname)
+    {
+        Init();
+
+        Dictionary<string, object> dictionary = new Dictionary<string, object>();
+        dictionary[$"{_uid}/PublicData/Nickname"] = nickname;
+
+        await SaveDataAsync(dictionary);
+    }
+    
+    /// <summary>
+    /// FFirebase DB - PublicData에서 현재 유저 닉네임을 불러오는 메서드
+    /// 반환값: DB에 저장된 유저 Nickname
+    /// </summary>
+    public async Task LoadNicknameAsync(Action<string> callback)
+    {
+        DatabaseReference nicknameRef = FirebaseManager.DataReference.Child(_uid).Child("PublicData").Child("Nickname");
+
+        DataSnapshot snapshot = await nicknameRef.GetValueAsync();
+        string nickname = snapshot.Value.ToString();
+        Debug.Log($"LoadNickname 닉네임 : {nickname}");
+
+        if (snapshot.Exists)
+        {
+            //string nickname = snapshot.Value.ToString();
+            Debug.Log($"닉네임 로드 성공 : {nickname}");
+            callback(nickname);
+        }
+        else
+        {
+            Debug.LogWarning("닉네임 데이터 없음");
+            callback(null);
+        }
+    }
+    #endregion
+    
+    /// <summary>
+    /// 오프라인이 되었을 때 접속 종료 시각을 저장하는 메서드
+    /// </summary>
+    public void SaveLogOutTime()
+    {
+        Init();
+        
+        DatabaseReference userRef = FirebaseManager.DataReference.Child(_uid).Child("UserData");
+        long unixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        userRef.Child("LogOutTime").SetValueAsync(unixTime);
+        //userRef.Child("IsOnline").SetValueAsync(false);
+    }
+
+    /// <summary>
+    /// 온라인이 되었을 때 보상을 계산하기 위해 최근 종료 시각을 불러오는 메서드
+    /// </summary>
+    /// <param name="callback"></param>
+    public void LoadLogOutTime(Action<long> callback)
+    {
+        FirebaseManager.DataReference.Child(_uid).Child("UserData").Child("LogOutTime")
+            .GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted && task.Result.Exists)
+            {
+                long savedTime = Convert.ToInt64(task.Result.Value);
+                callback(savedTime);
+            }
+            else
+            {
+                callback(0);
+            }
+        });
     }
 }
