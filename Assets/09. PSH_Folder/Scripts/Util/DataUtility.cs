@@ -35,4 +35,21 @@ public static class DataUtility
 
         return valueToFormat.ToString("0.##") + suffixes[suffixIndex];
     }
+
+    public static string FormatNumber(float number)
+    {
+        if (number == 0f) return "0";
+        if (number < 1000f) return number.ToString("0.##");
+
+        int exponent = (int)Mathf.Floor(Mathf.Log10(number));
+        int suffixIndex = exponent / 3;
+
+        if (suffixIndex >= suffixes.Count)
+            return "INF";
+
+        float divisor = Mathf.Pow(1000f, suffixIndex);
+        float valueToFormat = number / divisor;
+
+        return valueToFormat.ToString("0.##") + suffixes[suffixIndex];
+    }
 }
