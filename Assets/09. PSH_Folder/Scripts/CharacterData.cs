@@ -1,6 +1,4 @@
-
 using System.Collections.Generic;
-using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 public enum Rarity
 {
