@@ -1,0 +1,15 @@
+﻿using _05._CSJ_Folder.Scripts.Quest.Definition;
+using UnityEngine;
+
+namespace _05._CSJ_Folder.Scripts.Quest
+{
+    [CreateAssetMenu (menuName = "Quest/Sequence/Routine")]
+    public class RoutineSequenceSO : ScriptableObject
+    {
+        // 사이클 2차 확인
+        // 홀수 사이클
+        public GeneralQuestDefinitionSO[] OddRoutine;
+        // 짝수 사이클
+        public GeneralQuestDefinitionSO[] EvenRoutine;
+    }
+}
