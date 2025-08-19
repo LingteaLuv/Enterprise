@@ -30,7 +30,23 @@ public class GoogleLogin : MonoBehaviour
     private void OnGoogleSignInClicked()
     {
         Debug.Log("구글 로그인 버튼 입력");
-        GoogleSignIn.DefaultInstance.SignIn().ContinueWithOnMainThread(OnGoogleAuthenticatedFinished);
+        GoogleSignIn.DefaultInstance.SignIn().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCanceled)
+            {
+                Debug.LogError("구글 인증 취소");
+            }
+
+            if (task.IsFaulted)
+            {
+                Debug.LogError($"구글 인증 실패 : {task.Exception}");
+            }
+
+            else
+            {
+                GoogleSignUp(task);
+            }
+        });
     }
 
     /// <summary>
@@ -43,30 +59,6 @@ public class GoogleLogin : MonoBehaviour
         Debug.Log("구글 로그아웃 버튼 입력");
         GoogleSignIn.DefaultInstance.Disconnect();
         FirebaseManager.Auth.SignOut();
-    }
-
-    /// <summary>
-    /// 구글 인증 완료 후 호출되는 콜백 메서드
-    /// 인증 실패: 에러 코드
-    /// 인증 성공: GoogleSignUp 메서드 호출
-    /// </summary>
-    /// <param name="task">구글 인증 결과 Task</param>
-    private void OnGoogleAuthenticatedFinished(Task<GoogleSignInUser> task)
-    {
-        if (task.IsCanceled)
-        {
-            Debug.LogError("구글 인증 취소");
-        }
-
-        if (task.IsFaulted)
-        {
-            Debug.LogError($"구글 인증 실패 : {task.Exception}");
-        }
-
-        else
-        {
-            GoogleSignUp(task);
-        }
     }
 
     /// <summary>
@@ -176,35 +168,7 @@ public class GoogleLogin : MonoBehaviour
     
                 // 구글 닉네임 변경 
                 await DatabaseManager.Instance.SetNickname(googleDisplayName);
-                //await Utility.SetGoogleNickname(user, googleDisplayName);
                 await user.ReloadAsync();
-    
-                //GameStartPanel 닉네임 text 변경 이벤트 호출
-                //_gameStartPanel.OnSetNicknameField?.Invoke(user.DisplayName);
-                /*PopupManager.Instance.ShowOKPopup("구글 계정으로 전환 성공\r\n 다시 로그인 해주세요.", "OK", () =>
-                {
-                    //PopupManager.Instance.HidePopup();
-    
-                    // SignOut
-                    //Utility.SetOffline();
-    
-                    // 구글 계정 로그아웃 처리 및 계정과 앱 연결 해제
-                    bool isGoogleUser = user.ProviderData.Any(provider => provider.ProviderId == "google.com");
-                    if (isGoogleUser)
-                    {
-                        GoogleSignIn.DefaultInstance.SignOut();
-                        GoogleSignIn.DefaultInstance.Disconnect();
-                    }
-    
-                    FirebaseManager.Auth.SignOut();
-    
-                    // 구글 계정 로그아웃 처리 및 계정과 앱 연결 해제
-                    GoogleSignIn.DefaultInstance.SignOut();
-                    GoogleSignIn.DefaultInstance.Disconnect();
-    
-                    // LoginPanel ShowUI, GameStartPanel HideUI
-                    OnClickSignOut?.Invoke();
-                });*/
             });
         });
     }
