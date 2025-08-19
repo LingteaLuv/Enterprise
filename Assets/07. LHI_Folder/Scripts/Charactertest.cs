@@ -7,7 +7,6 @@ namespace LHI
         [SerializeField]
         public CharacterData[] characterData;
 
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
             foreach (var character in characterData)
@@ -24,6 +23,8 @@ namespace LHI
             }
 
         }
+
+
 
         // Update is called once per frame
         void Update()
