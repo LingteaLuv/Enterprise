@@ -14,9 +14,11 @@ public class GachaUIHandler : MonoBehaviour
     {
         if (gachaManager != null)
         {
-            gachaManager.PerformSingleGacha();
-            gachaListUI.gameObject.SetActive(true);
-            Debug.Log("UI 버튼 클릭으로 1회 뽑기를 실행했습니다.");
+            if (gachaManager.PerformSingleGacha())
+            {
+                gachaListUI.gameObject.SetActive(true);
+                Debug.Log("UI 버튼 클릭으로 1회 뽑기를 실행했습니다.");
+            }
         }
         else
         {
@@ -31,9 +33,11 @@ public class GachaUIHandler : MonoBehaviour
     {
         if (gachaManager != null)
         {
-            gachaManager.PerformMultipleGacha(10);
-            gachaListUI.gameObject.SetActive(true);
-            Debug.Log("UI 버튼 클릭으로 10회 뽑기를 실행했습니다.");
+            if (gachaManager.PerformMultipleGacha(10))
+            {
+                gachaListUI.gameObject.SetActive(true);
+                Debug.Log("UI 버튼 클릭으로 10회 뽑기를 실행했습니다.");
+            }
         }
         else
         {
