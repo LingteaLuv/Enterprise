@@ -48,9 +48,9 @@ public class PlayerCharacterData
         }
 
         // 기본 스탯 적용 
-        finalStats["health"] = BasicStatManager.Instance.GetStatValue(BasicStatType.Health);
-        finalStats["attackPoint"] = BasicStatManager.Instance.GetStatValue(BasicStatType.Attack);
-        finalStats["defensePower"] = BasicStatManager.Instance.GetStatValue(BasicStatType.Defense);
+        finalStats["health"] += BasicStatManager.Instance.GetStatValue(BasicStatType.Health);
+        finalStats["attackPower"] += BasicStatManager.Instance.GetStatValue(BasicStatType.Attack);
+        finalStats["defensePower"] += BasicStatManager.Instance.GetStatValue(BasicStatType.Defense);
 
 
         // 장비 스탯 적용
