@@ -90,7 +90,7 @@ public class BasicStatUI : MonoBehaviour
             float currentValue = BasicStatManager.Instance.GetStatValue(group.statType);
             if (group.valueText != null)
             {
-                group.valueText.text = currentValue.ToString("F0"); // 소수점 없이 표시
+                group.valueText.text = DataUtility.FormatNumber(currentValue);
             }
 
             // 레벨업 비용 표시
@@ -99,7 +99,7 @@ public class BasicStatUI : MonoBehaviour
 
             if (group.costText != null)
             {
-                group.costText.text = $"Cost: {DataUtility.FormatNumber(cost)} {costType}"; 
+                group.costText.text = $"비용: {DataUtility.FormatNumber(cost)} {costType}"; 
             }
 
             // 레벨업 버튼 활성화/비활성화

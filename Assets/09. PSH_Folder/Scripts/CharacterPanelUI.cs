@@ -16,6 +16,11 @@ public class CharacterPanelUI : MonoBehaviour
     public TextMeshProUGUI soulFragmentText; // 예: "15 / 20"
     public Slider soulFragmentSlider;
 
+    [Header("편성 UI")]
+    public GameObject formationIndicator; // 편성에 포함되었는지 표시하는 UI 오브젝트 (예: 체크마크 이미지)
+    [HideInInspector]
+    public CharacterScrollViewUI ownerScrollView; // 부모 스크롤 뷰
+
     private GameObject characterInfoUIPanel;
     private PlayerCharacterData currentPlayerCharData; // 이 패널이 표시하는 캐릭터 데이터
 
@@ -44,6 +49,9 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 영혼 조각 UI 업데이트
         UpdateSoulFragmentUI();
+
+        // 편성 상태 시각화 업데이트
+        UpdateFormationVisuals();
     }
 
     /// <summary>
@@ -93,29 +101,65 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 현재 편성 상태에 따라 시각적 표시를 업데이트합니다.
+    /// </summary>
+    public void UpdateFormationVisuals()
+    {
+        if (formationIndicator != null)
+        {
+            bool isInFormation = PlayerDataManager.Instance.IsInFormation(currentPlayerCharData);
+            formationIndicator.SetActive(isInFormation);
+        }
+    }
+
 
     /// <summary>
     /// 패널 버튼 클릭 시 호출됩니다.
     /// </summary>
     private void OnPanelButtonClicked()
     {
-        if (characterInfoUIPanel != null)
+        // 부모 스크롤뷰가 할당되었고, 편성 모드가 활성화 상태일 때
+        if (ownerScrollView != null && ownerScrollView.isFormationMode)
         {
-            characterInfoUIPanel.SetActive(true);
+            // 편성 로직 처리
+            bool isInFormation = PlayerDataManager.Instance.IsInFormation(currentPlayerCharData);
 
-            CharacterInfoUI infoUI = characterInfoUIPanel.GetComponent<CharacterInfoUI>();
-            if (infoUI != null)
+            if (isInFormation)
             {
-                infoUI.Setup(currentPlayerCharData);
+                // 이미 편성에 있으면 제거
+                PlayerDataManager.Instance.RemoveCharacterFromFormation(currentPlayerCharData);
             }
             else
             {
-                Debug.LogWarning("CharacterInfoUI 컴포넌트를 찾을 수 없습니다.");
+                // 편성에 없으면 추가 시도
+                int result = PlayerDataManager.Instance.AddCharacterToFormation(currentPlayerCharData);
+                // result 0: 성공, 1: 중복, 2: 꽉참. 필요시 결과에 따라 다른 피드백 처리 가능
             }
+            // 시각적 상태 업데이트
+            UpdateFormationVisuals();
         }
         else
         {
-            Debug.LogWarning("CharacterInfoUI Panel을 찾을 수 없습니다.");
+            // 기존 로직: 캐릭터 정보창 열기
+            if (characterInfoUIPanel != null)
+            {
+                characterInfoUIPanel.SetActive(true);
+
+                CharacterInfoUI infoUI = characterInfoUIPanel.GetComponent<CharacterInfoUI>();
+                if (infoUI != null)
+                {
+                    infoUI.Setup(currentPlayerCharData);
+                }
+                else
+                {
+                    Debug.LogWarning("CharacterInfoUI 컴포넌트를 찾을 수 없습니다.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("CharacterInfoUI Panel을 찾을 수 없습니다.");
+            }
         }
     }
 }

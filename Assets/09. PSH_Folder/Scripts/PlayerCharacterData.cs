@@ -77,7 +77,7 @@ public class PlayerCharacterData
         if (oldPower != battlePower)
         {
             Debug.Log($"전투력 변경 감지: {oldPower} -> {battlePower}");
-            StatEvents.RaiseBattlePowerChanged(oldPower, battlePower);
+            StatEvents.RaiseCharacterBattlePowerChanged(this, oldPower, battlePower);
         }
     }
 }

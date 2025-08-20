@@ -15,15 +15,17 @@ public class BattlePowerPopup : MonoBehaviour
     }
     private void OnEnable()
     {
-        StatEvents.OnBattlePowerChanged += ShowBattlePowerChange;
+        // 팀 전투력 변경 이벤트를 구독하도록 수정
+        StatEvents.OnTeamBattlePowerChanged += ShowTeamBattlePowerChange;
     }
 
     private void OnDisable()
     {
-        StatEvents.OnBattlePowerChanged -= ShowBattlePowerChange;
+        // 팀 전투력 변경 이벤트 구독을 해제하도록 수정
+        StatEvents.OnTeamBattlePowerChanged -= ShowTeamBattlePowerChange;
     }
 
-    private void ShowBattlePowerChange(BigInt oldPower, BigInt newPower)
+    private void ShowTeamBattlePowerChange(BigInt oldPower, BigInt newPower)
     {
         // 이미 실행 중인 코루틴이 있으면 중단
         if (popupCoroutine != null)
@@ -39,7 +41,15 @@ public class BattlePowerPopup : MonoBehaviour
         float duration = 1.0f;
         float elapsed = 0f;
 
-        popupText.text = $"{DataUtility.FormatNumber(oldPower)} → {DataUtility.FormatNumber(newPower)}";
+        // 텍스트를 '팀 전투력'으로 변경하고, 증감에 따라 텍스트 표시
+        bool sgn = newPower > oldPower;
+        BigInt battlePoint = sgn ? newPower - oldPower : oldPower - newPower;
+        Color diffColor = sgn ? Color.blue : Color.red;
+
+        // 전투력 전체 텍스트는 흰색, 괄호 안 증감치만 색 바꾸고 싶으면 <color> 태그 활용
+        popupText.text = $"팀 전투력 : {DataUtility.FormatNumber(newPower)} " +
+                         $"\n(<color=#{ColorUtility.ToHtmlStringRGB(diffColor)}>{(sgn ? "+" : "-")}{DataUtility.FormatNumber(battlePoint)}</color>)";
+
         popupText.transform.position = startPos;
 
         Vector3 endPos = startPos + new Vector3(0, 50f, 0); // 위로 50만큼 이동
