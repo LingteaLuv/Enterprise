@@ -14,12 +14,15 @@ public class TabBarController : MonoBehaviour
     [SerializeField] GameObject characterListPanel;
     [SerializeField] GameObject gachaPanel;
 
-    // 버튼과 판넬을 연결하는 딕셔너리
-    private Dictionary<Button, GameObject> dic;
+    [Header("공용 닫기 버튼")]
+    [SerializeField] Button closeBtn;
+
+    private Dictionary<Button, GameObject> tabToPanel;
+    private GameObject currentOpenPanel;
 
     private void Awake()
     {
-        dic = new Dictionary<Button, GameObject>
+        tabToPanel = new Dictionary<Button, GameObject>
         {
             { basicStatBtn, basicStatPanel },
             { characterListBtn, characterListPanel },
@@ -31,25 +34,44 @@ public class TabBarController : MonoBehaviour
 
     void Init()
     {
-        basicStatPanel.SetActive(false);
-        characterListPanel.SetActive(false);
-        gachaPanel.SetActive(false);
+        // 초기 상태: 모든 패널 끄기, 닫기 버튼 숨김
+        foreach (var panel in tabToPanel.Values)
+            panel.SetActive(false);
+        closeBtn.gameObject.SetActive(false);
 
-        // 버튼에 연결
-        foreach (var item in dic)
+        // 탭 버튼 이벤트 연결
+        foreach (var item in tabToPanel)
         {
-            item.Key.onClick.AddListener(CloseAllPanel);
-            // 나중에 ui 등장 애니메이션 연결
-            item.Key.onClick.AddListener(() => item.Value.SetActive(true));
+            Button tabBtn = item.Key;
+            GameObject panel = item.Value;
+
+            tabBtn.onClick.AddListener(() =>
+            {
+                CloseAllPanels();
+                panel.SetActive(true);
+                currentOpenPanel = panel;
+                closeBtn.transform.position = tabBtn.transform.position;
+                closeBtn.gameObject.SetActive(true);
+            });
         }
+
+        // 공용 닫기 버튼 이벤트 연결
+        closeBtn.onClick.AddListener(() =>
+        {
+            if (currentOpenPanel != null)
+            {
+                currentOpenPanel.SetActive(false);
+                currentOpenPanel = null;
+            }
+            closeBtn.gameObject.SetActive(false);
+        });
     }
 
-    //다른거 끄기
-    public void CloseAllPanel()
+    void CloseAllPanels()
     {
-        foreach (var item in dic.Values)
-        {
-            item.SetActive(false);
-        }        
+        foreach (var panel in tabToPanel.Values)
+            panel.SetActive(false);
+        currentOpenPanel = null;
+        closeBtn.gameObject.SetActive(false);
     }
 }

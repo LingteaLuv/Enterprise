@@ -278,7 +278,7 @@ public class CharacterInfoUI : MonoBehaviour
 
         // 전투력 계산
         currentCharacterData.RecaculateStats();
-        battlePoint.text = DataUtility.FormatNumber(StatCalculator.ComputeFinalPower(currentCharacterData));
+        battlePoint.text = $"전투력 : {DataUtility.FormatNumber(StatCalculator.ComputeFinalPower(currentCharacterData))}";
     }
 
     /// <summary>
