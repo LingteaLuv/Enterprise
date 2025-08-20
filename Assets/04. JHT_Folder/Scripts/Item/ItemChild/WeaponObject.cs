@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace JHT
 {
@@ -23,8 +22,8 @@ namespace JHT
         public override void Init()
         {
             base.Init();
-            weapon = itemSO as ItemWeaponSO;
-
+            weapon = (ItemWeaponSO)itemSO;
+            itemIcon = weapon.icon;
             OnUpCount += UpCountWeapon;
             InventoryManager.Instance.OnUpCountItem += ItemLevelUp;
 

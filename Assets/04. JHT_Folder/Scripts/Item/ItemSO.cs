@@ -5,13 +5,12 @@ namespace JHT
 {
     public abstract class ItemSO : ScriptableObject
     {
-        [field: SerializeField] public string itemName { get; set; }
-        [field: SerializeField] public ItemType itemType { get; set; }
-        [field: SerializeField] public Sprite icon { get; set; } = null;
-        [field: SerializeField] public Image backImage { get; set; }
-        [field: SerializeField] public string desc { get; set; }
-        [field: SerializeField] public float attackDamage{ get; set; }
-        [field: SerializeField] public bool isStrengthen { get; set; }
+        [field: SerializeField] public string itemName { get; private set; }
+        [field: SerializeField] public ItemType itemType { get; private set; }
+        [field: SerializeField] public Sprite icon { get; private set; } = null;
+        [field: SerializeField] public Image backImage { get; private set; }
+        [field: SerializeField] public string desc { get; private set; }
+        [field: SerializeField] public bool isStrengthen { get; private set; }
 
         public virtual void UseItem(ItemSO item) { }
     }
