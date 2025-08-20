@@ -1,16 +1,16 @@
+using JHT;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemDataManager : MonoBehaviour
+namespace JHT
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class ItemDataManager : Singleton<ItemDataManager>
     {
-        
-    }
+        private Dictionary<int, ItemObject> itemDataDic;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        private void Awake()
+        {
+            base.Awake();
+        }
     }
 }
