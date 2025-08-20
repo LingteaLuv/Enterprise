@@ -10,7 +10,7 @@ public class PlayerDataManager : MonoBehaviour
 
     [Header("캐릭터 편성")]
     public List<PlayerCharacterData> formationCharacters = new List<PlayerCharacterData>();
-    public const int MAX_FORMATION_SIZE = 5;
+    public const int MAX_FORMATION_SIZE = 4;
     public BigInteger teamBattlePower;
 
     [Header("캐릭터 레벨업 비용 설정")]
@@ -20,6 +20,8 @@ public class PlayerDataManager : MonoBehaviour
     public Dictionary<CharacterData, PlayerCharacterData> ownedCharacters = new Dictionary<CharacterData, PlayerCharacterData>();
     public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
     private Dictionary<int, int> starUpgradeCosts;
+
+    private bool isBatchUpdating = false; // 일괄 업데이트 상태 플래그
 
     private void Awake()
     {
@@ -31,16 +33,12 @@ public class PlayerDataManager : MonoBehaviour
 
     private void Start()
     {
-        // 게임 시작 시 모든 캐릭터의 스탯을 한 번 계산해줍니다.
-        // 다른 모든 Start() 함수가 실행된 후를 보장하기 위해, 첫 프레임의 끝에서 실행합니다.
         StartCoroutine(InitialCalculationCoroutine());
     }
 
     private IEnumerator InitialCalculationCoroutine()
     {
-        // 모든 Start() 함수가 실행된 후인 첫 프레임의 끝까지 기다립니다.
         yield return new WaitForEndOfFrame();
-
         Debug.Log("초기 스탯 계산을 시작합니다.");
         RecalculateAllCharacterStats();
     }
@@ -48,13 +46,13 @@ public class PlayerDataManager : MonoBehaviour
     private void OnEnable()
     {
         StatEvents.OnCharacterBattlePowerChanged += HandleCharacterBattlePowerChange;
-        BasicStatManager.OnBaseStatsChanged += RecalculateAllCharacterStats; // 기본 스탯 변경 시 모든 캐릭터 스탯 재계산
+        BasicStatManager.OnBaseStatsChanged += HandleBaseStatsChanged;
     }
 
     private void OnDisable()
     {
         StatEvents.OnCharacterBattlePowerChanged -= HandleCharacterBattlePowerChange;
-        BasicStatManager.OnBaseStatsChanged -= RecalculateAllCharacterStats;
+        BasicStatManager.OnBaseStatsChanged -= HandleBaseStatsChanged;
     }
 
     private void InitializeUpgradeCosts()
@@ -83,11 +81,10 @@ public class PlayerDataManager : MonoBehaviour
         else
         {
             PlayerCharacterData newCharData = new PlayerCharacterData(characterdata);
-
-            // 추가한 캐릭터의 전투력을 계산해놓고 저장
-            newCharData.RecaculateStats();
             ownedCharacters.Add(characterdata, newCharData);
             Debug.Log($"[신규] {characterdata.characterName}({characterdata.rarity}성) 획득!");
+            // 새로 추가된 캐릭터의 스탯을 즉시 계산
+            newCharData.RecaculateStats();
             return newCharData;
         }
     }
@@ -165,11 +162,25 @@ public class PlayerDataManager : MonoBehaviour
 
     private void HandleCharacterBattlePowerChange(PlayerCharacterData character, BigInteger oldPower, BigInteger newPower)
     {
+        if (isBatchUpdating) return; // 일괄 업데이트 중에는 개별 처리를 건너뜀
+
         if (IsInFormation(character))
         {
             Debug.Log($"{character.characterdata.characterName}의 전투력 변경으로 팀 전투력을 재계산합니다.");
             RecalculateTeamBattlePower();
         }
+    }
+
+    private void HandleBaseStatsChanged()
+    {
+        Debug.Log("기본 스탯 변경 감지. 일괄 업데이트를 시작합니다.");
+        isBatchUpdating = true;
+
+        RecalculateAllCharacterStats();
+        RecalculateTeamBattlePower(); // 모든 캐릭터 업데이트 후, 팀 전투력 최종 계산
+
+        isBatchUpdating = false;
+        Debug.Log("일괄 업데이트 완료.");
     }
 
     public void RecalculateTeamBattlePower()
@@ -187,9 +198,6 @@ public class PlayerDataManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 보유한 모든 캐릭터의 스탯을 재계산합니다.
-    /// </summary>
     public void RecalculateAllCharacterStats()
     {
         Debug.Log("모든 캐릭터의 스탯을 재계산합니다...");
@@ -199,4 +207,3 @@ public class PlayerDataManager : MonoBehaviour
         }
     }
 }
-
