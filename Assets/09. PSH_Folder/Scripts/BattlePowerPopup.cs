@@ -39,7 +39,7 @@ public class BattlePowerPopup : MonoBehaviour
         float duration = 1.0f;
         float elapsed = 0f;
 
-        popupText.text = $"{DataUtility.FormatNumber(oldPower)} → {DataUtility.FormatNumber(newPower)}";
+        popupText.text = $"전투력 : {DataUtility.FormatNumber(newPower)} → {DataUtility.FormatNumber(newPower - oldPower)} 만큼 증가";
         popupText.transform.position = startPos;
 
         Vector3 endPos = startPos + new Vector3(0, 50f, 0); // 위로 50만큼 이동
