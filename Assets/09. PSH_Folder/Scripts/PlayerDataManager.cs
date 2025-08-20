@@ -7,6 +7,10 @@ public class PlayerDataManager : MonoBehaviour
 {
     public static PlayerDataManager Instance { get; private set; }
 
+    [Header("캐릭터 편성")]
+    public List<PlayerCharacterData> formationCharacters = new List<PlayerCharacterData>();
+    public const int MAX_FORMATION_SIZE = 5;
+
     [Header("캐릭터 레벨업 비용 설정")]
     public BigInteger baseLevelUpCost = 1000; // 기본 레벨업 비용
     public double levelUpCostIncreaseRatio = 1.07; // 레벨업 비용 증가율
@@ -198,5 +202,56 @@ public class PlayerDataManager : MonoBehaviour
         // TODO: 레벨업에 따른 추가 보상 로직 (스탯 증가 외)
         CurrencyManager.Instance.UpdateCurrencyUI();
         return true;
+    }
+
+    /// <summary>
+    /// 캐릭터를 편성에 추가합니다.
+    /// </summary>
+    /// <param name="characterData">추가할 캐릭터</param>
+    /// <returns>성공 여부. (0:성공, 1:중복, 2:꽉참)</returns>
+    public int AddCharacterToFormation(PlayerCharacterData characterData)
+    {
+        if (formationCharacters.Contains(characterData))
+        {
+            Debug.Log($"{characterData.characterdata.characterName}은(는) 이미 편성에 포함되어 있습니다.");
+            return 1;
+        }
+
+        if (formationCharacters.Count >= MAX_FORMATION_SIZE)
+        {
+            Debug.Log($"편성이 가득 찼습니다. (최대: {MAX_FORMATION_SIZE}명)");
+            return 2;
+        }
+
+        formationCharacters.Add(characterData);
+        Debug.Log($"{characterData.characterdata.characterName}을(를) 편성에 추가했습니다.");
+        // TODO: 편성 변경 UI 갱신 이벤트 호출
+        return 0;
+    }
+
+    /// <summary>
+    /// 캐릭터를 편성에서 제거합니다.
+    /// </summary>
+    /// <param name="characterData">제거할 캐릭터</param>
+    /// <returns>성공 여부</returns>
+    public bool RemoveCharacterFromFormation(PlayerCharacterData characterData)
+    {
+        if (formationCharacters.Remove(characterData))
+        {
+            Debug.Log($"{characterData.characterdata.characterName}을(를) 편성에서 제거했습니다.");
+            // TODO: 편성 변경 UI 갱신 이벤트 호출
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 캐릭터가 현재 편성에 포함되어 있는지 확인합니다.
+    /// </summary>
+    /// <param name="characterData">확인할 캐릭터</param>
+    /// <returns>포함 여부</returns>
+    public bool IsInFormation(PlayerCharacterData characterData)
+    {
+        return formationCharacters.Contains(characterData);
     }
 }
