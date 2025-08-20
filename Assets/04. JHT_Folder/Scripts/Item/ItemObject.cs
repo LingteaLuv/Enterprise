@@ -10,8 +10,11 @@ namespace JHT
     public class ItemObject : MonoBehaviour
     {
         [field: SerializeField] public ItemSO itemSO { get; private set; }
-        public Sprite itemIcon;
-        public string itemName;
+        [field: SerializeField] public int itemNum { get; private set; }
+
+        [field: SerializeField] public Sprite itemIcon { get; set; }
+
+        [field: SerializeField] public string itemName { get; set; }
 
         public virtual void Init()
         {

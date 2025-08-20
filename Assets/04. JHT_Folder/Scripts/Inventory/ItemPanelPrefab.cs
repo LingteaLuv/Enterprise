@@ -31,7 +31,7 @@ namespace JHT
             if (item as WeaponObject)
             {
                 WeaponObject obj = (WeaponObject)item;
-                SetWeapon((WeaponObject)item);
+                SetWeapon(obj);
                 obj.OnUpCount += UpCountAction;
                 obj.OnUpgrade += UpGradeAction;
             }
