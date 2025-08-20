@@ -50,10 +50,10 @@ public class InfoPanel : UIBase
     
     private void OnTouchLinkBtn()
     {
-        if (AuthManager.Instance.LinkWithGoogleAsync())
+        AuthManager.Instance.LinkWithGoogleAsync(async () =>
         {
-            OnGameStart?.Invoke();
-        }
+            await SetText();
+        });
     }
     
     private async Task OnTouchDeleteBtn()
