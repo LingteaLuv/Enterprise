@@ -41,8 +41,15 @@ public class BattlePowerPopup : MonoBehaviour
         float duration = 1.0f;
         float elapsed = 0f;
 
-        // 텍스트를 '팀 전투력'으로 변경하고, 증가량을 더 명확하게 표시
-        popupText.text = $"팀 전투력 : {DataUtility.FormatNumber(newPower)} (+{DataUtility.FormatNumber(newPower - oldPower)})";
+        // 텍스트를 '팀 전투력'으로 변경하고, 증감에 따라 텍스트 표시
+        bool sgn = newPower > oldPower;
+        BigInt battlePoint = sgn ? newPower - oldPower : oldPower - newPower;
+        Color diffColor = sgn ? Color.blue : Color.red;
+
+        // 전투력 전체 텍스트는 흰색, 괄호 안 증감치만 색 바꾸고 싶으면 <color> 태그 활용
+        popupText.text = $"팀 전투력 : {DataUtility.FormatNumber(newPower)} " +
+                         $"\n(<color=#{ColorUtility.ToHtmlStringRGB(diffColor)}>{(sgn ? "+" : "-")}{DataUtility.FormatNumber(battlePoint)}</color>)";
+
         popupText.transform.position = startPos;
 
         Vector3 endPos = startPos + new Vector3(0, 50f, 0); // 위로 50만큼 이동
