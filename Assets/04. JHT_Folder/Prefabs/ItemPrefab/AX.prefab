@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7269746149848842001
+--- !u!1 &5597114255676065821
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,9 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7547763596135555250}
-  - component: {fileID: 4812398754381661204}
-  - component: {fileID: 448971586873427922}
+  - component: {fileID: 5884566938386283838}
+  - component: {fileID: 5263971761092023153}
   m_Layer: 0
   m_Name: AX
   m_TagString: Untagged
@@ -18,46 +17,38 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &7547763596135555250
-RectTransform:
+--- !u!4 &5884566938386283838
+Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7269746149848842001}
+  m_GameObject: {fileID: 5597114255676065821}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 717.1769, y: 1318.0436, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 720.00024, y: 1148.6409}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &4812398754381661204
+--- !u!114 &5263971761092023153
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7269746149848842001}
+  m_GameObject: {fileID: 5597114255676065821}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c27ce5f360e6cb44e8ed69dfb1f60498, type: 3}
+  m_Script: {fileID: 11500000, guid: 82f2a4414b79c3b43bab90ed8cb3a776, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <weapon>k__BackingField: {fileID: 11400000, guid: ef963a91a5eed324e82ba7609b548742, type: 2}
-  <itemIcon>k__BackingField: {fileID: 21300000, guid: 66305a19e3614694f868c75a982e6b68, type: 3}
-  attackDamage: 0
-  itemLevel: 1
---- !u!222 &448971586873427922
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7269746149848842001}
-  m_CullTransparentMesh: 1
+  <itemSO>k__BackingField: {fileID: 11400000, guid: ef963a91a5eed324e82ba7609b548742, type: 2}
+  itemIcon: {fileID: 21300000, guid: 7a9e374666ad6cc47807bb001844f3d8, type: 3}
+  itemName: AX
+  weapon: {fileID: 11400000, guid: ef963a91a5eed324e82ba7609b548742, type: 2}
+  itemLevel: 0
+  itemStar: 0
+  upCount: 0
+  weaponPower: 0
