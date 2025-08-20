@@ -113,7 +113,7 @@ public class AuthManager : Singleton<AuthManager>
     {
         Firebase.Auth.Credential credential =
             Firebase.Auth.GoogleAuthProvider.GetCredential(userTask.IdToken, null);
-        await FirebaseManager.Auth.SignInWithCredentialAsync(credential);
+        await FirebaseManager.Auth.SignInAndRetrieveDataWithCredentialAsync(credential);
         
         // 구글 로그인 한 계정을 CurrentUser로 설정
         FirebaseUser user = FirebaseManager.Auth.CurrentUser;
@@ -133,7 +133,7 @@ public class AuthManager : Singleton<AuthManager>
     /// 구글 게정으로 전환하고, 임시 닉네임을 구글 닉네임으로 변경
     /// </summary>
     /// <returns></returns>
-    public bool LinkWithGoogleAsync()
+    public bool LinkWithGoogleAsync(Action callback)
     {
         // 계정 전환 가능 여부 체크
         FirebaseUser user = FirebaseManager.Auth.CurrentUser;
@@ -179,6 +179,7 @@ public class AuthManager : Singleton<AuthManager>
                 // 구글 닉네임 변경 
                 await DatabaseManager.Instance.SetNickname(googleDisplayName);
                 await user.ReloadAsync();
+                callback.Invoke();
                 return true;
             });
             return false;
