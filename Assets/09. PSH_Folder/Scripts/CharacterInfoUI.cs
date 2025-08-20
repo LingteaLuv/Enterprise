@@ -73,9 +73,9 @@ public class CharacterInfoUI : MonoBehaviour
 
         if (data != null)
         {
-            characterNameText.text = data.characterdata.characterName;
+            characterNameText.text = $"이름 : {data.characterdata.characterName}";
             characterImage.sprite = data.characterdata.characterSprite;
-            levelText.text = $"Lv.{data.characterLevel}";
+            levelText.text = $"캐릭터 레벨 : {data.characterLevel}";
 
             // 캐릭터별 영혼 조각 UI 갱신
             UpdateSoulFragmentsUI();
@@ -114,11 +114,11 @@ public class CharacterInfoUI : MonoBehaviour
         // 현재는 int로 가정합니다.
         if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments))
         {
-            soulFragmentsText.text = $"Soul Fragments: {currentFragments}";
+            soulFragmentsText.text = $"영혼 조각 : {currentFragments}";
         }
         else
         {
-            soulFragmentsText.text = "Soul Fragments: 0"; // 데이터를 찾을 수 없을 때 기본값
+            soulFragmentsText.text = "영혼 조각 : 0"; // 데이터를 찾을 수 없을 때 기본값
         }
     }
 
@@ -136,10 +136,10 @@ public class CharacterInfoUI : MonoBehaviour
         double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, currentCharacterData.characterLevel - 1);
         System.Numerics.BigInteger cost = (System.Numerics.BigInteger)costDouble; // BigInteger로 캐스팅
 
-        CurrencyType costType = CurrencyType.EnhancementStone; // 비용 재화 타입 (현재는 골드로 고정)
+        CurrencyType costType = CurrencyType.EnhancementStone; // 비용 재화 타입
 
         // DataUtility.FormatNumber가 BigInteger를 받는지 확인 필요. float을 받는다면 cost를 float으로 변경
-        levelUpCostText.text = $"Cost: {DataUtility.FormatNumber(cost)} {costType}";
+        levelUpCostText.text = $"비용 : {DataUtility.FormatNumber(cost)} 강화석";
 
         // 재화가 충분한지 확인하여 버튼 활성화/비활성화
         // InventoryManager.Instance.GetCurrency가 BigInteger를 반환한다고 가정
@@ -174,7 +174,7 @@ public class CharacterInfoUI : MonoBehaviour
         // PlayerDataManager.Instance.TryGetUpgradeCost가 int cost를 반환한다고 가정
         if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.stars, out cost))
         {
-            starUpgradeCostText.text = $"Cost: {cost} Soul Fragments";
+            starUpgradeCostText.text = $"비용 : {cost} 영혼 조각";
 
             // 해당 캐릭터의 영혼 조각이 충분한지 확인하여 버튼 활성화/비활성화
             int currentFragments = 0;
@@ -215,8 +215,7 @@ public class CharacterInfoUI : MonoBehaviour
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
             float atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.characterLevel);
-            // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
-            atkDisplay.text = $"ATK Lv{currentCharacterData.characterLevel} {atkValue.ToString("F0")}";
+            atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(atkValue)}";
             currentCharacterData.characterStats["attackPower"] = atkValue;
         }
         else
@@ -230,8 +229,7 @@ public class CharacterInfoUI : MonoBehaviour
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
             float hpValue = StatManager.CalculateStatValue(hpStatData, currentCharacterData.characterLevel);
-            // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
-            hpDisplay.text = $"HP Lv{currentCharacterData.characterLevel} {hpValue.ToString("F0")}";
+            hpDisplay.text = $"체력 : {DataUtility.FormatNumber(hpValue)}";
             currentCharacterData.characterStats["health"] = hpValue;
         }
         else
@@ -245,8 +243,7 @@ public class CharacterInfoUI : MonoBehaviour
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
             float defValue = StatManager.CalculateStatValue(defStatData, currentCharacterData.characterLevel);
-            // DataUtility.FormatNumber가 float을 받지 않을 경우를 대비하여 ToString("F0") 사용
-            defDisplay.text = $"DEF Lv{currentCharacterData.characterLevel} {defValue.ToString("F0")}";
+            defDisplay.text = $"방어력 : {DataUtility.FormatNumber(defValue)}";
             currentCharacterData.characterStats["defensePower"] = defValue;
         }
         else
@@ -259,7 +256,7 @@ public class CharacterInfoUI : MonoBehaviour
         if (criChanStatData != null)
         {
             float criChanValue = criChanStatData.value;
-            criChanDisplay.text = $"CRI {criChanValue}%";
+            criChanDisplay.text = $"치명타 확률 : {criChanValue}%";
         }
 
         // CritDmg 데이터 가져오기 레벨업
@@ -267,7 +264,7 @@ public class CharacterInfoUI : MonoBehaviour
         if (criDmgStatData != null)
         {
             float criDmgValue = criDmgStatData.value;
-            criDmgDisplay.text = $"CRIDmg {criDmgValue}%";
+            criDmgDisplay.text = $"치명타 피해 : {criDmgValue}%";
         }
 
         // ATKSpd 데이터 가져오기 레벨업
@@ -275,7 +272,7 @@ public class CharacterInfoUI : MonoBehaviour
         if (atkSpdStatData != null)
         {
             float atkSpdValue = atkSpdStatData.value;
-            atkSpdDisplay.text = $"AtkSpd {atkSpdValue}";
+            atkSpdDisplay.text = $"공격 속도 : {atkSpdValue}";
         }
         // 치확 치피 공속 얘네는 나중에 다른 업글 수단 생기면 업데이트해야함 statmanager에서 따로 매서드 추가해야할듯
 
