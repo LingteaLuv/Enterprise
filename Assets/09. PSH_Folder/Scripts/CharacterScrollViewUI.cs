@@ -49,7 +49,7 @@ public class CharacterScrollViewUI : MonoBehaviour
         .ToList();
                 break;
             case CharacterSortOption.Level:
-                characters = characters.OrderByDescending(c => c.level).ThenBy(c => c.characterdata.characterName)
+                characters = characters.OrderByDescending(c => c.characterLevel).ThenBy(c => c.characterdata.characterName)
         .ToList();
                 break;
         }

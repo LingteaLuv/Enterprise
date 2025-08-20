@@ -7,8 +7,7 @@ using UnityEngine;
 
 public class CharacterDataImporter
 {
-    // CSV 파일이 위치한 실제 경로 (사용자 지정)
-    // C:/Users/xmasoo/Downloads/1/CharacterData.csv 파일 경로를 직접 지정합니다.
+    // CSV 파일이 위치한 실제 경로
     private static string csvFilePath = Application.dataPath + "/Editor/CSVData/CharacterData.csv";
 
     // ScriptableObject 에셋을 저장할 기본 경로
