@@ -1,50 +1,71 @@
 using JHT;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ItemPanelPrefab : MonoBehaviour, IPointerClickHandler
+namespace JHT
 {
-    public ItemObject itemObject;
-    public string itemName;
-    public int itemLevel;
-    public int itemPower;
-    public Image itemImage;
-
-    private bool isCheck;
-
-    public void Init(ItemObject item)
+    public class ItemPanelPrefab : MonoBehaviour
     {
-        itemObject = item;
-        itemName = item.weapon.itemName;
-        itemLevel = item.itemLevel;
-        itemPower = (int)item.attackDamage;
-        itemImage.sprite = item.itemIcon;
-        Debug.Log($"스프라이트 : {itemImage.sprite} ::: {item.itemIcon}");
-    }
+        public ItemObject itemObject;
+        public string itemName;
+        public int itemLevel;
+        public Image itemImage;
 
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        isCheck = !isCheck;
-        if (InventoryManager.Instance.currentMode == InventoryMode.CheckForUpgrade)
+
+        #region Weapon
+
+        public TextMeshProUGUI itemCountText;
+        public Image itemStarCount;
+
+        #endregion
+
+        #region Relics
+
+        #endregion
+
+
+        public void Init(ItemObject item)
         {
-            
+            if (item as WeaponObject)
+            {
+                WeaponObject obj = (WeaponObject)item;
+                SetWeapon(obj);
+                obj.OnUpCount += UpCountAction;
+                obj.OnUpgrade += UpGradeAction;
+            }
+            else
+            {
+                SetRelics((RelicsObject)item);
+            }
         }
-    }
 
-    public void ForUpgrade()
-    {
-        if (InventoryManager.Instance.currentMode == InventoryMode.CheckForUpgrade)
+        private void SetWeapon(WeaponObject item)
+        {
+            itemObject = item;
+            itemName = item.itemName;
+            itemLevel = item.itemLevel;
+            itemImage.sprite = item.itemIcon;
+            itemCountText.text = item.itemLevel.ToString();
+        }
+
+        private void SetRelics(RelicsObject item)
         {
 
         }
-    }
 
-    public void ForDelete()
-    {
-        if (InventoryManager.Instance.currentMode == InventoryMode.CheckForUpgrade)
+        //Action으로 WeaponItem을 받아와야할듯? 
+        private void UpCountAction(WeaponObject item)
+        {
+            //Weapon
+            itemCountText.text = item.itemLevel.ToString();
+        }
+
+        private void UpGradeAction(WeaponObject item)
         {
 
         }
+
     }
 }

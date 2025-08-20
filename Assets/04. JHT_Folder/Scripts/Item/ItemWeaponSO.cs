@@ -1,15 +1,25 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace JHT
 {
-    public class ItemWeapon : ItemSO
-    {
-        [field: SerializeField] public WeaponType weaponType;
-        [field: SerializeField] public CharacterWeponType characterWeaponType;
-        AnimatorOverrideController animatorOverride; // Attack애니메이션 변경 character enum에 따라
 
-        public GameObject[] levelParticle;
+    [System.Serializable]
+    public class WeaponClass
+    {
+        public int star;
+        public int[] levels;
+    }
+
+    public class ItemWeaponSO : ItemSO
+    {
+        [field: SerializeField] public WeaponType weaponType { get; private set; }
+        [field: SerializeField] public CharacterWeponType characterWeaponType { get; private set; }
+
+        [field: SerializeField] public WeaponClass[] weaponClasses { get; private set; } = null;
+        [field: SerializeField] public Image[] stars { get; private set; }
 
         public override void UseItem(ItemSO item)
         {
