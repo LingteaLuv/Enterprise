@@ -1,7 +1,8 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using UnityEngine;
 
 public class PlayerDataManager : MonoBehaviour
 {
@@ -224,6 +225,120 @@ public class PlayerDataManager : MonoBehaviour
             return formation[position].Contains(characterData);
         }
         return false;
+    }
+
+    /// <summary>
+    /// 보유 캐릭터 중 전투력이 높은 순서대로 편성을 자동으로 구성합니다.
+    /// 편성 조건: 각 포지션(전, 중, 후, 최후)에 최소 1명씩, 총 5명.
+    /// </summary>
+    /// <returns>자동 편성 성공 여부</returns>
+    public bool AutoFormTeam()
+    {
+        Debug.Log("[PDM] 자동 편성 시작.");
+
+        // 1. 초기화: 현재 편성 비우기 및 보유 캐릭터 목록 준비
+        // 기존 편성을 비웁니다.
+        if (formation == null)
+        {
+            Debug.LogError("[PDM] AutoFormTeam 오류: formation 딕셔너리가 null입니다! Awake에서 초기화되었는지 확인하세요.");
+            return false;
+        }
+        foreach (var roleObj in System.Enum.GetValues(typeof(CrewRole)))
+        {
+            CrewRole role = (CrewRole)roleObj; // 명시적 캐스팅 추가
+            Debug.Log($"[PDM] AutoFormTeam: 현재 처리 중인 역할: {role}");
+            if (!formation.ContainsKey(role))
+            {
+                Debug.LogError($"[PDM] AutoFormTeam 오류: formation 딕셔너리에 {role} 키가 없습니다! Awake에서 모든 역할이 초기화되었는지 확인하세요.");
+                // 이 경우는 Awake에서 초기화가 제대로 안 된 경우입니다.
+                // 안전하게 빈 리스트를 추가해줍니다.
+                formation.Add(role, new List<PlayerCharacterData>());
+            }
+            formation[role].Clear(); // <--- 이 부분에서 오류가 발생했습니다。
+            Debug.Log($"[PDM] AutoFormTeam: {role} 포지션 클리어 완료.");
+        }
+        // 모든 보유 캐릭터를 임시 리스트에 복사합니다.
+        List<PlayerCharacterData> availableCharacters = new List<PlayerCharacterData>(ownedCharacters.Values);
+
+        // 2. 1단계: 필수 포지션 채우기 (각 역할별 1명)
+        // 각 역할별로 가장 전투력이 높은 캐릭터를 찾습니다.
+        foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
+        {
+            PlayerCharacterData bestCharacterForRole = availableCharacters
+                .Where(c => c.characterdata.crewrole == role)
+                .OrderByDescending(c => c.battlePower)
+                .FirstOrDefault();
+
+            if (bestCharacterForRole != null)
+            {
+                formation[role].Add(bestCharacterForRole);
+                availableCharacters.Remove(bestCharacterForRole); // 사용된 캐릭터는 목록에서 제거
+                Debug.Log($"[PDM] 자동 편성: {role} 포지션에 {bestCharacterForRole.characterdata.characterName} 배치.");
+            }
+            else
+            {
+                Debug.LogWarning($"[PDM] 자동 편성 실패: {role} 포지션에 배치할 캐릭터가 없습니다.");
+                // 편성을 초기화하고 실패를 알립니다.
+                if (formation == null) // formation 딕셔너리 null 체크 추가
+                {
+                    Debug.LogError("[PDM] AutoFormTeam 오류: formation 딕셔너리가 null입니다! (실패 초기화 중)");
+                    OnOwnedCharactersChanged?.Invoke(); // UI 갱신
+                    return false;
+                }
+                foreach (var roleToClearObj in System.Enum.GetValues(typeof(CrewRole)))
+                {
+                    CrewRole roleToClear = (CrewRole)roleToClearObj; // 명시적 캐스팅 추가
+                    if (!formation.ContainsKey(roleToClear)) // 키 존재 여부 체크 추가
+                    {
+                        Debug.LogError($"[PDM] AutoFormTeam 오류: formation 딕셔너리에 {roleToClear} 키가 없습니다! (실패 초기화 중)");
+                        formation.Add(roleToClear, new List<PlayerCharacterData>()); // 키가 없으면 추가
+                    }
+                    formation[roleToClear].Clear(); // 이 부분 수정
+                }
+                OnOwnedCharactersChanged?.Invoke(); // UI 갱신
+                return false;
+            }
+        }
+
+        // 3. 2단계: 5번째 캐릭터 채우기
+        // 남은 캐릭터 중 전투력이 가장 높은 캐릭터를 찾습니다.
+        PlayerCharacterData fifthCharacter = availableCharacters
+            .OrderByDescending(c => c.battlePower)
+            .FirstOrDefault();
+
+        if (fifthCharacter != null)
+        {
+            // 5번째 캐릭터는 Captain 포지션이 아니어야 합니다.
+            // 그리고 해당 포지션에 아직 2명이 배치되지 않았어야 합니다.
+            CrewRole fifthRole = fifthCharacter.characterdata.crewrole;
+            if (fifthRole != CrewRole.Captain && formation[fifthRole].Count < 2)
+            {
+                formation[fifthRole].Add(fifthCharacter);
+                Debug.Log($"[PDM] 자동 편성: 5번째 캐릭터로 {fifthCharacter.characterdata.characterName} ({fifthRole}) 배치.");
+            }
+            else
+            {
+                Debug.LogWarning($"[PDM] 자동 편성 실패: 5번째 캐릭터를 배치할 적절한 포지션이 없습니다. (남은 캐릭터: {fifthCharacter.characterdata.characterName}, 역할: {fifthRole})");
+                // 이 경우에도 편성은 유효하지 않을 수 있으므로 실패로 간주합니다.
+                // (이미 4명은 채워져 있으므로, 이 상태로 UI를 갱신하고 사용자에게 수동 조정을 유도할 수도 있습니다.)
+                // 여기서는 일단 실패로 처리합니다.
+                // (편성 초기화는 하지 않고, IsValidFormation()에서 걸러지도록 둡니다.)
+                OnOwnedCharactersChanged?.Invoke(); // UI 갱신
+                return false;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[PDM] 자동 편성 실패: 5번째 캐릭터로 배치할 캐릭터가 없습니다.");
+            OnOwnedCharactersChanged?.Invoke(); // UI 갱신
+            return false;
+        }
+
+        // 4. 마무리: 팀 전투력 재계산 및 UI 갱신
+        RecalculateTeamBattlePower();
+        OnOwnedCharactersChanged?.Invoke(); // UI 갱신
+        Debug.Log("[PDM] 자동 편성 완료.");
+        return true;
     }
 
     public bool IsValidFormation()

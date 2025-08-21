@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FormationUIController : MonoBehaviour
 {
@@ -8,6 +9,12 @@ public class FormationUIController : MonoBehaviour
     public FormationSlotUI rearSlot; // Cook
     public FormationSlotUI lastSlot; // Captain
 
+    public Button autoFormationButton; // 자동 편성 버튼
+
+    private void Start()
+    {
+        autoFormationButton.onClick.AddListener(AutoFormating);
+    }
     void OnEnable()
     {
         // PlayerDataManager의 이벤트 구독
@@ -83,5 +90,11 @@ public class FormationUIController : MonoBehaviour
             PlayerDataManager.Instance.formation.TryGetValue(CrewRole.Captain, out characters);
             lastSlot.Setup(characters ?? new List<PlayerCharacterData>());
         }
+    }
+
+    public void AutoFormating()
+    {        
+        string str = PlayerDataManager.Instance.AutoFormTeam() ? "성공" : "실패";
+        Debug.Log("자동 편성"+ str);
     }
 }
