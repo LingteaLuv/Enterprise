@@ -21,6 +21,10 @@ public class CharacterPanelUI : MonoBehaviour
     [HideInInspector]
     public CharacterScrollViewUI ownerScrollView; // 부모 스크롤 뷰
 
+    [Header("직업, 속성 아이콘")]
+    public Image crewRoleIcon;
+    public Image factionIcon;
+
     private GameObject characterInfoUIPanel;
     private PlayerCharacterData currentPlayerCharData; // 이 패널이 표시하는 캐릭터 데이터
 
@@ -52,6 +56,9 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 편성 상태 시각화 업데이트
         UpdateFormationVisuals();
+
+        // 직업, 속성 아이콘 업데이트
+        UpdateIcon();
     }
 
     /// <summary>
@@ -113,7 +120,24 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// 캐릭터 직업, 속성에 따라 아이콘을 업데이트합니다.
+    /// </summary>
+    public void UpdateIcon()
+    {
+        crewRoleIcon.sprite = GetIcon(currentPlayerCharData.characterdata.crewrole);
+        factionIcon.sprite = GetIcon(currentPlayerCharData.characterdata.faction);
+    }
+    public Sprite GetIcon(CrewRole role)
+    {
+        string path = $"PSHTest/Icon/{role}";
+        return Resources.Load<Sprite>(path);
+    }
+    public Sprite GetIcon(Faction role)
+    {
+        string path = $"PSHTest/Icon/{role}";
+        return Resources.Load<Sprite>(path);
+    }
     /// <summary>
     /// 패널 버튼 클릭 시 호출됩니다.
     /// </summary>
