@@ -10,11 +10,32 @@ public enum CharacterSortOption
     Level
 }
 
+// CrewRole 필터링 옵션
+public enum CrewRoleFilterOption
+{
+    All, // 전체
+    Deckhand,
+    Sailor,
+    Cook,
+    Captain
+}
+
+// Faction 필터링 옵션
+public enum FactionFilterOption
+{
+    All, // 전체
+    Pirate,
+    Navy,
+    Monster
+}
+
 public class CharacterScrollViewUI : MonoBehaviour
 {
     public Transform contentPanel;
     public GameObject characterPanelPrefab;
     public TMP_Dropdown sortDropdown;
+    public TMP_Dropdown crewRoleFilterDropdown;
+    public TMP_Dropdown factionFilterDropdown; // 새로운 드롭다운 필드
 
     [Header("편성 모드")]
     public bool isFormationMode = false;
@@ -23,16 +44,113 @@ public class CharacterScrollViewUI : MonoBehaviour
     public GameObject formationPanel;
 
     private CharacterSortOption currentSort = CharacterSortOption.Stars;
+    private CrewRoleFilterOption currentCrewRoleFilter = CrewRoleFilterOption.All;
+    private FactionFilterOption currentFactionFilter = FactionFilterOption.All; // 새로운 필터 변수
     private List<CharacterPanelUI> panelPool = new List<CharacterPanelUI>();
 
     void Start()
     {
         sortDropdown.onValueChanged.AddListener(OnSortDropdownChanged);
+        crewRoleFilterDropdown.onValueChanged.AddListener(OnCrewRoleFilterDropdownChanged);
+        // 새로운 드롭다운 리스너 추가
+        factionFilterDropdown.onValueChanged.AddListener(OnFactionFilterDropdownChanged);
+
         if (formationModeButton != null)
         {
             formationModeButton.onClick.AddListener(ToggleFormationMode);
         }
         UpdateFormationButtonText();
+
+        // 드롭다운 옵션 초기화
+        PopulateSortDropdown(); // 새로 추가
+        PopulateCrewRoleFilterDropdown();
+        PopulateFactionFilterDropdown();
+    }
+
+    // SortDropdown 옵션을 채우는 함수
+    private void PopulateSortDropdown()
+    {
+        sortDropdown.ClearOptions(); // 기존 옵션 제거
+        List<string> options = new List<string>();
+        foreach (CharacterSortOption option in System.Enum.GetValues(typeof(CharacterSortOption)))
+        {
+            options.Add(GetLocalizedEnumName(option)); // 헬퍼 함수 사용
+        }
+        sortDropdown.AddOptions(options);
+    }
+
+    // 새로운 드롭다운 값 변경 시 호출될 함수
+    void OnFactionFilterDropdownChanged(int index)
+    {
+        currentFactionFilter = (FactionFilterOption)index;
+        RefreshDisplay();
+    }
+
+    // FactionFilterDropdown 옵션을 채우는 함수
+    private void PopulateFactionFilterDropdown()
+    {
+        factionFilterDropdown.ClearOptions(); // 기존 옵션 제거
+        List<string> options = new List<string>();
+        foreach (FactionFilterOption option in System.Enum.GetValues(typeof(FactionFilterOption)))
+        {
+            options.Add(GetLocalizedEnumName(option)); // 헬퍼 함수 사용
+        }
+        factionFilterDropdown.AddOptions(options);
+    }
+
+    // Enum 값을 한글 문자열로 변환하는 헬퍼 함수
+    private string GetLocalizedEnumName(System.Enum enumValue)
+    {
+        switch (enumValue)
+        {
+            case CrewRoleFilterOption.All: return "전체";
+            case CrewRoleFilterOption.Deckhand: return "갑판원";
+            case CrewRoleFilterOption.Sailor: return "선원";
+            case CrewRoleFilterOption.Cook: return "요리사";
+            case CrewRoleFilterOption.Captain: return "선장";
+
+            case FactionFilterOption.All: return "전체";
+            case FactionFilterOption.Pirate: return "해적";
+            case FactionFilterOption.Navy: return "해군";
+            case FactionFilterOption.Monster: return "괴물";
+
+            // CrewRole enum 값도 필요하다면 여기에 추가
+            case CrewRole.Deckhand: return "갑판원";
+            case CrewRole.Sailor: return "선원";
+            case CrewRole.Cook: return "요리사";
+            case CrewRole.Captain: return "선장";
+
+            // Faction enum 값도 필요하다면 여기에 추가
+            case Faction.Pirate: return "해적";
+            case Faction.Navy: return "해군";
+            case Faction.Monster: return "괴물";
+
+            // --- ADD THIS ---
+            case CharacterSortOption.Stars: return "성급별";
+            case CharacterSortOption.Level: return "레벨별";
+            // --- END ADDITION ---
+
+            default: return enumValue.ToString(); // 매핑되지 않은 값은 기본 영어 이름 사용
+        }
+    }
+
+    // 새로운 드롭다운 값 변경 시 호출될 함수
+    void OnCrewRoleFilterDropdownChanged(int index)
+    {
+        currentCrewRoleFilter = (CrewRoleFilterOption)index;
+        RefreshDisplay();
+    }
+
+    // CrewRoleFilterDropdown 옵션을 채우는 함수
+    private void PopulateCrewRoleFilterDropdown()
+    {
+        crewRoleFilterDropdown.ClearOptions(); // 기존 옵션 제거
+        List<string> options = new List<string>();
+        foreach (CrewRoleFilterOption option in System.Enum.GetValues(typeof(CrewRoleFilterOption)))
+        {
+            options.Add(GetLocalizedEnumName(option)); // 헬퍼 함수 사용
+        }
+        crewRoleFilterDropdown.AddOptions(options);
     }
 
     // 이 UI 오브젝트가 활성화될 때마다 목록을 새로고침하고, 이벤트 리스너를 등록합니다.
@@ -83,7 +201,7 @@ public class CharacterScrollViewUI : MonoBehaviour
                 if (!PlayerDataManager.Instance.IsValidFormation())
                 {
                     Debug.LogWarning("편성 오류: 편성이 완료되지 않았습니다! (모든 포지션에 1명씩, 총 5명)");
-                    UIManager.Instance.ShowWarning("편성이 완료되지 않았습니다!");
+                    // 여기에 사용자에게 보여줄 UI 경고 메시지 로직 추가 (예: 팝업)
                     // 편성 모드를 종료하지 않고 유지합니다.
                     return; // 함수 종료, isFormationMode는 true로 유지됨
                 }
@@ -141,6 +259,24 @@ public class CharacterScrollViewUI : MonoBehaviour
     private List<PlayerCharacterData> GetSortedCharacters()
     {
         var charactersQuery = PlayerDataManager.Instance.ownedCharacters.Values.AsEnumerable();
+
+        // --- FACTION 필터링 로직 추가 ---
+        if (currentFactionFilter != FactionFilterOption.All)
+        {
+            // FactionFilterOption과 Faction enum의 값이 일치한다고 가정
+            Faction targetFaction = (Faction)System.Enum.Parse(typeof(Faction), currentFactionFilter.ToString());
+            charactersQuery = charactersQuery.Where(c => c.characterdata.faction == targetFaction);
+        }
+        // --- FACTION 필터링 로직 끝 ---
+
+        // --- CrewRole 필터링 로직 (기존) ---
+        if (currentCrewRoleFilter != CrewRoleFilterOption.All)
+        {
+            // CrewRoleFilterOption과 CrewRole enum의 값이 일치한다고 가정
+            CrewRole targetRole = (CrewRole)System.Enum.Parse(typeof(CrewRole), currentCrewRoleFilter.ToString());
+            charactersQuery = charactersQuery.Where(c => c.characterdata.crewrole == targetRole);
+        }
+        // --- CrewRole 필터링 로직 끝 ---
 
         // 1. 편성에 포함된 캐릭터를 먼저 정렬 (IsInFormation이 true인 캐릭터가 먼저 오도록)
         var sortedCharacters = charactersQuery.OrderByDescending(c => PlayerDataManager.Instance.IsInFormation(c));
