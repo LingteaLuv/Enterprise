@@ -1,8 +1,8 @@
 
 
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class CharacterPanelUI : MonoBehaviour
 {
@@ -20,6 +20,10 @@ public class CharacterPanelUI : MonoBehaviour
     public GameObject formationIndicator; // 편성에 포함되었는지 표시하는 UI 오브젝트 (예: 체크마크 이미지)
     [HideInInspector]
     public CharacterScrollViewUI ownerScrollView; // 부모 스크롤 뷰
+
+    [Header("직업, 속성 아이콘")]
+    public Image crewRoleIcon;
+    public Image factionIcon;
 
     private GameObject characterInfoUIPanel;
     private PlayerCharacterData currentPlayerCharData; // 이 패널이 표시하는 캐릭터 데이터
@@ -52,6 +56,9 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 편성 상태 시각화 업데이트
         UpdateFormationVisuals();
+
+        // 직업, 속성 아이콘 업데이트
+        UpdateIcon();
     }
 
     /// <summary>
@@ -113,7 +120,24 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// 캐릭터 직업, 속성에 따라 아이콘을 업데이트합니다.
+    /// </summary>
+    public void UpdateIcon()
+    {
+        crewRoleIcon.sprite = GetIcon(currentPlayerCharData.characterdata.crewrole);
+        factionIcon.sprite = GetIcon(currentPlayerCharData.characterdata.faction);
+    }
+    public Sprite GetIcon(CrewRole role)
+    {
+        string path = $"PSHTest/Icon/{role}";
+        return Resources.Load<Sprite>(path);
+    }
+    public Sprite GetIcon(Faction role)
+    {
+        string path = $"PSHTest/Icon/{role}";
+        return Resources.Load<Sprite>(path);
+    }
     /// <summary>
     /// 패널 버튼 클릭 시 호출됩니다.
     /// </summary>
@@ -134,7 +158,23 @@ public class CharacterPanelUI : MonoBehaviour
             {
                 // 편성에 없으면 추가 시도
                 int result = PlayerDataManager.Instance.AddCharacterToFormation(currentPlayerCharData);
-                // result 0: 성공, 1: 중복, 2: 꽉참. 필요시 결과에 따라 다른 피드백 처리 가능
+                switch (result)
+                {
+                    case 1:
+                        UIManager.Instance.ShowToast($"{currentPlayerCharData}는 이미 다른 곳에 편성되었습니다.");
+                        break;
+                    case 2:
+                        UIManager.Instance.ShowToast("편성이 가득 찼습니다.");
+                        break;
+                    case 3:
+                        UIManager.Instance.ShowToast("선장은 1명만 배치할 수 있습니다.");
+                        break;
+                    case 4:
+                        UIManager.Instance.ShowToast("각 포지션에는 최대 2명까지 배치할 수 있습니다.");
+                        break;
+                    default:
+                        break;
+                }
             }
             // 시각적 상태 업데이트
             UpdateFormationVisuals();
