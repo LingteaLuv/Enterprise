@@ -10,8 +10,16 @@ public class DatabaseManager : Singleton<DatabaseManager>
 {
     private FirebaseUser _user;
     private string _uid;
+    private PlayerData _playerData;
+    public PlayerData PlayerData => _playerData;
+    
+    private void Start()
+    {
+        _playerData = new PlayerData();
+    }
     
     public event Action OnChangedNickname;
+    public event Action OnChangedCreditData;
     
     private void Init()
     {
@@ -136,4 +144,141 @@ public class DatabaseManager : Singleton<DatabaseManager>
             }
         });
     }
+
+    #region Package
+
+    public void SavePackage(string packageName)
+    {
+        Init();
+        
+        DatabaseReference userRef = FirebaseManager.DataReference.Child(_uid).Child("PrivateData");
+        userRef.Child(packageName).SetValueAsync(true);
+    }
+    
+    public void LoadPackage(string packageName, Action<bool> callback)
+    {
+        Init();
+        
+        DatabaseReference userRef = FirebaseManager.DataReference.Child(_uid).Child("PrivateData");
+        userRef.Child(packageName).GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted && task.Result.Exists)
+            {
+                object result = task.Result.Value;
+                if (bool.TryParse(result.ToString(), out bool isPurchase))
+                {
+                    callback(isPurchase);
+                }
+            }
+            else
+            {
+                callback(false);
+            }
+        });
+    }
+
+    public void LoadAllPackageData(Action<string> callback)
+    {
+        DatabaseReference packageRef = FirebaseManager.DataReference
+            .Child("SharedData").Child("PackageData");
+        packageRef.GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted && task.Result.Exists)
+            {
+                foreach (var package in task.Result.Children)
+                {
+                    string packageId = package.Key;
+                    Debug.Log($"LoadAllPackageData : packageId = {packageId}");
+                    callback(packageId);
+                }
+            }
+        });
+    }
+    
+    public void LoadPackageData(string packageId, Action<string, bool> callback)
+    {
+        DatabaseReference packageRef = FirebaseManager.DataReference
+            .Child("SharedData").Child("PackageData").Child(packageId);
+        packageRef.GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted && task.Result.Exists)
+            {
+                var data = task.Result;
+                string price = data.Child("Price").Value.ToString();
+                bool isPurchased = Convert.ToBoolean(data.Child("IsPurchased").Value);
+                callback(price, isPurchased);
+            }
+        });
+    }
+    
+    #endregion
+    
+    
+    private void CreditValueChanged(object sender, ValueChangedEventArgs args)
+    {
+        DataSnapshot snapshot = args.Snapshot;
+
+        if (snapshot.Exists && snapshot.HasChild("Gold"))
+        {
+            long gold = (long)snapshot.Child("Gold").Value;
+            _playerData.CreditData.Gold = (int)gold;
+        }
+        else
+        {
+            _playerData.CreditData.Gold = 0;
+        }
+        OnChangedCreditData?.Invoke();
+    }
+    
+    public void DisplayCreditData()
+    {
+        DatabaseReference creditRef = FirebaseManager.DataReference.Child(_uid).Child("CreditData");
+        creditRef.ValueChanged += CreditValueChanged;
+    }
+
+    #region Test
+
+    public void PlusGold()
+    {
+        DatabaseReference goldRef = FirebaseManager.DataReference.Child(_uid).Child("CreditData").Child("Gold");
+        goldRef.RunTransaction(data =>
+        {
+            if (data.Value == null)
+            {
+                data.Value = 1;
+            }
+            else
+            {
+                int currentGold = Convert.ToInt32(data.Value);
+                data.Value = currentGold + 1;
+            }
+            return TransactionResult.Success(data);
+        });
+    }
+    
+    public void MinusGold()
+    {
+        DatabaseReference goldRef = FirebaseManager.DataReference.Child(_uid).Child("CreditData").Child("Gold");
+        goldRef.RunTransaction(data =>
+        {
+            if (data.Value == null)
+            {
+                data.Value = 0;
+            }
+            else
+            {
+                int currentGold = Convert.ToInt32(data.Value);
+                if (currentGold > 0)
+                {
+                    data.Value = currentGold - 1;
+                }
+                else
+                {
+                    data.Value = 0;
+                }
+            }
+            return TransactionResult.Success(data);
+        });
+    }
+    #endregion
 }

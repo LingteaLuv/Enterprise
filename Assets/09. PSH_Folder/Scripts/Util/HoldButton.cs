@@ -42,10 +42,15 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         {
             Debug.LogWarning("HoldButton: Button 컴포넌트를 찾을 수 없습니다. interactable 속성이 작동하지 않을 수 있습니다.");
         }
+        else
+        {
+            Debug.Log($"[HoldButton] Awake: Button 컴포넌트 interactable 상태: {_button.interactable}");
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        Debug.Log($"[HoldButton] OnPointerDown 호출됨. interactable: {interactable}");
         if (!interactable) return; // interactable이 false면 동작하지 않음
 
         isPointerDown = true;
@@ -55,10 +60,12 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             StopCoroutine(holdCoroutine);
         }
         holdCoroutine = StartCoroutine(HoldActionCoroutine());
+        Debug.Log("[HoldButton] HoldActionCoroutine 시작됨.");
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        Debug.Log("[HoldButton] OnPointerUp 호출됨.");
         if (!interactable) return; // interactable이 false면 동작하지 않음
 
         isPointerDown = false;
@@ -71,26 +78,41 @@ public class HoldButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     private IEnumerator HoldActionCoroutine()
     {
+        Debug.Log("[HoldButton] HoldActionCoroutine 실행 중.");
         if (onHoldAction != null)
         {
             onHoldAction.Invoke();
+            Debug.Log("[HoldButton] 첫 번째 onHoldAction.Invoke() 호출됨.");
         }
 
         yield return new WaitForSeconds(holdDelay);
+        Debug.Log($"[HoldButton] HoldDelay ({holdDelay}초) 대기 완료. isPointerDown: {isPointerDown}");
 
         while (isPointerDown)
         {
+            // 버튼이 비활성화 상태일 때도 계속 코루틴이 실행되어 의도치 않은 동작 발생해 이를 수정
+            if (!interactable) // 버튼이 비활성화되면 코루틴 종료
+            {
+                Debug.Log("[HoldButton] 버튼이 비활성화되어 HoldActionCoroutine 종료.");
+                isPointerDown = false; // 루프를 확실히 종료
+                yield break; // 코루틴 즉시 종료
+            }
+
             if (onHoldAction != null)
             {
                 onHoldAction.Invoke();
+                Debug.Log("[HoldButton] 반복 onHoldAction.Invoke() 호출됨.");
             }
 
             yield return new WaitForSeconds(repeatInterval);
+            Debug.Log($"[HoldButton] RepeatInterval ({repeatInterval}초) 대기 완료. isPointerDown: {isPointerDown}");
         }
+        Debug.Log("[HoldButton] HoldActionCoroutine 종료.");
     }
 
     private void OnDisable()
     {
+        Debug.Log("[HoldButton] OnDisable 호출됨.");
         isPointerDown = false;
         if (holdCoroutine != null)
         {
