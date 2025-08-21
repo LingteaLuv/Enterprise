@@ -20,6 +20,7 @@ public class CharacterScrollViewUI : MonoBehaviour
     public bool isFormationMode = false;
     public Button formationModeButton;
     public TextMeshProUGUI formationModeButtonText;
+    public GameObject formationPanel;
 
     private CharacterSortOption currentSort = CharacterSortOption.Stars;
     private List<CharacterPanelUI> panelPool = new List<CharacterPanelUI>();
@@ -74,10 +75,32 @@ public class CharacterScrollViewUI : MonoBehaviour
 
     public void ToggleFormationMode()
     {
+        // 편성 모드를 종료하려는 경우 (isFormationMode가 true에서 false로 바뀌기 직전)
+        if (isFormationMode) // 현재 편성 모드 상태가 true라면, 이제 종료하려는 것
+        {
+            if (PlayerDataManager.Instance != null)
+            {
+                if (!PlayerDataManager.Instance.IsValidFormation())
+                {
+                    Debug.LogWarning("편성 오류: 편성이 완료되지 않았습니다! (모든 포지션에 1명씩, 총 5명)");
+                    // 여기에 사용자에게 보여줄 UI 경고 메시지 로직 추가 (예: 팝업)
+                    // 편성 모드를 종료하지 않고 유지합니다.
+                    return; // 함수 종료, isFormationMode는 true로 유지됨
+                }
+            }
+            else
+            {
+                Debug.LogError("PlayerDataManager.Instance가 null입니다. 편성 유효성 검사를 수행할 수 없습니다.");
+                return;
+            }
+        }
+
+        // 유효성 검사를 통과했거나, 편성 모드로 진입하는 경우 (isFormationMode가 false에서 true로 바뀌는 경우)
         isFormationMode = !isFormationMode;
         Debug.Log("편성 모드 상태: " + isFormationMode);
         UpdateFormationButtonText();
         RefreshDisplay();
+        formationPanel.SetActive(isFormationMode);
     }
 
     private void UpdateFormationButtonText()
