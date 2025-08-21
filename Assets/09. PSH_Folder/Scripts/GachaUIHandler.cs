@@ -18,7 +18,7 @@ public class GachaUIHandler : MonoBehaviour
 
         // 확인창 호출
         UIManager.Instance.ShowConfirm(
-            "정말 1회 뽑기를 진행하시겠습니까?",
+            "100젬을 소비하여 1회 뽑기를 진행하시겠습니까?",
             onConfirm: () =>
             {
                 if (gachaManager.PerformSingleGacha())
@@ -52,7 +52,7 @@ public class GachaUIHandler : MonoBehaviour
 
         // 확인창 호출
         UIManager.Instance.ShowConfirm(
-            "정말 10회 연속 뽑기를 진행하시겠습니까?",
+            "1000젬을 소비하여 10회 연속 뽑기를 진행하시겠습니까?",
             onConfirm: () =>
             {
                 if (gachaManager.PerformMultipleGacha(10))
