@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using _05._CSJ_Folder.Scripts.Quest.Definition;
 using _05._CSJ_Folder.Scripts.Quest.Sequence;
 using JetBrains.Annotations;
@@ -36,15 +35,17 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private Dictionary<string, QuestInstance>  _instances;
 
         private int GeneralQuestCount = 1;
-        private int ClearedQuestCount = 0;
-        private int CurrentQuestStage = 0;
-        private int CurrentClearedStage = 0;
+        private int ClearedQuestCount;
+        private int CurrentQuestStage;
+        private int CurrentClearedStage;
 
         // 이벤트
+        // UI 퀘스트의 텍스트 업데이트
         public Action<QuestDefinitionSO, QuestInstance> OnQuestUpdated;
+        // UI에 퀘스트 완료 표시와 연결
         public Action<QuestDefinitionSO, QuestInstance> OnQuestCompleted;
+        // 추후 보상관련 사용
         public Action<QuestRewardSO.RewardEntry> OnRewardGranted;
-        private IRewardGiver _rewardGiverImplementation;
 
         #region UnityLifeCycle
 
@@ -109,7 +110,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             def.Reward.AddReward(this);
             
-            OnGeneralCompleted(def, inst);
+            OnGeneralCompleted();
 
             Save();
         }
@@ -277,16 +278,16 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if(!IsInstanceComplete(def, inst)) return;
 
             inst.QuestState = QuestState_Enum.Completed;
+                        
+            OnQuestCompleted?.Invoke(def, inst);
 
             Save();
         }
         
 
-        private void OnGeneralCompleted(QuestDefinitionSO def, QuestInstance inst)
+        private void OnGeneralCompleted()
         {
             ClearedQuestCount++;
-            
-            OnQuestCompleted?.Invoke(def, inst);
             
             EnsureGeneralActive();
         }
@@ -376,6 +377,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         public void Give(QuestRewardSO.RewardEntry entry)
         {
             OnRewardGranted?.Invoke(entry);
+            // TODO : Inventory.Add(entry); || Inventory.Add(entry.RewardType, entry.Amount); 등 진행
         }
 
         // TODO : 추후 기간제 퀘스트 생성
