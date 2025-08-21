@@ -1,13 +1,33 @@
 using UnityEngine;
+using System;
 
 namespace LHI
 {
     public class Charactertest : MonoBehaviour
     {
-        [SerializeField]
         public CharacterData[] characterData;
 
+        public static event Action OnClicked;
+
+        public void DoThing()
+        {
+            OnClicked?.Invoke();
+        }
         void Start()
+        {
+
+
+        }
+
+        public void OnGUI()
+        {
+            if (GUI.Button(new Rect(10, 10, 150, 30), "Click Me"))
+            {
+                OnClicked?.Invoke();
+                Debug.Log("Button Clicked!");
+            }
+        }
+        public void Debug_()
         {
             foreach (var character in characterData)
             {
@@ -21,9 +41,7 @@ namespace LHI
                 Debug.Log($"Critical Damage: {character.criticalDamage}%");
                 Debug.Log($"Speed: {character.speed}");
             }
-
         }
-
 
 
         // Update is called once per frame

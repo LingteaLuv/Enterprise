@@ -1,19 +1,37 @@
 using UnityEngine;
 
-public class CharacterManager : MonoBehaviour
+namespace LHI
 {
-    public static CharacterManager Instance { get; private set; }
-
-    public void Awake()
+    public class CharacterManager : MonoBehaviour
     {
-        if (Instance == null)
+        public static CharacterManager Instance { get; private set; }
+
+        public void Awake()
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Instance == null)
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
-        else
+
+        private void OnEnable()
         {
-            Destroy(gameObject);
+            Charactertest.OnClicked += test;
+        }
+
+        private void OnDisable()
+        {
+            Charactertest.OnClicked -= test;
+        }
+
+        void test()
+        {
+
         }
     }
 }
