@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using System.Numerics;
 
 public class PlayerDataManager : MonoBehaviour
@@ -17,8 +16,11 @@ public class PlayerDataManager : MonoBehaviour
     public BigInteger baseLevelUpCost = 1000; // 기본 레벨업 비용
     public double levelUpCostIncreaseRatio = 1.07; // 레벨업 비용 증가율
 
+    // 보유 캐릭터
     public Dictionary<CharacterData, PlayerCharacterData> ownedCharacters = new Dictionary<CharacterData, PlayerCharacterData>();
+    // 캐릭터별 영혼조각 캐릭터ID, 개수
     public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
+    // 성급업에 필요한 영혼조각 InitializeUpgradeCosts에 있음
     private Dictionary<int, int> starUpgradeCosts;
 
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
