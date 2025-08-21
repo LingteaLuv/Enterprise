@@ -9,9 +9,11 @@
         // 퀘스트 상태
         public QuestState_Enum QuestState = QuestState_Enum.Active;
         // 현재 퀘스트 목표 달성 정도
-        public int CurrentGoalCount { get; private set; }
+        public int CurrentGoalCount { get; private set; } = 0;
         // 현재 일반 퀘스트가 몇번째 퀘스트인지 
         public int GeneralQuestCount;
+        // 만약 스테이지 클리어 미션이라면 몇 스테이지를 깨야하는지
+        public int needToClearStage;
         
 
         /// <summary>
@@ -31,9 +33,9 @@
             return true;
         }
 
-        public void GoalCountUp(int count)
+        public void GoalCountAdjust(int count)
         {
-            CurrentGoalCount += count;
+            CurrentGoalCount = count;
         }
     }
 }

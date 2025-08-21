@@ -1,0 +1,72 @@
+using _05._CSJ_Folder.Scripts.Quest;
+using UnityEngine;
+
+public class QuestSignalManager : Singleton<QuestSignalManager>
+{
+    [SerializeField] private QuestSignalSO _signal;
+
+    // TODO : 추후 퀘스트 종류 입력을 받지 않고 자동으로 퀘스트 목록에 맞춰서 신호를 보낼 수도 있음
+    
+    /// <summary>
+    /// 적을 죽였을 때 이를 퀘스트로 갱신할 때 호출하는 시그널
+    /// </summary>
+    /// <param name="enemyId">적의 종류를 보냄 ex) general, boss, all</param>
+    /// <param name="count"> 몇 마리의 적을 잡았는 지 보냄</param>
+    /// <param name="general">기본적으로 true, 일반 퀘스트를 갱신할 때 사용</param>
+    /// <param name="daily">일일 퀘스트 갱신용</param>
+    /// <param name="weekly">주간 퀘스트 갱신용</param>
+    public void KillEnemy(MonsterId enemyId, int count = 1, bool general = true, 
+        bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.Kill(enemyId);
+        SendSignal(key, count, general, daily, weekly);
+    }
+
+    /// <summary>
+    /// 아이템 획득시 보내는 시그널
+    /// </summary>
+    /// <param name="itemId">아이템 이름을 값으로 받음 ex)diamond, gold</param>
+    /// <param name="count">획득한 수량, 아이템의 경우 1회만 획득하는 경우가 거의 없을거라 생각하여 실수를 막기 위해 초기값 없음 </param>
+    /// <param name="general"></param>
+    /// <param name="daily"></param>
+    /// <param name="weekly"></param>
+    public void CollectItem(ItemId itemId, int count, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.Collect(itemId);
+        SendSignal(key, count, general, daily, weekly);
+    }
+
+    /// <summary>
+    /// 가차 진행시 보내는 시그널
+    /// </summary>
+    /// <param name="gachaId">어떤 가차를 진행했는지 키 값으로 보냄 ex) equipment, character</param>
+    /// <param name="count">가차를 몇 번 진행했는지 키 값으로 보냄</param>
+    /// <param name="general"></param>
+    /// <param name="daily"></param>
+    /// <param name="weekly"></param>
+    public void GachaPull(gachaType gachaId, int count = 1, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.GachaPull(gachaId);
+        SendSignal(key, count, general, daily, weekly);
+    }
+
+    /// <summary>
+    /// 스테이지 클리어시 보내는 시그널
+    /// </summary>
+    /// <param name="stage">몇 번째 스테이지인지 스테이지 넘버를 보냄</param>
+    /// <param name="general"></param>
+    /// <param name="daily"></param>
+    /// <param name="weekly"></param>
+    public void StageClear(int stage, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.StageClear();
+        SendSignal(key, stage, general, daily, weekly);
+    }
+
+    private void SendSignal(string key, int count, bool general, bool daily, bool weekly)
+    {
+        if(general) _signal.Raise(QuestType_Enum.General, key, count);
+        if(daily) _signal.Raise(QuestType_Enum.Daily, key, count);
+        if(weekly) _signal.Raise(QuestType_Enum.Weekly, key, count);
+    }
+}
