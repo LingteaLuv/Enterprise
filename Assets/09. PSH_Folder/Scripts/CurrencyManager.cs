@@ -38,10 +38,8 @@ public class CostInfo
 /// <summary>
 /// 플레이어의 모든 재화를 중앙에서 관리하는 싱글턴 매니저입니다.
 /// </summary>
-public class CurrencyManager : MonoBehaviour
+public class CurrencyManager : Singleton<CurrencyManager>
 {
-    public static CurrencyManager Instance { get; private set; }
-
     // 각 재화(CurrencyType)를 얼마나 보유하고 있는지 저장하는 딕셔너리
     private Dictionary<CurrencyType, BigInteger> currencyWallet = new Dictionary<CurrencyType, BigInteger>();
 
@@ -55,18 +53,11 @@ public class CurrencyManager : MonoBehaviour
     [SerializeField] private string _initialEnhancementStoneString = "0";
     [SerializeField] private string _initialGemString = "0";
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            InitializeWallet(); // 처음 시작 시 지갑 초기화
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        base.Awake();
+
+        InitializeWallet(); // 처음 시작 시 지갑 초기화
     }
 
     private void InitializeWallet()

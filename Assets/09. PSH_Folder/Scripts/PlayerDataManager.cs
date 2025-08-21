@@ -4,10 +4,8 @@ using System.Linq;
 using System.Numerics;
 using UnityEngine;
 
-public class PlayerDataManager : MonoBehaviour
-{
-    public static PlayerDataManager Instance { get; private set; }
-
+public class PlayerDataManager : Singleton<PlayerDataManager>
+{ 
     [Header("캐릭터 편성")]
     public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
     public const int MAX_FORMATION_SIZE = 5;
@@ -29,10 +27,9 @@ public class PlayerDataManager : MonoBehaviour
 
     private bool isBatchUpdating = false; // 일괄 업데이트 상태 플래그
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-        else { Destroy(gameObject); }
+        base.Awake();
 
         formation = new Dictionary<CrewRole, List<PlayerCharacterData>>
         {

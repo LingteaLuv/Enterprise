@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using UnityEngine;
 
-public class BasicStatManager : MonoBehaviour
+public class BasicStatManager : Singleton<BasicStatManager>
 {
-    public static BasicStatManager Instance { get; private set; }
-
     /// <summary>
     /// 기본 스탯이 변경되었을 때 발생하는 이벤트
     /// </summary>
@@ -18,10 +16,9 @@ public class BasicStatManager : MonoBehaviour
     private Dictionary<BasicStatType, int> _playerBasicStatLevels = new Dictionary<BasicStatType, int>();
     private Dictionary<BasicStatType, BasicStatData> _statDefinitionsMap = new Dictionary<BasicStatType, BasicStatData>();
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-        else { Destroy(gameObject); }
+        base.Awake();
 
         InitializeStatDefinitions();
         LoadPlayerBasicStatLevels();
