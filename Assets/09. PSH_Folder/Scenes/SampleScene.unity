@@ -379,9 +379,9 @@ MonoBehaviour:
   - rarity: 3
     chance: 10
   - rarity: 2
-    chance: 30
+    chance: 20
   - rarity: 1
-    chance: 60
+    chance: 70
   characterDataFolderPath: Assets/Resources/CharacterData
   allCharacters:
   - {fileID: 11400000, guid: 18616c6770a9dd14180f81da49f7e8e4, type: 2}
@@ -392,6 +392,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a0d6b1e3ab847814aa5d17f396f85bb4, type: 2}
   - {fileID: 11400000, guid: e66a3d804acca43408b2b871e7af950a, type: 2}
   - {fileID: 11400000, guid: 0d0135364e3c1a0468cd86474654dc3a, type: 2}
+  - {fileID: 11400000, guid: ce51f15c3bdee16429b82eff4b26a4f4, type: 2}
+  - {fileID: 11400000, guid: d0934cca3039e4f409bd451818c75262, type: 2}
+  - {fileID: 11400000, guid: de1ec51b3eb277f428b0e741ecbb8069, type: 2}
+  - {fileID: 11400000, guid: e43cf9f5e3e3028429ed806ab937ad12, type: 2}
+  - {fileID: 11400000, guid: 78e31957ac8830447982fe1d8168cf2f, type: 2}
+  - {fileID: 11400000, guid: 139ca1dfc449f5d489cccf0e75aa1222, type: 2}
+  - {fileID: 11400000, guid: c7af75d8df9680146ad75a2382cbb3cc, type: 2}
+  - {fileID: 11400000, guid: e550292a8759efc43956b82774959431, type: 2}
+  - {fileID: 11400000, guid: 1ff31b0ceff58e64794f845393318bc2, type: 2}
 --- !u!4 &73587118
 Transform:
   m_ObjectHideFlags: 0
@@ -1306,7 +1315,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00008892749}
+  m_AnchoredPosition: {x: 0, y: -0.000057337194}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &225086053
@@ -1429,8 +1438,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 788033979}
   m_HandleRect: {fileID: 788033978}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 0.99998385
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4571,7 +4580,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57c64d1aae070be4a8bf97a9c79733a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  formationCharacters: []
   levelUpCostIncreaseRatio: 1.07
 --- !u!4 &838598445
 Transform:
@@ -6927,12 +6935,12 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1881173057}
-  - {fileID: 1311549207}
-  - {fileID: 643076240}
   - {fileID: 1165234609}
   - {fileID: 1394805823}
   - {fileID: 1429659316}
+  - {fileID: 1881173057}
+  - {fileID: 1311549207}
+  - {fileID: 643076240}
   - {fileID: 1257699569}
   - {fileID: 1421084951}
   m_Father: {fileID: 0}

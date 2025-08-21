@@ -9,8 +9,8 @@ public class PlayerDataManager : MonoBehaviour
     public static PlayerDataManager Instance { get; private set; }
 
     [Header("캐릭터 편성")]
-    public List<PlayerCharacterData> formationCharacters = new List<PlayerCharacterData>();
-    public const int MAX_FORMATION_SIZE = 4;
+    public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
+    public const int MAX_FORMATION_SIZE = 5;
     public BigInteger teamBattlePower;
 
     [Header("캐릭터 레벨업 비용 설정")]
@@ -27,6 +27,14 @@ public class PlayerDataManager : MonoBehaviour
     {
         if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
         else { Destroy(gameObject); }
+
+        formation = new Dictionary<CrewRole, List<PlayerCharacterData>>
+        {
+            { CrewRole.Deckhand, new List<PlayerCharacterData>() }, // 전
+            { CrewRole.Sailor, new List<PlayerCharacterData>() },   // 중
+            { CrewRole.Cook, new List<PlayerCharacterData>() },     // 후
+            { CrewRole.Captain, new List<PlayerCharacterData>() }   // 최후
+        };
 
         InitializeUpgradeCosts();
     }
@@ -134,30 +142,75 @@ public class PlayerDataManager : MonoBehaviour
         return true;
     }
 
+    public int GetFormationCharacterCount()
+    {
+        int count = 0;
+        foreach (var list in formation.Values)
+        {
+            count += list.Count;
+        }
+        return count;
+    }
+
     public int AddCharacterToFormation(PlayerCharacterData characterData)
     {
-        if (formationCharacters.Contains(characterData)) { Debug.Log($"{characterData.characterdata.characterName}은(는) 이미 편성에 포함되어 있습니다."); return 1; }
-        if (formationCharacters.Count >= MAX_FORMATION_SIZE) { Debug.Log($"편성이 가득 찼습니다."); return 2; }
-        formationCharacters.Add(characterData);
-        Debug.Log($"{characterData.characterdata.characterName}을(를) 편성에 추가했습니다.");
+        CrewRole position = characterData.characterdata.crewrole;
+
+        // 편성이 가득 찼는지 확인
+        if (GetFormationCharacterCount() >= MAX_FORMATION_SIZE)
+        {
+            Debug.Log("편성이 가득 찼습니다.");
+            return 2;
+        }
+
+        // 캐릭터가 이미 다른 곳에 편성되어 있는지 확인
+        if (IsInFormation(characterData))
+        {
+            Debug.Log($"{characterData.characterdata.characterName}은(는) 이미 편성에 포함되어 있습니다.");
+            return 1;
+        }
+
+        // 포지션별 규칙 확인
+        List<PlayerCharacterData> positionList = formation[position];
+        if (position == CrewRole.Captain && positionList.Count >= 1)
+        {
+            Debug.Log("최후(Captain) 포지션에는 한 명만 배치할 수 있습니다.");
+            return 4; // 포지션 가득 참
+        }
+        if (position != CrewRole.Captain && positionList.Count >= 2)
+        {
+            Debug.Log($"{position} 포지션에는 두 명까지만 배치할 수 있습니다.");
+            return 4;
+        }
+
+        // 캐릭터 추가
+        positionList.Add(characterData);
+        Debug.Log($"{characterData.characterdata.characterName}을(를) {position} 포지션에 추가했습니다.");
         RecalculateTeamBattlePower();
-        return 0;
+        return 0; // 성공
     }
 
     public bool RemoveCharacterFromFormation(PlayerCharacterData characterData)
     {
-        if (formationCharacters.Remove(characterData))
+        CrewRole position = characterData.characterdata.crewrole;
+        if (formation.ContainsKey(position) && formation[position].Remove(characterData))
         {
-            Debug.Log($"{characterData.characterdata.characterName}을(를) 편성에서 제거했습니다.");
+            Debug.Log($"{characterData.characterdata.characterName}을(를) {position} 포지션에서 제거했습니다.");
             RecalculateTeamBattlePower();
             return true;
         }
+        Debug.LogWarning($"{characterData.characterdata.characterName}을(를) 편성에서 찾을 수 없습니다.");
         return false;
     }
 
     public bool IsInFormation(PlayerCharacterData characterData)
     {
-        return formationCharacters.Contains(characterData);
+        CrewRole position = characterData.characterdata.crewrole;
+        if (formation.ContainsKey(position))
+        {
+            return formation[position].Contains(characterData);
+        }
+        return false;
     }
 
     private void HandleCharacterBattlePowerChange(PlayerCharacterData character, BigInteger oldPower, BigInteger newPower)
@@ -187,9 +240,12 @@ public class PlayerDataManager : MonoBehaviour
     {
         BigInteger oldTeamPower = teamBattlePower;
         BigInteger newTeamPower = 0;
-        foreach (var character in formationCharacters)
+        foreach (var list in formation.Values)
         {
-            newTeamPower += character.battlePower;
+            foreach (var character in list)
+            {
+                newTeamPower += character.battlePower;
+            }
         }
         teamBattlePower = newTeamPower;
         if (oldTeamPower != teamBattlePower)

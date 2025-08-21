@@ -7,10 +7,10 @@ public enum Rarity
 
 public enum CrewRole
 {
-    Captain,   // 선장
+    Deckhand,   // 갑판원
     Sailor,    // 선원
     Cook,      // 요리사
-    Deckhand   // 갑판원
+    Captain  // 선장
 }
 public enum Faction
 {
