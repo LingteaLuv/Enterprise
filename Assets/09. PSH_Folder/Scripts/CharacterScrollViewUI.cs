@@ -141,18 +141,26 @@ public class CharacterScrollViewUI : MonoBehaviour
     private List<PlayerCharacterData> GetSortedCharacters()
     {
         var charactersQuery = PlayerDataManager.Instance.ownedCharacters.Values.AsEnumerable();
+
+        // 1. 편성에 포함된 캐릭터를 먼저 정렬 (IsInFormation이 true인 캐릭터가 먼저 오도록)
+        var sortedCharacters = charactersQuery.OrderByDescending(c => PlayerDataManager.Instance.IsInFormation(c));
+
+        // 2. 기존 정렬 기준 (성급, 레벨)을 그 다음으로 적용
         switch (currentSort)
         {
             case CharacterSortOption.Stars:
-                return charactersQuery.OrderByDescending(c => c.stars)
-                                      .ThenBy(c => c.characterdata.characterName)
-                                      .ToList();
+                sortedCharacters = sortedCharacters.ThenByDescending(c => c.stars)
+                                                   .ThenBy(c => c.characterdata.characterName); // 이름으로 2차 정렬
+                break;
             case CharacterSortOption.Level:
-                return charactersQuery.OrderByDescending(c => c.characterLevel)
-                                      .ThenBy(c => c.characterdata.characterName)
-                                      .ToList();
+                sortedCharacters = sortedCharacters.ThenByDescending(c => c.characterLevel)
+                                                   .ThenBy(c => c.characterdata.characterName); // 이름으로 2차 정렬
+                break;
             default:
-                return charactersQuery.ToList();
+                // 기본 정렬 (편성 여부만)
+                break;
         }
+
+        return sortedCharacters.ToList();
     }
 }
