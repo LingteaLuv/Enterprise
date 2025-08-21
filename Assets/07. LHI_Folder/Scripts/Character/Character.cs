@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace LHI
 {
-    public abstract class StatBehaviour : MonoBehaviour
+    public abstract class Character : MonoBehaviour
     {
         public float CurrentHP;
         public float MaxHP;
