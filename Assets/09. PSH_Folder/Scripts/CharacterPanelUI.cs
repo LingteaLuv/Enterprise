@@ -1,8 +1,8 @@
 
 
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class CharacterPanelUI : MonoBehaviour
 {
@@ -158,7 +158,23 @@ public class CharacterPanelUI : MonoBehaviour
             {
                 // 편성에 없으면 추가 시도
                 int result = PlayerDataManager.Instance.AddCharacterToFormation(currentPlayerCharData);
-                // result 0: 성공, 1: 중복, 2: 꽉참. 필요시 결과에 따라 다른 피드백 처리 가능
+                switch (result)
+                {
+                    case 1:
+                        UIManager.Instance.ShowToast($"{currentPlayerCharData}는 이미 다른 곳에 편성되었습니다.");
+                        break;
+                    case 2:
+                        UIManager.Instance.ShowToast("편성이 가득 찼습니다.");
+                        break;
+                    case 3:
+                        UIManager.Instance.ShowToast("선장은 1명만 배치할 수 있습니다.");
+                        break;
+                    case 4:
+                        UIManager.Instance.ShowToast("각 포지션에는 최대 2명까지 배치할 수 있습니다.");
+                        break;
+                    default:
+                        break;
+                }
             }
             // 시각적 상태 업데이트
             UpdateFormationVisuals();

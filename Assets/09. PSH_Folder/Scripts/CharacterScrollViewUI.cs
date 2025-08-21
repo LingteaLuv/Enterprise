@@ -83,7 +83,7 @@ public class CharacterScrollViewUI : MonoBehaviour
                 if (!PlayerDataManager.Instance.IsValidFormation())
                 {
                     Debug.LogWarning("편성 오류: 편성이 완료되지 않았습니다! (모든 포지션에 1명씩, 총 5명)");
-                    // 여기에 사용자에게 보여줄 UI 경고 메시지 로직 추가 (예: 팝업)
+                    UIManager.Instance.ShowWarning("편성이 완료되지 않았습니다!");
                     // 편성 모드를 종료하지 않고 유지합니다.
                     return; // 함수 종료, isFormationMode는 true로 유지됨
                 }

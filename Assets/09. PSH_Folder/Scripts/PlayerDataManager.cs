@@ -185,7 +185,7 @@ public class PlayerDataManager : MonoBehaviour
         if (position == CrewRole.Captain && positionList.Count >= 1)
         {
             Debug.Log("최후(Captain) 포지션에는 한 명만 배치할 수 있습니다.");
-            return 4; // 포지션 가득 참
+            return 3; // 포지션 가득 참
         }
         if (position != CrewRole.Captain && positionList.Count >= 2)
         {
