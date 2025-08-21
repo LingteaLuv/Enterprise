@@ -5,7 +5,7 @@ using System.Numerics;
 using UnityEngine;
 
 public class PlayerDataManager : Singleton<PlayerDataManager>
-{ 
+{
     [Header("캐릭터 편성")]
     public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
     public const int MAX_FORMATION_SIZE = 5;
@@ -299,34 +299,34 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
         // 3. 2단계: 5번째 캐릭터 채우기
         // 남은 캐릭터 중 전투력이 가장 높은 캐릭터를 찾습니다.
+        // Captain 역할을 제외한 남은 캐릭터 중 전투력이 가장 높은 캐릭터를 찾습니다.
         PlayerCharacterData fifthCharacter = availableCharacters
+            .Where(c => c.characterdata.crewrole != CrewRole.Captain) // Captain 제외 필터링 추가
             .OrderByDescending(c => c.battlePower)
             .FirstOrDefault();
 
         if (fifthCharacter != null)
         {
-            // 5번째 캐릭터는 Captain 포지션이 아니어야 합니다.
+            // 5번째 캐릭터는 Captain 포지션이 아니어야 합니다. (이미 위에서 필터링했으므로 이 조건은 항상 true)
             // 그리고 해당 포지션에 아직 2명이 배치되지 않았어야 합니다.
             CrewRole fifthRole = fifthCharacter.characterdata.crewrole;
-            if (fifthRole != CrewRole.Captain && formation[fifthRole].Count < 2)
+            if (formation[fifthRole].Count < 2) // Captain이 아니므로 이 조건만 확인
             {
                 formation[fifthRole].Add(fifthCharacter);
                 Debug.Log($"[PDM] 자동 편성: 5번째 캐릭터로 {fifthCharacter.characterdata.characterName} ({fifthRole}) 배치.");
             }
             else
             {
-                Debug.LogWarning($"[PDM] 자동 편성 실패: 5번째 캐릭터를 배치할 적절한 포지션이 없습니다. (남은 캐릭터: {fifthCharacter.characterdata.characterName}, 역할: {fifthRole})");
-                // 이 경우에도 편성은 유효하지 않을 수 있으므로 실패로 간주합니다.
-                // (이미 4명은 채워져 있으므로, 이 상태로 UI를 갱신하고 사용자에게 수동 조정을 유도할 수도 있습니다.)
-                // 여기서는 일단 실패로 처리합니다.
-                // (편성 초기화는 하지 않고, IsValidFormation()에서 걸러지도록 둡니다.)
+                // 이 경우는 Captain이 아닌데도 해당 포지션이 이미 2명으로 꽉 찬 경우입니다.
+                // (예: Deckhand 2명, Sailor 1명, Cook 1명, Captain 1명인 상태에서 남은 캐릭터가 Sailor인 경우)
+                Debug.LogWarning($"[PDM] 자동 편성 실패: 5번째 캐릭터({fifthCharacter.characterdata.characterName})를 배치할 적절한 포지션이 없습니다. (해당 포지션({fifthRole})이 이미 꽉 참)");
                 OnOwnedCharactersChanged?.Invoke(); // UI 갱신
                 return false;
             }
         }
         else
         {
-            Debug.LogWarning("[PDM] 자동 편성 실패: 5번째 캐릭터로 배치할 캐릭터가 없습니다.");
+            Debug.LogWarning("[PDM] 자동 편성 실패: 5번째 캐릭터로 배치할 캐릭터가 없습니다. (Captain 제외)"); // 로그 메시지 수정
             OnOwnedCharactersChanged?.Invoke(); // UI 갱신
             return false;
         }
