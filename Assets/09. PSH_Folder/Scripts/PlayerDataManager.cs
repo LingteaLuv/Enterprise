@@ -21,6 +21,9 @@ public class PlayerDataManager : MonoBehaviour
     public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
     private Dictionary<int, int> starUpgradeCosts;
 
+    public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
+    public event System.Action OnOwnedCharactersChanged;
+
     private bool isBatchUpdating = false; // 일괄 업데이트 상태 플래그
 
     private void Awake()
@@ -84,6 +87,7 @@ public class PlayerDataManager : MonoBehaviour
             }
             AddSoulFragments(characterdata.characterID, fragmentsGained);
             Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
+            OnOwnedCharactersChanged?.Invoke(); // 캐릭터 목록 변경(조각 획득) 이벤트 발생
             return existingCharData;
         }
         else
@@ -93,6 +97,7 @@ public class PlayerDataManager : MonoBehaviour
             Debug.Log($"[신규] {characterdata.characterName}({characterdata.rarity}성) 획득!");
             // 새로 추가된 캐릭터의 스탯을 즉시 계산
             newCharData.RecaculateStats();
+            OnOwnedCharactersChanged?.Invoke(); // 캐릭터 목록 변경(신규 획득) 이벤트 발생
             return newCharData;
         }
     }
@@ -124,6 +129,7 @@ public class PlayerDataManager : MonoBehaviour
         characterSoulFragments[characterId] -= cost;
         playerCharData.stars++;
         Debug.Log($"{playerCharData.characterdata.characterName}이(가) {playerCharData.stars}성으로 승급했습니다!");
+        OnCharacterDataUpdated?.Invoke(playerCharData); // 데이터 변경 이벤트 발생
         return true;
     }
 
@@ -138,6 +144,7 @@ public class PlayerDataManager : MonoBehaviour
         if (!CurrencyManager.Instance.SpendCurrency(CurrencyType.EnhancementStone, levelUpCost)) { Debug.LogWarning("캐릭터 레벨업 실패: 재화 부족"); return false; }
         character.characterLevel++;
         Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.characterLevel})");
+        OnCharacterDataUpdated?.Invoke(character); // 데이터 변경 이벤트 발생
         CurrencyManager.Instance.UpdateCurrencyUI();
         return true;
     }

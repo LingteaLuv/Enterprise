@@ -35,8 +35,6 @@ public class CharacterInfoUI : MonoBehaviour
 
     private PlayerCharacterData currentCharacterData; // 현재 표시 중인 캐릭터 데이터
 
-    private CharacterScrollViewUI scrollView;
-
     void Awake()
     {
         // 초기에는 비활성화
@@ -59,8 +57,6 @@ public class CharacterInfoUI : MonoBehaviour
         {
             starUpgradeButton.onClick.AddListener(OnStarUpgradeButtonClicked);
         }
-
-        scrollView = FindFirstObjectByType<CharacterScrollViewUI>();
     }
 
     /// <summary>
@@ -207,7 +203,7 @@ public class CharacterInfoUI : MonoBehaviour
     /// </summary>
     private void UpdateCharacterStatsDisplay()
     {
-        if (currentCharacterData == null) return;      
+        if (currentCharacterData == null) return;
 
         // ATK 스탯 데이터 찾기 (CSV 헤더에 맞춰 "attackPower"로 변경)
         StatData atkStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "attackPower");
@@ -288,22 +284,10 @@ public class CharacterInfoUI : MonoBehaviour
     {
         if (currentCharacterData == null) return;
 
-        bool success = PlayerDataManager.Instance.TryLevelUpCharacter(currentCharacterData);
-
-        if (success)
-        {
-            // 레벨업 성공 시 UI 갱신
-            Setup(currentCharacterData); // Setup을 다시 호출하여 모든 UI 요소 갱신
-
-            if (scrollView != null)
-            {
-                scrollView.RefreshDisplay();
-            }
-            else
-            {
-                Debug.LogWarning("CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신이 불완전할 수 있습니다."); // CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신이 불완전할 수 있습니다.
-            }
-        }
+        // PlayerDataManager의 TryLevelUpCharacter는 성공 시 이벤트를 발생시키므로,
+        // 이 UI는 그 이벤트를 수신하여 스스로 갱신됩니다.
+        // 따라서 이 함수에서는 단순히 레벨업 시도만 하면 됩니다.
+        PlayerDataManager.Instance.TryLevelUpCharacter(currentCharacterData);
     }
 
     /// <summary>
@@ -313,21 +297,32 @@ public class CharacterInfoUI : MonoBehaviour
     {
         if (currentCharacterData == null) return;
 
-        bool success = PlayerDataManager.Instance.TryUpgradeCharacterStar(currentCharacterData);
+        // 레벨업과 마찬가지로, 업그레이드 시도만 하고 UI 갱신은
+        // PlayerDataManager가 발생시키는 이벤트에 맡깁니다.
+        PlayerDataManager.Instance.TryUpgradeCharacterStar(currentCharacterData);
+    }
 
-        if (success)
+    private void OnEnable()
+    {
+        // PlayerDataManager의 이벤트에 구독
+        PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterUpdate;
+    }
+
+    private void OnDisable()
+    {
+        // PlayerDataManager의 이벤트 구독 해제
+        PlayerDataManager.Instance.OnCharacterDataUpdated -= HandleCharacterUpdate;
+    }
+
+    /// <summary>
+    /// PlayerDataManager로부터 캐릭터 데이터 변경 이벤트를 받았을 때 호출됩니다.
+    /// </summary>
+    private void HandleCharacterUpdate(PlayerCharacterData updatedData)
+    {
+        // 현재 이 정보창에 표시된 캐릭터의 데이터가 변경된 경우에만 UI를 새로고침합니다.
+        if (currentCharacterData != null && currentCharacterData == updatedData)
         {
-            // 성급 업그레이드 성공 시 UI 갱신
-            Setup(currentCharacterData); // Setup을 다시 호출하여 모든 UI 요소 갱신
-
-            if (scrollView != null)
-            {
-                scrollView.RefreshDisplay();
-            }
-            else
-            {
-                Debug.LogWarning("CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신이 불완전할 수 있습니다."); // CharacterScrollViewUI를 찾을 수 없습니다. UI 갱신이 불완전할 수 있습니다.
-            }
+            Setup(currentCharacterData);
         }
     }
 
