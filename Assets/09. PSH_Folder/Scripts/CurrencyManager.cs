@@ -48,6 +48,13 @@ public class CurrencyManager : MonoBehaviour
     public TextMeshProUGUI goldText;
     public TextMeshProUGUI stoneText;
     public TextMeshProUGUI gemText;
+
+    // 인스펙터에서 초기 재화량을 설정하기 위한 문자열 필드
+    [Header("초기 재화 설정 (인스펙터용)")]
+    [SerializeField] private string _initialGoldString = "0";
+    [SerializeField] private string _initialEnhancementStoneString = "0";
+    [SerializeField] private string _initialGemString = "0";
+
     private void Awake()
     {
         if (Instance == null)
@@ -72,15 +79,28 @@ public class CurrencyManager : MonoBehaviour
                 currencyWallet.Add(type, 0);
             }
         }
-        // TODO: 여기에 게임 시작 시 저장된 재화 데이터를 불러오는 로직을 추가해야 합니다.
-        // 예: LoadData();
 
-        // 테스트용 초기 재화 지급
-        AddCurrency(CurrencyType.Gold, 10000000);
-        AddCurrency(CurrencyType.EnhancementStone, 5600000);
-        AddCurrency(CurrencyType.Gem, 15000);
-        Debug.Log("[CurrencyManager] 지갑 초기화 및 테스트 재화 지급 완료.");
+        // 인스펙터에서 설정된 초기 재화량을 적용합니다.
+        AddCurrencyFromInspectorString(CurrencyType.Gold, _initialGoldString);
+        AddCurrencyFromInspectorString(CurrencyType.EnhancementStone, _initialEnhancementStoneString);
+        AddCurrencyFromInspectorString(CurrencyType.Gem, _initialGemString);
+
+        Debug.Log("[CurrencyManager] 지갑 초기화 및 초기 재화 지급 완료.");
         UpdateCurrencyUI();
+    }
+
+    // 헬퍼 함수: 문자열에서 재화를 추가
+    private void AddCurrencyFromInspectorString(CurrencyType type, string amountString)
+    {
+        if (BigInteger.TryParse(amountString, out BigInteger amount))
+        {
+            currencyWallet[type] = amount; // 직접 할당 (AddCurrency는 로그가 많으므로)
+        }
+        else
+        {
+            Debug.LogWarning($"[CurrencyManager] {type} 초기 재화 문자열 '{amountString}' 파싱 실패. 0으로 설정됩니다.");
+            currencyWallet[type] = 0;
+        }
     }
 
     /// <summary>
@@ -144,5 +164,105 @@ public class CurrencyManager : MonoBehaviour
         goldText.text = $"gold : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gold])}";
         stoneText.text = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
         gemText.text = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gem])}";
+    }
+
+    // 인스펙터에서 값이 변경될 때 호출됩니다.
+    private void OnValidate()
+    {
+        // 에디터에서만 실행되도록 합니다. (빌드된 게임에서는 호출되지 않음)
+        // 그리고 게임이 실행 중일 때만 currencyWallet을 직접 업데이트합니다.
+        if (Application.isPlaying) // 게임이 실행 중일 때만
+        {
+            UpdateCurrencyFromInspectorStrings();
+        }
+        else // 게임이 실행 중이 아닐 때 (에디터에서만)
+        {
+            // 인스펙터에서 입력된 문자열을 BigInteger로 파싱하고 다시 문자열로 변환하여 정규화합니다.
+            // Gold
+            if (BigInteger.TryParse(_initialGoldString, out BigInteger parsedGold))
+            {
+                _initialGoldString = parsedGold.ToString();
+            }
+            else
+            {
+                _initialGoldString = "0"; // 파싱 실패 시 기본값
+            }
+
+            // EnhancementStone
+            if (BigInteger.TryParse(_initialEnhancementStoneString, out BigInteger parsedStone))
+            {
+                _initialEnhancementStoneString = parsedStone.ToString();
+            }
+            else
+            {
+                _initialEnhancementStoneString = "0";
+            }
+
+            // Gem
+            if (BigInteger.TryParse(_initialGemString, out BigInteger parsedGem))
+            {
+                _initialGemString = parsedGem.ToString();
+            }
+            else
+            {
+                _initialGemString = "0";
+            }
+        }
+    }
+
+    // 인스펙터 문자열에서 실제 currencyWallet을 업데이트하는 헬퍼 함수
+    private void UpdateCurrencyFromInspectorStrings()
+    {
+        // currencyWallet이 초기화되지 않았을 수 있으므로 체크
+        if (currencyWallet == null || currencyWallet.Count == 0)
+        {
+            // Debug.LogWarning("CurrencyManager: currencyWallet이 아직 초기화되지 않았습니다. OnValidate에서 업데이트를 건너뜀.");
+            return;
+        }
+
+        // Gold
+        if (BigInteger.TryParse(_initialGoldString, out BigInteger parsedGold))
+        {
+            if (currencyWallet[CurrencyType.Gold] != parsedGold) // 값이 변경되었을 때만 업데이트
+            {
+                currencyWallet[CurrencyType.Gold] = parsedGold;
+                Debug.Log($"[CurrencyManager] 인스펙터에서 Gold 변경됨: {DataUtility.FormatNumber(parsedGold)}");
+                UpdateCurrencyUI(); // UI 갱신
+            }
+        }
+        else
+        {
+            _initialGoldString = currencyWallet[CurrencyType.Gold].ToString(); // 유효하지 않으면 현재 값으로 되돌림
+        }
+
+        // EnhancementStone
+        if (BigInteger.TryParse(_initialEnhancementStoneString, out BigInteger parsedStone))
+        {
+            if (currencyWallet[CurrencyType.EnhancementStone] != parsedStone)
+            {
+                currencyWallet[CurrencyType.EnhancementStone] = parsedStone;
+                Debug.Log($"[CurrencyManager] 인스펙터에서 Stone 변경됨: {DataUtility.FormatNumber(parsedStone)}");
+                UpdateCurrencyUI();
+            }
+        }
+        else
+        {
+            _initialEnhancementStoneString = currencyWallet[CurrencyType.EnhancementStone].ToString();
+        }
+
+        // Gem
+        if (BigInteger.TryParse(_initialGemString, out BigInteger parsedGem))
+        {
+            if (currencyWallet[CurrencyType.Gem] != parsedGem)
+            {
+                currencyWallet[CurrencyType.Gem] = parsedGem;
+                Debug.Log($"[CurrencyManager] 인스펙터에서 Gem 변경됨: {DataUtility.FormatNumber(parsedGem)}");
+                UpdateCurrencyUI();
+            }
+        }
+        else
+        {
+            _initialGemString = currencyWallet[CurrencyType.Gem].ToString();
+        }
     }
 }
