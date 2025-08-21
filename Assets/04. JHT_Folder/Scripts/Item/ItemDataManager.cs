@@ -12,11 +12,10 @@ namespace JHT
 {
     public class ItemDataManager : Singleton<ItemDataManager>
     {
-        private const string WEAPON_PATH = "JHT_ItemWeapon";
         private const string WEAPON_LABEL = "ItemWeapon";
-        public List<WeaponObject> weaponList;
-        public Dictionary<int, WeaponObject> weaponDataDic;
-
+        public List<DataItem> weaponList;
+        public Dictionary<int, DataItem> weaponDataDic;
+        public EncyclopediaPanel encyclopediaPanel;
         //public List<RelicsObject> relicsList;
         //public Dictionary<int, List<RelicsObject>> relicsDataDic;
 
@@ -27,36 +26,33 @@ namespace JHT
         {
             base.Awake();
 
-            StartCoroutine(WeaponDataSetting());
+            //StartCoroutine(WeaponDataSetting());
         }
 
-        private IEnumerator WeaponDataSetting()
+        private IEnumerator Start()
         {
+            yield return null;
+
             weaponList = new();
             weaponDataDic = new();
 
             weaponHandle = Addressables.LoadAssetsAsync<GameObject>(WEAPON_LABEL);
 
             yield return weaponHandle;
-            Debug.Log($"aaaaaaaaaaa : {weaponHandle}");
 
-            for (int i = 0; i < weaponHandle.Result.Count; i++)
-            {
-                Debug.Log($"bbbbbbbbb : {weaponHandle.Result[i]}");
-            }
-            weaponHandle.Completed += (w) => LoadWeaponList(weaponHandle);
+            LoadWeaponList(weaponHandle);
 
         }
         
         private void LoadWeaponList(AsyncOperationHandle<IList<GameObject>> objs)
         {
-            List<WeaponObject> list = new();
+            List<DataItem> list = new();
             foreach(var w in objs.Result)
             {
-                list.Add(w.GetComponent<WeaponObject>());
+                list.Add(w.GetComponent<DataItem>());
             }
 
-            List<WeaponObject> sortList = list.OrderBy(w => w.itemName).ToList();
+            List<DataItem> sortList = list.OrderBy(w => w.itemName).ToList();
 
             for (int i =0; i < sortList.Count; i ++)
             {
@@ -67,7 +63,7 @@ namespace JHT
         }
 
 
-        private void LoadWeaponFinish(List<WeaponObject> list)
+        private void LoadWeaponFinish(List<DataItem> list)
         {
             weaponDataDic.Clear();
 
@@ -77,17 +73,23 @@ namespace JHT
                     weaponDataDic.Add(list[i].itemNum, list[i]);
             }
 
+            if (weaponHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                //if (encyclopediaPanel == null)
+                //    encyclopediaPanel = FindObjectOfType<EncyclopediaPanel>();
+                StartCoroutine(EndInit());
+            }
         }
 
-        private void Update()
+        private IEnumerator EndInit()
         {
-            //if (Input.GetKeyDown(KeyCode.Space))
-            //{
-            //    foreach (var w in weaponDataDic)
-            //    {
-            //        Debug.Log($"weaponDic : {w.Value.itemName}");
-            //    }
-            //}
+            yield return new WaitForEndOfFrame();
+            encyclopediaPanel.Init();
+        }
+
+        public Dictionary<int, DataItem> GetAllWeaponData()
+        {
+            return weaponDataDic;
         }
     }
 }
