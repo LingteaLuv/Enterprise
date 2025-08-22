@@ -18,10 +18,13 @@ namespace JHT
         [SerializeField] private Button weaponInventoryButton;
         [SerializeField] private Button relicsInventoryButton;
 
+        [SerializeField] private WeaponStatPanel weaponStatPanel;
+
         private InventoryManager inventoryManager;
         private bool isLevelSort;
 
         private List<ItemPanelPrefab> items;
+
         private void OnEnable()
         {
             inventoryManager = InventoryManager.Instance;
@@ -31,6 +34,7 @@ namespace JHT
 
             weaponInventoryButton.onClick.AddListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.AddListener(ChangeRelicsMode);
+            ItemEventManager.Instance.OnClickItem += ShowWeaponStat;
         }
 
         private void OnDisable()
@@ -41,11 +45,26 @@ namespace JHT
 
             weaponInventoryButton.onClick.RemoveListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.RemoveListener(ChangeRelicsMode);
+            ItemEventManager.Instance.OnClickItem -= ShowWeaponStat;
         }
 
         private void Start()
         {
             items = new();
+        }
+
+        private void ShowWeaponStat(ItemObject obj)
+        {
+            if (obj is WeaponObject)
+            {
+                WeaponObject inst = (WeaponObject)InventoryManager.Instance.GetItemData(obj);
+
+                if(!weaponStatPanel.gameObject.activeSelf)
+                    weaponStatPanel.gameObject.SetActive(true);
+
+                weaponStatPanel.Init(inst);
+            }
+            
         }
 
         private void AddItem(ItemObject item)

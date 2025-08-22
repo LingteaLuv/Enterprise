@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using static UnityEditor.Progress;
 
 namespace JHT
 {
@@ -16,7 +17,7 @@ namespace JHT
 
         public InventoryMode currentMode;
 
-        public void Start()
+        public void OnEnable()
         {
             if(weaponList == null)
                 weaponList = new();
@@ -28,6 +29,12 @@ namespace JHT
             OnRemoveInventory += RemoveInventroyIndex;
         }
 
+        public void OnDisable()
+        {
+            OnAddInventory -= AddInventroyWeapon;
+            OnRemoveInventory -= RemoveInventroyIndex;
+        }
+
         public void AddItem(DataItem item)
         {
             if (item.itemSO.itemType == ItemType.Weapon)
@@ -36,8 +43,8 @@ namespace JHT
                 
                 if (existObj == null)
                 {
-                    WeaponObject obj = new WeaponObject(item);
-                    OnAddInventory?.Invoke(obj);
+                    existObj = new WeaponObject(item);
+                    OnAddInventory?.Invoke(existObj);
                 }
                 else
                 {
@@ -50,6 +57,25 @@ namespace JHT
                 //RelicsObject obj = item as RelicsObject;
             }
             
+        }
+
+        public ItemObject GetItemData(ItemObject obj)
+        {
+            if (obj == null || obj.itemSO == null) return null;
+
+            switch (obj.itemSO.itemType)
+            {
+                case ItemType.Weapon:
+                    if (weaponList == null) return null;
+                    // itemNum 일치하는 동일 무기 반환
+                    return weaponList.Find(x => x.itemNum == obj.itemNum);
+
+                case ItemType.Relics:
+                    // TODO: relicsObject에서도 동일한 방식으로 찾기
+                    // return relicsObject.Find(x => x.itemNum == obj.itemNum);
+                    return null;
+            }
+            return null;
         }
 
         public void RemoveItem(ItemObject item)
@@ -104,10 +130,20 @@ namespace JHT
 
         public void WeaponLevelSort(bool isLevelSort)
         {
-            weaponList.Sort((a, b) => isLevelSort ? a.itemLevel.CompareTo(b.itemLevel)          //오름
-                                            : b.itemLevel.CompareTo(a.itemLevel));              //내림
+            weaponList.Sort((a, b) => isLevelSort ? a.ItemLevel.CompareTo(b.ItemLevel)          //오름
+                                            : b.ItemLevel.CompareTo(a.ItemLevel));              //내림
+        }
+
+
+        public void aaaaaaa()
+        {
+            foreach (var w in weaponList)
+            {
+                Debug.Log($"이름 : {w.itemName},   공격력 : {w.weaponPower},   별 : {w.ItemStar},   아이템 레벨 : {w.ItemLevel}\n");
+            }
         }
     }
+
     public enum InventoryMode
     {
         Weapon,

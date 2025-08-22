@@ -18,6 +18,7 @@ namespace JHT
     public enum ItemType
     {
         Weapon,
+        Relics,
         Crystal,
         NormalItem
     }
