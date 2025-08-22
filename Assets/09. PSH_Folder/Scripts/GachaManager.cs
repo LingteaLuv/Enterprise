@@ -24,6 +24,11 @@ public class GachaManager : MonoBehaviour
     [Header("가챠 확률 설정")]
     public List<RarityChance> rarityChances;
 
+    [Header("역할별 확률 조정")]
+    [Tooltip("선장(Captain) 역할 캐릭터의 기본 확률(1)에 곱해지는 값입니다. 0.5로 설정하면 선장의 등장 확률이 절반이 됩니다.")]
+    public float captainProbabilityMultiplier = 1.0f;
+
+
     [Header("캐릭터 SO 자동 로드")]
     [Tooltip("캐릭터 SO 에셋들이 저장된 폴더 경로입니다.")]
     public string characterDataFolderPath = "Assets/Resources/CharacterData"; // 기본 경로 예시
@@ -167,20 +172,58 @@ public class GachaManager : MonoBehaviour
         // 1. 등급 뽑기
         Rarity chosenRarity = GetRandomRarity();
 
-        // 2. 해당 등급 내에서 캐릭터 뽑기
+        // 2. 해당 등급의 캐릭터 목록 가져오기
         List<CharacterData> availableCharacters = charactersByRarity[chosenRarity];
+
         if (availableCharacters.Count == 0)
         {
-            Debug.LogWarning($"{chosenRarity} 등급의 캐릭터가 목록에 없습니다!");
-            // 예외 처리: B 등급 등 기본 등급의 캐릭터를 대신 반환할 수 있습니다.
-            return charactersByRarity[Rarity.B][0];
+            Debug.LogWarning($"{chosenRarity} 등급의 캐릭터가 목록에 없습니다! 기본 등급 캐릭터를 반환합니다.");
+            if (charactersByRarity.ContainsKey(Rarity.B) && charactersByRarity[Rarity.B].Count > 0)
+                return charactersByRarity[Rarity.B][0];
+            else if (allCharacters.Count > 0)
+                return allCharacters[0];
+            else
+            {
+                Debug.LogError("뽑을 수 있는 캐릭터가 아무도 없습니다!");
+                return null;
+            }
         }
 
-        int randomIndex = Random.Range(0, availableCharacters.Count);
-        CharacterData drawnCharacter = availableCharacters[randomIndex];
+        // 3. 역할(CrewRole)에 따라 가중치를 적용하여 캐릭터 뽑기
+        // 각 캐릭터의 가중치를 계산합니다. 기본 가중치는 1입니다.
+        // '선장' 역할(CrewRole.Captain)일 경우, 설정된 확률 배수(captainProbabilityMultiplier)를 적용합니다.
+        // 참고: CharacterData에 'public CrewRole crewRole;' 와 같이 역할 정보가 정의되어 있어야 합니다.
+        //       CrewRole enum에 'Captain' 항목이 있어야 합니다.
+        var weightedCharacters = availableCharacters.Select(c => new {
+            Character = c,
+            Weight = (c.crewrole == CrewRole.Captain ? 1.0f * captainProbabilityMultiplier : 1.0f)
+        }).ToList();
 
-        Debug.Log($"가챠 결과: [{drawnCharacter.rarity}] {drawnCharacter.characterName} 획득!");
-        return drawnCharacter;
+        float totalWeight = weightedCharacters.Sum(c => c.Weight);
+
+        if (totalWeight <= 0)
+        {
+            Debug.LogWarning($"{chosenRarity} 등급에 뽑을 수 있는(가중치가 0보다 큰) 캐릭터가 없습니다. 첫번째 캐릭터를 반환합니다.");
+            return availableCharacters[0];
+        }
+
+        float randomPoint = Random.Range(0, totalWeight);
+
+        foreach (var entry in weightedCharacters)
+        {
+            if (randomPoint < entry.Weight)
+            {
+                Debug.Log($"가챠 결과: [{entry.Character.rarity}] {entry.Character.characterName} (역할: {entry.Character.crewrole}, 가중치: {entry.Weight}) 획득!");
+                return entry.Character;
+            }
+            else
+            {
+                randomPoint -= entry.Weight;
+            }
+        }
+
+        // 예외 상황 방지: 루프를 빠져나온 경우 마지막 캐릭터 반환
+        return weightedCharacters.Last().Character;
     }
 
     /// <summary>
