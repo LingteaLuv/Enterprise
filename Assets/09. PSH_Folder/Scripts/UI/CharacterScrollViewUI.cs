@@ -274,7 +274,7 @@ public class CharacterScrollViewUI : MonoBehaviour
         {
             // CrewRoleFilterOption과 CrewRole enum의 값이 일치한다고 가정
             CrewRole targetRole = (CrewRole)System.Enum.Parse(typeof(CrewRole), currentCrewRoleFilter.ToString());
-            charactersQuery = charactersQuery.Where(c => c.characterdata.crewrole == targetRole);
+            charactersQuery = charactersQuery.Where(c => c.characterdata.crewRole == targetRole);
         }
         // --- CrewRole 필터링 로직 끝 ---
 

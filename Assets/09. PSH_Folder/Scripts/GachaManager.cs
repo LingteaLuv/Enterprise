@@ -37,7 +37,7 @@ public class GachaManager : MonoBehaviour
     public List<CharacterData> allCharacters; // 모든 캐릭터 ScriptableObject를 여기에 연결
 
     // 가장 마지막에 실행된 가챠 결과 리스트
-    public List<PlayerCharacterData> lastGachaResults { get; private set; }
+    public List<PlayerCharacterData> LastGachaResults { get; private set; }
 
     // 등급별로 캐릭터를 미리 분류해 놓은 딕셔너리. 가챠 실행 속도를 높여줍니다.
     private Dictionary<Rarity, List<CharacterData>> charactersByRarity;
@@ -107,7 +107,7 @@ public class GachaManager : MonoBehaviour
         PlayerCharacterData newCharacterInstance = PlayerDataManager.Instance.AddCharacter(drawnCharacterSO);
 
         // 마지막 결과 리스트를 새로 만들고, 이번에 뽑은 캐릭터 하나만 추가합니다.
-        lastGachaResults = new List<PlayerCharacterData> { newCharacterInstance };
+        LastGachaResults = new List<PlayerCharacterData> { newCharacterInstance };
 
         // UI 갱신
         if (characterScrollViewUI != null)
@@ -138,7 +138,7 @@ public class GachaManager : MonoBehaviour
 
         // 2. 재화 소모 성공 시, 가챠 실행
         List<CharacterData> drawnCharacters = DrawMultipleCharacters(count);
-        lastGachaResults = new List<PlayerCharacterData>(); // 리스트 초기화
+        LastGachaResults = new List<PlayerCharacterData>(); // 리스트 초기화
 
         foreach (var characterSO in drawnCharacters)
         {
@@ -146,7 +146,7 @@ public class GachaManager : MonoBehaviour
             PlayerCharacterData newCharacterInstance = PlayerDataManager.Instance.AddCharacter(characterSO);
             if (newCharacterInstance != null)
             {
-                lastGachaResults.Add(newCharacterInstance);
+                LastGachaResults.Add(newCharacterInstance);
             }
         }
 
@@ -196,7 +196,7 @@ public class GachaManager : MonoBehaviour
         //       CrewRole enum에 'Captain' 항목이 있어야 합니다.
         var weightedCharacters = availableCharacters.Select(c => new {
             Character = c,
-            Weight = (c.crewrole == CrewRole.Captain ? 1.0f * captainProbabilityMultiplier : 1.0f)
+            Weight = (c.crewRole == CrewRole.Captain ? 1.0f * captainProbabilityMultiplier : 1.0f)
         }).ToList();
 
         float totalWeight = weightedCharacters.Sum(c => c.Weight);
@@ -213,7 +213,7 @@ public class GachaManager : MonoBehaviour
         {
             if (randomPoint < entry.Weight)
             {
-                Debug.Log($"가챠 결과: [{entry.Character.rarity}] {entry.Character.characterName} (역할: {entry.Character.crewrole}, 가중치: {entry.Weight}) 획득!");
+                Debug.Log($"가챠 결과: [{entry.Character.rarity}] {entry.Character.characterName} (역할: {entry.Character.crewRole}, 가중치: {entry.Weight}) 획득!");
                 return entry.Character;
             }
             else
