@@ -6,6 +6,10 @@ using UnityEngine;
 
 public class PlayerDataManager : Singleton<PlayerDataManager>
 {
+    [Header("시작 캐릭터 설정")]
+    [Tooltip("게임 시작 시 기본으로 지급할 캐릭터 목록")]
+    public List<CharacterData> startingCharacters = new List<CharacterData>();
+
     [Header("캐릭터 편성")]
     public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
     public const int MAX_FORMATION_SIZE = 5;
@@ -44,7 +48,39 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     private void Start()
     {
+        // 게임 시작 시 보유 캐릭터가 없으면 기본 캐릭터 지급
+        if (ownedCharacters.Count == 0)
+        {
+            GrantStartingCharacters();
+            // 기본 캐릭터 지급 후, 자동으로 팀을 편성합니다.
+            Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
+            AutoFormTeam();
+        }
+
         StartCoroutine(InitialCalculationCoroutine());
+    }
+
+    private void GrantStartingCharacters()
+    {
+        Debug.Log("기본 지급 캐릭터가 있는지 확인합니다...");
+        if (startingCharacters == null || startingCharacters.Count == 0)
+        {
+            Debug.Log("기본으로 지급할 캐릭터가 설정되지 않았습니다.");
+            return;
+        }
+
+        Debug.Log($"{startingCharacters.Count}명의 기본 캐릭터를 지급합니다.");
+        foreach (CharacterData characterSO in startingCharacters)
+        {
+            if (characterSO != null)
+            {
+                AddCharacter(characterSO);
+            }
+            else
+            {
+                Debug.LogWarning("Starting Characters 리스트에 null인 항목이 있습니다.");
+            }
+        }
     }
 
     private IEnumerator InitialCalculationCoroutine()
