@@ -338,7 +338,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         return true;
     }
 
-    public bool IsValidFormation()
+    public int IsValidFormation()
     {
         // 모든 필수 포지션에 캐릭터가 배치되었는지 확인
         foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
@@ -346,7 +346,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             if (!formation.ContainsKey(role) || formation[role].Count == 0)
             {
                 Debug.LogWarning($"편성 오류: {role} 포지션에 캐릭터가 배치되지 않았습니다. (최소 1명 필요)");
-                return false; // 해당 포지션에 캐릭터가 없으면 유효하지 않음
+                return 1; // 해당 포지션에 캐릭터가 없으면 유효하지 않음
             }
         }
 
@@ -355,12 +355,12 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         if (currentFormationCount != MAX_FORMATION_SIZE)
         {
             Debug.LogWarning($"편성 오류: 총 편성 인원이 {MAX_FORMATION_SIZE}명이 아닙니다. (현재 {currentFormationCount}명)");
-            return false; // 총 인원이 5명이 아니면 유효하지 않음
+            return 2; // 총 인원이 5명이 아니면 유효하지 않음
         }
 
         // 모든 필수 포지션에 캐릭터가 배치되었고 총 인원도 5명이라면 유효함
         Debug.Log("편성 유효성 검사 통과: 모든 필수 포지션에 캐릭터가 배치되었습니다. (총 인원 5명)");
-        return true;
+        return 0;
     }
 
     private void HandleCharacterBattlePowerChange(PlayerCharacterData character, BigInteger oldPower, BigInteger newPower)
