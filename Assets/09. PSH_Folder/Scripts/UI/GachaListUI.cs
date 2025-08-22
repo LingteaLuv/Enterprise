@@ -5,9 +5,6 @@ using System.Collections.Generic;
 public class GachaListUI : MonoBehaviour
 {
     [Header("필수 연결")]
-    [Tooltip("씬에 있는 GachaManager 오브젝트")]
-    public GachaManager gachaManager;
-
     [Tooltip("결과 아이템으로 생성할 프리팹 (CharacterPanelUI 스크립트가 있어야 함)")]
     public GameObject resultItemPrefab;
 
@@ -16,57 +13,54 @@ public class GachaListUI : MonoBehaviour
 
     [Header("연출 설정")]
     [Tooltip("각 아이템이 등장하는 시간 간격")]
-    public float delayBetweenItems = 0.2f;
+    public float delayBetweenItems = 0.1f;
 
     [Tooltip("개별 아이템의 등장 애니메이션 시간")]
-    public float animationDuration = 0.5f;
+    public float animationDuration = 0.4f;
 
-    // GachaManager로부터 받아온 실제 PlayerCharacterData 리스트
-    private List<PlayerCharacterData> gachaResultsData = new List<PlayerCharacterData>();
-
-    void OnEnable()
+    /// <summary>
+    /// 캐릭터 뽑기 결과를 받아 화면에 표시를 시작하는 함수입니다.
+    /// GachaUIHandler가 이 함수를 호출해줍니다.
+    /// </summary>
+    /// <param name="characterResults">표시할 캐릭터 데이터 리스트</param>
+    public void DisplayCharacterResults(List<PlayerCharacterData> characterResults)
     {
-        if (gachaManager == null)
+        if (characterResults == null || characterResults.Count == 0)
         {
-            Debug.LogError("GachaListUI에 GachaManager가 연결되지 않았습니다!");
+            Debug.LogWarning("표시할 가챠 결과가 없습니다.");
             return;
         }
 
-        gachaResultsData = gachaManager.lastGachaResults;
-
-        if (gachaResultsData == null || gachaResultsData.Count == 0)
-        {
-            Debug.LogWarning("GachaManager에 표시할 가챠 결과가 없습니다. 연출을 시작하지 않습니다.");
-            return;
-        }
-
-        StartCoroutine(ShowResultsCoroutine());
+        // 기존에 실행중인 코루틴이 있다면 중지 (연속 뽑기 시 중복 방지)
+        StopAllCoroutines();
+        StartCoroutine(ShowResultsCoroutine(characterResults));
     }
 
-    private IEnumerator ShowResultsCoroutine()
+    private IEnumerator ShowResultsCoroutine(List<PlayerCharacterData> results)
     {
+        // 기존 아이템들 삭제
         foreach (Transform child in contentParent)
         {
             Destroy(child.gameObject);
         }
-        yield return null;
+        yield return null; // 한 프레임 대기하여 삭제가 반영되도록 함
 
-        for (int i = 0; i < gachaResultsData.Count; i++)
+        // 새 아이템들 생성 및 연출
+        foreach (var resultData in results)
         {
             GameObject itemGO = Instantiate(resultItemPrefab, contentParent);
 
-            // resultItemPrefab에 있는 CharacterPanelUI 컴포넌트를 가져옵니다.
             CharacterPanelUI panelUI = itemGO.GetComponent<CharacterPanelUI>();
             if (panelUI != null)
             {
-                // CharacterPanelUI의 Setup 함수에 PlayerCharacterData를 넘겨줍니다.
-                panelUI.Setup(gachaResultsData[i]);
+                panelUI.Setup(resultData);
             }
             else
             {
                 Debug.LogWarning($"{resultItemPrefab.name} 프리팹에 CharacterPanelUI 스크립트가 없습니다.", itemGO);
             }
 
+            // 등장 애니메이션 실행
             StartCoroutine(AnimateItemCoroutine(itemGO));
 
             yield return new WaitForSeconds(delayBetweenItems);

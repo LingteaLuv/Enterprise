@@ -29,7 +29,7 @@ public class CharacterData : ScriptableObject
     public string description;
     public Sprite characterSprite; // 캐릭터 이미지
     public Rarity rarity; // 1, 2, 3성 등급
-    public CrewRole crewrole; // 진형(전중후최후)
+    public CrewRole crewRole; // 진형(전중후최후)
     public Faction faction; // 속성(불물풀)
 
     [Header("스탯 정보")]
