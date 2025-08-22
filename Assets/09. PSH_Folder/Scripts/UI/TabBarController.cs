@@ -7,15 +7,22 @@ public class TabBarController : MonoBehaviour
     [Header("하단 버튼")]
     [SerializeField] Button basicStatBtn;
     [SerializeField] Button characterListBtn;
+    [SerializeField] Button invenBtn;
     [SerializeField] Button gachaBtn;
+    [SerializeField] Button shopBtn;
+    [SerializeField] Button questBtn;
 
     [Header("버튼에 연결된 UI")]
     [SerializeField] GameObject basicStatPanel;
     [SerializeField] GameObject characterListPanel;
+    [SerializeField] GameObject invenPanel;
     [SerializeField] GameObject gachaPanel;
+    [SerializeField] GameObject shopPanel;
+    [SerializeField] GameObject questPanel;
 
     [Header("공용 닫기 버튼")]
     [SerializeField] Button closeBtn;
+    [SerializeField] Button homeBtn;
 
     private Dictionary<Button, GameObject> tabToPanel;
     private GameObject currentOpenPanel;
@@ -26,7 +33,10 @@ public class TabBarController : MonoBehaviour
         {
             { basicStatBtn, basicStatPanel },
             { characterListBtn, characterListPanel },
-            { gachaBtn, gachaPanel }
+            { invenBtn, invenPanel },
+            { gachaBtn, gachaPanel },
+            { shopBtn, shopPanel },
+            { questBtn, questPanel }
         };
 
         Init();
@@ -57,6 +67,16 @@ public class TabBarController : MonoBehaviour
 
         // 공용 닫기 버튼 이벤트 연결
         closeBtn.onClick.AddListener(() =>
+        {
+            if (currentOpenPanel != null)
+            {
+                currentOpenPanel.SetActive(false);
+                currentOpenPanel = null;
+            }
+            closeBtn.gameObject.SetActive(false);
+        });
+
+        homeBtn.onClick.AddListener(() =>
         {
             if (currentOpenPanel != null)
             {
