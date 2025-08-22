@@ -7,6 +7,14 @@ using UnityEngine.UI;
 /// </summary>
 public class GachaUIHandler : MonoBehaviour
 {
+    [Header("패널 목록")]
+    public GameObject charPanel;
+    public GameObject equipPanel;
+    public GameObject relicPanel;
+    public Button charButton;
+    public Button equipButton;
+    public Button relicButton;
+
     [Header("캐릭터 뽑기")]
     public CharacterGachaManager characterGachaManager;
     public Button charSingleBtn;
@@ -25,6 +33,13 @@ public class GachaUIHandler : MonoBehaviour
 
     private void Start()
     {
+        // 패널 연결
+        charButton.onClick.AddListener(() => { charPanel.SetActive(true); equipPanel.SetActive(false); relicPanel.SetActive(false); });
+        equipButton.onClick.AddListener(() => { charPanel.SetActive(false); equipPanel.SetActive(true); relicPanel.SetActive(false); });
+        relicButton.onClick.AddListener(() => { charPanel.SetActive(false); equipPanel.SetActive(false); relicPanel.SetActive(true); });
+
+
+        // 캐릭터 뽑기
         charSingleBtn.onClick.AddListener(OnClick_CharacterGacha_Single);
         charMultipleBtn.onClick.AddListener(OnClick_CharacterGacha_Multiple);
     }
@@ -123,4 +138,6 @@ public class GachaUIHandler : MonoBehaviour
             }
         );
     }
+
+    
 }
