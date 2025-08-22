@@ -13,20 +13,17 @@ namespace _05._CSJ_Folder.Scripts.Quest
             public int Amount;
         }
     
-        public RewardEntry[] Rewards;
+        public RewardEntry Reward;
 
         // 해당하는 보상을 획득 처리
         public void AddReward(IRewardGiver giver)
         {
-            foreach (var reward in Rewards)
-            {
-                giver.Give(reward.RewardType, reward.Amount);
-            }
+            giver.Give(Reward);
         }
     }
     
     public interface IRewardGiver
     {
-        public void Give(string type, int amount);
+        public void Give(QuestRewardSO.RewardEntry rewardEntry);
     }
 }

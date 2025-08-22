@@ -15,7 +15,7 @@
     // 일반 퀘스트 구분
     public enum GeneralType_Enum
     {
-        None, Tutorial, Routine
+        None, Tutorial, Routine, StageClear
     }
 
     // 일반 퀘스트의 속한 사이클
@@ -27,6 +27,6 @@
     // 현재 퀘스트의 상태
     public enum QuestState_Enum
     {
-        Completed, Active, Received
+        BeforeActive, Completed, Active, Received
     }
 }

@@ -9,9 +9,9 @@ namespace JHT
     public class DemoAddWeapon : MonoBehaviour
     {
 
-        [SerializeField] private WeaponObject item1;
-        [SerializeField] private WeaponObject item2;
-        [SerializeField] private WeaponObject item3;
+        [SerializeField] private DataItem item1;
+        [SerializeField] private DataItem item2;
+        [SerializeField] private DataItem item3;
 
         public Button oneAddButton;
         public Button twoAddButton;
@@ -21,31 +21,32 @@ namespace JHT
         public Button twoRemoveButton;
         public Button threeRemoveButton;
 
-        private event Action<WeaponObject> OnClick;
+        private event Action<DataItem> OnClick;
+
         private void Start()
         {
             oneAddButton.onClick.AddListener(OnAdd1);
             twoAddButton.onClick.AddListener(OnAdd2);
             threeAddButton.onClick.AddListener(OnAdd3);
 
-            oneRemoveButton.onClick.AddListener(OnRemove1);
-            twoRemoveButton.onClick.AddListener(OnRemove2);
-            threeRemoveButton.onClick.AddListener(OnRemove3);
+           // twoRemoveButton.onClick.AddListener(OnRemove2);
+           // threeRemoveButton.onClick.AddListener(OnRemove3);
+
         }
 
-        public void AddWeapon(WeaponObject item)
+        public void AddWeapon(DataItem item)
         {
             InventoryManager.Instance.AddItem(item);
         }
 
-        public void RemoveWeapon(WeaponObject item)
+        public void RemoveWeapon(DataItem item)
         {
-            InventoryManager.Instance.RemoveItem(item);
+            //InventoryManager.Instance.RemoveItem(item);
         }
 
-        private void OnAdd1() => AddWeapon(item1);
-        private void OnAdd2() => AddWeapon(item2);
-        private void OnAdd3() => AddWeapon(item3);
+        private void OnAdd1() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item1.itemNum]);
+        private void OnAdd2() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item2.itemNum]);
+        private void OnAdd3() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item3.itemNum]);
         private void OnRemove1() => RemoveWeapon(item1);
         private void OnRemove2() => RemoveWeapon(item2);
         private void OnRemove3() => RemoveWeapon(item3);

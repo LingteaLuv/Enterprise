@@ -28,12 +28,11 @@ namespace JHT
 
         public void Init(ItemObject item)
         {
-            if (item as WeaponObject)
+            if (item is WeaponObject)
             {
                 WeaponObject obj = (WeaponObject)item;
                 SetWeapon(obj);
                 obj.OnUpCount += UpCountAction;
-                obj.OnUpgrade += UpGradeAction;
             }
             else
             {
@@ -62,10 +61,6 @@ namespace JHT
             itemCountText.text = item.itemLevel.ToString();
         }
 
-        private void UpGradeAction(WeaponObject item)
-        {
-
-        }
 
     }
 }

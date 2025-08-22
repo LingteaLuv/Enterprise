@@ -1,7 +1,10 @@
 using JHT;
 using UnityEngine;
 
-public class RelicsObject : ItemObject
+namespace JHT
 {
-   
+    public class RelicsObject : ItemObject
+    {
+
+    }
 }

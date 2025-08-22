@@ -2,58 +2,73 @@ using UnityEngine;
 
 namespace LHI
 {
-    public class BountyAssessmentCalculation : MonoBehaviour
+    public class Bounty : MonoBehaviour
     {
-        // 역할에 따라 전투력 산정 방식이 다름
-        // CombatPower를 줄여서 CP로 명명
-        // 처음 AllCPCalculate 메서드로 모든 전투력을 계산하고, 이후에는 각 스탯별로 전투력을 계산하는 메서드들을 호출하여 사용
-        // 생각해보니 그냥 옵저버 패턴을 사용해서 캐릭터 데이터가 변경될 때마다 전투력을 자동으로 갱신하는 것이 더 좋을 것 같음
-        // 옵저버 패턴으로 구현을 실패하여 나중에 수정할 예정
-        // 옵저버 가 아니라 그냥 파라미터에 겟을 정리하여 가져갈때 바로 연산하도록 고려
-
+        // 리스트 캐릭터 정보(편성된)를 넣으면 점수로 반환 받는 방식
+        // 메서드로 활용
+        // 초기 전투력 산정은 AllCPCalculate 메서드를 사용
+        // 편성된 캐릭터의 스탯 변경시 재계산
 
         public float combatPower = 0;
 
-        private float combatPowerAttack = 0;
-        public float CombatPowerAttack
-        {
-            get { return combatPowerAttack; }
-            set { combatPowerAttack = value; }
-        }
-
-        public float combatPowerHealth = 0;
-        public float combatPowerDefense = 0;
-        public float combatPowerCritical = 0;
-        public float combatPowerSpeed = 0;
-
-        /// <summary>
-        /// 초기화 후에 캐릭터의 모든 전투력을 계산하는 메소드, 최초에 전투력 산정을 위해서 사용
-        /// </summary>
-        /// <param name="characterData"></param>
-        public void AllCPCalculate(CharacterData characterData)
-        {
-            combatPower = 0f;
-            combatPowerAttack = 0f;
-            combatPowerHealth = 0f;
-            combatPowerDefense = 0f;
-            combatPowerCritical = 0f;
-            combatPowerSpeed = 0f;
-
-            combatPowerAttack = CPAttack(characterData);
-            combatPowerHealth = CPHealth(characterData);
-            combatPowerDefense = CPDefense(characterData);
-            combatPowerCritical = CPCritical(characterData);
-            combatPowerSpeed = CPSpeed(characterData);
-            combatPower = combatPowerAttack + combatPowerHealth + combatPowerDefense + combatPowerCritical + combatPowerSpeed;
-        }
-
         #region
 
-        public float GetCombatPower()
+        /// <summary>
+        /// 편성 된 모든 캐릭터의 전투력을 계산하는 메소드
+        /// </summary>
+        /// <param name="characterData"></param>
+        public float AllCPCalculate(CharacterData[] characterData)
         {
+            // 초기화
+            float oldCombatPower = combatPower;
+            combatPower = 0;
+
+            foreach (var character in characterData)
+            {
+                // 캐릭터가 null인 경우는 제외
+                if (character == null)
+                {
+                    continue;
+                }
+
+                combatPower += AllCPCalculate(character);
+            }
+
+            float index = combatPower - oldCombatPower;
+
+            // ui 나 신호 추가
+            if (index < 0)
+            {
+                Debug.Log($"{oldCombatPower}에서 {combatPower} 으로 변경, 전투력이 감소했습니다. 감소량: {Mathf.Abs(index)}");
+            }
+            else if (index > 0)
+            {
+                Debug.Log($"{oldCombatPower}에서 {combatPower} 으로 변경, 전투력이 증가했습니다. 증가량: {index}");
+            }
+            else
+            {
+                Debug.Log($"{oldCombatPower}에서 {combatPower} 으로 변경, 전투력이 변동이 없습니다.");
+            }
+
             return combatPower;
         }
 
+        /// <summary>
+        /// 한 캐릭터의 전투력을 계산하는 메소드
+        /// </summary>
+        /// <param name="characterData"></param>
+        /// <returns></returns>
+        public float AllCPCalculate(CharacterData characterData)
+        {
+            float CP =
+                CPAttack(characterData) +
+                CPHealth(characterData) +
+                CPDefense(characterData) +
+                CPCritical(characterData) +
+                CPSpeed(characterData);
+            combatPower += CP;
+            return combatPower;
+        }
         #endregion
 
         #region 스탯별 각 전투력 산정 메소드들

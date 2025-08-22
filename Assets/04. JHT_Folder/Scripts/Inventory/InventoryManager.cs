@@ -15,6 +15,7 @@ namespace JHT
         public Action<WeaponObject> OnUpCountItem;
 
         public InventoryMode currentMode;
+
         public void Start()
         {
             if(weaponList == null)
@@ -23,37 +24,38 @@ namespace JHT
             if(relicsObject == null)
                 relicsObject = new();
 
-            OnAddInventory += AddInventroyIndex;
+            OnAddInventory += AddInventroyWeapon;
             OnRemoveInventory += RemoveInventroyIndex;
         }
 
-        public void AddItem(ItemObject item)
+        public void AddItem(DataItem item)
         {
-            if (item as WeaponObject)
+            if (item.itemSO.itemType == ItemType.Weapon)
             {
-                WeaponObject obj = item as WeaponObject;
-                if (weaponList.Contains(obj))
+                WeaponObject existObj = weaponList.Find(x => x.itemNum == item.itemNum);
+                
+                if (existObj == null)
                 {
-                    OnUpCountItem?.Invoke(obj);
+                    WeaponObject obj = new WeaponObject(item);
+                    OnAddInventory?.Invoke(obj);
                 }
                 else
                 {
-                    OnAddInventory?.Invoke(obj);
-                    obj.Init();
+                    OnUpCountItem?.Invoke(existObj);
                 }
+                
             }
             else
             {
-                RelicsObject obj = item as RelicsObject;
+                //RelicsObject obj = item as RelicsObject;
             }
             
         }
 
         public void RemoveItem(ItemObject item)
         {
-            if (item as WeaponObject)
+            if (item is WeaponObject obj)
             {
-                WeaponObject obj = item as WeaponObject;
                 if (weaponList.Contains(obj))
                 {
                     OnRemoveInventory?.Invoke(item);
@@ -65,7 +67,7 @@ namespace JHT
             }
             else
             {
-                RelicsObject obj = item as RelicsObject;
+                //RelicsObject obj = item as RelicsObject;
             }
             
         }
@@ -75,28 +77,27 @@ namespace JHT
             weaponList.Clear();
         }
 
-        private void AddInventroyIndex(ItemObject item)
+        private void AddInventroyWeapon(ItemObject item)
         {
-            if (item as WeaponObject)
-            {;
-                weaponList.Add((WeaponObject)item);
+            if (item is WeaponObject obj)
+            {
+                weaponList.Add(obj);
             }
             else
             {
-                RelicsObject obj = item as RelicsObject;
+                //RelicsObject obj = item as RelicsObject;
             }
         }
 
         private void RemoveInventroyIndex(ItemObject item)
         {
-            if (item as WeaponObject)
+            if (item is WeaponObject obj)
             {
-                WeaponObject obj = item as WeaponObject;
                 weaponList.Remove(obj);
             }
             else
             {
-                RelicsObject obj = item as RelicsObject;
+                //RelicsObject obj = item as RelicsObject;
             }
         }
 
