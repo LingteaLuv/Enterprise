@@ -1,7 +1,7 @@
 ﻿using _05._CSJ_Folder.Scripts.Quest.Definition;
 using UnityEngine;
 
-namespace _05._CSJ_Folder.Scripts.Quest
+namespace _05._CSJ_Folder.Scripts.Quest.Sequence
 {
     [CreateAssetMenu (menuName = "Quest/Sequence/Routine")]
     public class RoutineSequenceSO : ScriptableObject
