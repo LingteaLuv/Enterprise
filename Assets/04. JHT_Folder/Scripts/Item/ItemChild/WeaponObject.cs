@@ -9,16 +9,25 @@ using UnityEngine;
 
 namespace JHT
 {
+    [Serializable]
     public class WeaponObject : ItemObject
     {
-        public int itemLevel;
-        public int itemStar;
         public float weaponPower;
+
+        private int itemLevel;
+        public int ItemLevel { get { return itemLevel;} set { itemLevel = value;  OnChangeLevel?.Invoke(itemLevel); } }
+        public Action<int> OnChangeLevel;
+
+        public int itemStar = 0;
+        public int ItemStar { get { return itemStar; } set { itemStar = value; OnChangeStar?.Invoke(itemStar); } }
+        public Action<int> OnChangeStar;
+
         private bool isUpgrade;
         public bool IsUpgrade { get { return isUpgrade; } set { isUpgrade = value; OnUpgrade?.Invoke(isUpgrade); } }
         public event Action<bool> OnUpgrade;
 
-        public Action<WeaponObject> OnUpCount;
+        public Action OnUpCount;
+        public Action OnAddStar;
 
         public WeaponObject(DataItem sample)
         {
@@ -26,8 +35,8 @@ namespace JHT
             itemName = sample.itemSO.itemName;
             itemNum = sample.itemNum;
             itemSO = sample.itemSO;
-
             InventoryManager.Instance.OnUpCountItem += ItemLevelUp;
+            OnAddStar += UpGradeItemForStar;
         }
 
         public void ItemUpCount(ItemWeaponSO weapon)
@@ -44,27 +53,43 @@ namespace JHT
                 return;
             }
 
-            itemLevel++;
-            OnUpCount?.Invoke(obj);
+            ItemWeaponSO so = (ItemWeaponSO)obj.itemSO;
+            ItemLevel++;
+
+            if (itemLevel > so.maxLevelInCurStar[itemLevel])
+            {
+                Debug.Log($"아이템이 현재 등급{itemStar} 최대 레벨");
+                return;
+            }
+
             UpCountWeapon();
+        }
+
+        // 방어코드 필요시 OnUpCount 구독 -> Weapon obj 넣어서
+        // IsUpgrade 위치 변경필요
+        public void UpCountWeapon()
+        {
+            ItemWeaponSO weapon = (ItemWeaponSO)itemSO;
+            weaponPower += weapon.upPowerPercent[itemStar];
+            if (itemLevel >= weapon.maxLevelInCurStar[itemStar])
+            {
+                IsUpgrade = true;
+            }
+        }
+
+        private void UpGradeItemForStar()
+        {
+            ItemWeaponSO so = (ItemWeaponSO)itemSO;
+            IsUpgrade = false;
+            itemLevel -= so.maxLevelInCurStar[itemStar];
+            ItemStar += 1;
+            weaponPower = so.upPowerPercent[itemStar] * itemLevel;
         }
 
         public WeaponObject OnAddItem(bool value)
         {
             return this;
         }
-
-        // 방어코드 필요시 OnUpCount 구독 -> Weapon obj 넣어서
-        public void UpCountWeapon()
-        {
-            ItemWeaponSO weapon = (ItemWeaponSO)itemSO;
-            weaponPower += weapon.upPowerPercent[itemStar];
-            //while (itemLevel > weapon.maxLevelInCurStar[itemStar])
-            //{
-            //    IsUpgrade = true;
-            //}
-        }
-
 
         #region 우리애기
 

@@ -20,9 +20,10 @@ namespace JHT
         [field: SerializeField] public CharacterWeponType characterWeaponType { get; private set; }
 
         [field: SerializeField] public WeaponClass[] weaponClasses { get; private set; } = null;
-        [field: SerializeField] public Image[] stars { get; private set; }
+        [field: SerializeField] public Sprite[] starImage { get; private set; }
         [field: SerializeField] public float[] upPowerPercent { get; private set; }
         [field: SerializeField] public int[] maxLevelInCurStar { get; private set; }
+        [field: SerializeField] public int[] upgradeCost { get; private set; }
 
 
         public override void UseItem(ItemSO item)
