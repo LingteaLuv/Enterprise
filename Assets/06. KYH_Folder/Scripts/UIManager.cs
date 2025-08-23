@@ -1,10 +1,10 @@
 using UnityEngine;
 using System.Collections;
 using System;
-public class UIManager : MonoBehaviour
+public class IngameUIManager : MonoBehaviour
 {
     // 싱글톤 인스턴스 설정 (전역 접근을 위한 static 인스턴스)
-    public static UIManager Instance { get; private set; }
+    public static IngameUIManager Instance { get; private set; }
 
     // 각 UI 패널들을 인스펙터에서 할당할 수 있도록 SerializeField로 설정
     [SerializeField] private GameObject lobbyUI;       // 로비(메인) UI 패널

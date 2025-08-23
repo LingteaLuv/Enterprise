@@ -13,6 +13,7 @@ public class IslandStageManager : MonoBehaviour
     [Header("섬 구성")]
     [SerializeField] private List<GameObject> islandSets;         // 각 섬에 해당하는 게임오브젝트 세트 (환경, 적, 타일맵 등 포함)
     [SerializeField] private List<Transform> shipPositions;       // 각 섬 앞에 배가 도달할 위치 (Transform으로 배치)
+    [SerializeField] private List<GameObject> battleFields;
 
     [Header("배 이동 설정")]
     [SerializeField] private ShipController shipController;
@@ -110,7 +111,7 @@ public class IslandStageManager : MonoBehaviour
             islandSets[i].SetActive(i == index);
 
         // 2. 전투 시작 (BattleManager는 기존 시스템을 그대로 사용)
-        BattleManager.Instance.StartBattle();
+        BattleManager.Instance.StartBattle(currentIndex);
     }
 
 
@@ -150,32 +151,26 @@ public class IslandStageManager : MonoBehaviour
             Debug.Log($"[MoveToAndEnter] onArrive 수신 index={index}");
         });
 
-        if (!arrive)
-        {
-            Debug.Log($" [MoveToAndEnter] arrive=false → StartBattle 스킵 (index={index})");
-            yield break;
-        }
 
-        Debug.Log($"[MoveToAndEnter]  도착 확인 → StartBattle 호출 시도 (index={index})");
+        SetBattleField(index); // 전투 필드 활성화
 
 
-        if (BattleManager.Instance == null)
-        {
-            Debug.Log(" BattleManager.Instance == null");
-        }
-        else if (BattleManager.Instance.Equals(null))  // 유니티의 유령 객체 체크 방식
-        {
-            Debug.Log(" BattleManager.Instance는 존재하지만 Unity MissingReference 상태임 (유령 객체)");
-        }
-        else
-        {
-            Debug.Log(" BattleManager.Instance 완전 정상. StartBattle 호출 시작"); 
-        }
 
-        BattleManager.Instance?.StartBattle();
+        BattleManager.Instance?.StartBattle(currentIndex);
 
         Debug.Log($"[MoveToAndEnter] StartBattle 호출 이후 정상 종료 index={index}");
 
         StopCoroutine(moveToAndEnter);
+    }
+
+    private void SetBattleField(int index)
+    {
+        Debug.Log($"[SetBattleField] index={index}");
+
+        for (int i = 0; i < battleFields.Count; i++)
+        {
+            Debug.Log($"- battleField[{i}]: {battleFields[i].name} → {(i == index ? "활성화" : "비활성화")}");
+            battleFields[i].SetActive(i == index);
+        }
     }
 }

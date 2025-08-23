@@ -1,35 +1,42 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 public class BattleManager : MonoBehaviour
 {
-    // 싱글톤 인스턴스 (전역 접근용)
     public static BattleManager Instance { get; private set; }
 
     private Coroutine battleRoutine;
 
+    [Header("스폰 프리팹")]
+    [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private GameObject enemyPrefab;
+
+    [Header("전투 필드")]
+    [SerializeField] private List<BattleField> battleFields;
+
+    [Header("스폰 수 설정")]
+    [SerializeField] private int baseEnemyCount = 3;
+    [SerializeField] private int growthPerStage = 1;
+
+    private GameObject currentPlayer;
+    private List<GameObject> spawnedEnemies = new();
+
+    private int currentStageIndex = 0;
+
     private void Awake()
     {
-        Debug.Log(" BattleManager.Awake 호출됨");
-        Instance = this; // 싱글톤 초기화
+        Debug.Log("BattleManager.Awake 호출됨");
+        Instance = this;
     }
 
     /// <summary>
     /// 외부에서 호출되는 전투 시작 메서드
     /// </summary>
-    public void StartBattle()
+    public void StartBattle(int stageIndex)
     {
-      //  Debug.Log(" StartBattle 진입함");
-      //  Debug.Log($"battleRoutine == null? {(battleRoutine == null ? "YES" : "NO")}");
-      //
-      //  if (battleRoutine != null)
-      //  {
-      //      StopCoroutine(battleRoutine);
-      //      Debug.LogWarning(" 이전 루틴 중지 후 battleRoutine = null 처리");
-      //      battleRoutine = null;
-      //  }
-
+        currentStageIndex = stageIndex;
         battleRoutine = StartCoroutine(BattleRoutine());
-        Debug.Log(" battleRoutine 시작됨");
+        Debug.Log("battleRoutine 시작됨");
     }
 
     /// <summary>
@@ -37,59 +44,73 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private IEnumerator BattleRoutine()
     {
-        // 1. 전투 UI 표시 (Lobby → Battle 전환)
-        //  UIManager.Instance.ShowBattleUI();
+        Debug.Log("전투 시작");
 
-        Debug.Log("전투시작");
-        // 2. 약간의 대기 시간 (적 활성화 등 준비 시간)
-        yield return new WaitForSeconds(0.5f);
+        var field = battleFields[currentStageIndex];
 
-      //  // 3. 자동 전투 루프
-      //  while (true)
-      //  {
-      //      // 모든 적이 제거되었는지 확인
-      //      if (AllEnemiesDefeated())
-      //          break;
-      //
-      //      // 유닛이 적을 찾아 이동 및 공격
-      //      AutoControlUnits();
-      //
-      //      // 다음 프레임까지 대기
-      //      yield return null;
-      //  }
-      //
-        // 4. 전투 종료 후 잠깐 대기 (연출 여유)
-        yield return new WaitForSeconds(1f);
+        // 1. 유닛 스폰
+        SpawnPlayer(field);
+        SpawnEnemies(field, currentStageIndex);
 
-        // 5. 보상 UI를 띄우고, 끝나면 다음 섬으로 이동
-        //  UIManager.Instance.ShowRewardUI(() =>
-        //  {
-        //      IslandStageManager.Instance.OnBattleComplete(); // 보상 끝난 후 다음 섬 로드
-        //  });
+        yield return new WaitForSeconds(0.5f); // 연출 시간
+
+        // 2. 전투 루프
+        while (true)
+        {
+            if (AllEnemiesDefeated())
+                break;
+
+            AutoControlUnits(); // 유닛 자동 행동 (구현 예정)
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(1f); // 종료 연출 대기
 
         battleRoutine = null;
-
         IslandStageManager.Instance.OnBattleComplete();
     }
 
-    /// <summary>
-    /// 아군 유닛의 자동 제어 루틴
-    /// (예: 가장 가까운 적 찾아서 이동하고 공격하기)
-    /// 실제 구현은 별도 유닛 AI에서 작성 예정
-    /// </summary>
-    private void AutoControlUnits()
+    private void SpawnPlayer(BattleField field)
     {
-        // TODO: 유닛 개별 AI 호출 또는 통합 컨트롤러 구현 예정
-        // 예: 각 유닛.FindNearestEnemy(), unit.MoveAndAttack()
+        if (currentPlayer != null)
+            Destroy(currentPlayer);
+
+        currentPlayer = Instantiate(playerPrefab, field.PlayerSpawnPoint.position, Quaternion.identity);
     }
 
-    /// <summary>
-    /// 전투 중 모든 적이 제거되었는지 확인
-    /// </summary>
-    /// <returns>적이 하나도 없으면 true</returns>
+    private void SpawnEnemies(BattleField field, int stageIndex)
+    {
+        int count = baseEnemyCount + (stageIndex * growthPerStage);
+        var spawnPoints = field.EnemySpawnPoints;
+        count = Mathf.Min(count, spawnPoints.Count);
+
+        for (int i = 0; i < count; i++)
+        {
+            var enemy = Instantiate(enemyPrefab, spawnPoints[i].position, Quaternion.identity);
+            enemy.tag = "Enemy"; // 전투 종료 체크용
+            spawnedEnemies.Add(enemy);
+        }
+    }
+
+    public void OnEnemyDead(GameObject enemy)
+    {
+        if (spawnedEnemies.Contains(enemy))
+            spawnedEnemies.Remove(enemy);
+
+        if (AllEnemiesDefeated())
+        {
+            Debug.Log("모든 적 제거 → 전투 종료 예정");
+            // 전투 루프에서 자동 감지됨 → 따로 종료 호출 안 해도 됨
+        }
+    }
+
     private bool AllEnemiesDefeated()
     {
-        // "Enemy" 태그가 붙은 오브젝트가 없으면 true
-        return GameObject.FindGameObjectsWithTag("Enemy").Length == 0;
+        return spawnedEnemies.Count == 0;
+    }
+
+    private void AutoControlUnits()
+    {
+        // TODO: 추후 유닛 FSM이나 AI 구현 시 연결
     }
 }
