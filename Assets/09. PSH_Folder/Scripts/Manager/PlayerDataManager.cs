@@ -6,6 +6,10 @@ using UnityEngine;
 
 public class PlayerDataManager : Singleton<PlayerDataManager>
 {
+    [Header("시작 캐릭터 설정")]
+    [Tooltip("게임 시작 시 기본으로 지급할 캐릭터 목록")]
+    public List<CharacterData> startingCharacters = new List<CharacterData>();
+
     [Header("캐릭터 편성")]
     public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
     public const int MAX_FORMATION_SIZE = 5;
@@ -44,7 +48,39 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     private void Start()
     {
+        // 게임 시작 시 보유 캐릭터가 없으면 기본 캐릭터 지급
+        if (ownedCharacters.Count == 0)
+        {
+            GrantStartingCharacters();
+            // 기본 캐릭터 지급 후, 자동으로 팀을 편성합니다.
+            Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
+            AutoFormTeam();
+        }
+
         StartCoroutine(InitialCalculationCoroutine());
+    }
+
+    private void GrantStartingCharacters()
+    {
+        Debug.Log("기본 지급 캐릭터가 있는지 확인합니다...");
+        if (startingCharacters == null || startingCharacters.Count == 0)
+        {
+            Debug.Log("기본으로 지급할 캐릭터가 설정되지 않았습니다.");
+            return;
+        }
+
+        Debug.Log($"{startingCharacters.Count}명의 기본 캐릭터를 지급합니다.");
+        foreach (CharacterData characterSO in startingCharacters)
+        {
+            if (characterSO != null)
+            {
+                AddCharacter(characterSO);
+            }
+            else
+            {
+                Debug.LogWarning("Starting Characters 리스트에 null인 항목이 있습니다.");
+            }
+        }
     }
 
     private IEnumerator InitialCalculationCoroutine()
@@ -161,7 +197,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     public int AddCharacterToFormation(PlayerCharacterData characterData)
     {
-        CrewRole position = characterData.characterdata.crewrole;
+        CrewRole position = characterData.characterdata.crewRole;
 
         // 편성이 가득 찼는지 확인
         if (GetFormationCharacterCount() >= MAX_FORMATION_SIZE)
@@ -201,7 +237,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     public bool RemoveCharacterFromFormation(PlayerCharacterData characterData)
     {
-        CrewRole position = characterData.characterdata.crewrole;
+        CrewRole position = characterData.characterdata.crewRole;
         if (formation.ContainsKey(position) && formation[position].Remove(characterData))
         {
             Debug.Log($"{characterData.characterdata.characterName}을(를) {position} 포지션에서 제거했습니다.");
@@ -216,7 +252,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     public bool IsInFormation(PlayerCharacterData characterData)
     {
-        CrewRole position = characterData.characterdata.crewrole;
+        CrewRole position = characterData.characterdata.crewRole;
         if (formation.ContainsKey(position))
         {
             return formation[position].Contains(characterData);
@@ -262,7 +298,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
         {
             PlayerCharacterData bestCharacterForRole = availableCharacters
-                .Where(c => c.characterdata.crewrole == role)
+                .Where(c => c.characterdata.crewRole == role)
                 .OrderByDescending(c => c.battlePower)
                 .FirstOrDefault();
 
@@ -301,7 +337,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         // 남은 캐릭터 중 전투력이 가장 높은 캐릭터를 찾습니다.
         // Captain 역할을 제외한 남은 캐릭터 중 전투력이 가장 높은 캐릭터를 찾습니다.
         PlayerCharacterData fifthCharacter = availableCharacters
-            .Where(c => c.characterdata.crewrole != CrewRole.Captain) // Captain 제외 필터링 추가
+            .Where(c => c.characterdata.crewRole != CrewRole.Captain) // Captain 제외 필터링 추가
             .OrderByDescending(c => c.battlePower)
             .FirstOrDefault();
 
@@ -309,7 +345,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         {
             // 5번째 캐릭터는 Captain 포지션이 아니어야 합니다. (이미 위에서 필터링했으므로 이 조건은 항상 true)
             // 그리고 해당 포지션에 아직 2명이 배치되지 않았어야 합니다.
-            CrewRole fifthRole = fifthCharacter.characterdata.crewrole;
+            CrewRole fifthRole = fifthCharacter.characterdata.crewRole;
             if (formation[fifthRole].Count < 2) // Captain이 아니므로 이 조건만 확인
             {
                 formation[fifthRole].Add(fifthCharacter);
@@ -338,7 +374,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         return true;
     }
 
-    public bool IsValidFormation()
+    public int IsValidFormation()
     {
         // 모든 필수 포지션에 캐릭터가 배치되었는지 확인
         foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
@@ -346,7 +382,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             if (!formation.ContainsKey(role) || formation[role].Count == 0)
             {
                 Debug.LogWarning($"편성 오류: {role} 포지션에 캐릭터가 배치되지 않았습니다. (최소 1명 필요)");
-                return false; // 해당 포지션에 캐릭터가 없으면 유효하지 않음
+                return 1; // 해당 포지션에 캐릭터가 없으면 유효하지 않음
             }
         }
 
@@ -355,12 +391,12 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         if (currentFormationCount != MAX_FORMATION_SIZE)
         {
             Debug.LogWarning($"편성 오류: 총 편성 인원이 {MAX_FORMATION_SIZE}명이 아닙니다. (현재 {currentFormationCount}명)");
-            return false; // 총 인원이 5명이 아니면 유효하지 않음
+            return 2; // 총 인원이 5명이 아니면 유효하지 않음
         }
 
         // 모든 필수 포지션에 캐릭터가 배치되었고 총 인원도 5명이라면 유효함
         Debug.Log("편성 유효성 검사 통과: 모든 필수 포지션에 캐릭터가 배치되었습니다. (총 인원 5명)");
-        return true;
+        return 0;
     }
 
     private void HandleCharacterBattlePowerChange(PlayerCharacterData character, BigInteger oldPower, BigInteger newPower)
