@@ -254,7 +254,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private void EnsureGeneralActive()
         { 
             if (GetActiveGeneralInstance() != null) return;
-            Debug.Log("Ensuring general active instance");
             if (_generalQuests.Count == 0)
             {
                 GeneralQuestProgress();
@@ -288,7 +287,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         private void OnGeneralCompleted()
         {
-            Debug.Log("General completed");
             ClearedQuestCount++;
             
             EnsureGeneralActive();
@@ -452,7 +450,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private void ForceQuestComplete()
         {
             QuestInstance inst = GetActiveGeneralInstance();
-            Debug.Log(inst);
             inst.ForceComplete();   
             MarkCompleted(GetActiveQuestDefinition(),inst);
         }
