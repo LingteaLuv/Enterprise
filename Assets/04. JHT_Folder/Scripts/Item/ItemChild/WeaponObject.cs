@@ -13,6 +13,7 @@ namespace JHT
     public class WeaponObject : ItemObject
     {
         public float weaponPower;
+        public WeaponRarity curRarity;
 
         private int itemLevel;
         public int ItemLevel { get { return itemLevel;} set { itemLevel = value;  OnChangeLevel?.Invoke(itemLevel); } }
@@ -29,12 +30,13 @@ namespace JHT
         public Action OnUpCount;
         public Action OnAddStar;
 
-        public WeaponObject(DataItem sample)
+        public WeaponObject(ItemWeaponSO sample, WeaponRarity rarity)
         {
-            itemIcon = sample.itemSO.icon;
-            itemName = sample.itemSO.itemName;
+            itemIcon = sample.icon;
+            itemName = sample.itemName;
             itemNum = sample.itemNum;
-            itemSO = sample.itemSO;
+            itemSO = sample;
+            curRarity = rarity;
             InventoryManager.Instance.OnUpCountItem += ItemLevelUp;
             OnAddStar += UpGradeItemForStar;
         }
@@ -83,6 +85,7 @@ namespace JHT
             IsUpgrade = false;
             itemLevel -= so.maxLevelInCurStar[itemStar];
             ItemStar += 1;
+            curRarity += (int)curRarity + 1;
             weaponPower = so.upPowerPercent[itemStar] * itemLevel;
         }
 

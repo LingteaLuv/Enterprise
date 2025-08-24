@@ -35,20 +35,22 @@ namespace JHT
             OnRemoveInventory -= RemoveInventroyIndex;
         }
 
-        public void AddItem(DataItem item)
+        public ItemObject AddItem(ItemWeaponSO item, WeaponRarity rarity)
         {
-            if (item.itemSO.itemType == ItemType.Weapon)
+            if (item.itemType == ItemType.Weapon)
             {
-                WeaponObject existObj = weaponList.Find(x => x.itemNum == item.itemNum);
+                WeaponObject obj = weaponList.Find(x => x.itemNum == item.itemNum);
                 
-                if (existObj == null)
+                if (obj == null)
                 {
-                    existObj = new WeaponObject(item);
-                    OnAddInventory?.Invoke(existObj);
+                    obj = new WeaponObject(item,rarity);
+                    OnAddInventory?.Invoke(obj);
+                    return obj;
                 }
                 else
                 {
-                    OnUpCountItem?.Invoke(existObj);
+                    OnUpCountItem?.Invoke(obj);
+                    return obj;
                 }
                 
             }
@@ -56,7 +58,8 @@ namespace JHT
             {
                 //RelicsObject obj = item as RelicsObject;
             }
-            
+
+            return null;
         }
 
         public ItemObject GetItemData(ItemObject obj)
