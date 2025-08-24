@@ -13,13 +13,13 @@ namespace JHT
     public class ItemDataManager : Singleton<ItemDataManager>
     {
         private const string WEAPON_LABEL = "ItemWeapon";
-        public List<DataItem> weaponList;
-        public Dictionary<int, DataItem> weaponDataDic;
+        public List<ItemWeaponSO> weaponList;
+        public Dictionary<int, ItemWeaponSO> weaponDataDic;
         public EncyclopediaPanel encyclopediaPanel;
         //public List<RelicsObject> relicsList;
         //public Dictionary<int, List<RelicsObject>> relicsDataDic;
 
-        private AsyncOperationHandle<IList<GameObject>> weaponHandle;
+        private AsyncOperationHandle<IList<ItemWeaponSO>> weaponHandle;
 
         // 수정필요 : csv에서 데이터 받아온 후 초기화 할 수 있도록 설정 해야함 
         protected override void Awake()
@@ -36,7 +36,7 @@ namespace JHT
             weaponList = new();
             weaponDataDic = new();
 
-            weaponHandle = Addressables.LoadAssetsAsync<GameObject>(WEAPON_LABEL);
+            weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>(WEAPON_LABEL);
 
             yield return weaponHandle;
 
@@ -44,26 +44,26 @@ namespace JHT
 
         }
         
-        private void LoadWeaponList(AsyncOperationHandle<IList<GameObject>> objs)
+        private void LoadWeaponList(AsyncOperationHandle<IList<ItemWeaponSO>> objs)
         {
-            List<DataItem> list = new();
+            List<ItemWeaponSO> list = new();
             foreach(var w in objs.Result)
             {
-                list.Add(w.GetComponent<DataItem>());
+                list.Add(w);
             }
 
-            List<DataItem> sortList = list.OrderBy(w => w.itemName).ToList();
+            //List<ItemWeaponSO> sortList = list.OrderBy(w => w.itemNum).ToList();
 
-            for (int i =0; i < sortList.Count; i ++)
+            for (int i =0; i < list.Count; i ++)
             {
-                weaponList.Add(sortList[i]);
+                weaponList.Add(list[i]);
             }
 
             LoadWeaponFinish(weaponList);
         }
 
 
-        private void LoadWeaponFinish(List<DataItem> list)
+        private void LoadWeaponFinish(List<ItemWeaponSO> list)
         {
             weaponDataDic.Clear();
 
@@ -87,7 +87,7 @@ namespace JHT
             encyclopediaPanel.Init();
         }
 
-        public Dictionary<int, DataItem> GetAllWeaponData()
+        public Dictionary<int, ItemWeaponSO> GetAllWeaponData()
         {
             return weaponDataDic;
         }

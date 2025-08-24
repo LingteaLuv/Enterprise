@@ -8,7 +8,7 @@ namespace JHT
 {
     public class EncyclopediaPanel : MonoBehaviour
     {
-        public Dictionary<int, DataItem> weaponDic;
+        public Dictionary<int, ItemWeaponSO> weaponDic;
         [SerializeField] private EncyclopediaPanelItem encyclopediaPanelItem;
         [SerializeField] private Transform encyclopediaPanelItemParent;
 
