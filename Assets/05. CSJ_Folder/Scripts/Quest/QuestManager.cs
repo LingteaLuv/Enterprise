@@ -4,6 +4,7 @@ using _05._CSJ_Folder.Scripts.Quest.Definition;
 using _05._CSJ_Folder.Scripts.Quest.Sequence;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace _05._CSJ_Folder.Scripts.Quest
 {
@@ -22,6 +23,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
         // 루틴 시퀀스
         [SerializeField] private RoutineSequenceSO _routineSequence;
         //private QuestSaveData _save;
+
+        [SerializeField] private GameObject QuestUI; 
         #endregion
         
         // quest Queue
@@ -38,6 +41,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private int ClearedQuestCount;
         private int CurrentQuestStage;
         private int CurrentClearedStage;
+
+        private QuestUIController _questUI;
 
         // 이벤트
         // UI 퀘스트의 텍스트 업데이트
@@ -62,11 +67,17 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (_signal != null) _signal.OnSignal += OnSignal;
             
             EnsureGeneralActive();
+
+            ActiveQuestUI();
         }
 
         private void OnDestroy()
         {
             if(_signal != null) _signal.OnSignal -= OnSignal;
+            _questUI.OnRewardRequest -= ReceiveReward;
+#if UNITY_EDITOR
+            _questUI.OnForceClear -= ForceQuestComplete;
+#endif
             Save();
         }
 
@@ -84,7 +95,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if(stage > CurrentClearedStage) CurrentClearedStage = stage;
 
             var activeGeneral = GetActiveGeneralInstance();
-            if (activeGeneral == null)return;
+            if (activeGeneral == null) return;
             
             var def = _defs[activeGeneral.QuestId];
             if (def.GeneralType == GeneralType_Enum.StageClear && 
@@ -106,14 +117,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             return inst;
         }
         
-        public void ReceiveReward(QuestDefinitionSO def, QuestInstance inst)
-        {
-            def.Reward.AddReward(this);
-            
-            OnGeneralCompleted();
-
-            Save();
-        }
         #endregion
 
         //TODO
@@ -124,6 +127,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (signalKey == QuestKeys.StageClear())
             {
                 OnStageCleared(amount);
+                return;
             }
             
             var activeGeneral = GetActiveGeneralInstance();
@@ -144,10 +148,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             
             if (IsInstanceComplete(def, activeGeneral))
                 MarkCompleted(def, activeGeneral);
-            
-            
-
-
         }
 
         #region GeneralQuest
@@ -181,6 +181,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                     QuestState = QuestState_Enum.BeforeActive,
                     GeneralQuestCount = GeneralQuestCount,
                     needToClearStage = CurrentQuestStage,
+                    stageClearMission = $"스테이지 {CurrentQuestStage}를 클리어 하세요"
                 };
                 _instances.Add(_stageClearTemplate.questId, inst);
             }
@@ -189,7 +190,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 inst.QuestState = QuestState_Enum.BeforeActive;
                 inst.GeneralQuestCount = GeneralQuestCount;
                 inst.needToClearStage = CurrentQuestStage;
-                inst.GoalCountAdjust(inst.CurrentGoalCount+1);
+                inst.GoalCountInit();
+                inst.stageClearMission = $"스테이지 {CurrentQuestStage}를 클리어 하세요";
             }
 
             GeneralQuestCount++;
@@ -225,8 +227,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
             bool isOdd = (CurrentQuestStage & 1) == 1;
             RoutineQuestDefinitionSO[] sequence =
                     isOdd ? 
-                        (RoutineQuestDefinitionSO[])_routineSequence.OddRoutine:  
-                        (RoutineQuestDefinitionSO[])_routineSequence.EvenRoutine;
+                        _routineSequence.OddRoutine:  
+                        _routineSequence.EvenRoutine;
 
             return sequence;
         }
@@ -234,15 +236,11 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private void InsertTutorials()
         {
             if (_tutorialQuests.Count == 0) return;
-
-            
             while (_tutorialQuests.Count >0 &&_tutorialQuests.Peek().targetStage <= GeneralQuestCount)
             {
                 if (_instances.TryGetValue(_tutorialQuests.Peek().questId, out var inst))
                 {
-                    if (inst.QuestState == QuestState_Enum.Received || 
-                        inst.QuestState == QuestState_Enum.Active || 
-                        inst.QuestState == QuestState_Enum.Completed)
+                    if (inst.QuestState != QuestState_Enum.BeforeActive)
                     {
                         _tutorialQuests.Dequeue();
                         continue;
@@ -254,8 +252,9 @@ namespace _05._CSJ_Folder.Scripts.Quest
         }
 
         private void EnsureGeneralActive()
-        {
+        { 
             if (GetActiveGeneralInstance() != null) return;
+            Debug.Log("Ensuring general active instance");
             if (_generalQuests.Count == 0)
             {
                 GeneralQuestProgress();
@@ -267,6 +266,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
         }
         
         #endregion
+        
+        #region QuestUtillity
 
         private bool IsInstanceComplete(QuestDefinitionSO def, QuestInstance inst)
         {
@@ -287,9 +288,11 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         private void OnGeneralCompleted()
         {
+            Debug.Log("General completed");
             ClearedQuestCount++;
             
             EnsureGeneralActive();
+            RefreshActiveQuestUI();
         }
 
         private bool EnsureActive(QuestDefinitionSO def)
@@ -302,15 +305,21 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 {
                     QuestId = def.questId,
                     QuestState = QuestState_Enum.Active,
-                    GeneralQuestCount = ClearedQuestCount,
+                    GeneralQuestCount = ClearedQuestCount + 1,
+                    
                 };
                 _instances.Add(def.questId, inst);
             }
             else
             {
                 inst.QuestState = QuestState_Enum.Active;
+                inst.GoalCountInit();
+                inst.GeneralQuestCount = ClearedQuestCount + 1;
+                GeneralQuestCount = ClearedQuestCount + 1;
+                
             }
 
+            RefreshActiveQuestUI();
             return true;
         }
 
@@ -325,6 +334,57 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
             return null;
         }
+        private QuestDefinitionSO GetActiveQuestDefinition()
+        {
+            return _defs.GetValueOrDefault(GetActiveGeneralInstance().QuestId);
+        }
+        
+        private void ReceiveReward(QuestDefinitionSO def, QuestInstance inst)
+        {
+            def.Reward.AddReward(this);
+            
+            OnGeneralCompleted();
+
+            Save();
+        }
+
+        private void ActiveQuestUI()
+        {
+            _questUI = QuestUI.GetComponentInChildren<QuestUIController>();
+            _questUI.QuestNumber = ClearedQuestCount + 1;
+            QuestInstance inst = GetActiveGeneralInstance();
+            _defs.TryGetValue(inst.QuestId, out var so);
+            if (so == null)
+            {
+                Debug.LogError($"instance {inst.QuestId} 미 발견");
+                return;
+            }
+
+            _questUI.QuestDef = so;
+            _questUI.QuestInst = inst;
+            
+            QuestUI.SetActive(true);
+            
+            _questUI.OnRewardRequest += ReceiveReward;
+            OnQuestCompleted += _questUI.UpdateQuest;
+            OnQuestUpdated += _questUI.UpdateQuest;
+#if UNITY_EDITOR
+            _questUI.OnForceClear += ForceQuestComplete;
+#endif
+            OnQuestUpdated?.Invoke(GetActiveQuestDefinition(), GetActiveGeneralInstance());
+        }
+
+        private void RefreshActiveQuestUI()
+        {
+            if (_questUI == null) return;
+            var inst = GetActiveGeneralInstance();
+            if (inst == null) return;
+            if (!_defs.TryGetValue(inst.QuestId, out var def)) return;
+
+            _questUI.QuestNumber = inst.GeneralQuestCount;
+            _questUI.UpdateQuest(def, inst);
+        }
+        #endregion
         
 
         // 데이터 베이스 연동은 추후 추가
@@ -373,18 +433,30 @@ namespace _05._CSJ_Folder.Scripts.Quest
         }
         #endregion
 
+        #region IRewardGiver
         //TODO : 인벤토리등과 연계하여 지급
         public void Give(QuestRewardSO.RewardEntry entry)
         {
             OnRewardGranted?.Invoke(entry);
             // TODO : Inventory.Add(entry); || Inventory.Add(entry.RewardType, entry.Amount); 등 진행
         }
+        #endregion
 
         // TODO : 추후 기간제 퀘스트 생성
         private void TemporaryQuestInit()
         {
             
         }
+
+#if  UNITY_EDITOR
+        private void ForceQuestComplete()
+        {
+            QuestInstance inst = GetActiveGeneralInstance();
+            Debug.Log(inst);
+            inst.ForceComplete();   
+            MarkCompleted(GetActiveQuestDefinition(),inst);
+        }
+#endif
 
     }
 }
