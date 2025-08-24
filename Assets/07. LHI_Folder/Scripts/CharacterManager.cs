@@ -5,14 +5,20 @@ namespace LHI
 {
     public class CharacterManager : MonoBehaviour
     {
+        // 싱글톤, 캐릭터 정보를 가지는 매니저 클래스
+        // 저장 및 불러오기, 캐릭터 진화 및 강화, 캐릭터 생성 및 회수 등의 기능을 포함 (스폰기능은 CharacterPool로 분리)
+
+
         public static CharacterManager Instance { get; private set; }
 
         public List<CharacterInfo> characters = new List<CharacterInfo>();
 
-        public Dictionary<int , CharacterInfo> charactersDict;
+        public static Dictionary<int , CharacterInfo> charactersDict;
+
 
         public void Awake()
         {
+            // 싱글톤 패턴 구현
             if (Instance == null)
             {
                 Instance = this;
@@ -45,7 +51,7 @@ namespace LHI
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private CharacterInfo GetCharacter(int id)
+        public CharacterInfo GetCharacter(int id)
         {
             if (charactersDict.TryGetValue(id, out CharacterInfo characterInfo))
             {
@@ -58,43 +64,33 @@ namespace LHI
             }
         }
 
-        #region 캐릭터 생성 및 회수
+        #region 저장 및 불러오기
 
-        /// <summary>
-        /// 데이터를 기반으로 캐릭터를 생성하는 메소드
-        /// </summary>
-        /// <param name="charInfo"></param>
-        private void CharacterRespawn(CharacterInfo charInfo)
+        private void Save()
+        {
+            // 게임 시작 시 캐릭터 데이터를 불러오는 로직
+        }
+
+        private void Load()
+        {
+            // 게임 종료 시 캐릭터 데이터를 저장하는 로직
+        }
+
+        #endregion
+
+        #region 캐릭터 진화 및 강화
+
+        private void CharacterEvolve()
         {
 
         }
 
-
-        /// <summary>
-        /// 만들어진 캐릭터를 회수하는 메소드
-        /// </summary>
-        /// <param name="charInfo"></param>
-        private void CharacterBring(CharacterInfo charInfo)
+        private void CharacterUpgrade()
         {
 
         }
 
-        private void CharacterPoolSet(CharacterInfo charInfo)
-        {
-
-        }
-
-
-        private void OnEnable()
-        {
-
-        }
-
-        private void OnDisable()
-        {
-            
-        }
-
+        #endregion
 
     }
 }
