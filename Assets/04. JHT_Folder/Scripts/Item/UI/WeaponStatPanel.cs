@@ -12,6 +12,7 @@ namespace JHT
         [SerializeField] private Button starUpBtn;
         [SerializeField] private Image weaponImage;
         [SerializeField] private Image[] starImages;
+        [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private TextMeshProUGUI levelText; // 레벨 표시용 텍스트
         [SerializeField] private TextMeshProUGUI statText;
         [SerializeField] private TextMeshProUGUI powerText;
@@ -95,6 +96,7 @@ namespace JHT
 
             // 기본 정보 업데이트
             weaponImage.sprite = curWeapon.itemIcon;
+            nameText.text = curWeapon.itemName;
             levelText.text = $"Lv. {curWeapon.ItemLevel}";
             switch (curWeapon.statType)
             {
