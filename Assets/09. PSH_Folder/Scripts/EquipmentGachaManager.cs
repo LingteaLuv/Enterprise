@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JHT;
 
+// ▼▼▼ 강화 포인트 확률 설정을 위한 클래스 추가 ▼▼▼
 [System.Serializable]
 public class EnhancementPointChance
 {
@@ -11,13 +12,16 @@ public class EnhancementPointChance
     [Range(0, 100)]
     public float chance; // 0-100%
 }
+// ▲▲▲ 강화 포인트 확률 설정을 위한 클래스 추가 ▲▲▲
 
 public class EquipmentGachaManager : BaseGachaManager<ItemObject>
 {
     private List<ItemWeaponSO> gachaPool = new List<ItemWeaponSO>();
 
+    // ▼▼▼ 강화 포인트 확률 리스트 추가 ▼▼▼
     [Header("강화 포인트 확률")]
     public List<EnhancementPointChance> enhancementPointChances;
+    // ▲▲▲ 강화 포인트 확률 리스트 추가 ▲▲▲
 
     private void Start()
     {
@@ -45,10 +49,27 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
             return null;
         }
 
-        ItemWeaponSO drawnWeaponSO = gachaPool[Random.Range(0, gachaPool.Count)];
+        // 선택된 등급에 해당하는 아이템만 필터링
+        List<ItemWeaponSO> filteredPool = gachaPool.Where(weapon => weapon.rarity == rarity).ToList();
+
+        ItemWeaponSO drawnWeaponSO;
+        if (filteredPool.Count == 0)
+        {
+            Debug.LogWarning($"[EquipmentGachaManager] {rarity} 등급의 아이템이 뽑기 풀에 없습니다. 전체 풀에서 무작위로 선택합니다.");
+            // 해당 등급의 아이템이 없을 경우, 전체 풀에서 무작위로 선택
+            drawnWeaponSO = gachaPool[Random.Range(0, gachaPool.Count)];
+        }
+        else
+        {
+            drawnWeaponSO = filteredPool[Random.Range(0, filteredPool.Count)];
+        }
+
+        Debug.Log($"[EquipmentGachaManager] 뽑힌 등급: {rarity}, 실제 뽑힌 아이템 등급: {drawnWeaponSO.rarity}, 아이템 이름: {drawnWeaponSO.itemName}");
+
         return InventoryManager.Instance.AddItem(drawnWeaponSO);
     }
 
+    // ▼▼▼ PerformMultipleGacha 오버라이드 및 강화 포인트 로직 수정 ▼▼▼
     public override bool PerformMultipleGacha(int count)
     {
         // BaseGachaManager의 기본 뽑기 로직을 먼저 실행합니다.
@@ -97,5 +118,6 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
         }
         return success;
     }
+    // ▲▲▲ PerformMultipleGacha 오버라이드 및 강화 포인트 로직 수정 ▲▲▲
 }
 
