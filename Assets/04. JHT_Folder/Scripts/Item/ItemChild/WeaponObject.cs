@@ -14,6 +14,9 @@ namespace JHT
     {
     
         public Rarity rarity;
+        public EquipCategory equipCategory; // 분류 - 무기 방패 갑옷
+        public EquipType equipType; // 세부분류 - 무기) 칼 도끼 활 등
+        public string statType;
 
         private int itemLevel;
         public int ItemLevel { get { return itemLevel; } set { itemLevel = value; OnChangeLevel?.Invoke(itemLevel); } }
@@ -36,6 +39,9 @@ namespace JHT
             itemNum = sample.itemNum;
             itemSO = sample;
             rarity = sample.rarity;
+            equipCategory  = sample.equipCategory;
+            equipType = sample.equipType;
+            statType = sample.statType;
         }
 
         

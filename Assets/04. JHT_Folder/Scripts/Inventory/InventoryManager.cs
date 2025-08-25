@@ -34,6 +34,63 @@ namespace JHT
             }
             return 0;
         }
+
+        public void LevelUpEquipment(int itemNum)
+        {
+            WeaponObject weapon = weaponList.Find(x => x.itemNum == itemNum);
+            if (weapon == null)
+            {
+                Debug.LogError($"[InventoryManager] LevelUpEquipment: itemNum {itemNum}에 해당하는 무기를 찾을 수 없습니다.");
+                return;
+            }
+
+            int requiredPoints = 10;
+            int currentPoints = GetEnhancementPoints(itemNum);
+
+            if (currentPoints >= requiredPoints)
+            {
+                // 강화 포인트 차감
+                AddEnhancementPointsToEquipment(itemNum, -requiredPoints);
+                // 레벨업
+                weapon.ItemLevel++;
+                Debug.Log($"[InventoryManager] {weapon.itemName} 레벨업! (Lv.{weapon.ItemLevel - 1} -> Lv.{weapon.ItemLevel})");
+            }
+            else
+            {
+                Debug.LogWarning($"[InventoryManager] {weapon.itemName} 레벨업 실패: 강화 포인트가 부족합니다. (필요: {requiredPoints}, 보유: {currentPoints})");
+            }
+        }
+
+        public void StarUpEquipment(int itemNum)
+        {
+            WeaponObject weapon = weaponList.Find(x => x.itemNum == itemNum);
+            if (weapon == null)
+            {
+                Debug.LogError($"[InventoryManager] StarUpEquipment: itemNum {itemNum}에 해당하는 무기를 찾을 수 없습니다.");
+                return;
+            }
+
+            // 조건 없이 성급 증가
+            weapon.ItemStar++;
+            Debug.Log($"[InventoryManager] {weapon.itemName} 성급 증가! ({weapon.ItemStar - 1}성 -> {weapon.ItemStar}성)");
+        }
+
+        public float GetWeaponStat(int itemNum)
+        {
+            WeaponObject weapon = weaponList.Find(x => x.itemNum == itemNum);
+            if (weapon == null)
+            {
+                Debug.LogError($"[InventoryManager] GetWeaponStat: itemNum {itemNum}에 해당하는 무기를 찾을 수 없습니다.");
+                return 0f;
+            }
+
+            // 기본 스탯 15, 레벨당 0.1 증가
+            float baseStat = 15f;
+            float statPerLevel = 0.1f;
+            float calculatedStat = baseStat + (weapon.ItemLevel * statPerLevel);
+
+            return calculatedStat;
+        }
         // ▲▲▲ 강화 포인트 관련 코드 수정 ▲▲▲
 
         public List<WeaponObject> weaponList;
