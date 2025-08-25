@@ -30,7 +30,7 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     /// <param name="general"></param>
     /// <param name="daily"></param>
     /// <param name="weekly"></param>
-    public void CollectItem(ItemId itemId, int count, bool general = true, bool daily = true, bool weekly = true)
+    public void CollectItem(MoneyId itemId, int count, bool general = true, bool daily = true, bool weekly = true)
     {
         var key = QuestKeys.Collect(itemId);
         SendSignal(key, count, general, daily, weekly);
@@ -44,9 +44,50 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     /// <param name="general"></param>
     /// <param name="daily"></param>
     /// <param name="weekly"></param>
-    public void GachaPull(gachaType gachaId, int count = 1, bool general = true, bool daily = true, bool weekly = true)
+    public void GachaPull(ItemType gachaId, int count = 1, bool general = true, bool daily = true, bool weekly = true)
     {
         var key = QuestKeys.GachaPull(gachaId);
+        SendSignal(key, count, general, daily, weekly);
+    }
+    
+    /// <summary>
+    /// 레벨업시 보내는 시그널
+    /// </summary>
+    /// <param name="gachaId"></param>
+    /// <param name="count"></param>
+    /// <param name="general"></param>
+    /// <param name="daily"></param>
+    /// <param name="weekly"></param>
+    public void LevelUp(ItemType LevelUpId, int count = 1, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.LevelUp(LevelUpId);
+        SendSignal(key, count, general, daily, weekly);
+    }
+    ///<summary>
+    /// 레벨업시 보내는 시그널
+    /// </summary>
+    /// <param name="UpgradeId">어떤 함선 강화를 진행하였는지를 타입으로 보냄 </param>
+    /// <param name="count"></param>
+    /// <param name="general"></param>
+    /// <param name="daily"></param>
+    /// <param name="weekly"></param>
+    public void Upgrade(UpgradeType UpgradeId, int count = 1, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.Upgrade(UpgradeId);
+        SendSignal(key, count, general, daily, weekly);
+    }
+
+    /// <summary>
+    /// 기타 사항 달성시 보내는 메일
+    /// </summary>
+    /// <param name="achieveType">string으로 메시지를 보냄</param>
+    /// <param name="count"></param>
+    /// <param name="general"></param>
+    /// <param name="daily"></param>
+    /// <param name="weekly"></param>
+    public void ETCAchieve(string achieveType, int count = 1, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.Achieve(achieveType);
         SendSignal(key, count, general, daily, weekly);
     }
 
