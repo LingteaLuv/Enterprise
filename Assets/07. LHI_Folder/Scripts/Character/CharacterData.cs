@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LHI
 {
-    public enum Role
+    public enum CrewRole
     {
         Captain,
         Boatswain,
@@ -12,23 +12,25 @@ namespace LHI
         Cook
     }
 
-    public enum Affiliation
+    public enum Faction
     {
         navy,
         pirate,
         monster
     }
 
-    [CreateAssetMenu(fileName = "CharacterData", menuName = "Scriptable Objects/CharacterData")]
+    [CreateAssetMenu(fileName = "CharacterData", menuName = "Scriptable_Character/CharacterData")]
     public class CharacterData : ScriptableObject
     {
         [Header("캐릭터 정보")]
         [Tooltip("캐릭터의 이름")]
         public string characterName;
         [Tooltip("캐릭터의 역할")]
-        public Role role;
+        public CrewRole role;
         [Tooltip("캐릭터의 소속")]
-        public Affiliation affiliation;
+        public Faction affiliation;
+        [Tooltip("캐릭터의 이미지")]
+        public Sprite characterSprite;
 
         [Header("캐릭터 스탯")]
         [Tooltip("캐릭터의 공격력")]

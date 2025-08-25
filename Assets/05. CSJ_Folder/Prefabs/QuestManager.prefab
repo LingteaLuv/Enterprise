@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3023377747093352777
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 508323871804324909}
+  - component: {fileID: 4745232091175918009}
+  m_Layer: 0
+  m_Name: QuestManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &508323871804324909
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3023377747093352777}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 821.101, y: 471.16174, z: -0.075629525}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4745232091175918009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3023377747093352777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75294f2daf161aa43906b287b3db330e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dailyQuestLists: {fileID: 11400000, guid: de7acd427a9b22b4cb0932f1ee1566b6, type: 2}
+  _weeklyQuestLists: {fileID: 11400000, guid: de7acd427a9b22b4cb0932f1ee1566b6, type: 2}
+  _signal: {fileID: 11400000, guid: c231c101f2103d84da16538b75e4ef7f, type: 2}
+  _stageClearTemplate: {fileID: 11400000, guid: b5c7c0acc3a6cbc4cb9cf19eba3f3ce7, type: 2}
+  _tutorialSequence: {fileID: 11400000, guid: ddb13c502b804d144b074c7dc42943c6, type: 2}
+  _routineSequence: {fileID: 11400000, guid: 4e28331580c7d0d4981facf21c9af6e0, type: 2}
+  QuestUI: {fileID: 0}
