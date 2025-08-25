@@ -30,6 +30,8 @@ namespace JHT
         private InventoryManager inventoryManager;
         private bool isLevelSort;
 
+        private List<ItemPanelPrefab> itemPanelPool = new List<ItemPanelPrefab>();
+
         //private List<ItemPanelPrefab> items;
 
         private void OnEnable()
@@ -43,6 +45,8 @@ namespace JHT
             relicsInventoryButton.onClick.AddListener(ChangeRelicsMode);
             InventoryManager.Instance.OnChooseItem += ShowChooseItem;
             ItemEventManager.Instance.OnClickItem += ShowItemStat;
+
+            ReSetItemPanel(null);
         }
 
         private void OnDisable()
@@ -72,14 +76,14 @@ namespace JHT
 
         private void ShowItemStat(ItemObject obj)
         {
-            if (obj.itemSO.itemType == ItemType.Weapon)
+            if (obj.itemSO.itemType == ItemType.Equip)
             {
                 WeaponObject inst = (WeaponObject)InventoryManager.Instance.GetItemData(obj);
 
                 if(!weaponStatPanel.gameObject.activeSelf)
                     weaponStatPanel.gameObject.SetActive(true);
 
-                weaponStatPanel.Init(inst);
+                weaponStatPanel.ShowStats(inst);
             }
             else
             {
@@ -100,38 +104,34 @@ namespace JHT
         }
 
 
-        //유물 or 무기 구분해서 sort
         private void ReSetItemPanel(ItemObject changedItem)
         {
-            if (changedItem is WeaponObject)
+            // 1. 모든 풀링된 패널을 비활성화
+            foreach (ItemPanelPrefab panel in itemPanelPool)
             {
-                foreach (Transform child in weaponPanelParent)
+                panel.gameObject.SetActive(false);
+            }
+
+            // 2. 인벤토리 리스트를 기반으로 패널을 재사용/생성하여 업데이트
+            for (int i = 0; i < inventoryManager.weaponList.Count; i++)
+            {
+                ItemPanelPrefab currentPanel;
+                if (i < itemPanelPool.Count)
                 {
-                    Destroy(child.gameObject);
+                    // 풀에 사용 가능한 패널이 있으면 재사용
+                    currentPanel = itemPanelPool[i];
+                }
+                else
+                {
+                    // 풀이 부족하면 새로 생성하고 풀에 추가
+                    currentPanel = Instantiate(itemPanelPrefab, weaponPanelParent);
+                    itemPanelPool.Add(currentPanel);
                 }
 
-                for (int i = 0; i < inventoryManager.weaponList.Count; i++)
-                {
-                    ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
-                    obj.transform.SetParent(weaponPanelParent);
-                    obj.Init(inventoryManager.weaponList[i]);
-                }
+                WeaponObject weapon = inventoryManager.weaponList[i];
+                currentPanel.SetUp(weapon);
+                currentPanel.gameObject.SetActive(true);
             }
-            else
-            {
-                foreach (Transform child in relicsPanelParent)
-                {
-                    Destroy(child.gameObject);
-                }
-
-                for (int i = 0; i < inventoryManager.relicsList.Count; i++)
-                {
-                    ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
-                    obj.transform.SetParent(relicsPanelParent);
-                    obj.Init(inventoryManager.relicsList[i]);
-                }
-            }
-            
         }
 
         private void ChangeWeaponMode()

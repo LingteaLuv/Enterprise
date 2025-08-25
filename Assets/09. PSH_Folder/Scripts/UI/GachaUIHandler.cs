@@ -1,3 +1,4 @@
+using JHT;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 /// </summary>
 public class GachaUIHandler : MonoBehaviour
 {
-    [Header("패널 목록")]
+    [Header("패널 및 탭 버튼")]
     public GameObject charPanel;
     public GameObject equipPanel;
     public GameObject relicPanel;
@@ -21,41 +22,40 @@ public class GachaUIHandler : MonoBehaviour
     public Button charMultipleBtn;
 
     [Header("장비 뽑기")]
-    // public EquipmentGachaManager equipmentGachaManager;
+    public EquipmentGachaManager equipmentGachaManager;
+    public Button equipSingleBtn;
+    public Button equipMultipleBtn;
 
     [Header("유물 뽑기")]
+    // public RelicGachaManager relicGachaManager;
 
-
-    [Header("연결할 UI")]
+    [Header("결과 UI")]
     [Tooltip("뽑기 결과 화면 UI를 연결하세요.")]
     public GachaListUI gachaListPanel;
 
 
     private void Start()
     {
-        // 패널 연결
+        // 탭 버튼 이벤트 연결
         charButton.onClick.AddListener(() => { charPanel.SetActive(true); equipPanel.SetActive(false); relicPanel.SetActive(false); });
         equipButton.onClick.AddListener(() => { charPanel.SetActive(false); equipPanel.SetActive(true); relicPanel.SetActive(false); });
         relicButton.onClick.AddListener(() => { charPanel.SetActive(false); equipPanel.SetActive(false); relicPanel.SetActive(true); });
 
-
-        // 캐릭터 뽑기
+        // 캐릭터 뽑기 버튼 이벤트 연결
         charSingleBtn.onClick.AddListener(OnClick_CharacterGacha_Single);
         charMultipleBtn.onClick.AddListener(OnClick_CharacterGacha_Multiple);
+
+        // 장비 뽑기 버튼 이벤트 연결
+        equipSingleBtn.onClick.AddListener(OnClick_EquipmentGacha_Single);
+        equipMultipleBtn.onClick.AddListener(OnClick_EquipmentGacha_Multiple);
     }
 
     #region 캐릭터 뽑기 함수
-    /// <summary>
-    /// 캐릭터 1회 뽑기 버튼에 연결할 함수
-    /// </summary>
     public void OnClick_CharacterGacha_Single()
     {
         HandleGacha(characterGachaManager, 1);
     }
 
-    /// <summary>
-    /// 캐릭터 10회 뽑기 버튼에 연결할 함수
-    /// </summary>
     public void OnClick_CharacterGacha_Multiple()
     {
         HandleGacha(characterGachaManager, 10);
@@ -63,47 +63,35 @@ public class GachaUIHandler : MonoBehaviour
     #endregion
 
 
-    #region 장비 뽑기 함수 (구현 예시)
-    /*
-    /// <summary>
-    /// 장비 1회 뽑기 버튼에 연결할 함수
-    /// </summary>
+    #region 장비 뽑기 함수
     public void OnClick_EquipmentGacha_Single()
     {
         HandleGacha(equipmentGachaManager, 1);
     }
 
-    /// <summary>
-    /// 장비 10회 뽑기 버튼에 연결할 함수
-    /// </summary>
     public void OnClick_EquipmentGacha_Multiple()
     {
         HandleGacha(equipmentGachaManager, 10);
     }
-    */
     #endregion
 
 
     /// <summary>
     /// 실제 뽑기를 처리하는 범용 함수
     /// </summary>
-    /// <typeparam name="T">PlayerCharacterData 또는 EquipmentData 등</typeparam>
-    /// <param name="manager">사용할 매니저</param>
-    /// <param name="count">뽑을 횟수</param>
     private void HandleGacha<T>(BaseGachaManager<T> manager, int count) where T : class
     {
         if (manager == null)
         {
-            Debug.LogError($"{typeof(T).Name} Gacha Manager가 GachaUIHandler에 연결되지 않았습니다!");
+            Debug.LogError($"GachaUIHandler에 {typeof(T).Name}에 해당하는 Gacha Manager가 연결되지 않았습니다!");
             return;
         }
 
         int totalCost = manager.singleGachaCost * count;
-        string itemType = "아이템"; // 기본 표시 이름
+        string itemType = "아이템";
         if (typeof(T) == typeof(PlayerCharacterData)) itemType = "캐릭터";
-        // else if (typeof(T) == typeof(EquipmentData)) itemType = "장비"; // 나중에 추가
+        else if (typeof(T) == typeof(ItemObject)) itemType = "장비";
 
-        // 확인창 호출
         UIManager.Instance.ShowConfirm(
             $"{totalCost}{manager.currencyType}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?",
             onConfirm: () =>
@@ -112,20 +100,27 @@ public class GachaUIHandler : MonoBehaviour
                 {
                     Debug.Log($"UI 버튼 클릭으로 {itemType} {count}회 뽑기를 실행했습니다.");
 
-                    // 뽑기 결과 타입에 따라 적절한 UI 표시 함수를 호출합니다.
+                    // [디버그 로그 추가]
+                    if (manager.LastGachaResults == null)
+                    {
+                        Debug.LogError("[GachaUIHandler] LastGachaResults 리스트가 null입니다!");
+                        return;
+                    }
+                    Debug.Log($"[GachaUIHandler] 결과 리스트 확인. 아이템 개수: {manager.LastGachaResults.Count}, 리스트 타입: {manager.LastGachaResults.GetType().Name}");
+
+                    // THE CRITICAL PART
                     if (manager.LastGachaResults is List<PlayerCharacterData> characterResults)
                     {
+                        Debug.Log("[GachaUIHandler] 캐릭터 결과 UI를 호출합니다.");
                         gachaListPanel.DisplayCharacterResults(characterResults);
                         gachaListPanel.gameObject.SetActive(true);
                     }
-                    /*
-                    else if (manager.LastGachaResults is List<EquipmentData> equipmentResults)
+                    else if (manager.LastGachaResults is List<ItemObject> equipmentResults)
                     {
-                        // 나중에 장비 결과 UI를 만들면 여기에 연결
-                        // gachaListUI.DisplayEquipmentResults(equipmentResults);
-                        // gachaListUI.gameObject.SetActive(true);
+                        Debug.Log("[GachaUIHandler] 장비 결과 UI를 호출합니다.");
+                        gachaListPanel.DisplayEquipmentResults(equipmentResults);
+                        gachaListPanel.gameObject.SetActive(true);
                     }
-                    */
                 }
                 else
                 {
@@ -138,6 +133,4 @@ public class GachaUIHandler : MonoBehaviour
             }
         );
     }
-
-    
 }

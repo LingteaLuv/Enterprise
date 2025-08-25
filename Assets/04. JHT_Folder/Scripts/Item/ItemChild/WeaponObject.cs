@@ -11,6 +11,11 @@ namespace JHT
         
         public ItemRarity curRarity;
 
+        public Rarity rarity;
+        public EquipCategory equipCategory; // 분류 - 무기 방패 갑옷
+        public EquipType equipType; // 세부분류 - 무기) 칼 도끼 활 등
+        public string statType;
+
         //확인용 변수
         public float curPower;
 
@@ -33,18 +38,24 @@ namespace JHT
         public Action OnUpCount;
         public Action OnAddStar;
 
-        public WeaponObject(ItemWeaponSO sample, ItemRarity rarity)
+        public WeaponObject(ItemWeaponSO sample)
         {
             itemIcon = sample.icon;
             itemName = sample.itemName;
             itemNum = sample.itemNum;
             itemSO = sample;
+            /*
             curRarity = rarity;
             ItemStar = (int)rarity;
             ItemPower = sample.upPowerPercent[itemStar] * itemLevel;
             curPower = itemPower;
             InventoryManager.Instance.OnUpCountItem += ItemLevelUp;
             OnAddStar += UpGradeItemForStar;
+            */
+            rarity = sample.rarity;
+            equipCategory = sample.equipCategory;
+            equipType = sample.equipType;
+            statType = sample.statType;
         }
 
         // 레벨이 오를경우

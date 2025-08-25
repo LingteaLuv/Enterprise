@@ -25,6 +25,8 @@ namespace JHT
         private AsyncOperationHandle<IList<ItemWeaponSO>> weaponHandle;
         private AsyncOperationHandle<IList<ItemRelicsSO>> relicsHandle;
 
+        public bool IsDataLoaded { get; private set; } = false;
+
         // 수정필요 : csv에서 데이터 받아온 후 초기화 할 수 있도록 설정 해야함 
         protected override void Awake()
         {
@@ -43,16 +45,36 @@ namespace JHT
             relicsList = new();
             relicsDataDic = new();
 
-            weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>(WEAPON_LABEL);
-            relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>(RELICS_LABEL);
+            ItemWeaponSO[] loadedWeapons = Resources.LoadAll<ItemWeaponSO>("EquipData");
+            LoadWeaponList(loadedWeapons);
+            //weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>(WEAPON_LABEL);
+            //relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>(RELICS_LABEL);
 
-            yield return weaponHandle;
-            yield return relicsHandle;
 
-            LoadWeaponList(weaponHandle);
-            LoadRelicsList(relicsHandle);
+            //yield return weaponHandle;
+            //yield return relicsHandle;
+
+            //LoadWeaponList(weaponHandle);
+            //LoadRelicsList(relicsHandle);
         }
         #region 장비
+        private void LoadWeaponList(ItemWeaponSO[] objs)
+        {
+            List<ItemWeaponSO> list = new();
+            foreach (var w in objs)
+            {
+                list.Add(w);
+            }
+
+            //List<ItemWeaponSO> sortList = list.OrderBy(w => w.itemNum).ToList();
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                weaponList.Add(list[i]);
+            }
+
+            LoadWeaponFinish(weaponList);
+        }
         private void LoadWeaponList(AsyncOperationHandle<IList<ItemWeaponSO>> objs)
         {
             List<ItemWeaponSO> list = new();
@@ -81,12 +103,14 @@ namespace JHT
                     weaponDataDic.Add(list[i].itemNum, list[i]);
             }
 
-            if (weaponHandle.Status == AsyncOperationStatus.Succeeded)
+            IsDataLoaded = true; // 데이터 로딩 완료!
+
+            /*if (weaponHandle.Status == AsyncOperationStatus.Succeeded)
             {
                 //if (encyclopediaPanel == null)
                 //    encyclopediaPanel = FindObjectOfType<EncyclopediaPanel>();
                 StartCoroutine(WeaponEndInit());
-            }
+            }*/
         }
         private IEnumerator WeaponEndInit()
         {
