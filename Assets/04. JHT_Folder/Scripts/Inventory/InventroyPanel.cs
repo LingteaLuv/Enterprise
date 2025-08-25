@@ -23,7 +23,7 @@ namespace JHT
         private InventoryManager inventoryManager;
         private bool isLevelSort;
 
-        //private List<ItemPanelPrefab> items;
+        private List<ItemPanelPrefab> itemPanelPool = new List<ItemPanelPrefab>();
 
         private void OnEnable()
         {
@@ -49,7 +49,7 @@ namespace JHT
             relicsInventoryButton.onClick.RemoveListener(ChangeRelicsMode);
             ItemEventManager.Instance.OnClickItem -= ShowWeaponStat;
         }
-        
+
         private void SortByLevel()
         {
             isLevelSort = !isLevelSort;
@@ -63,42 +63,41 @@ namespace JHT
             {
                 WeaponObject inst = (WeaponObject)InventoryManager.Instance.GetItemData(obj);
 
-                if(!weaponStatPanel.gameObject.activeSelf)
+                if (!weaponStatPanel.gameObject.activeSelf)
                     weaponStatPanel.gameObject.SetActive(true);
 
-                //weaponStatPanel.Init(inst);
+                weaponStatPanel.ShowStats(inst);
             }
-            
+
         }
 
-        private void AddItem(ItemObject item)
-        {
-            ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
-            obj.transform.SetParent(itemPanelParent);
-            //obj.Init(item);
-        }
-
-
-        //유물 or 무기 구분해서 sort
         private void ReSetItemPanel(ItemObject changedItem)
         {
-            // 기존 아이템 UI들을 모두 삭제
-            foreach (Transform child in itemPanelParent)
+            // 1. 모든 풀링된 패널을 비활성화
+            foreach (ItemPanelPrefab panel in itemPanelPool)
             {
-                Destroy(child.gameObject);
+                panel.gameObject.SetActive(false);
             }
 
-            // InventoryManager가 가진 무기 리스트를 기반으로 UI를 다시 생성
+            // 2. 인벤토리 리스트를 기반으로 패널을 재사용/생성하여 업데이트
             for (int i = 0; i < inventoryManager.weaponList.Count; i++)
             {
-                // 1. 아이템 패널 프리팹을 생성하고, 부모를 itemPanelParent로 설정
-                ItemPanelPrefab obj = Instantiate(itemPanelPrefab, itemPanelParent);
+                ItemPanelPrefab currentPanel;
+                if (i < itemPanelPool.Count)
+                {
+                    // 풀에 사용 가능한 패널이 있으면 재사용
+                    currentPanel = itemPanelPool[i];
+                }
+                else
+                {
+                    // 풀이 부족하면 새로 생성하고 풀에 추가
+                    currentPanel = Instantiate(itemPanelPrefab, itemPanelParent);
+                    itemPanelPool.Add(currentPanel);
+                }
 
-                // 2. inventoryManager.weaponList에서 WeaponObject를 가져옴
                 WeaponObject weapon = inventoryManager.weaponList[i];
-
-                // 3. 이전에 만든 SetWeaponData 함수를 호출하여 UI 내용 채우기
-                obj.SetUp(weapon);
+                currentPanel.SetUp(weapon);
+                currentPanel.gameObject.SetActive(true);
             }
         }
 
