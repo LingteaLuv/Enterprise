@@ -35,7 +35,7 @@ namespace JHT
 
         public void AddWeapon(ItemWeaponSO item)
         {
-            InventoryManager.Instance.AddItem(item,WeaponRarity.E);
+            InventoryManager.Instance.AddItem(item);
         }
 
         public void RemoveWeapon(ItemWeaponSO item)

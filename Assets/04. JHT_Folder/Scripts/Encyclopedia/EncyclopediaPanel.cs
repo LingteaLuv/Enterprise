@@ -25,12 +25,12 @@ namespace JHT
 
         private void ShowAllWeapon()
         {
-            for (int i = 0; i < ItemDataManager.Instance.GetAllWeaponData().Count; i++)
+            /*for (int i = 0; i < ItemDataManager.Instance.GetAllWeaponData().Count; i++)
             {
                 EncyclopediaPanelItem obj = Instantiate(encyclopediaPanelItem);
                 obj.transform.SetParent(encyclopediaPanelItemParent);
                 obj.Init(ItemDataManager.Instance.GetAllWeaponData()[i]);
-            }
+            }*/
         }
     }
 }
