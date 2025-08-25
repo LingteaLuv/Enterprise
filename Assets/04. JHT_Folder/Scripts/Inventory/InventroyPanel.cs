@@ -64,10 +64,10 @@ namespace JHT
             ReSetItemPanel(null);
         }
 
-        private RelicsObject ShowChooseItem(RelicsObject obj1, RelicsObject obj2)
+        private void ShowChooseItem(RelicsObject obj1, RelicsObject obj2)
         {
             choosePopup.gameObject.SetActive(true);
-            return choosePopup.Init(obj1, obj2);
+            choosePopup.Init(obj1, obj2);
         }
 
         private void ShowItemStat(ItemObject obj)
