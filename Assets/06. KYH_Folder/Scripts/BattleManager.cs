@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
@@ -23,10 +24,24 @@ public class BattleManager : MonoBehaviour
 
     private int currentStageIndex = 0;
 
+    private bool isbattleover = false;
+
     private void Awake()
     {
         Debug.Log("BattleManager.Awake 호출됨");
         Instance = this;
+    }
+
+    private void Update()
+    {
+        // 임시 전투 종료 후 다음 섬 넘어가기위한 키 . 차후 삭제 예정
+        if (Keyboard.current.spaceKey.wasPressedThisFrame && !isbattleover)
+        {
+            isbattleover = true;
+            battleRoutine = null;
+            IslandStageManager.Instance.OnBattleComplete();
+            ClearEnemies();
+        }
     }
 
     /// <summary>
@@ -34,6 +49,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public void StartBattle(int stageIndex)
     {
+        isbattleover = false;
         currentStageIndex = stageIndex;
         battleRoutine = StartCoroutine(BattleRoutine());
         Debug.Log("battleRoutine 시작됨");
@@ -44,6 +60,8 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private IEnumerator BattleRoutine()
     {
+        
+
         Debug.Log("전투 시작");
 
         var field = battleFields[currentStageIndex];
@@ -53,6 +71,14 @@ public class BattleManager : MonoBehaviour
         SpawnEnemies(field, currentStageIndex);
 
         yield return new WaitForSeconds(0.5f); // 연출 시간
+
+      //  // 임시 전투 종료 후 다음 섬 넘어가기위한 키 . 차후 삭제 예정
+      //  if(Keyboard.current.spaceKey.wasPressedThisFrame)
+      //  {
+      //      battleRoutine = null;
+      //      Debug.Log("스페이스 버튼으로 전투 스킵 후 다음 섬 이동.");
+      //      IslandStageManager.Instance.OnBattleComplete();
+      //  }
 
         // 2. 전투 루프
         while (true)
@@ -67,7 +93,15 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(1f); // 종료 연출 대기
 
         battleRoutine = null;
-        IslandStageManager.Instance.OnBattleComplete();
+
+        if (isbattleover == true)
+        {
+            yield break;
+        }
+        else
+        {
+            IslandStageManager.Instance.OnBattleComplete();
+        }
     }
 
     private void SpawnPlayer(BattleField field)
@@ -112,5 +146,15 @@ public class BattleManager : MonoBehaviour
     private void AutoControlUnits()
     {
         // TODO: 추후 유닛 FSM이나 AI 구현 시 연결
+    }
+
+    private void ClearEnemies()
+    {
+        foreach (var enemy in spawnedEnemies)
+        {
+            if (enemy != null)
+                Destroy(enemy);
+        }
+        spawnedEnemies.Clear();
     }
 }
