@@ -1,3 +1,4 @@
+using NUnit.Framework.Interfaces;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,141 +9,57 @@ namespace JHT
     {
         private WeaponObject curWeapon;
 
-        [SerializeField] private HoldButton levelUpBtn;
-        [SerializeField] private Button starUpBtn;
+        [SerializeField] private Button upGradeButton;
         [SerializeField] private Image weaponImage;
-        [SerializeField] private Image[] starImages;
-        [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private TextMeshProUGUI levelText; // 레벨 표시용 텍스트
-        [SerializeField] private TextMeshProUGUI statText;
+        [SerializeField] private Image starImage;
         [SerializeField] private TextMeshProUGUI powerText;
+        [SerializeField] private TextMeshProUGUI upLevelText;
+        [SerializeField] private TextMeshProUGUI shieldText;
 
-        private void Awake()
+        public void Init(WeaponObject weapon)
         {
-            levelUpBtn.onHoldAction.AddListener(OnLevelUpButtonClick);
-            starUpBtn.onClick.AddListener(OnStarUpButtonClick);
-        }
-
-        private void OnDisable()
-        {
-            // 패널이 비활성화될 때 이벤트 리스너 정리
-            if (curWeapon != null)
-            {
-                curWeapon.OnChangeLevel -= OnWeaponDataChanged;
-                curWeapon.OnChangeStar -= OnWeaponDataChanged;
-                InventoryManager.Instance.OnEquipmentEnhancementPointsChanged -= OnEnhancementPointsChanged;
-            }
-        }
-
-        public void ShowStats(WeaponObject weapon)
-        {
-            // 이전에 등록된 이벤트가 있다면 해제
-            if (curWeapon != null)
-            {
-                curWeapon.OnChangeLevel -= OnWeaponDataChanged;
-                curWeapon.OnChangeStar -= OnWeaponDataChanged;
-                InventoryManager.Instance.OnEquipmentEnhancementPointsChanged -= OnEnhancementPointsChanged;
-            }
-
             curWeapon = weapon;
+            ItemWeaponSO so = (ItemWeaponSO)curWeapon.itemSO;
 
-            if (curWeapon == null)
-            {
-                // 무기 정보가 없으면 패널 비활성화 또는 초기 상태로
-                gameObject.SetActive(false);
-                return;
-            }
+            curWeapon.OnUpgrade += UpStarAction;
+            curWeapon.OnChangeStar += UpdateStarView;
+            curWeapon.OnChangeLevel += UpdateLevelView;
+            curWeapon.OnChangePower += UpdatePowerView;
+            upGradeButton.onClick.AddListener(() => { curWeapon.OnAddStar?.Invoke(); });
 
-            gameObject.SetActive(true);
+            upGradeButton.interactable = curWeapon.IsUpgrade;
+            weaponImage.sprite = so.icon;
 
-            // 새 무기의 데이터 변경 이벤트에 UI 업데이트 함수 연결
-            curWeapon.OnChangeLevel += OnWeaponDataChanged;
-            curWeapon.OnChangeStar += OnWeaponDataChanged;
-            // 강화 포인트 변경 이벤트에 UI 업데이트 함수 연결
-            InventoryManager.Instance.OnEquipmentEnhancementPointsChanged += OnEnhancementPointsChanged;
-
-            UpdateUI();
+            UpdateLevelView(curWeapon.ItemLevel);
+            UpdateStarView(curWeapon.ItemStar);
+            UpdatePowerView(curWeapon.ItemPower);
         }
 
-        private void OnLevelUpButtonClick()
+        public void UpdateLevelView(int value)
         {
-            if (curWeapon == null) return;
-            InventoryManager.Instance.LevelUpEquipment(curWeapon.itemNum);
+            ItemWeaponSO so = (ItemWeaponSO)curWeapon.itemSO;
+
+            upLevelText.text = $"{value}/{so.maxLevelInCurStar[curWeapon.itemStar]}";
         }
 
-        private void OnStarUpButtonClick()
+        public void UpdatePowerView(float value)
         {
-            if (curWeapon == null) return;
-            InventoryManager.Instance.StarUpEquipment(curWeapon.itemNum);
+            ItemWeaponSO so = (ItemWeaponSO)curWeapon.itemSO;
+
+            powerText.text = curWeapon.ItemPower.ToString();
         }
 
-        private void OnWeaponDataChanged(int value)
+        public void UpdateStarView(int value)
         {
-            UpdateUI();
+            ItemWeaponSO so = (ItemWeaponSO)curWeapon.itemSO;
+            starImage.sprite = so.starImage[value];
         }
 
-        private void OnEnhancementPointsChanged(int itemNum, int points)
+        // 내 돈보다 클때 추가해야함
+        private void UpStarAction(bool value)
         {
-            // 현재 보고있는 무기의 강화포인트가 변경되었을 때만 UI 갱신
-            if (curWeapon != null && curWeapon.itemNum == itemNum)
-            {
-                UpdateUI();
-            }
+            upGradeButton.interactable = value;
         }
 
-        private void UpdateUI()
-        {
-            if (curWeapon == null) return;
-
-            // 기본 정보 업데이트
-            weaponImage.sprite = curWeapon.itemIcon;
-            nameText.text = curWeapon.itemName;
-            levelText.text = $"Lv. {curWeapon.ItemLevel}";
-            switch (curWeapon.statType)
-            {
-                case "attackPower":
-                    statText.text = "공격력";
-                    break;
-
-                case "defensePower":
-                    statText.text = "방어력";
-                    break;
-
-                case "health":
-                    statText.text = "체력";
-                    break;
-
-                default:
-                    statText.text = "알 수 없는 스탯";
-                    break;
-            }
-
-
-            // 스탯 계산 및 표시
-            float calculatedStat = InventoryManager.Instance.GetWeaponStat(curWeapon.itemNum);
-            powerText.text = $"{calculatedStat:F1}% 증가";
-
-            // 별 UI 업데이트
-            UpdateStarDisplay(curWeapon.ItemStar);
-
-            // 성급업 가능 여부 먼저 계산
-            bool isMaxStars = curWeapon.ItemStar >= 5;
-            bool needsStarUp = curWeapon.ItemLevel > 0 && curWeapon.ItemLevel % 10 == 0 && curWeapon.ItemStar < (curWeapon.ItemLevel / 10);
-            bool canStarUp = !isMaxStars && needsStarUp;
-            starUpBtn.interactable = canStarUp;
-
-            // 레벨업 버튼 활성화 로직 (성급업이 가능하지 않을 때만 활성화)
-            bool hasEnoughPoints = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum) >= 10;
-            bool isMaxLevel = curWeapon.ItemLevel >= 50;
-            levelUpBtn.interactable = hasEnoughPoints && !isMaxLevel && !canStarUp;
-        }
-
-        private void UpdateStarDisplay(int currentStars)
-        {
-            for (int i = 0; i < starImages.Length; i++)
-            {
-                starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
-            }
-        }
     }
 }
