@@ -214,6 +214,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _googleLoginBtn: {fileID: 1886686620}
   _guestLoginBtn: {fileID: 1415596461}
+  _playGamesLoginBtn: {fileID: 1611712680}
 --- !u!1 &134951661
 GameObject:
   m_ObjectHideFlags: 0
@@ -2883,12 +2884,12 @@ GameObject:
   - component: {fileID: 1611712681}
   - component: {fileID: 1611712680}
   m_Layer: 5
-  m_Name: GoogleLogoutBtn
+  m_Name: PlayGamesLoginBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1611712680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3196,7 +3197,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: GoogleLogout
+  m_text: PlayGamesLogin
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3395,7 +3396,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
-  _googleWebAPI: 442492611135-dq4pgnvgurl1urko0ufe2hqbeql3psnu.apps.googleusercontent.com
+  _googleWebAPI: 442492611135-uorp8s27lrlcj76no3lf79l1dh1akkh0.apps.googleusercontent.com
 --- !u!4 &1841873299
 Transform:
   m_ObjectHideFlags: 0
