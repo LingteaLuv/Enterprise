@@ -23,13 +23,13 @@ namespace JHT
         #endregion
 
         #region Relics
-
+        public Image itemRarityImage;
         #endregion
 
 
         public void Init(ItemObject item)
         {
-            if (item is WeaponObject)
+            if (item.itemSO.itemType == ItemType.Weapon)
             {
                 itemObject = (WeaponObject)item;
                 WeaponObject obj = (WeaponObject)itemObject;
@@ -41,6 +41,9 @@ namespace JHT
             }
             else
             {
+                itemObject = (RelicsObject)item;
+                RelicsObject obj = (RelicsObject)itemObject;
+
                 SetRelics((RelicsObject)item);
             }
         }
@@ -50,12 +53,31 @@ namespace JHT
             ItemEventManager.Instance.ClickItem(itemObject);
         }
 
+
+        #region Relics
+
+
+        private void SetRelics(RelicsObject item)
+        {
+            if (item.itemNum != itemObject.itemNum)
+                return;
+
+            itemRarityImage.sprite = item.itemRarityImage;
+            itemStarImage.gameObject.SetActive(false);
+            itemCountText.gameObject.SetActive(false);
+            itemDetail.onClick.AddListener(ShowItem);
+        }
+
+        #endregion
+
+
+        #region Weapon
+
         private void SetWeapon(WeaponObject item)
         {
             if (item.itemNum != itemObject.itemNum)
                 return;
 
-            itemObject = item;
             itemName = item.itemName;
             itemLevel = item.ItemLevel;
             itemImage.sprite = item.itemIcon;
@@ -63,16 +85,10 @@ namespace JHT
 
         }
 
-        private void SetRelics(RelicsObject item)
-        {
 
-        }
-
-        //Action으로 WeaponItem을 받아와야할듯? 
         private void UpCountAction(int value)
         {
             WeaponObject obj = (WeaponObject)itemObject;
-            //Weapon
             itemCountText.text = value.ToString();
         }
 
@@ -82,5 +98,6 @@ namespace JHT
             WeaponObject obj = (WeaponObject)itemObject;
             itemStarImage.sprite = so.starImage[value];
         }
+        #endregion
     }
 }

@@ -2,7 +2,6 @@ using NUnit.Framework.Interfaces;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
 namespace JHT
 {
@@ -23,32 +22,38 @@ namespace JHT
             ItemWeaponSO so = (ItemWeaponSO)curWeapon.itemSO;
 
             curWeapon.OnUpgrade += UpStarAction;
-            weapon.OnChangeStar += UpdateStarview;
+            curWeapon.OnChangeStar += UpdateStarView;
+            curWeapon.OnChangeLevel += UpdateLevelView;
+            curWeapon.OnChangePower += UpdatePowerView;
             upGradeButton.onClick.AddListener(() => { curWeapon.OnAddStar?.Invoke(); });
 
             upGradeButton.interactable = curWeapon.IsUpgrade;
             weaponImage.sprite = so.icon;
 
-            UpdateLevelView();
-            UpdateStarview(curWeapon.itemStar);
+            UpdateLevelView(curWeapon.ItemLevel);
+            UpdateStarView(curWeapon.ItemStar);
+            UpdatePowerView(curWeapon.ItemPower);
         }
 
-        public void UpdateLevelView()
+        public void UpdateLevelView(int value)
         {
             ItemWeaponSO so = (ItemWeaponSO)curWeapon.itemSO;
 
-            powerText.text = curWeapon.weaponPower.ToString();
-            upLevelText.text = $"{curWeapon.ItemLevel}/{so.maxLevelInCurStar[curWeapon.itemStar]}";
+            upLevelText.text = $"{value}/{so.maxLevelInCurStar[curWeapon.itemStar]}";
         }
-
-        public void UpdateStarview(int value)
+        
+        public void UpdatePowerView(float value)
         {
             ItemWeaponSO so = (ItemWeaponSO)curWeapon.itemSO;
-            Debug.Log($"1Value : {value}");
-            Debug.Log($"1CurValue : {curWeapon.itemStar}");
+
+            powerText.text = curWeapon.ItemPower.ToString();
+        }
+
+        public void UpdateStarView(int value)
+        {
+            ItemWeaponSO so = (ItemWeaponSO)curWeapon.itemSO;
             starImage.sprite = so.starImage[value];
         }
-
 
         // 내 돈보다 클때 추가해야함
         private void UpStarAction(bool value)

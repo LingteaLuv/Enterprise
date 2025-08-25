@@ -41,13 +41,4 @@ namespace JHT
         Shield
     }
 
-    public enum WeaponRarity
-    {
-        E = 0,
-        D,
-        C,
-        B,
-        A
-    }
-
 }
