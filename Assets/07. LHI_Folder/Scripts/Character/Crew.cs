@@ -18,19 +18,24 @@ namespace LHI
 
         private void Start()
         {
-            MaxHP = characterData.health;
-            CurrentHP = MaxHP;
 
-            // 데이터 옮기기
-
-            CurrentSkillGauge = 0;
-            MaxSkillGauge = 100; // 예시로 100으로 설정
         }
+
+        private void OnEnable()
+        {
+            // 캐릭터 데이터를 스테이터스에 적용
+
+
+        }
+        // MaxHP = characterData.health;
+        // CurrentHP = MaxHP;
+        //CurrentSkillGauge = 0;
+        //MaxSkillGauge = 100; // 예시로 100으로 설정
 
         public override void TakeDamage(float damage)
         {
-            CurrentHP = Mathf.Max(CurrentHP - damage, 0);
-            if (CurrentHP <= 0)
+            currentHP = Mathf.Max(currentHP - damage, 0);
+            if (currentHP <= 0)
             {
                 Die();
             }
@@ -41,17 +46,17 @@ namespace LHI
             gameObject.SetActive(false); // 캐릭터를 비활성화
         }
 
-        public void Heal(float amount)
+        public override void Heal(float amount)
         {
-            CurrentHP = Mathf.Min(CurrentHP + amount, MaxHP);
+            currentHP = Mathf.Min(currentHP + amount, maxHP);
         }
 
-        public void Move()
+        public override void Move()
         {
             // 캐릭터 
         }
 
-        public void Find()
+        public override void TargetFind()
         {
             
         }
