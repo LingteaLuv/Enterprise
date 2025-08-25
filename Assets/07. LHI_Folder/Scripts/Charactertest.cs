@@ -21,10 +21,10 @@ namespace LHI
 
         public void OnGUI()
         {
-            if (GUI.Button(new Rect(10, 10, 150, 30), "Click Me"))
+            if (GUI.Button(new Rect(10, 10, 150, 30), "CharacterManager"))
             {
                 OnClicked?.Invoke();
-                Debug.Log("Button Clicked!");
+                Debug.Log("CharacterManager: Button Clicked!");
             }
         }
         public void Debug_()

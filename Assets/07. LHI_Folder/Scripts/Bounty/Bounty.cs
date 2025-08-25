@@ -81,13 +81,13 @@ namespace LHI
         {
             switch (characterData.role)
             {
-                case Role.Captain:
+                case CrewRole.Captain:
                     return characterData.attack * 1.5f;
-                case Role.Boatswain:
+                case CrewRole.Boatswain:
                     return characterData.attack * 0.2f;
-                case Role.Sailor:
+                case CrewRole.Sailor:
                     return characterData.attack * 1.2f;
-                case Role.Cook:
+                case CrewRole.Cook:
                     return characterData.attack;
                 default:
                     Debug.Log("캐릭터의 역할이 없습니다. 0을 반환합니다. (전투력 산출 공격력 부분)");
@@ -104,13 +104,13 @@ namespace LHI
         {
             switch (characterData.role)
             {
-                case Role.Captain:
+                case CrewRole.Captain:
                     return characterData.health * 0.3f;
-                case Role.Boatswain:
+                case CrewRole.Boatswain:
                     return characterData.health * 0.4f;
-                case Role.Sailor:
+                case CrewRole.Sailor:
                     return characterData.health * 0.3f;
-                case Role.Cook:
+                case CrewRole.Cook:
                     return characterData.health * 0.4f;
                 default:
                     Debug.Log("캐릭터의 역할이 없습니다. 0을 반환합니다. (전투력 산출 체력 부분)");
@@ -127,13 +127,13 @@ namespace LHI
         {
             switch (characterData.role)
             {
-                case Role.Captain:
+                case CrewRole.Captain:
                     return characterData.defense * 0.3f;
-                case Role.Boatswain:
+                case CrewRole.Boatswain:
                     return characterData.defense * 0.4f;
-                case Role.Sailor:
+                case CrewRole.Sailor:
                     return characterData.defense * 0.2f;
-                case Role.Cook:
+                case CrewRole.Cook:
                     return characterData.defense * 0.3f;
                 default:
                     Debug.Log("캐릭터의 역할이 없습니다. 0을 반환합니다. (전투력 산출 방어력 부분)");
@@ -150,13 +150,13 @@ namespace LHI
         {
             switch (characterData.role)
             {
-                case Role.Captain:
+                case CrewRole.Captain:
                     return (characterData.criticalChance * characterData.criticalDamage / 200) * 0.8f;
-                case Role.Boatswain:
+                case CrewRole.Boatswain:
                     return (characterData.criticalChance * characterData.criticalDamage / 200) * 0.1f;
-                case Role.Sailor:
+                case CrewRole.Sailor:
                     return (characterData.criticalChance * characterData.criticalDamage / 200) * 0.8f;
-                case Role.Cook:
+                case CrewRole.Cook:
                     return (characterData.criticalChance * characterData.criticalDamage / 200) * 0.3f;
                 default:
                     Debug.Log("캐릭터의 역할이 없습니다. 0을 반환합니다. (전투력 산출 치명타 확률 부분)");
@@ -174,13 +174,13 @@ namespace LHI
         {
             switch (characterData.role)
             {
-                case Role.Captain:
+                case CrewRole.Captain:
                     return characterData.speed * 1000f;
-                case Role.Boatswain:
+                case CrewRole.Boatswain:
                     return characterData.speed * 1000f;
-                case Role.Sailor:
+                case CrewRole.Sailor:
                     return characterData.speed * 1000f;
-                case Role.Cook:
+                case CrewRole.Cook:
                     return characterData.speed * 1000f;
                 default:
                     Debug.Log("캐릭터의 역할이 없습니다. 0을 반환합니다. (전투력 산출 속도 부분)");
