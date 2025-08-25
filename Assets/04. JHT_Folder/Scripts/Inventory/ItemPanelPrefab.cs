@@ -6,81 +6,56 @@ using UnityEngine.UI;
 
 namespace JHT
 {
-    // 모두 IPointer 인터페이스로
     public class ItemPanelPrefab : MonoBehaviour
     {
-        public ItemObject itemObject;
-        public string itemName;
-        public int itemLevel;
+        // --- Inspector에서 연결할 UI 컴포넌트들 ---
+        [Header("UI Components")]
         public Image itemImage;
         public Button itemDetail;
-
-        #region Weapon
-
-        public TextMeshProUGUI itemCountText;
-        public Image itemStarImage;
-
-        #endregion
-
-        #region Relics
-
-        #endregion
+        public Image[] starImages; // 별 이미지 배열
+        public TextMeshProUGUI nameText;
+        public TextMeshProUGUI levelText;
 
 
-        public void Init(ItemObject item)
+        // --- 데이터 ---
+        private ItemObject itemObject; // 원본 데이터를 저장해 둘 변수
+
+        private WeaponStatPanel weaponStatPanel;
+
+        /// <summary>
+        /// WeaponObject를 받아 UI 내용을 채우는 함수
+        /// </summary>
+        public void SetUp(WeaponObject weapon)
         {
-            if (item is WeaponObject)
+            this.itemObject = weapon;
+
+            this.nameText.text = weapon.itemName;
+            this.levelText.text = "Lv." + weapon.ItemLevel;
+
+            if (weapon.itemIcon != null)
             {
-                itemObject = (WeaponObject)item;
-                WeaponObject obj = (WeaponObject)itemObject;
-                SetWeapon(obj);
-                obj.OnChangeLevel += UpCountAction;
-                obj.OnChangeStar += UpStar;
-                itemDetail.onClick.AddListener(ShowItem);
-                UpStar(obj.itemStar);
+                this.itemImage.sprite = weapon.itemIcon;
             }
-            else
+
+            UpdateStarDisplay(weapon.ItemStar);
+
+            // 상세 정보 보기 버튼 클릭 이벤트 설정
+            itemDetail.onClick.RemoveAllListeners();
+            itemDetail.onClick.AddListener(() => {
+                Debug.Log(weapon.itemName + " (레벨 " + weapon.ItemLevel + ") 상세 정보 보기");
+                weaponStatPanel = FindAnyObjectByType<WeaponStatPanel>(FindObjectsInactive.Include)?.gameObject.GetComponent<WeaponStatPanel>();
+                weaponStatPanel.ShowStats(weapon);
+            });
+        }
+
+        // 별 UI를 업데이트하는 함수
+        private void UpdateStarDisplay(int currentStars)
+        {
+            for (int i = 0; i < starImages.Length; i++)
             {
-                SetRelics((RelicsObject)item);
+                // 현재 별 개수보다 인덱스가 작으면 노란색, 아니면 회색으로 표시
+                starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
             }
-        }
-
-        private void ShowItem()
-        {
-            ItemEventManager.Instance.ClickItem(itemObject);
-        }
-
-        private void SetWeapon(WeaponObject item)
-        {
-            if (item.itemNum != itemObject.itemNum)
-                return;
-
-            itemObject = item;
-            itemName = item.itemName;
-            itemLevel = item.ItemLevel;
-            itemImage.sprite = item.itemIcon;
-            itemCountText.text = item.ItemLevel.ToString();
-
-        }
-
-        private void SetRelics(RelicsObject item)
-        {
-
-        }
-
-        //Action으로 WeaponItem을 받아와야할듯? 
-        private void UpCountAction(int value)
-        {
-            WeaponObject obj = (WeaponObject)itemObject;
-            //Weapon
-            itemCountText.text = value.ToString();
-        }
-
-        private void UpStar(int value)
-        {
-            ItemWeaponSO so = (ItemWeaponSO)itemObject.itemSO;
-            WeaponObject obj = (WeaponObject)itemObject;
-            itemStarImage.sprite = so.starImage[value];
         }
     }
 }

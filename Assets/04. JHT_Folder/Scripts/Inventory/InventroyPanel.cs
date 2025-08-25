@@ -35,6 +35,8 @@ namespace JHT
             weaponInventoryButton.onClick.AddListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.AddListener(ChangeRelicsMode);
             ItemEventManager.Instance.OnClickItem += ShowWeaponStat;
+
+            ReSetItemPanel(null);
         }
 
         private void OnDisable()
@@ -64,7 +66,7 @@ namespace JHT
                 if(!weaponStatPanel.gameObject.activeSelf)
                     weaponStatPanel.gameObject.SetActive(true);
 
-                weaponStatPanel.Init(inst);
+                //weaponStatPanel.Init(inst);
             }
             
         }
@@ -73,25 +75,33 @@ namespace JHT
         {
             ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
             obj.transform.SetParent(itemPanelParent);
-            obj.Init(item);
+            //obj.Init(item);
         }
 
 
         //유물 or 무기 구분해서 sort
         private void ReSetItemPanel(ItemObject changedItem)
         {
+            // 기존 아이템 UI들을 모두 삭제
             foreach (Transform child in itemPanelParent)
             {
                 Destroy(child.gameObject);
             }
 
+            // InventoryManager가 가진 무기 리스트를 기반으로 UI를 다시 생성
             for (int i = 0; i < inventoryManager.weaponList.Count; i++)
             {
-                ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
-                obj.transform.SetParent(itemPanelParent);
-                obj.Init(inventoryManager.weaponList[i]);
+                // 1. 아이템 패널 프리팹을 생성하고, 부모를 itemPanelParent로 설정
+                ItemPanelPrefab obj = Instantiate(itemPanelPrefab, itemPanelParent);
+
+                // 2. inventoryManager.weaponList에서 WeaponObject를 가져옴
+                WeaponObject weapon = inventoryManager.weaponList[i];
+
+                // 3. 이전에 만든 SetWeaponData 함수를 호출하여 UI 내용 채우기
+                obj.SetUp(weapon);
             }
         }
+
 
         private void ChangeWeaponMode()
         {

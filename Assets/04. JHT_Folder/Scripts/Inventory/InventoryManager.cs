@@ -19,10 +19,10 @@ namespace JHT
 
         public void OnEnable()
         {
-            if(weaponList == null)
+            if (weaponList == null)
                 weaponList = new();
 
-            if(relicsObject == null)
+            if (relicsObject == null)
                 relicsObject = new();
 
             OnAddInventory += AddInventroyWeapon;
@@ -35,15 +35,24 @@ namespace JHT
             OnRemoveInventory -= RemoveInventroyIndex;
         }
 
-        public ItemObject AddItem(ItemWeaponSO item, WeaponRarity rarity)
+        public WeaponObject AddItem(ItemWeaponSO item)
         {
-            if (item.itemType == ItemType.Weapon)
+            if (item == null)
             {
+                Debug.LogError("AddItem 함수에 null인 ItemWeaponSO가 전달되었습니다!");
+                return null;
+            }
+
+
+            if (item.itemType == ItemType.Equip)
+            {
+
+
                 WeaponObject obj = weaponList.Find(x => x.itemNum == item.itemNum);
-                
+
                 if (obj == null)
                 {
-                    obj = new WeaponObject(item,rarity);
+                    obj = new WeaponObject(item);
                     OnAddInventory?.Invoke(obj);
                     return obj;
                 }
@@ -52,11 +61,12 @@ namespace JHT
                     OnUpCountItem?.Invoke(obj);
                     return obj;
                 }
-                
+
             }
             else
             {
-                //RelicsObject obj = item as RelicsObject;
+                // [디버그 로그 추가]
+                Debug.LogError($"[InventoryManager] {item.itemName}의 타입이 Equip이 아닙니다! 실제 타입: {item.itemType}. 아이템을 추가하지 않습니다.");
             }
 
             return null;
@@ -68,7 +78,7 @@ namespace JHT
 
             switch (obj.itemSO.itemType)
             {
-                case ItemType.Weapon:
+                case ItemType.Equip:
                     if (weaponList == null) return null;
                     // itemNum 일치하는 동일 무기 반환
                     return weaponList.Find(x => x.itemNum == obj.itemNum);
@@ -98,7 +108,7 @@ namespace JHT
             {
                 //RelicsObject obj = item as RelicsObject;
             }
-            
+
         }
 
         public void WeaponCleanInventroy()
@@ -138,13 +148,7 @@ namespace JHT
         }
 
 
-        public void aaaaaaa()
-        {
-            foreach (var w in weaponList)
-            {
-                Debug.Log($"이름 : {w.itemName},   공격력 : {w.weaponPower},   별 : {w.ItemStar},   아이템 레벨 : {w.ItemLevel}\n");
-            }
-        }
+    
     }
 
     public enum InventoryMode

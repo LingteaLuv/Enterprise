@@ -16,10 +16,5 @@ namespace JHT
         public Sprite itemIcon { get; set; }
 
         public string itemName { get; set; }
-
-        public virtual void Init()
-        {
-            itemName = itemSO.itemName;
-        }
     }
 }
