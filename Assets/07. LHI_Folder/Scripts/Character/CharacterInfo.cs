@@ -10,10 +10,10 @@ namespace LHI
 
         // 나중에 인스펙터에서 숨기기
         [HideInInspector]
-        public int evolveLevel;
+        public int evolveLevel = 1;
         [HideInInspector]
-        public int upgradeLevel;
+        public int upgradeLevel = 1;
         [HideInInspector]
-        public bool isOwned;
+        public bool isOwned = false;
     }
 }

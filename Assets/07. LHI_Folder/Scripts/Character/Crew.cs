@@ -18,14 +18,18 @@ namespace LHI
 
         private void Start()
         {
-            MaxHP = characterData.health;
-            CurrentHP = MaxHP;
 
-            // 데이터 옮기기
-
-            CurrentSkillGauge = 0;
-            MaxSkillGauge = 100; // 예시로 100으로 설정
         }
+
+        private void OnEnable()
+        {
+            // 캐릭터 데이터를 스테이터스에 적용
+
+        }
+        // MaxHP = characterData.health;
+        // CurrentHP = MaxHP;
+        //CurrentSkillGauge = 0;
+        //MaxSkillGauge = 100; // 예시로 100으로 설정
 
         public override void TakeDamage(float damage)
         {
