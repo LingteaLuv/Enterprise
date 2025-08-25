@@ -18,34 +18,55 @@ namespace JHT
         [SerializeField] private Button weaponInventoryButton;
         [SerializeField] private Button relicsInventoryButton;
 
+        [SerializeField] private WeaponStatPanel weaponStatPanel;
+
         private InventoryManager inventoryManager;
         private bool isLevelSort;
 
-        private List<ItemPanelPrefab> items;
+        //private List<ItemPanelPrefab> items;
+
         private void OnEnable()
         {
             inventoryManager = InventoryManager.Instance;
-            inventoryManager.OnAddInventory += AddItem;
-            inventoryManager.OnRemoveInventory += RemoveItem;
-            levelSort.onClick.AddListener(() => { isLevelSort = !isLevelSort; inventoryManager.WeaponLevelSort(isLevelSort); ReSetItemPanel(); });
+            inventoryManager.OnAddInventory += ReSetItemPanel;
+            inventoryManager.OnRemoveInventory += ReSetItemPanel;
+            levelSort.onClick.AddListener(SortByLevel);
 
             weaponInventoryButton.onClick.AddListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.AddListener(ChangeRelicsMode);
+            ItemEventManager.Instance.OnClickItem += ShowWeaponStat;
         }
 
         private void OnDisable()
         {
-            inventoryManager.OnAddInventory -= AddItem;
-            inventoryManager.OnRemoveInventory -= RemoveItem;
-            levelSort.onClick.RemoveListener(() => { isLevelSort = !isLevelSort; inventoryManager.WeaponLevelSort(isLevelSort); ReSetItemPanel(); });
+            inventoryManager.OnAddInventory -= ReSetItemPanel;
+            inventoryManager.OnRemoveInventory -= ReSetItemPanel;
+            levelSort.onClick.RemoveListener(SortByLevel);
 
             weaponInventoryButton.onClick.RemoveListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.RemoveListener(ChangeRelicsMode);
+            ItemEventManager.Instance.OnClickItem -= ShowWeaponStat;
+        }
+        
+        private void SortByLevel()
+        {
+            isLevelSort = !isLevelSort;
+            inventoryManager.WeaponLevelSort(isLevelSort);
+            ReSetItemPanel(null);
         }
 
-        private void Start()
+        private void ShowWeaponStat(ItemObject obj)
         {
-            items = new();
+            if (obj is WeaponObject)
+            {
+                WeaponObject inst = (WeaponObject)InventoryManager.Instance.GetItemData(obj);
+
+                if(!weaponStatPanel.gameObject.activeSelf)
+                    weaponStatPanel.gameObject.SetActive(true);
+
+                weaponStatPanel.Init(inst);
+            }
+            
         }
 
         private void AddItem(ItemObject item)
@@ -53,34 +74,22 @@ namespace JHT
             ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
             obj.transform.SetParent(itemPanelParent);
             obj.Init(item);
-            items.Add(obj);
         }
 
-        private void RemoveItem(ItemObject item)
-        {
-            int idx = items.FindIndex(p => p != null && p.itemObject == item);
-            if (idx < 0) return;
-
-            var panel = items[idx];
-            items.RemoveAt(idx);
-            if (panel != null) Destroy(panel.gameObject);
-        }
 
         //유물 or 무기 구분해서 sort
-        private void ReSetItemPanel()
+        private void ReSetItemPanel(ItemObject changedItem)
         {
             foreach (Transform child in itemPanelParent)
             {
                 Destroy(child.gameObject);
             }
-            items.Clear();
 
             for (int i = 0; i < inventoryManager.weaponList.Count; i++)
             {
                 ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
                 obj.transform.SetParent(itemPanelParent);
                 obj.Init(inventoryManager.weaponList[i]);
-                items.Add(obj);
             }
         }
 

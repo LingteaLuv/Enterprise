@@ -23,7 +23,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.Definition
 
         [Header("퀘스트 내용")] 
         // 퀘스트의 목표 (목표, 텍스트, 목표 숫자)
-        public GoalDefinitionSO[] Goals;
+        public GoalDefinitionSO Goal;
         
         // 퀘스트의 보상
         public QuestRewardSO Reward;

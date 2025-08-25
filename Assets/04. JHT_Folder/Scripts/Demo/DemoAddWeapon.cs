@@ -9,9 +9,9 @@ namespace JHT
     public class DemoAddWeapon : MonoBehaviour
     {
 
-        [SerializeField] private DataItem item1;
-        [SerializeField] private DataItem item2;
-        [SerializeField] private DataItem item3;
+        [SerializeField] private ItemWeaponSO item1;
+        [SerializeField] private ItemWeaponSO item2;
+        [SerializeField] private ItemWeaponSO item3;
 
         public Button oneAddButton;
         public Button twoAddButton;
@@ -21,7 +21,6 @@ namespace JHT
         public Button twoRemoveButton;
         public Button threeRemoveButton;
 
-        private event Action<DataItem> OnClick;
 
         private void Start()
         {
@@ -34,12 +33,12 @@ namespace JHT
 
         }
 
-        public void AddWeapon(DataItem item)
+        public void AddWeapon(ItemWeaponSO item)
         {
-            InventoryManager.Instance.AddItem(item);
+            InventoryManager.Instance.AddItem(item,WeaponRarity.E);
         }
 
-        public void RemoveWeapon(DataItem item)
+        public void RemoveWeapon(ItemWeaponSO item)
         {
             //InventoryManager.Instance.RemoveItem(item);
         }

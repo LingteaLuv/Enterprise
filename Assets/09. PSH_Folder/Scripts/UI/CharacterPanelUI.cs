@@ -125,7 +125,7 @@ public class CharacterPanelUI : MonoBehaviour
     /// </summary>
     public void UpdateIcon()
     {
-        crewRoleIcon.sprite = GetIcon(currentPlayerCharData.characterdata.crewrole);
+        crewRoleIcon.sprite = GetIcon(currentPlayerCharData.characterdata.crewRole);
         factionIcon.sprite = GetIcon(currentPlayerCharData.characterdata.faction);
     }
     public Sprite GetIcon(CrewRole role)

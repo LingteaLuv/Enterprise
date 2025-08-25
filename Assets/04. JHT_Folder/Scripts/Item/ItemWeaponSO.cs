@@ -17,13 +17,15 @@ namespace JHT
     public class ItemWeaponSO : ItemSO
     {
         [field: SerializeField] public WeaponType weaponType { get; private set; }
-        [field: SerializeField] public CharacterWeponType characterWeaponType { get; private set; }
 
-        [field: SerializeField] public WeaponClass[] weaponClasses { get; private set; } = null;
-        [field: SerializeField] public Image[] stars { get; private set; }
+        //[field: SerializeField] public CharacterWeponType characterWeaponType { get; private set; } //캐릭터 정보 가져오기
+        
+        [field: SerializeField] public Sprite[] starImage { get; private set; }
         [field: SerializeField] public float[] upPowerPercent { get; private set; }
         [field: SerializeField] public int[] maxLevelInCurStar { get; private set; }
+        [field: SerializeField] public int[] upgradeCost { get; private set; }
 
+        //[field: SerializeField] public WeaponClass[] weaponClasses { get; private set; } = null;
 
         public override void UseItem(ItemSO item)
         {
@@ -39,12 +41,13 @@ namespace JHT
         Shield
     }
 
-    // 이게 필요할까..? flags가
-    [Flags]
-    public enum CharacterWeponType //추후에 캐릭터 enum나오면 바꿀거임
+    public enum WeaponRarity
     {
-        Sword = 1 << 0,
-        Bow = 2 << 1,
-        Ax = 3 << 2
+        E = 0,
+        D,
+        C,
+        B,
+        A
     }
+
 }

@@ -5,6 +5,7 @@ namespace JHT
 {
     public abstract class ItemSO : ScriptableObject
     {
+        [field: SerializeField] public int itemNum { get; private set; }
         [field: SerializeField] public string itemName { get; private set; }
         [field: SerializeField] public ItemType itemType { get; private set; }
         [field: SerializeField] public Sprite icon { get; private set; } = null;
@@ -18,6 +19,7 @@ namespace JHT
     public enum ItemType
     {
         Weapon,
+        Relics,
         Crystal,
         NormalItem
     }
