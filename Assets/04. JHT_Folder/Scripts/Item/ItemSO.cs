@@ -23,4 +23,14 @@ namespace JHT
         Crystal,
         NormalItem
     }
+
+    public enum ItemRarity
+    {
+        Normal = 0,
+        Rare,
+        Epic,
+        Unique,
+        Legend
+    }
+
 }

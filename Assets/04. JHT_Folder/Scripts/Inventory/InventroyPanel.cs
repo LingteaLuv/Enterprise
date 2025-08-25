@@ -8,10 +8,13 @@ namespace JHT
 {
     public class InventroyPanel : MonoBehaviour
     {
-        [SerializeField] private Transform itemPanelParent;
+        [Header("Spawn_ItemPanel")]
+        [SerializeField] private Transform weaponPanelParent;
+        [SerializeField] private Transform relicsPanelParent;
         [SerializeField] private ItemPanelPrefab itemPanelPrefab;
         [SerializeField] private Button levelSort;
 
+        [Header("Choose_Inventory")]
         [SerializeField] private GameObject weaponInventory;
         [SerializeField] private GameObject relicsInventory;
 
@@ -19,6 +22,10 @@ namespace JHT
         [SerializeField] private Button relicsInventoryButton;
 
         [SerializeField] private WeaponStatPanel weaponStatPanel;
+        [SerializeField] private RelicsStatPanel relicsStatPanel;
+
+        [Header("PopUp")]
+        [SerializeField] private ChoosePopUp choosePopup;
 
         private InventoryManager inventoryManager;
         private bool isLevelSort;
@@ -34,7 +41,8 @@ namespace JHT
 
             weaponInventoryButton.onClick.AddListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.AddListener(ChangeRelicsMode);
-            ItemEventManager.Instance.OnClickItem += ShowWeaponStat;
+            InventoryManager.Instance.OnChooseItem += ShowChooseItem;
+            ItemEventManager.Instance.OnClickItem += ShowItemStat;
         }
 
         private void OnDisable()
@@ -45,9 +53,10 @@ namespace JHT
 
             weaponInventoryButton.onClick.RemoveListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.RemoveListener(ChangeRelicsMode);
-            ItemEventManager.Instance.OnClickItem -= ShowWeaponStat;
+            InventoryManager.Instance.OnChooseItem -= ShowChooseItem;
+            ItemEventManager.Instance.OnClickItem -= ShowItemStat;
         }
-        
+    
         private void SortByLevel()
         {
             isLevelSort = !isLevelSort;
@@ -55,9 +64,15 @@ namespace JHT
             ReSetItemPanel(null);
         }
 
-        private void ShowWeaponStat(ItemObject obj)
+        private RelicsObject ShowChooseItem(RelicsObject obj1, RelicsObject obj2)
         {
-            if (obj is WeaponObject)
+            choosePopup.gameObject.SetActive(true);
+            return choosePopup.Init(obj1, obj2);
+        }
+
+        private void ShowItemStat(ItemObject obj)
+        {
+            if (obj.itemSO.itemType == ItemType.Weapon)
             {
                 WeaponObject inst = (WeaponObject)InventoryManager.Instance.GetItemData(obj);
 
@@ -66,13 +81,21 @@ namespace JHT
 
                 weaponStatPanel.Init(inst);
             }
-            
+            else
+            {
+                RelicsObject inst = (RelicsObject)InventoryManager.Instance.GetItemData(obj);
+
+                if (!relicsStatPanel.gameObject.activeSelf)
+                    relicsStatPanel.gameObject.SetActive(true);
+
+                relicsStatPanel.Init(inst);
+            }
         }
 
         private void AddItem(ItemObject item)
         {
             ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
-            obj.transform.SetParent(itemPanelParent);
+            obj.transform.SetParent(weaponPanelParent);
             obj.Init(item);
         }
 
@@ -80,17 +103,35 @@ namespace JHT
         //유물 or 무기 구분해서 sort
         private void ReSetItemPanel(ItemObject changedItem)
         {
-            foreach (Transform child in itemPanelParent)
+            if (changedItem is WeaponObject)
             {
-                Destroy(child.gameObject);
-            }
+                foreach (Transform child in weaponPanelParent)
+                {
+                    Destroy(child.gameObject);
+                }
 
-            for (int i = 0; i < inventoryManager.weaponList.Count; i++)
-            {
-                ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
-                obj.transform.SetParent(itemPanelParent);
-                obj.Init(inventoryManager.weaponList[i]);
+                for (int i = 0; i < inventoryManager.weaponList.Count; i++)
+                {
+                    ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
+                    obj.transform.SetParent(weaponPanelParent);
+                    obj.Init(inventoryManager.weaponList[i]);
+                }
             }
+            else
+            {
+                foreach (Transform child in relicsPanelParent)
+                {
+                    Destroy(child.gameObject);
+                }
+
+                for (int i = 0; i < inventoryManager.relicsList.Count; i++)
+                {
+                    ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
+                    obj.transform.SetParent(relicsPanelParent);
+                    obj.Init(inventoryManager.relicsList[i]);
+                }
+            }
+            
         }
 
         private void ChangeWeaponMode()
