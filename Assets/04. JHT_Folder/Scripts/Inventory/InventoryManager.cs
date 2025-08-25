@@ -8,6 +8,34 @@ namespace JHT
 {
     public class InventoryManager : Singleton<InventoryManager>
     {
+        // ▼▼▼ 강화 포인트 관련 코드 수정 ▼▼▼
+        public Dictionary<int, int> equipmentEnhancementPoints = new Dictionary<int, int>();
+        public Action<int, int> OnEquipmentEnhancementPointsChanged; // itemNum, newPoints
+
+        public void AddEnhancementPointsToEquipment(int itemNum, int amount)
+        {
+            if (equipmentEnhancementPoints.ContainsKey(itemNum))
+            {
+                equipmentEnhancementPoints[itemNum] += amount;
+            }
+            else
+            {
+                equipmentEnhancementPoints.Add(itemNum, amount);
+            }
+            Debug.Log($"장비 ID: {itemNum} 에 강화 포인트 {amount} 추가! (총 {equipmentEnhancementPoints[itemNum]} 포인트)");
+            OnEquipmentEnhancementPointsChanged?.Invoke(itemNum, equipmentEnhancementPoints[itemNum]);
+        }
+
+        public int GetEnhancementPoints(int itemNum)
+        {
+            if (equipmentEnhancementPoints.ContainsKey(itemNum))
+            {
+                return equipmentEnhancementPoints[itemNum];
+            }
+            return 0;
+        }
+        // ▲▲▲ 강화 포인트 관련 코드 수정 ▲▲▲
+
         public List<WeaponObject> weaponList;
         public List<RelicsObject> relicsObject;
 
@@ -148,7 +176,6 @@ namespace JHT
         }
 
 
-    
     }
 
     public enum InventoryMode
