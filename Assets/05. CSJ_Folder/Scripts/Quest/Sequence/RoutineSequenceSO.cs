@@ -8,8 +8,8 @@ namespace _05._CSJ_Folder.Scripts.Quest.Sequence
     {
         // 사이클 2차 확인
         // 홀수 사이클
-        public GeneralQuestDefinitionSO[] OddRoutine;
+        public RoutineQuestDefinitionSO[] OddRoutine;
         // 짝수 사이클
-        public GeneralQuestDefinitionSO[] EvenRoutine;
+        public RoutineQuestDefinitionSO[] EvenRoutine;
     }
 }

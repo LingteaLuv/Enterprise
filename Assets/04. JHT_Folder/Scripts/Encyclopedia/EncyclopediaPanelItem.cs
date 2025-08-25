@@ -9,14 +9,12 @@ public class EncyclopediaPanelItem : MonoBehaviour
     public Image frontImage;
     public string itemName;
 
-    private DataItem sample;
-    public void Init(DataItem _weaponObject)
+    private ItemSO sample;
+    public void Init(ItemSO _weaponObject)
     {
-        ItemWeaponSO weaponSO = (ItemWeaponSO)_weaponObject.itemSO;
-
         sample = _weaponObject;
-        encyclopediaImage.sprite = _weaponObject.itemSO.icon;
-        frontImage.sprite = weaponSO.backImage;
+        encyclopediaImage.sprite = _weaponObject.icon;
+        frontImage.sprite = _weaponObject.backImage;
         itemName = _weaponObject.itemName;
         InventoryManager.Instance.OnAddInventory += OpenItem;
     }

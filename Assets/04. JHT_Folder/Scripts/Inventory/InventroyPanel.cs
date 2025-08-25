@@ -8,10 +8,13 @@ namespace JHT
 {
     public class InventroyPanel : MonoBehaviour
     {
-        [SerializeField] private Transform itemPanelParent;
+        [Header("Spawn_ItemPanel")]
+        [SerializeField] private Transform weaponPanelParent;
+        [SerializeField] private Transform relicsPanelParent;
         [SerializeField] private ItemPanelPrefab itemPanelPrefab;
         [SerializeField] private Button levelSort;
 
+        [Header("Choose_Inventory")]
         [SerializeField] private GameObject weaponInventory;
         [SerializeField] private GameObject relicsInventory;
 
@@ -19,87 +22,115 @@ namespace JHT
         [SerializeField] private Button relicsInventoryButton;
 
         [SerializeField] private WeaponStatPanel weaponStatPanel;
+        [SerializeField] private RelicsStatPanel relicsStatPanel;
+
+        [Header("PopUp")]
+        [SerializeField] private ChoosePopUp choosePopup;
 
         private InventoryManager inventoryManager;
         private bool isLevelSort;
 
-        private List<ItemPanelPrefab> items;
+        private List<ItemPanelPrefab> itemPanelPool = new List<ItemPanelPrefab>();
+
+        //private List<ItemPanelPrefab> items;
 
         private void OnEnable()
         {
             inventoryManager = InventoryManager.Instance;
-            inventoryManager.OnAddInventory += AddItem;
-            inventoryManager.OnRemoveInventory += RemoveItem;
-            levelSort.onClick.AddListener(() => { isLevelSort = !isLevelSort; inventoryManager.WeaponLevelSort(isLevelSort); ReSetItemPanel(); });
+            inventoryManager.OnAddInventory += ReSetItemPanel;
+            inventoryManager.OnRemoveInventory += ReSetItemPanel;
+            levelSort.onClick.AddListener(SortByLevel);
 
             weaponInventoryButton.onClick.AddListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.AddListener(ChangeRelicsMode);
-            ItemEventManager.Instance.OnClickItem += ShowWeaponStat;
+            InventoryManager.Instance.OnChooseItem += ShowChooseItem;
+            ItemEventManager.Instance.OnClickItem += ShowItemStat;
+
+            ReSetItemPanel(null);
         }
 
         private void OnDisable()
         {
-            inventoryManager.OnAddInventory -= AddItem;
-            inventoryManager.OnRemoveInventory -= RemoveItem;
-            levelSort.onClick.RemoveListener(() => { isLevelSort = !isLevelSort; inventoryManager.WeaponLevelSort(isLevelSort); ReSetItemPanel(); });
+            inventoryManager.OnAddInventory -= ReSetItemPanel;
+            inventoryManager.OnRemoveInventory -= ReSetItemPanel;
+            levelSort.onClick.RemoveListener(SortByLevel);
 
             weaponInventoryButton.onClick.RemoveListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.RemoveListener(ChangeRelicsMode);
-            ItemEventManager.Instance.OnClickItem -= ShowWeaponStat;
+            InventoryManager.Instance.OnChooseItem -= ShowChooseItem;
+            ItemEventManager.Instance.OnClickItem -= ShowItemStat;
+        }
+    
+        private void SortByLevel()
+        {
+            isLevelSort = !isLevelSort;
+            inventoryManager.WeaponLevelSort(isLevelSort);
+            ReSetItemPanel(null);
         }
 
-        private void Start()
+        private void ShowChooseItem(RelicsObject obj1, RelicsObject obj2)
         {
-            items = new();
+            choosePopup.gameObject.SetActive(true);
+            choosePopup.Init(obj1, obj2);
         }
 
-        private void ShowWeaponStat(ItemObject obj)
+        private void ShowItemStat(ItemObject obj)
         {
-            if (obj is WeaponObject)
+            if (obj.itemSO.itemType == ItemType.Equip)
             {
                 WeaponObject inst = (WeaponObject)InventoryManager.Instance.GetItemData(obj);
 
                 if(!weaponStatPanel.gameObject.activeSelf)
                     weaponStatPanel.gameObject.SetActive(true);
 
-                weaponStatPanel.Init(inst);
+                weaponStatPanel.ShowStats(inst);
             }
-            
+            else
+            {
+                RelicsObject inst = (RelicsObject)InventoryManager.Instance.GetItemData(obj);
+
+                if (!relicsStatPanel.gameObject.activeSelf)
+                    relicsStatPanel.gameObject.SetActive(true);
+
+                relicsStatPanel.Init(inst);
+            }
         }
 
         private void AddItem(ItemObject item)
         {
             ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
-            obj.transform.SetParent(itemPanelParent);
+            obj.transform.SetParent(weaponPanelParent);
             obj.Init(item);
-            items.Add(obj);
         }
 
-        private void RemoveItem(ItemObject item)
-        {
-            int idx = items.FindIndex(p => p != null && p.itemObject == item);
-            if (idx < 0) return;
 
-            var panel = items[idx];
-            items.RemoveAt(idx);
-            if (panel != null) Destroy(panel.gameObject);
-        }
-
-        //유물 or 무기 구분해서 sort
-        private void ReSetItemPanel()
+        private void ReSetItemPanel(ItemObject changedItem)
         {
-            foreach (Transform child in itemPanelParent)
+            // 1. 모든 풀링된 패널을 비활성화
+            foreach (ItemPanelPrefab panel in itemPanelPool)
             {
-                Destroy(child.gameObject);
+                panel.gameObject.SetActive(false);
             }
-            items.Clear();
 
+            // 2. 인벤토리 리스트를 기반으로 패널을 재사용/생성하여 업데이트
             for (int i = 0; i < inventoryManager.weaponList.Count; i++)
             {
-                ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
-                obj.transform.SetParent(itemPanelParent);
-                obj.Init(inventoryManager.weaponList[i]);
-                items.Add(obj);
+                ItemPanelPrefab currentPanel;
+                if (i < itemPanelPool.Count)
+                {
+                    // 풀에 사용 가능한 패널이 있으면 재사용
+                    currentPanel = itemPanelPool[i];
+                }
+                else
+                {
+                    // 풀이 부족하면 새로 생성하고 풀에 추가
+                    currentPanel = Instantiate(itemPanelPrefab, weaponPanelParent);
+                    itemPanelPool.Add(currentPanel);
+                }
+
+                WeaponObject weapon = inventoryManager.weaponList[i];
+                currentPanel.SetUp(weapon);
+                currentPanel.gameObject.SetActive(true);
             }
         }
 

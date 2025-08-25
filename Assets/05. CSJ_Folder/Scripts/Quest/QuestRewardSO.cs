@@ -9,6 +9,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         // 리워드 물품과 숫자 구조체 묶음
         public struct RewardEntry
         {
+            public Sprite RewardIcon;
             public string RewardType;
             public int Amount;
         }

@@ -9,19 +9,22 @@ namespace JHT
     public class DemoAddWeapon : MonoBehaviour
     {
 
-        [SerializeField] private DataItem item1;
-        [SerializeField] private DataItem item2;
-        [SerializeField] private DataItem item3;
+        [SerializeField] private ItemWeaponSO item1;
+        [SerializeField] private ItemWeaponSO item2;
+        [SerializeField] private ItemWeaponSO item3;
+
+        [SerializeField] private ItemRelicsSO relics1;
+        [SerializeField] private ItemRelicsSO relics2;
+        [SerializeField] private ItemRelicsSO relics3;
 
         public Button oneAddButton;
         public Button twoAddButton;
         public Button threeAddButton;
 
-        public Button oneRemoveButton;
-        public Button twoRemoveButton;
-        public Button threeRemoveButton;
+        public Button oneAddRButton;
+        public Button twoAddRButton;
+        public Button threeAddRButton;
 
-        private event Action<DataItem> OnClick;
 
         private void Start()
         {
@@ -29,26 +32,33 @@ namespace JHT
             twoAddButton.onClick.AddListener(OnAdd2);
             threeAddButton.onClick.AddListener(OnAdd3);
 
-           // twoRemoveButton.onClick.AddListener(OnRemove2);
-           // threeRemoveButton.onClick.AddListener(OnRemove3);
-
+            oneAddRButton.onClick.AddListener(OnRAdd1);
+            twoAddRButton.onClick.AddListener(OnRAdd2);
+            threeAddRButton.onClick.AddListener(OnRAdd3);
         }
 
-        public void AddWeapon(DataItem item)
+        public void AddWeapon(ItemWeaponSO item)
         {
-            InventoryManager.Instance.AddItem(item);
+            InventoryManager.Instance.AddItem(item,ItemRarity.Normal);
         }
 
-        public void RemoveWeapon(DataItem item)
+
+
+        public void AddRelics1(ItemRelicsSO item)
         {
-            //InventoryManager.Instance.RemoveItem(item);
+            InventoryManager.Instance.AddItem(item,ItemRarity.Normal,3);
+        }
+
+        public void AddRelics2(ItemRelicsSO item)
+        {
+            InventoryManager.Instance.AddItem(item, ItemRarity.Unique, 3);
         }
 
         private void OnAdd1() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item1.itemNum]);
         private void OnAdd2() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item2.itemNum]);
         private void OnAdd3() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item3.itemNum]);
-        private void OnRemove1() => RemoveWeapon(item1);
-        private void OnRemove2() => RemoveWeapon(item2);
-        private void OnRemove3() => RemoveWeapon(item3);
+        private void OnRAdd1() => AddRelics1(ItemDataManager.Instance.GetAllRelicsData()[item1.itemNum]);
+        private void OnRAdd2() => AddRelics2(ItemDataManager.Instance.GetAllRelicsData()[item1.itemNum]);
+        private void OnRAdd3() => AddRelics1(ItemDataManager.Instance.GetAllRelicsData()[item2.itemNum]);
     }
 }

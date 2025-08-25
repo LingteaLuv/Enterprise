@@ -1,13 +1,17 @@
-using UnityEngine;
+using JHT;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class GachaListUI : MonoBehaviour
 {
-    [Header("필수 연결")]
-    [Tooltip("결과 아이템으로 생성할 프리팹 (CharacterPanelUI 스크립트가 있어야 함)")]
-    public GameObject resultItemPrefab;
+    [Header("프리팹 연결")]
+    [Tooltip("캐릭터 결과 아이템으로 생성할 프리팹 (CharacterPanelUI 스크립트가 있어야 함)")]
+    public GameObject characterResultItemPrefab;
+    [Tooltip("장비 결과 아이템으로 생성할 프리팹 (ItemPanelPrefab 스크립트가 있어야 함)")]
+    public GameObject equipmentResultItemPrefab;
 
+    [Header("공통 연결")]
     [Tooltip("생성된 아이템들이 위치할 부모 트랜스폼 (GridLayoutGroup 등)")]
     public Transform contentParent;
 
@@ -20,23 +24,31 @@ public class GachaListUI : MonoBehaviour
 
     /// <summary>
     /// 캐릭터 뽑기 결과를 받아 화면에 표시를 시작하는 함수입니다.
-    /// GachaUIHandler가 이 함수를 호출해줍니다.
     /// </summary>
-    /// <param name="characterResults">표시할 캐릭터 데이터 리스트</param>
     public void DisplayCharacterResults(List<PlayerCharacterData> characterResults)
     {
-        if (characterResults == null || characterResults.Count == 0)
+        if (characterResultItemPrefab == null)
         {
-            Debug.LogWarning("표시할 가챠 결과가 없습니다.");
+            Debug.LogError("characterResultItemPrefab이 연결되지 않았습니다!");
             return;
         }
-
-        // 기존에 실행중인 코루틴이 있다면 중지 (연속 뽑기 시 중복 방지)
-        StopAllCoroutines();
-        StartCoroutine(ShowResultsCoroutine(characterResults));
+        StartCoroutine(ShowResultsCoroutine(characterResults, characterResultItemPrefab));
     }
 
-    private IEnumerator ShowResultsCoroutine(List<PlayerCharacterData> results)
+    /// <summary>
+    /// 장비 뽑기 결과를 받아 화면에 표시를 시작하는 함수입니다.
+    /// </summary>
+    public void DisplayEquipmentResults(List<ItemObject> equipmentResults)
+    {
+        if (equipmentResultItemPrefab == null)
+        {
+            Debug.LogError("equipmentResultItemPrefab이 연결되지 않았습니다!");
+            return;
+        }
+        StartCoroutine(ShowResultsCoroutine(equipmentResults, equipmentResultItemPrefab));
+    }
+
+    private IEnumerator ShowResultsCoroutine<T>(List<T> results, GameObject prefabToSpawn) where T : class
     {
         // 기존 아이템들 삭제
         foreach (Transform child in contentParent)
@@ -48,16 +60,18 @@ public class GachaListUI : MonoBehaviour
         // 새 아이템들 생성 및 연출
         foreach (var resultData in results)
         {
-            GameObject itemGO = Instantiate(resultItemPrefab, contentParent);
+            GameObject itemGO = Instantiate(prefabToSpawn, contentParent);
 
-            CharacterPanelUI panelUI = itemGO.GetComponent<CharacterPanelUI>();
-            if (panelUI != null)
+            // 타입에 따라 적절한 UI 스크립트의 Init 함수를 호출
+            if (resultData is PlayerCharacterData charData)
             {
-                panelUI.Setup(resultData);
+                CharacterPanelUI panelUI = itemGO.GetComponent<CharacterPanelUI>();
+                if (panelUI != null) panelUI.Setup(charData);
             }
-            else
+            else if (resultData is WeaponObject itemData)
             {
-                Debug.LogWarning($"{resultItemPrefab.name} 프리팹에 CharacterPanelUI 스크립트가 없습니다.", itemGO);
+                ItemPanelPrefab panelUI = itemGO.GetComponent<ItemPanelPrefab>();
+                if (panelUI != null) panelUI.SetUp(itemData);
             }
 
             // 등장 애니메이션 실행
