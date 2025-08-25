@@ -1,5 +1,6 @@
-using UnityEngine;
+using DG.Tweening;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace LHI
 {
@@ -11,9 +12,11 @@ namespace LHI
 
         public static CharacterManager Instance { get; private set; }
 
-        public List<CharacterInfo> characters = new List<CharacterInfo>();
+        public List<CharacterInfo> characters = new List<CharacterInfo>(); // 인스펙터에서 캐릭터 정보를 추가할 리스트
 
-        public static Dictionary<int , CharacterInfo> charactersDict;
+        public static Dictionary<int, CharacterInfo> basecharactersDict; // 기본 캐릭터 정보를 저장하는 딕셔너리
+
+        public static Dictionary<int , CharacterInfo> charactersDict; // 강화나 유물등 적용 후 캐릭터 정보를 저장하는 딕셔너리
 
 
         public void Awake()
@@ -31,19 +34,29 @@ namespace LHI
 
             // characters 리스트를 Dictionary로 변환
             charactersDict = new Dictionary<int, CharacterInfo>();
+            basecharactersDict = new Dictionary<int, CharacterInfo>();
             foreach (var character in characters)
             {
+                if (!basecharactersDict.ContainsKey(character.id))
+                {
+                    basecharactersDict.Add(character.id, character);
+                }
+                else
+                {
+                    Debug.LogWarning($"캐릭터 정보를 딕셔너리로 변환중_basecharactersDict에서 ID {character.id}가 이미 사전에 있습니다.");
+                }
+
                 if (!charactersDict.ContainsKey(character.id))
                 {
                     charactersDict.Add(character.id, character);
                 }
                 else
                 {
-                    Debug.LogWarning($"ID {character.id}가 이미 사전에 있습니다.");
+                    Debug.LogWarning($"캐릭터 정보를 딕셔너리로 변환중_charactersDict에서 ID {character.id}가 이미 사전에 있습니다.");
                 }
             }
 
-            characters = null; // 메모리 절약을 위해 초기화
+            characters = null; // 메모리 절약을 위해 리스트를 null로 설정
         }
 
         /// <summary>
