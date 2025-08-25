@@ -3547,6 +3547,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
   weaponList: []
+  relicsList: []
+  myMoney: 0
   currentMode: 0
 --- !u!4 &277753486
 Transform:
@@ -5359,6 +5361,7 @@ MonoBehaviour:
   _dontDestroyOnLoad: 1
   weaponList: []
   encyclopediaPanel: {fileID: 2028712887}
+  relicsList: []
 --- !u!4 &382032050
 Transform:
   m_ObjectHideFlags: 0
@@ -23410,7 +23413,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f7bbcd6c68b48545887dbcdcaa47c53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPanelParent: {fileID: 1033274171}
+  weaponPanelParent: {fileID: 1033274171}
+  relicsPanelParent: {fileID: 0}
   itemPanelPrefab: {fileID: -7351495467950165020, guid: 24b29d0cdc261be49949cb5433d2625a, type: 3}
   levelSort: {fileID: 1912998782}
   weaponInventory: {fileID: 666618023}
@@ -23418,6 +23422,8 @@ MonoBehaviour:
   weaponInventoryButton: {fileID: 1387822909}
   relicsInventoryButton: {fileID: 1982316097}
   weaponStatPanel: {fileID: 608691404}
+  relicsStatPanel: {fileID: 0}
+  choosePopup: {fileID: 0}
 --- !u!114 &1830309535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25822,7 +25828,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   encyclopediaPanelItem: {fileID: 6724687520634231539, guid: 642b60e3d5bc10f409cf89a2a4b5677d, type: 3}
-  encyclopediaPanelItemParent: {fileID: 959262486}
+  encyclopediaPanelWeaponParent: {fileID: 0}
+  encyclopediaPanelRelicsParent: {fileID: 0}
 --- !u!224 &2028712888
 RectTransform:
   m_ObjectHideFlags: 0
