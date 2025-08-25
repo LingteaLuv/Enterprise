@@ -4,6 +4,8 @@ using UnityEngine;
 using Firebase.Auth;
 using Firebase.Extensions;
 using Google;
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
 
 public class AuthManager : Singleton<AuthManager>
 {
@@ -126,6 +128,33 @@ public class AuthManager : Singleton<AuthManager>
         }
         _isClicked = false;
         return true;
+    }
+
+    public async Task<bool> PlayGamesLogin()
+    {
+        if (_isClicked) return false;
+        _isClicked = true;
+        Debug.Log("플레이 게임즈 로그인 버튼 입력");
+        
+        PlayGamesPlatform.Activate();
+        
+        var tcs = new TaskCompletionSource<bool>();
+        
+        PlayGamesPlatform.Instance.Authenticate(status =>
+        {
+            if (status == SignInStatus.Success)
+            {
+                Debug.Log("구글 로그인 성공: " + PlayGamesPlatform.Instance.GetUserId());
+                tcs.SetResult(true);
+            }
+            else
+            {
+                Debug.LogError("구글 로그인 실패: " + status);
+                tcs.SetResult(false);
+            }
+            _isClicked = false;
+        });
+        return await tcs.Task;
     }
     
     /// <summary>
