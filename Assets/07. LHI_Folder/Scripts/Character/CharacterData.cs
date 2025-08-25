@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LHI
 {
-    public enum Role
+    public enum CrewRole
     {
         Captain,
         Boatswain,
@@ -12,23 +12,26 @@ namespace LHI
         Cook
     }
 
-    public enum Affiliation
+    public enum Faction
     {
         navy,
         pirate,
         monster
     }
 
-    [CreateAssetMenu(fileName = "CharacterData", menuName = "Scriptable Objects/CharacterData")]
+    [CreateAssetMenu(fileName = "CharacterData", menuName = "Scriptable_Character/CharacterData")]
     public class CharacterData : ScriptableObject
     {
         [Header("캐릭터 정보")]
         [Tooltip("캐릭터의 이름")]
         public string characterName;
         [Tooltip("캐릭터의 역할")]
-        public Role role;
+        public CrewRole role;
         [Tooltip("캐릭터의 소속")]
-        public Affiliation affiliation;
+        public Faction affiliation;
+        [Tooltip("캐릭터의 이미지")]
+        public Sprite characterSprite;
+        // 애니메이션 클립도 추가 가능
 
         [Header("캐릭터 스탯")]
         [Tooltip("캐릭터의 공격력")]
@@ -43,7 +46,7 @@ namespace LHI
         public float criticalChance;
         [Tooltip("캐릭터의 치명타 배율 (%), ex)2배를 200로 작성할 것")]
         public float criticalDamage;
-        [Tooltip("캐릭터가 자신의 턴을 가지는 속도를 결정하는 스탯 ex) 1.5는 1초에 1.5 번 공격, 2는 1초에 2번 공격을 의미함")]
+        [Tooltip("캐릭터가 공격 속도를 결정하는 스탯 ex) 1.5는 1초에 1.5 번 공격, 2는 1초에 2번 공격을 의미함")]
         public float speed;
 
         private void OnValidate()

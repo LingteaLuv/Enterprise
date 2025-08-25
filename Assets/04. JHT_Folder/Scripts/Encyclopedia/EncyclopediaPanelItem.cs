@@ -9,8 +9,8 @@ public class EncyclopediaPanelItem : MonoBehaviour
     public Image frontImage;
     public string itemName;
 
-    private ItemWeaponSO sample;
-    public void Init(ItemWeaponSO _weaponObject)
+    private ItemSO sample;
+    public void Init(ItemSO _weaponObject)
     {
         sample = _weaponObject;
         encyclopediaImage.sprite = _weaponObject.icon;

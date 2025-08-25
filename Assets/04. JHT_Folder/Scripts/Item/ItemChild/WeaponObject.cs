@@ -1,10 +1,6 @@
 using JHT;
-using NUnit.Framework.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 namespace JHT
@@ -12,14 +8,26 @@ namespace JHT
     [Serializable]
     public class WeaponObject : ItemObject
     {
-        public float weaponPower;
-        public WeaponRarity curRarity;
+        
+        public ItemRarity curRarity;
+
+        public Rarity rarity;
+        public EquipCategory equipCategory; // 분류 - 무기 방패 갑옷
+        public EquipType equipType; // 세부분류 - 무기) 칼 도끼 활 등
+        public string statType;
+
+        //확인용 변수
+        public float curPower;
+
+        private float itemPower;
+        public float ItemPower { get { return itemPower; } set { itemPower = value; OnChangePower?.Invoke(itemPower); } }
+        public Action<float> OnChangePower;
 
         private int itemLevel;
         public int ItemLevel { get { return itemLevel;} set { itemLevel = value;  OnChangeLevel?.Invoke(itemLevel); } }
         public Action<int> OnChangeLevel;
 
-        public int itemStar = 0;
+        public int itemStar;
         public int ItemStar { get { return itemStar; } set { itemStar = value; OnChangeStar?.Invoke(itemStar); } }
         public Action<int> OnChangeStar;
 
@@ -30,20 +38,24 @@ namespace JHT
         public Action OnUpCount;
         public Action OnAddStar;
 
-        public WeaponObject(ItemWeaponSO sample, WeaponRarity rarity)
+        public WeaponObject(ItemWeaponSO sample)
         {
             itemIcon = sample.icon;
             itemName = sample.itemName;
             itemNum = sample.itemNum;
             itemSO = sample;
+            /*
             curRarity = rarity;
+            ItemStar = (int)rarity;
+            ItemPower = sample.upPowerPercent[itemStar] * itemLevel;
+            curPower = itemPower;
             InventoryManager.Instance.OnUpCountItem += ItemLevelUp;
             OnAddStar += UpGradeItemForStar;
-        }
-
-        public void ItemUpCount(ItemWeaponSO weapon)
-        {
-
+            */
+            rarity = sample.rarity;
+            equipCategory = sample.equipCategory;
+            equipType = sample.equipType;
+            statType = sample.statType;
         }
 
         // 레벨이 오를경우
@@ -58,7 +70,7 @@ namespace JHT
             ItemWeaponSO so = (ItemWeaponSO)obj.itemSO;
             ItemLevel++;
 
-            if (itemLevel > so.maxLevelInCurStar[itemLevel])
+            if (itemLevel > so.maxLevelInCurStar[itemStar])
             {
                 Debug.Log($"아이템이 현재 등급{itemStar} 최대 레벨");
                 return;
@@ -71,27 +83,39 @@ namespace JHT
         // IsUpgrade 위치 변경필요
         public void UpCountWeapon()
         {
-            ItemWeaponSO weapon = (ItemWeaponSO)itemSO;
-            weaponPower += weapon.upPowerPercent[itemStar];
-            if (itemLevel >= weapon.maxLevelInCurStar[itemStar])
-            {
-                IsUpgrade = true;
-            }
+            ItemWeaponSO so = (ItemWeaponSO)itemSO;
+            ItemPower += so.upPowerPercent[itemStar];
+            CheckUpgrade(so);
         }
 
         private void UpGradeItemForStar()
         {
             ItemWeaponSO so = (ItemWeaponSO)itemSO;
-            IsUpgrade = false;
+
             itemLevel -= so.maxLevelInCurStar[itemStar];
             ItemStar += 1;
             curRarity += (int)curRarity + 1;
-            weaponPower = so.upPowerPercent[itemStar] * itemLevel;
+            if (itemLevel > 0)
+            {
+                ItemPower = itemLevel >= so.maxLevelInCurStar[itemStar] ?
+                    so.upPowerPercent[itemStar] * so.maxLevelInCurStar[itemStar] :
+                    so.upPowerPercent[itemStar] * itemLevel;
+            }
+            else
+            {
+                ItemPower = so.upPowerPercent[itemStar];
+            }
+            curPower = itemPower;
+            ItemLevel = this.ItemLevel;
+            CheckUpgrade(so);
         }
 
-        public WeaponObject OnAddItem(bool value)
+        private void CheckUpgrade(ItemWeaponSO so)
         {
-            return this;
+            if (itemLevel >= so.maxLevelInCurStar[itemStar])
+                IsUpgrade = true;
+            else
+                IsUpgrade = false;
         }
 
         #region 우리애기

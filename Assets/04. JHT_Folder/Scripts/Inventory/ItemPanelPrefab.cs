@@ -12,9 +12,16 @@ namespace JHT
         public ItemObject itemObject;
         public string itemName;
         public int itemLevel;
+
+        [Header("UI Components")]
         public Image itemImage;
         public Button itemDetail;
+        public Image[] starImages;
+        public TextMeshProUGUI nameText;
+        public TextMeshProUGUI levelText;
 
+        private WeaponObject weaponObject; // 표시할 무기 데이터
+        private WeaponStatPanel weaponStatPanel; // 캐싱하여 사용
         #region Weapon
 
         public TextMeshProUGUI itemCountText;
@@ -23,13 +30,13 @@ namespace JHT
         #endregion
 
         #region Relics
-
+        public Image itemRarityImage;
         #endregion
 
 
         public void Init(ItemObject item)
         {
-            if (item is WeaponObject)
+            if (item.itemSO.itemType == ItemType.Equip)
             {
                 itemObject = (WeaponObject)item;
                 WeaponObject obj = (WeaponObject)itemObject;
@@ -41,21 +48,102 @@ namespace JHT
             }
             else
             {
+                itemObject = (RelicsObject)item;
+                RelicsObject obj = (RelicsObject)itemObject;
+
                 SetRelics((RelicsObject)item);
             }
         }
+        public void SetUp(WeaponObject weapon)
+        {
+            // 이전에 연결된 이벤트가 있다면 해제
+            if (weaponObject != null)
+            {
+                weaponObject.OnChangeLevel -= RefreshUI;
+                weaponObject.OnChangeStar -= RefreshUI;
+            }
 
+            this.weaponObject = weapon;
+
+            // 새 무기 데이터의 이벤트에 UI 갱신 함수를 등록
+            weaponObject.OnChangeLevel += RefreshUI;
+            weaponObject.OnChangeStar += RefreshUI;
+
+            // 상세 정보 보기 버튼 클릭 이벤트 설정 (한 번만 설정)
+            itemDetail.onClick.RemoveAllListeners();
+            itemDetail.onClick.AddListener(ShowDetails);
+
+            // UI 즉시 갱신
+            RefreshUI();
+        }
+
+        private void RefreshUI(int dummy = 0) // 이벤트 콜백을 위해 파라미터 추가
+        {
+            if (weaponObject == null) return;
+
+            nameText.text = weaponObject.itemName;
+            levelText.text = "Lv." + weaponObject.ItemLevel;
+
+            if (weaponObject.itemIcon != null)
+            {
+                itemImage.sprite = weaponObject.itemIcon;
+            }
+
+            UpdateStarDisplay(weaponObject.ItemStar);
+        }
+        private void ShowDetails()
+        {
+            if (weaponObject == null) return;
+
+            Debug.Log(weaponObject.itemName + " (레벨 " + weaponObject.ItemLevel + ") 상세 정보 보기");
+            weaponStatPanel = FindAnyObjectByType<WeaponStatPanel>();
+            if (weaponStatPanel != null)
+            {
+                weaponStatPanel.ShowStats(weaponObject);
+            }
+            else
+            {
+                Debug.LogError("WeaponStatPanel을 찾을 수 없습니다!");
+            }
+        }
+
+        private void UpdateStarDisplay(int currentStars)
+        {
+            for (int i = 0; i < starImages.Length; i++)
+            {
+                starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
+            }
+        }
         private void ShowItem()
         {
             ItemEventManager.Instance.ClickItem(itemObject);
         }
+
+
+        #region Relics
+
+
+        private void SetRelics(RelicsObject item)
+        {
+            if (item.itemNum != itemObject.itemNum)
+                return;
+
+            itemRarityImage.sprite = item.itemRarityImage;
+            itemStarImage.gameObject.SetActive(false);
+            itemCountText.gameObject.SetActive(false);
+            itemDetail.onClick.AddListener(ShowItem);
+        }
+
+        #endregion
+
+
+        #region Weapon
 
         private void SetWeapon(WeaponObject item)
         {
             if (item.itemNum != itemObject.itemNum)
                 return;
 
-            itemObject = item;
             itemName = item.itemName;
             itemLevel = item.ItemLevel;
             itemImage.sprite = item.itemIcon;
@@ -63,16 +151,10 @@ namespace JHT
 
         }
 
-        private void SetRelics(RelicsObject item)
-        {
 
-        }
-
-        //Action으로 WeaponItem을 받아와야할듯? 
         private void UpCountAction(int value)
         {
             WeaponObject obj = (WeaponObject)itemObject;
-            //Weapon
             itemCountText.text = value.ToString();
         }
 
@@ -82,5 +164,6 @@ namespace JHT
             WeaponObject obj = (WeaponObject)itemObject;
             itemStarImage.sprite = so.starImage[value];
         }
+        #endregion
     }
 }

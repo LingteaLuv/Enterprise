@@ -28,21 +28,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
         Debug.Log($"_uid : {_user.UserId}");
         _uid = _user.UserId;
     }
-    
-    private async Task SaveDataAsync(Dictionary<string, object> dictionary)
-    {
-        var task = FirebaseManager.DataReference.UpdateChildrenAsync(dictionary);
-        await task; 
-
-        if (task.IsCompletedSuccessfully)
-        {
-            Debug.Log("닉네임 저장 성공");
-        }
-        else
-        {
-            Debug.LogError("닉네임 저장 실패");
-        }
-    }
 
     public async Task DeleteDataAsync()
     {
@@ -53,14 +38,96 @@ public class DatabaseManager : Singleton<DatabaseManager>
     #region Nickname
     
     /// <summary>
-    /// Firebase DB - PublicData에 현재 설정된 닉네임을 저장하는 메서드
+    /// Firebase RTDB에 단일 데이터를 저장하는 메서드
     /// </summary>
-    private async Task SaveNicknameAsync(string nickname)
+    public async Task SaveFieldAsync(string path, object value)
     {
         Dictionary<string, object> dictionary = new Dictionary<string, object>();
-        dictionary[$"{_uid}/PublicData/Nickname"] = nickname;
+        dictionary[path] = value;
+        
+        var task = FirebaseManager.DataReference.UpdateChildrenAsync(dictionary);
+        await task; 
 
-        await SaveDataAsync(dictionary);
+        if (task.IsCompletedSuccessfully)
+        {
+            Debug.Log("데이터 저장 성공");
+        }
+        else
+        {
+            Debug.LogError("데이터 저장 실패");
+        }
+    }
+
+    /// <summary>
+    /// Firebase RTDB에 다중 데이터(Dictionary)를 저장하는 메서드
+    /// </summary>
+    public async Task SaveFieldsAsync(Dictionary<string, object> dictionary)
+    {
+        var task = FirebaseManager.DataReference.UpdateChildrenAsync(dictionary);
+        await task; 
+
+        if (task.IsCompletedSuccessfully)
+        {
+            Debug.Log("데이터 저장 성공");
+        }
+        else
+        {
+            Debug.LogError("데이터 저장 실패");
+        }
+    }
+    
+    /// <summary>
+    /// Firebase RTDB에 다중 데이터(Custom class)를 저장하는 메서드
+    /// </summary>
+    public async Task SaveFieldsAsync<T>(T data) where T : class
+    {
+        string json = JsonUtility.ToJson(data);
+        Dictionary<string, object> dictionary= Utility.JsonToDict(json);
+        
+        if (dictionary == null) return;
+        
+        var task = FirebaseManager.DataReference.Child(typeof(T).Name).UpdateChildrenAsync(dictionary);
+        await task; 
+
+        if (task.IsCompletedSuccessfully)
+        {
+            Debug.Log("데이터 저장 성공");
+        }
+        else
+        {
+            Debug.LogError("데이터 저장 실패");
+        }
+    }
+    
+    /// <summary>
+    /// Firebase RTDB에서 단일 데이터를 불러오는 메서드
+    /// </summary>
+    public async Task LoadFieldAsync<T>(string path, Action<T> callback)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(path);
+        DataSnapshot snapshot = await dataRef.GetValueAsync();
+
+        if (!snapshot.Exists || snapshot.Value == null) return;
+        
+        T data = (T)Convert.ChangeType(snapshot.Value, typeof(T));
+        callback(data);
+    }
+    
+    /// <summary>
+    /// Firebase RTDB에서 다중 데이터(Custom class)를 불러오는 메서드
+    /// </summary>
+    public async Task LoadFieldsAsync<T>(Action<T> callback) where T : class
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child(typeof(T).Name);
+        DataSnapshot snapshot = await dataRef.GetValueAsync();
+
+        if (!snapshot.Exists || snapshot.Value == null) return;
+
+        Dictionary<string, object> dictionary = snapshot.Value as Dictionary<string, object>;
+
+        string json = Utility.DictToJson(dictionary);
+        T data = JsonUtility.FromJson<T>(json);
+        callback(data);
     }
     
     /// <summary>
@@ -80,7 +147,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             nickname = newNickname;
         }
 
-        await SaveNicknameAsync(nickname);
+        await SaveFieldAsync($"{_uid}/PublicData/Nickname",nickname);
 
         OnChangedNickname?.Invoke();
     }

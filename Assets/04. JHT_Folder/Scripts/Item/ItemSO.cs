@@ -5,22 +5,32 @@ namespace JHT
 {
     public abstract class ItemSO : ScriptableObject
     {
-        [field: SerializeField] public int itemNum { get; private set; }
-        [field: SerializeField] public string itemName { get; private set; }
-        [field: SerializeField] public ItemType itemType { get; private set; }
-        [field: SerializeField] public Sprite icon { get; private set; } = null;
-        [field: SerializeField] public Sprite backImage { get; private set; }
-        [field: SerializeField] public string desc { get; private set; }
-        [field: SerializeField] public bool isStrengthen { get; private set; }
+        [field: SerializeField] public int itemNum;
+        [field: SerializeField] public string itemName;
+        [field: SerializeField] public ItemType itemType;
+        [field: SerializeField] public Sprite icon;
+        [field: SerializeField] public Sprite backImage;
+        [field: SerializeField] public string desc;
+        [field: SerializeField] public bool isStrengthen;
 
         public virtual void UseItem(ItemSO item) { }
     }
 
     public enum ItemType
     {
-        Weapon,
+        Equip,
         Relics,
         Crystal,
         NormalItem
     }
+
+    public enum ItemRarity
+    {
+        Normal = 0,
+        Rare,
+        Epic,
+        Unique,
+        Legend
+    }
+
 }
