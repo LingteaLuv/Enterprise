@@ -30,25 +30,7 @@ namespace LHI
                 return;
             }
 
-
-
-
-
-            // 캐릭터 진화 강화 레벨 적용 charInfo 에 적용 (이 경우 스크립터블 오브젝트의 값이 변경되지 않도록 주의)
-
-            // 적용한 수치를 CrewData에 설정
-            //CrewData.characterData.characterName = charInfo.characterData.characterName;
-            //CrewData.characterData.role = charInfo.characterData.role;
-            //CrewData.characterData.affiliation = charInfo.characterData.affiliation;
-            //CrewData.characterData.characterSprite = charInfo.characterData.characterSprite;
-
-            //CrewData.characterData.attack = charInfo.characterData.attack;
-            //CrewData.characterData.health = charInfo.characterData.health;
-            //CrewData.characterData.defense = charInfo.characterData.defense;
-            //CrewData.characterData.criticalChance = charInfo.characterData.criticalChance;
-            //CrewData.characterData.criticalDamage = charInfo.characterData.criticalDamage;
-            //CrewData.characterData.speed = charInfo.characterData.speed;
-
+            // 캐릭터 정보를 CrewData에 설정
             CrewData.characterData = CharacterManager.charactersDict[ID].characterData; // 캐릭터 데이터 설정
 
             // 진형에 따라 캐릭터 위치 설정 pos와 posNum에 따라 위치를 다르게 설정

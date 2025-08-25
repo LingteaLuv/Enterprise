@@ -31,6 +31,7 @@ namespace LHI
         public Faction affiliation;
         [Tooltip("캐릭터의 이미지")]
         public Sprite characterSprite;
+        // 애니메이션 클립도 추가 가능
 
         [Header("캐릭터 스탯")]
         [Tooltip("캐릭터의 공격력")]
@@ -45,7 +46,7 @@ namespace LHI
         public float criticalChance;
         [Tooltip("캐릭터의 치명타 배율 (%), ex)2배를 200로 작성할 것")]
         public float criticalDamage;
-        [Tooltip("캐릭터가 자신의 턴을 가지는 속도를 결정하는 스탯 ex) 1.5는 1초에 1.5 번 공격, 2는 1초에 2번 공격을 의미함")]
+        [Tooltip("캐릭터가 공격 속도를 결정하는 스탯 ex) 1.5는 1초에 1.5 번 공격, 2는 1초에 2번 공격을 의미함")]
         public float speed;
 
         private void OnValidate()

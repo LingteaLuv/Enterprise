@@ -31,12 +31,15 @@ namespace LHI
             CharacterStatUpdate(ID);
         }
 
-
+        /// <summary>
+        /// 강화나 진화가 이루어 진 이후 캐릭터 스탯을 업데이트 하는 메소드
+        /// </summary>
+        /// <param name="ID"></param>
         public void CharacterStatUpdate(int ID)
         {
             // 아이디 에서 캐릭터 정보를 가져옴 진화, 강화, 직책
             CharacterInfo characterInfo = CharacterManager.charactersDict[ID];
-            CharacterInfo basecharactersInfo = CharacterManager.basecharactersDict[ID];
+            CharacterData baseCharacterData = CharacterManager.baseCharactersDict[ID];
 
             int strLv = characterInfo.strengthenLevel;
             int evoLv = characterInfo.evolveLevel;
@@ -45,7 +48,7 @@ namespace LHI
             switch (role)
             {
                 case CrewRole.Captain: // 선장
-                    characterInfo.characterData.attack = (int)((basecharactersInfo.characterData.attack + (5 * strLv)) * (0.1 * evoLv + 1));
+                    characterInfo.characterData.attack = (int)((baseCharacterData.attack + (5 * strLv)) * (0.1 * evoLv + 1));
                     // 예시: 강화 레벨당 5 증가, 진화 레벨당 10% 증가
                     // 위 내용은 예시이며, 실제 게임 밸런스에 맞게 조정 필요
                     // 또한 선장의 경우는 캐릭터 마다 개별 증가치가 달라 따로 작성필요
