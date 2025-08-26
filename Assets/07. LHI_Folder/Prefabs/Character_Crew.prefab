@@ -44,10 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ab37f7ff98638d4baa0c39a5f3d1771, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentHP: 0
-  MaxHP: 0
-  CurrentSkillGauge: 0
-  MaxSkillGauge: 0
+  currentHP: 0
+  maxHP: 0
+  attack: 0
+  defense: 0
+  criticalChance: 0
+  criticalDamage: 0
   characterData: {fileID: 0}
 --- !u!1 &6611058026934152761
 GameObject:
@@ -64,7 +66,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1009588260755447407
 Transform:
   m_ObjectHideFlags: 0
