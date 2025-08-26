@@ -32,7 +32,7 @@ public class QuestUIController : MonoBehaviour
     {
         _questButton.onClick.AddListener(OnClickQuest);
         #if UNITY_EDITOR
-        _CheatButton.onClick.AddListener(OnClickCheatButton);
+        SubmitButton();
         #endif
     }
 
@@ -61,7 +61,7 @@ public class QuestUIController : MonoBehaviour
         
         _questNumberText.text = QuestNumber.ToString();
         _questGoalText.text = QuestDef.questName;
-        if (definition.questName == "stageClear")
+        if (QuestDef.GeneralType == GeneralType_Enum.StageClear)
         {
             _questGoalText.text = QuestInst.stageClearMission;
         }
@@ -86,9 +86,48 @@ public class QuestUIController : MonoBehaviour
     
     #if UNITY_EDITOR
     public Action OnForceClear;
+    [SerializeField] private Button KillButton;
+    [SerializeField] private Button GachaButton;
+    [SerializeField] private Button LevelUpButton;
+    [SerializeField] private Button UpgradeButton;
     public void OnClickCheatButton()
     {
         OnForceClear?.Invoke();
+    }
+    
+    public void SubmitButton()
+    {
+        _CheatButton.onClick.AddListener(OnClickCheatButton);
+        KillButton.onClick.AddListener(OnClickKillButton);
+        GachaButton.onClick.AddListener(OnClickGachaButton);
+        LevelUpButton.onClick.AddListener(OnClickLevelUpButton);
+        UpgradeButton.onClick.AddListener(OnClickUpgradeButton);
+    }
+
+    public void OnClickKillButton()
+    {
+        QuestSignalManager.Instance.KillEnemy(MonsterId.All);
+    }
+
+    public void OnClickGachaButton()
+    {
+        QuestSignalManager.Instance.GachaPull(ItemType.Character, 5);
+        QuestSignalManager.Instance.GachaPull(ItemType.Equipment, 5);
+        QuestSignalManager.Instance.GachaPull(ItemType.Relic, 5);
+    }
+
+    public void OnClickLevelUpButton()
+    {
+        QuestSignalManager.Instance.LevelUp(ItemType.Character, 5);
+        QuestSignalManager.Instance.LevelUp(ItemType.Relic, 5);
+        QuestSignalManager.Instance.LevelUp(ItemType.Equipment, 5);
+    }
+
+    public void OnClickUpgradeButton()
+    {
+        QuestSignalManager.Instance.Upgrade(UpgradeType.Atk,5);
+        QuestSignalManager.Instance.Upgrade(UpgradeType.Def,5);
+        QuestSignalManager.Instance.Upgrade(UpgradeType.Hp, 5);
     }
     #endif
 }

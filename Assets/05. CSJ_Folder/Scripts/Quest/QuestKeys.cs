@@ -1,14 +1,27 @@
 ﻿
     using System;
+    using System.Text;
     using UnityEngine;
 
     public static class QuestKeys
     {
+        public static string Compose(KeyFunc keyFunc, TypedEnumKey key)
+        {
+            StringBuilder sb = new StringBuilder();
+            switch (keyFunc)
+            {
+                case KeyFunc.StageClear:
+                    return key.ToString();
+                default:
+                    return sb.Append(keyFunc.ToString()).Append(":").Append(key.ToKeyString()).ToString();
+                
+            }
+        }
         private static readonly string stageClearkey = "stageClear";
         
         public static string Kill(MonsterId enemyId) => $"Kill:{enemyId.ToString()}";
         public static string Collect(MoneyId itemId) => $"Collect:{itemId.ToString()}";
-        public static string GachaPull(ItemType gachaId) => $"Gacha:{gachaId}";
+        public static string GachaPull(ItemType gachaId) => $"GachaPull:{gachaId}";
         public static string LevelUp(ItemType LevelId) => $"LevelUP:{LevelId}";
         public static string Upgrade(UpgradeType UpgradeId) => $"Upgrade:{UpgradeId}";
         public static string Achieve(string achieveType) => $"Achieve:{achieveType}";

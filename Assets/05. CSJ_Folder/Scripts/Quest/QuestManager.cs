@@ -64,7 +64,11 @@ namespace _05._CSJ_Folder.Scripts.Quest
             BuildCatalog();
             
             Load();
-            if (_signal != null) _signal.OnSignal += OnSignal;
+            if (_signal != null)
+            {
+                _signal.OnSignal -= OnSignal;
+                _signal.OnSignal += OnSignal;
+            }
             
             EnsureGeneralActive();
 
@@ -140,6 +144,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
             var delta = goal.ProgressDeltaFrom(signalKey, amount);
             if (delta <= 0) return;
             
+       
+            
             var before = activeGeneral.CurrentGoalCount;
             var require = def.Goal.RequireCount;
             activeGeneral.GoalCountAdjust(Mathf.Clamp(before + delta, 0, require));
@@ -170,7 +176,10 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             if (CurrentClearedStage == 0) return;
             if (_stageClearTemplate == null) return;
-             
+            if (_generalQuests.Count != 0) return;
+            if (HasActiveGeneral()) return;
+            
+
             _generalQuests.Enqueue(_stageClearTemplate);
             
             if (!_instances.TryGetValue(_stageClearTemplate.questId, out var inst))
@@ -196,20 +205,17 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
             GeneralQuestCount++;
 
-            if (GetActiveGeneralInstance() == null)
-                EnsureActive(_stageClearTemplate);
-
         }
         
         private void InsertRoutineQuest()
         {
-            int target = _tutorialQuests.Count >0 ?_tutorialQuests.Peek().targetStage : int.MaxValue;
+            int target = _tutorialQuests.Count > 0 ?_tutorialQuests.Peek().targetStage : int.MaxValue;
             foreach (var quest in GetNextParity())
             {
-                if (target <= GeneralQuestCount)
+                if (target <= GeneralQuestCount + 1)
                 {
                     InsertTutorials();
-                    target = _tutorialQuests.Count >0 ?_tutorialQuests.Peek().targetStage : int.MaxValue;
+                    target = _tutorialQuests.Count > 0 ?_tutorialQuests.Peek().targetStage : int.MaxValue;
                 }
     
                 // TODO : 만약 CLearMin의 내림차순 정렬이 보장되어 있다면 return으로 변경 
@@ -236,7 +242,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private void InsertTutorials()
         {
             if (_tutorialQuests.Count == 0) return;
-            while (_tutorialQuests.Count >0 &&_tutorialQuests.Peek().targetStage <= GeneralQuestCount)
+            while (_tutorialQuests.Count >0 &&_tutorialQuests.Peek().targetStage <= GeneralQuestCount + 1)
             {
                 if (_instances.TryGetValue(_tutorialQuests.Peek().questId, out var inst))
                 {
@@ -320,7 +326,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             RefreshActiveQuestUI();
             return true;
         }
-
+        
         private QuestInstance GetActiveGeneralInstance()
         {
             foreach (var kv in _instances)
@@ -334,8 +340,11 @@ namespace _05._CSJ_Folder.Scripts.Quest
         }
         private QuestDefinitionSO GetActiveQuestDefinition()
         {
-            return _defs.GetValueOrDefault(GetActiveGeneralInstance().QuestId);
+            var inst = GetActiveGeneralInstance();
+            return inst == null ? null : _defs.GetValueOrDefault(inst.QuestId);
         }
+        
+        private bool HasActiveGeneral() => GetActiveGeneralInstance() != null;
         
         private void ReceiveReward(QuestDefinitionSO def, QuestInstance inst)
         {
@@ -449,6 +458,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
 #if  UNITY_EDITOR
         private void ForceQuestComplete()
         {
+            CurrentClearedStage++;
             QuestInstance inst = GetActiveGeneralInstance();
             inst.ForceComplete();   
             MarkCompleted(GetActiveQuestDefinition(),inst);
