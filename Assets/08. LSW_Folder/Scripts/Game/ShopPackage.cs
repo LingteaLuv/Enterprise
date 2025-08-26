@@ -28,6 +28,7 @@ public class ShopPackage : MonoBehaviour
     private void OnTouchPurchaseBtn()
     {
         DatabaseManager.Instance.SavePackage(_packageId);
+        GoogleAdmobTester.Instance.ShowAd();
         UpdatePanel();
     }
 
