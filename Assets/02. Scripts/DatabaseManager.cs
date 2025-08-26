@@ -158,6 +158,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// </summary>
     public async Task LoadNicknameAsync(Action<string> callback)
     {
+        _uid = FirebaseManager.Auth.CurrentUser.UserId;
         DatabaseReference nicknameRef = FirebaseManager.DataReference.Child(_uid).Child("PublicData").Child("Nickname");
 
         DataSnapshot snapshot = await nicknameRef.GetValueAsync();

@@ -18,6 +18,7 @@ public class GoogleAdmobTester : MonoBehaviour
             return;
         }
         Debug.Log("광고 초기화 성공");
+        LoadAd();
     }
 
     public void LoadAd()
