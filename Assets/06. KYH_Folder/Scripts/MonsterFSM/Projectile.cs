@@ -19,6 +19,19 @@ public class Projectile : MonoBehaviour
         {
             // 명중 처리, 파괴 등
             Destroy(gameObject);
+
+            Debug.Log("타겟에게 닿지않고 파괴됨");
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Crew"))
+        {
+            Debug.Log(" Crew에게 명중되고 파괴됨.");
+
+            // 데미지 처리
+            Destroy(gameObject);
         }
     }
 }

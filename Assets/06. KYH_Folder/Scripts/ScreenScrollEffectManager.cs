@@ -39,28 +39,25 @@ public class ScreenScrollEffectManager : MonoBehaviour
     /// 스크롤 연출을 실행하는 함수
     /// </summary>
     /// <param name="onComplete">애니메이션 완료 후 실행할 콜백</param>
-    public void ShowScrollEffect(System.Action onComplete = null)
+    public void ShowScrollEffect(string customMessage, System.Action onComplete = null)
     {
-        // 텍스트 초기화 (빈 상태로 시작)
         typingText.text = "";
+        message = customMessage;
 
-        // DOTween 시퀀스 생성
         Sequence seq = DOTween.Sequence();
 
-        // 1. 검은 패널을 오른쪽에서 중앙으로 이동
+        // 1. 오른쪽에서 중앙으로 이동
         seq.Append(blackPanel.DOAnchorPos(centerScreen, scrollDuration).SetEase(Ease.InOutSine));
 
-        // 2. 중앙 도착 후 텍스트 타자 효과 시작
+        // 2. 중앙 도착 후 타자 효과
         seq.AppendCallback(() =>
         {
             StartCoroutine(PlayTypingEffect(() =>
             {
-                // 3. 텍스트 출력이 끝난 후
+                // 3. 출력 완료 후 왼쪽으로 이동
                 Sequence outSeq = DOTween.Sequence();
-                outSeq.AppendInterval(waitDuration); // 잠시 대기
-                // 중앙에서 왼쪽으로 이동
+                outSeq.AppendInterval(waitDuration);
                 outSeq.Append(blackPanel.DOAnchorPos(offScreenLeft, scrollDuration).SetEase(Ease.InOutSine));
-                // 모든 연출이 끝나면 onComplete 콜백 호출
                 outSeq.OnComplete(() => onComplete?.Invoke());
             }));
         });
