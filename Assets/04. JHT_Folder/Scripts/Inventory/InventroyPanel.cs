@@ -12,6 +12,7 @@ namespace JHT
         [SerializeField] private Transform weaponPanelParent;
         [SerializeField] private Transform relicsPanelParent;
         [SerializeField] private ItemPanelPrefab itemPanelPrefab;
+        [SerializeField] private ItemRelicsPanelItem itemRelicsPanelItem;
         [SerializeField] private Button levelSort;
 
         [Header("Choose_Inventory")]
@@ -28,16 +29,22 @@ namespace JHT
         [SerializeField] private ChoosePopUp choosePopup;
 
         private InventoryManager inventoryManager;
+        private ItemEventManager itemEventManager;
         private bool isLevelSort;
 
         private List<ItemPanelPrefab> itemPanelPool = new List<ItemPanelPrefab>();
+        private List<ItemRelicsPanelItem> itemRelicsPanelPool = new List<ItemRelicsPanelItem>();
 
         //private List<ItemPanelPrefab> items;
 
         private void OnEnable()
         {
             inventoryManager = InventoryManager.Instance;
+            itemEventManager = ItemEventManager.Instance;
+
             inventoryManager.OnAddInventory += ReSetItemPanel;
+            inventoryManager.OnAddInventory += ReSetRelicsPanel;
+            inventoryManager.OnChangePanel += ReSetRelicsPanel;
             inventoryManager.OnRemoveInventory += ReSetItemPanel;
             levelSort.onClick.AddListener(SortByLevel);
 
@@ -53,12 +60,14 @@ namespace JHT
         {
             inventoryManager.OnAddInventory -= ReSetItemPanel;
             inventoryManager.OnRemoveInventory -= ReSetItemPanel;
+            inventoryManager.OnAddInventory -= ReSetRelicsPanel;
+            inventoryManager.OnChangePanel -= ReSetRelicsPanel;
             levelSort.onClick.RemoveListener(SortByLevel);
 
             weaponInventoryButton.onClick.RemoveListener(ChangeWeaponMode);
             relicsInventoryButton.onClick.RemoveListener(ChangeRelicsMode);
-            InventoryManager.Instance.OnChooseItem -= ShowChooseItem;
-            ItemEventManager.Instance.OnClickItem -= ShowItemStat;
+            inventoryManager.OnChooseItem -= ShowChooseItem;
+            itemEventManager.OnClickItem -= ShowItemStat;
         }
     
         private void SortByLevel()
@@ -130,6 +139,37 @@ namespace JHT
 
                 WeaponObject weapon = inventoryManager.weaponList[i];
                 currentPanel.SetUp(weapon);
+                currentPanel.gameObject.SetActive(true);
+            }
+        }
+
+        private void ReSetRelicsPanel(ItemObject changedItem)
+        {
+            // 1. 모든 풀링된 패널을 비활성화
+            foreach (ItemRelicsPanelItem panel in itemRelicsPanelPool)
+            {
+                panel.gameObject.SetActive(false);
+            }
+
+            // 2. 인벤토리 리스트를 기반으로 패널을 재사용/생성하여 업데이트
+            for (int i = 0; i < inventoryManager.relicsList.Count; i++)
+            {
+                ItemRelicsPanelItem currentPanel;
+                if (i < itemRelicsPanelPool.Count)
+                {
+                    // 풀에 사용 가능한 패널이 있으면 재사용
+                    currentPanel = itemRelicsPanelPool[i];
+                }
+                else
+                {
+                    // 풀이 부족하면 새로 생성하고 풀에 추가
+                    currentPanel = Instantiate(itemRelicsPanelItem);
+                    currentPanel.transform.SetParent(relicsPanelParent);
+                    itemRelicsPanelPool.Add(currentPanel);
+                }
+
+                RelicsObject relics = inventoryManager.relicsList[i];
+                currentPanel.Init(relics);
                 currentPanel.gameObject.SetActive(true);
             }
         }
