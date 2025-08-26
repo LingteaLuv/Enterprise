@@ -24,13 +24,14 @@ namespace LHI
         private void OnEnable()
         {
             // 캐릭터 데이터를 스테이터스에 적용
+            maxHP = characterData.health;
+            attack = characterData.attack;
+            defense = characterData.defense;
+            criticalChance = characterData.criticalChance;
+            criticalDamage = characterData.criticalDamage;
 
-
+            currentHP = maxHP;
         }
-        // MaxHP = characterData.health;
-        // CurrentHP = MaxHP;
-        //CurrentSkillGauge = 0;
-        //MaxSkillGauge = 100; // 예시로 100으로 설정
 
         public override void TakeDamage(float damage)
         {
@@ -53,7 +54,7 @@ namespace LHI
 
         public override void Move()
         {
-            // 캐릭터 
+            // 이동과 타겟은 전투 시스템과 연결되기 때문에 용호님과 상의 후 작성
         }
 
         public override void TargetFind()

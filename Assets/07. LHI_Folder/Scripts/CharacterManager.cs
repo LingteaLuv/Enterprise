@@ -13,9 +13,10 @@ namespace LHI
 
         public List<CharacterInfo> characters = new List<CharacterInfo>(); // 인스펙터에서 캐릭터 정보를 추가할 리스트
 
-        public static Dictionary<int, CharacterData> baseCharactersDict; // 기본 캐릭터 정보를 저장하는 딕셔너리
+        // 기본 캐릭터 정보를 저장하는 딕셔너리 (이 전역 변수 진화 강화 쪽만 사용한다면 static 빼고 사용해도 될듯함)
+        public static Dictionary<int, CharacterData> baseCharactersDict; 
 
-        public static Dictionary<int , CharacterInfo> charactersDict; // 강화나 유물등 적용 후 캐릭터 정보를 저장하는 딕셔너리
+        public static Dictionary<int, CharacterInfo> charactersDict; // 변화 및 강화 등 적용 후 캐릭터 정보를 저장하는 딕셔너리
 
 
         public void Awake()
