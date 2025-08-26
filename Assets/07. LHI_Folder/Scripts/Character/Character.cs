@@ -8,6 +8,9 @@ namespace LHI
         public float maxHP;
         public float attack;
         public float defense;
+        public float attackRange;        // 임의로 상속받기위해 추가함
+        public float moveSpeed;          // 임의로 상속받기위해 추가함
+        public float attackDelay;        // 임의로 상속받기위해 추가함
 
         public float criticalChance;
         public float criticalDamage;

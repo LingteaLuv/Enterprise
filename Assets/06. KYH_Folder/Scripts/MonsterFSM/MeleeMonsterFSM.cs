@@ -3,17 +3,24 @@ using System.Collections;
 public class MeleeMonsterFSM : BaseMonsterFSM
 {
     public Transform target;
+    protected override void Start()
+    {
+        base.Start();
 
+        FindClosestCrew();
+    }
     protected override void HandleIdle()
     {
+        if (target == null)
+        {
+            FindClosestCrew(); // 실시간 타겟 탐색
+            return; // 한 프레임 쉬고 다음 프레임부터 다시 체크
+        }
+
         if (Vector3.Distance(transform.position, target.position) < attackRange)
-        {
             ChangeState(State.Attack);
-        }
         else
-        {
             ChangeState(State.Move);
-        }
     }
 
     protected override void HandleMove()
@@ -36,12 +43,52 @@ public class MeleeMonsterFSM : BaseMonsterFSM
     {
         while (true)
         {
+            if (target == null)
+            {
+                ChangeState(State.Idle);
+                yield break;
+            }
+
+            float distance = Vector3.Distance(transform.position, target.position);
+
+            if (distance > attackRange)
+            {
+                ChangeState(State.Move); // 사거리 밖이면 다시 이동 상태로
+                yield break; // 코루틴 종료
+            }
+
             Debug.Log($"{gameObject.name}이(가) 근접 공격!");
 
             // 이펙트, 애니메이션, 데미지 적용 등
-            // target.GetComponent<Player>()?.TakeDamage(공격력);
+            // target.GetComponent<Player>()?.TakeDamage(attack);
 
             yield return new WaitForSeconds(attackDelay);
         }
+    }
+
+    private void FindClosestCrew()
+    {
+        GameObject[] crews = GameObject.FindGameObjectsWithTag("Crew");
+        float minDist = float.MaxValue;
+        GameObject closest = null;
+
+        foreach (GameObject crew in crews)
+        {
+            float dist = Vector3.Distance(transform.position, crew.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closest = crew;
+            }
+        }
+
+        if (closest != null)
+            target = closest.transform;
+    }
+
+    public override void TargetFind()
+    {
+        if (target == null)
+            FindClosestCrew();
     }
 }
