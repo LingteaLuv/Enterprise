@@ -44,6 +44,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             CurrentGoalCount = 0;
         }
+
         #if UNITY_EDITOR
         public void ForceComplete()
         {

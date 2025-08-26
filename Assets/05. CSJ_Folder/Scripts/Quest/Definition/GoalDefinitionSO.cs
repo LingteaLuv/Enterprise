@@ -7,37 +7,37 @@ namespace _05._CSJ_Folder.Scripts.Quest.Definition
     [CreateAssetMenu(menuName = "Quest/Goals")]
     public class GoalDefinitionSO : ScriptableObject
     {
-        // 퀘스트 목표의 키 ex) "kill : slime"
+        // 퀘스트 목표의 키 ex) "kill, GachaPull"
         [SerializeField] private KeyFunc keyValue;
 
-        [SerializeField]
+        // 퀘스트 세부 항목 : => ItemType.Relic, Monster.All, UpgradeType.Atk; 
+        [SerializeField] 
         public TypedEnumKey enumKey;
-        // 퀘스트 설명 ex) 슬라임을 {RequireCount} 처치하세요.
-        [TextArea] private string description;
         // 퀘스트 목표 처치 수
         public int RequireCount = 1;
+        
+        // 비 직렬화 항목 : 캐시 키
+        [NonSerialized] private string _cachedKey; 
+        
+        // 키의 경우 BuildKey로 만든 키 값을 캐시화 하여 제공 
+        public string Key => _cachedKey ??= BuildKey();
 
-        private string key;
-        public string Key => key;
-        public string Description => description;
+        // QuestKeys.Compose를 통해서 Key 값을 만들고 정규화를 진행
+        private string BuildKey() => Normalize(QuestKeys.Compose(keyValue, enumKey));
 
-        public void Start()
-        {
-            if (keyValue == KeyFunc.StageClear)
-            {
-                key = keyValue.ToString();
-            }
-            else
-            {       
-                StringBuilder sb = new StringBuilder();
-                key = sb.Append(keyValue.ToString()).Append(":").Append(enumKey.ToKeyString()).ToString();
-            }
-        }
+        // 입력받은 키와 현재 목표의 키가 동일한지 판별하여 참 거짓을 반환
+        public bool Matches(string signalKey) => string.Equals(Normalize(signalKey), Key, StringComparison.Ordinal);
+        
 
-        public bool Matches(string signalKey) => string.Equals(Normalize(signalKey), Normalize(key), StringComparison.Ordinal);
-
+        // 목표와 키가 동일하다면 마릿수 반환, 아니라면 진행 안된 사실 반환
         public int ProgressDeltaFrom(string signalKey, int delta) => Matches(signalKey) ? delta : 0;
 
-        private static string Normalize(string s) => (s ?? "").Trim();
+        // 문자열을 받아 공백 삭제, 소문자화 진행
+        private static string Normalize(string s) => (s ?? "").Trim().ToLowerInvariant();
+        
+#if UNITY_EDITOR
+        private void OnValidate() { _cachedKey = null; }
+#endif
+        private void OnEnable() { _cachedKey = null; }
     } 
 }
