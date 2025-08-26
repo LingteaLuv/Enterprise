@@ -206,13 +206,13 @@ public class CharacterInfoUI : MonoBehaviour
         if (currentCharacterData == null) return;
 
         // ATK 스탯 데이터 찾기 (CSV 헤더에 맞춰 "attackPower"로 변경)
-        StatData atkStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "attackPower");
+        StatData atkStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.Attack);
         if (atkStatData != null)
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
             float atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.characterLevel);
             atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(atkValue)}";
-            currentCharacterData.characterStats["attackPower"] = atkValue;
+            currentCharacterData.characterStats[Stat.Attack] = atkValue;
         }
         else
         {
@@ -220,13 +220,13 @@ public class CharacterInfoUI : MonoBehaviour
         }
 
         // HP 스탯 데이터 찾기 (CSV 헤더에 맞춰 "health"로 변경)
-        StatData hpStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "health");
+        StatData hpStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.Health);
         if (hpStatData != null)
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
             float hpValue = StatManager.CalculateStatValue(hpStatData, currentCharacterData.characterLevel);
             hpDisplay.text = $"체력 : {DataUtility.FormatNumber(hpValue)}";
-            currentCharacterData.characterStats["health"] = hpValue;
+            currentCharacterData.characterStats[Stat.Health] = hpValue;
         }
         else
         {
@@ -234,13 +234,13 @@ public class CharacterInfoUI : MonoBehaviour
         }
 
         // DEF 스탯 데이터 찾기 (CSV 헤더에 맞춰 "defensePower"로 변경)
-        StatData defStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "defensePower");
+        StatData defStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.Defense);
         if (defStatData != null)
         {
             // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
             float defValue = StatManager.CalculateStatValue(defStatData, currentCharacterData.characterLevel);
             defDisplay.text = $"방어력 : {DataUtility.FormatNumber(defValue)}";
-            currentCharacterData.characterStats["defensePower"] = defValue;
+            currentCharacterData.characterStats[Stat.Defense] = defValue;
         }
         else
         {
@@ -248,7 +248,7 @@ public class CharacterInfoUI : MonoBehaviour
         }
 
         // CritChance 데이터 가져오기 레벨업
-        StatData criChanStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "critChance");
+        StatData criChanStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.CritChance);
         if (criChanStatData != null)
         {
             float criChanValue = criChanStatData.value;
@@ -256,7 +256,7 @@ public class CharacterInfoUI : MonoBehaviour
         }
 
         // CritDmg 데이터 가져오기 레벨업
-        StatData criDmgStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "critDamage");
+        StatData criDmgStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.CritDamage);
         if (criDmgStatData != null)
         {
             float criDmgValue = criDmgStatData.value;
@@ -264,7 +264,7 @@ public class CharacterInfoUI : MonoBehaviour
         }
 
         // ATKSpd 데이터 가져오기 레벨업
-        StatData atkSpdStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == "attackSpeed");
+        StatData atkSpdStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.AttackSpeed);
         if (atkSpdStatData != null)
         {
             float atkSpdValue = atkSpdStatData.value;

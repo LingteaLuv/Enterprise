@@ -18,7 +18,7 @@ public static class StatCalculator
         }
         return total;
     }
-    public static float GetStat(PlayerCharacterData character, string statName)
+    public static float GetStat(PlayerCharacterData character, Stat statName)
     {
         if (character.finalStats.ContainsKey(statName))
             return character.finalStats[statName];

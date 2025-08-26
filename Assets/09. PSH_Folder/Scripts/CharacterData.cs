@@ -14,8 +14,8 @@ public enum CrewRole
 }
 public enum Faction
 {
-    Pirate,   // 해적
     Navy,     // 해군
+    Pirate,   // 해적
     Monster   // 괴물
 }
 
