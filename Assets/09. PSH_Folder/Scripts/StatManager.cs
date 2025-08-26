@@ -5,7 +5,7 @@ using UnityEngine; // Debug.LogWarning을 사용하기 위해 추가
 public static class StatManager
 {
     // 각 스탯의 레벨당 성장치를 저장하는 딕셔너리
-    private static Dictionary<string, float> statGrowthRates;
+    private static Dictionary<Stat, float> statGrowthRates;
 
     // static 생성자: 클래스가 처음 로드될 때 한 번만 실행됩니다.
     static StatManager()
@@ -16,11 +16,11 @@ public static class StatManager
     // 스탯 성장치 초기화 함수
     private static void InitializeStatGrowthRates()
     {
-        statGrowthRates = new Dictionary<string, float>
+        statGrowthRates = new Dictionary<Stat, float>
         {
-            { "health", 100f },         // 체력: 레벨당 100 증가
-            { "attackPower", 20f },     // 공격력: 레벨당 20 증가
-            { "defensePower", 5f },     // 방어력: 레벨당 5 증가
+            { Stat.Health, 100f },         // 체력: 레벨당 100 증가
+            { Stat.Attack, 20f },     // 공격력: 레벨당 20 증가
+            { Stat.Defense, 5f },     // 방어력: 레벨당 5 증가
             //{ "critChance", 0.005f },   // 치명타 확률: 레벨당 0.5% 증가 (0.005 = 0.5%)
             //{ "critDamage", 0.01f },    // 치명타 피해: 레벨당 1% 증가 (0.01 = 1%)
             //{ "attackSpeed", 0.001f }   // 공격 속도: 레벨당 0.1% 증가

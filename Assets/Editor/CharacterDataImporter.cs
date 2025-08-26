@@ -93,16 +93,14 @@ public class CharacterDataImporter
                 data.faction = (Faction)Enum.Parse(typeof(Faction), fields[headerMap["faction"]], true);
 
                 // 스탯 정보 파싱 및 StatData 리스트에 추가
-                string[] statHeaders = new string[] { "attackPower", "health", "defensePower", "critChance", "critDamage", "attackSpeed" };
+                string[] statHeaders = new string[] { "attack", "health", "defense", "critChance", "critDamage", "attackSpeed" };
                 foreach (string statName in statHeaders)
                 {
                     if (headerMap.ContainsKey(statName))
                     {
                         StatData stat = new StatData();
-                        stat.statName = statName;
+                        stat.statName = (Stat)Enum.Parse(typeof(Stat), statName, true);
                         stat.value = float.Parse(fields[headerMap[statName]]); // float으로 파싱
-                        // StatData에 Validate() 메서드가 있다면 호출 (현재 float 버전 StatData에는 필요 없음)
-                        // stat.Validate();
                         data.baseStats.Add(stat);
                     }
                     else
