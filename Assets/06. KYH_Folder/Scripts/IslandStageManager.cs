@@ -20,7 +20,7 @@ public class IslandStageManager : MonoBehaviour
     [SerializeField] private Transform shipTransform;             // 실제 배 GameObject (움직일 대상)
     [SerializeField] private float shipMoveDuration = 2f;         // 섬까지 배가 이동하는 시간
 
-
+    
     [SerializeField] private TravelUIController travelUI;          // // 캔버스에서 배 이동을 연출하는 컨트롤러
 
     private int currentIndex = 0;                                  // 현재 진행 중인 섬의 인덱스
@@ -69,6 +69,12 @@ public class IslandStageManager : MonoBehaviour
     /// </summary>
     private IEnumerator HandleReturnAndNext()
     {
+        // 패널 연출 삽입
+        bool done = false;
+        ScreenScrollEffectManager.Instance.ShowScrollEffect(() => done = true);
+        yield return new WaitUntil(() => done);
+
+
         Debug.Log(" [HandleReturnAndNext] 진입");
 
         yield return new WaitForSeconds(1f);
@@ -150,6 +156,11 @@ public class IslandStageManager : MonoBehaviour
             arrive = true;
             Debug.Log($"[MoveToAndEnter] onArrive 수신 index={index}");
         });
+
+        // 패널 연출 삽입
+        bool done = false;
+        ScreenScrollEffectManager.Instance.ShowScrollEffect(() => done = true);
+        yield return new WaitUntil(() => done);
 
 
         SetBattleField(index); // 전투 필드 활성화

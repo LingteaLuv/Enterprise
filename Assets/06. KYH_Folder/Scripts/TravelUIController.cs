@@ -34,6 +34,8 @@ public class TravelUIController : MonoBehaviour
             return;
         }
         StartCoroutine(FadeCanvasGroup(travelCanvasGroup, visible ? 1f : 0f, fadeTime));
+
+        
     }
 
     /// <summary>
