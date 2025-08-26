@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using JHT;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,7 +12,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
 {
     [Header("캐릭터 데이터 (전용)")]
     [Tooltip("캐릭터 SO 에셋들이 저장된 폴더 경로")]
-    public string characterDataFolderPath = "Assets/Resources/CharacterData";
+    public string characterDataFolderPath = "CharacterData";
     [Tooltip("게임에 존재하는 모든 캐릭터 SO 목록")]
     public List<CharacterData> allCharacters;
 
@@ -21,33 +23,20 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
     // 등급별로 캐릭터를 미리 분류해 놓은 딕셔너리
     private Dictionary<Rarity, List<CharacterData>> charactersByRarity;
 
-#if UNITY_EDITOR
-    [ContextMenu("폴더에서 캐릭터 SO 모두 불러오기")]
-    private void LoadAllCharacterSOsFromFolder()
+    private void Start()
     {
-        if (string.IsNullOrEmpty(characterDataFolderPath))
-        {
-            Debug.LogError("캐릭터 SO 폴더 경로가 지정되지 않았습니다!");
-            return;
-        }
-        allCharacters.Clear();
-        string[] guids = AssetDatabase.FindAssets("t:CharacterData", new[] { characterDataFolderPath });
-        foreach (string guid in guids)
-        {
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-            CharacterData character = AssetDatabase.LoadAssetAtPath<CharacterData>(assetPath);
-            if (character != null)
-            {
-                allCharacters.Add(character);
-            }
-        }
-        EditorUtility.SetDirty(this);
-        Debug.Log($"{allCharacters.Count}개의 캐릭터 SO를 폴더에서 성공적으로 불러왔습니다.");
+        StartCoroutine(InitializeGachaPool());
     }
-#endif
 
-    void Awake()
+    private System.Collections.IEnumerator InitializeGachaPool()
     {
+        while (ItemDataManager.Instance == null || !ItemDataManager.Instance.IsDataLoaded)
+        {
+            yield return null;
+        }
+        allCharacters = Resources.LoadAll<CharacterData>(characterDataFolderPath).ToList();
+        Debug.Log($"[CharacterGachaManager] {allCharacters.Count}명의 캐릭터를 뽑기 풀에 추가했습니다.");
+
         InitializeCharacterDictionary();
     }
 
