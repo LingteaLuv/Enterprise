@@ -11,7 +11,6 @@ namespace JHT
         [field: SerializeField] public Sprite icon;
         [field: SerializeField] public Sprite backImage;
         [field: SerializeField] public string desc;
-        [field: SerializeField] public bool isStrengthen;
 
         public virtual void UseItem(ItemSO item) { }
     }
@@ -19,18 +18,8 @@ namespace JHT
     public enum ItemType
     {
         Equip,
-        Relics,
-        Crystal,
-        NormalItem
+        Relics
     }
 
-    public enum ItemRarity
-    {
-        Normal = 0,
-        Rare,
-        Epic,
-        Unique,
-        Legend
-    }
 
 }

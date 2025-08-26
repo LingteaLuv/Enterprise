@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ChoosePopUp : MonoBehaviour//, IPointerClickHandler
+public class ChoosePopUp : MonoBehaviour
 {
     [SerializeField] private Button item1Button;
     [SerializeField] private Button item2Button;
@@ -50,20 +50,4 @@ public class ChoosePopUp : MonoBehaviour//, IPointerClickHandler
         InventoryManager.Instance.OnChangeItem?.Invoke(relicsObj1, relicsObj2, false);
         gameObject.SetActive(false);
     }
-
-    //public void OnPointerClick(PointerEventData eventData)
-    //{
-    //    GameObject clickedObj = eventData.pointerClick;
-    //
-    //    if (clickedObj == item1)
-    //    {
-    //        InventoryManager.Instance.OnChangeItem?.Invoke(relicsObj1, relicsObj2,true);
-    //        this.gameObject.SetActive(false);
-    //    }
-    //    else if (clickedObj == item2)
-    //    {
-    //        InventoryManager.Instance.OnChangeItem?.Invoke(relicsObj1, relicsObj2,false);
-    //        this.gameObject.SetActive(false);
-    //    }
-    //}
 }

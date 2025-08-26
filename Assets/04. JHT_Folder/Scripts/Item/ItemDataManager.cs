@@ -27,6 +27,8 @@ namespace JHT
 
         public bool IsDataLoaded { get; private set; } = false;
 
+        public JHT_DataDownLoader downLoader;
+
         // 수정필요 : csv에서 데이터 받아온 후 초기화 할 수 있도록 설정 해야함 
         protected override void Awake()
         {
@@ -48,14 +50,13 @@ namespace JHT
             ItemWeaponSO[] loadedWeapons = Resources.LoadAll<ItemWeaponSO>("EquipData");
             LoadWeaponList(loadedWeapons);
             //weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>(WEAPON_LABEL);
-            //relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>(RELICS_LABEL);
-
+            relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>(RELICS_LABEL);
 
             //yield return weaponHandle;
-            //yield return relicsHandle;
+            yield return relicsHandle;
 
             //LoadWeaponList(weaponHandle);
-            //LoadRelicsList(relicsHandle);
+            LoadRelicsList(relicsHandle);
         }
         #region 장비
         private void LoadWeaponList(ItemWeaponSO[] objs)
@@ -158,7 +159,19 @@ namespace JHT
         {
             yield return new WaitForEndOfFrame();
             encyclopediaPanel.RelicsInit();
+
+            yield return DownLoadCSV();
         }
+
+        private IEnumerator DownLoadCSV()
+        {
+            while (!IsDataLoaded)
+                yield return null;
+
+            downLoader = new JHT_DataDownLoader();
+            yield return downLoader.DownloadData();
+        }
+
         #endregion
 
 
@@ -171,5 +184,6 @@ namespace JHT
         {
             return relicsDataDic;
         }
+
     }
 }
