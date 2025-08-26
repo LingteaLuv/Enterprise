@@ -17,6 +17,7 @@ namespace JHT
 
         public Action<RelicsObject,RelicsObject> OnChooseItem;
         public Action<RelicsObject,RelicsObject,bool> OnChangeItem;
+        public Action<RelicsObject> OnChangePanel;
 
         public InventoryMode currentMode;
 
@@ -39,6 +40,8 @@ namespace JHT
             OnRemoveInventory -= RemoveInventroyIndex;
             OnChangeItem -= AddRelicsItem;
         }
+
+        #region 수현님코드
         // ▼▼▼ 강화 포인트 관련 코드 수정 ▼▼▼
         public Dictionary<int, int> equipmentEnhancementPoints = new Dictionary<int, int>();
         public Action<int, int> OnEquipmentEnhancementPointsChanged; // itemNum, newPoints
@@ -56,7 +59,7 @@ namespace JHT
             Debug.Log($"장비 ID: {itemNum} 에 강화 포인트 {amount} 추가! (총 {equipmentEnhancementPoints[itemNum]} 포인트)");
             OnEquipmentEnhancementPointsChanged?.Invoke(itemNum, equipmentEnhancementPoints[itemNum]);
         }
-
+        
         public int GetEnhancementPoints(int itemNum)
         {
             if (equipmentEnhancementPoints.ContainsKey(itemNum))
@@ -91,6 +94,7 @@ namespace JHT
                 Debug.LogWarning($"[InventoryManager] {weapon.itemName} 레벨업 실패: 강화 포인트가 부족합니다. (필요: {requiredPoints}, 보유: {currentPoints})");
             }
         }
+        
 
         public void StarUpEquipment(int itemNum)
         {
@@ -123,6 +127,9 @@ namespace JHT
             return calculatedStat;
         }
         // ▲▲▲ 강화 포인트 관련 코드 수정 ▲▲▲
+
+        #endregion
+
         public WeaponObject AddItem(ItemWeaponSO item)
         {
             if (item == null)
@@ -134,8 +141,6 @@ namespace JHT
 
             if (item.itemType == ItemType.Equip)
             {
-
-
                 WeaponObject obj = weaponList.Find(x => x.itemNum == item.itemNum);
 
                 if (obj == null)
@@ -159,43 +164,34 @@ namespace JHT
 
             return null;
         }
-        public ItemObject AddItem(ItemSO item, ItemRarity rarity,int level = -1)
-        {
-            if (item.itemType == ItemType.Equip)
-            {
-                WeaponObject obj = weaponList.Find(x => x.itemNum == item.itemNum);
-                ItemWeaponSO so = (ItemWeaponSO)item;
 
-                if (obj == null)
+        public void AddItem(ItemSO item, ItemRarity rarity,int level = -1)
+        {
+            bool exist = false;
+            int index = -1;
+
+            for (int i = 0; i < relicsList.Count; i++)
+            {
+                if (relicsList.Count <= 0)
+                    break;
+
+                if (item.itemNum == relicsList[i].itemNum)
                 {
-                    obj = new WeaponObject(so);
-                    OnAddInventory?.Invoke(obj);
-                    OnUpCountItem?.Invoke(obj);
-                    return obj;
+                    exist = true;
+                    index = i;
+                    break;
                 }
-                else
-                {
-                    OnUpCountItem?.Invoke(obj);
-                    return obj;
-                }
-                
+            }
+
+            ItemRelicsSO so = (ItemRelicsSO)item;
+            if (!exist)
+            {
+                RelicsObject obj = new RelicsObject(so, rarity, level);
+                OnAddInventory?.Invoke(obj);
             }
             else
             {
-                RelicsObject obj = relicsList.Find(x => x.itemNum == item.itemNum);
-                ItemRelicsSO so = (ItemRelicsSO)item;
-
-                if (obj == null)
-                {
-                    obj = new RelicsObject(so, rarity, level);
-                    OnAddInventory?.Invoke(obj);
-                    return obj;
-                }
-                else
-                {
-                    OnChooseItem?.Invoke(obj, new RelicsObject(so, rarity, level));
-                    return obj;
-                }
+                OnChooseItem?.Invoke(relicsList[index], new RelicsObject(so, rarity, level));
             }
         }
 
@@ -210,6 +206,7 @@ namespace JHT
                 if (inst == null)
                 {
                     relicsList.Add(obj1);
+                    OnChangePanel?.Invoke(obj1);
                 }
             }
             else
@@ -217,6 +214,7 @@ namespace JHT
                 DestoryRelics(obj1);
                 
                 relicsList.Add(obj2);
+                OnChangePanel?.Invoke(obj2);
             }
             
         }

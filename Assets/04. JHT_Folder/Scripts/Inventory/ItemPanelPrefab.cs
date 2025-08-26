@@ -46,14 +46,9 @@ namespace JHT
                 itemDetail.onClick.AddListener(ShowItem);
                 UpStar(obj.itemStar);
             }
-            else
-            {
-                itemObject = (RelicsObject)item;
-                RelicsObject obj = (RelicsObject)itemObject;
-
-                SetRelics((RelicsObject)item);
-            }
         }
+
+        #region Weapon
         public void SetUp(WeaponObject weapon)
         {
             // 이전에 연결된 이벤트가 있다면 해제
@@ -114,6 +109,9 @@ namespace JHT
                 starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
             }
         }
+
+        #endregion
+
         private void ShowItem()
         {
             ItemEventManager.Instance.ClickItem(itemObject);
@@ -121,18 +119,6 @@ namespace JHT
 
 
         #region Relics
-
-
-        private void SetRelics(RelicsObject item)
-        {
-            if (item.itemNum != itemObject.itemNum)
-                return;
-
-            itemRarityImage.sprite = item.itemRarityImage;
-            itemStarImage.gameObject.SetActive(false);
-            itemCountText.gameObject.SetActive(false);
-            itemDetail.onClick.AddListener(ShowItem);
-        }
 
         #endregion
 

@@ -7,7 +7,6 @@ namespace JHT
     [CreateAssetMenu(menuName = "Scriptable_Relics", fileName = "Scriptable_Relics/Relics")]
     public class ItemRelicsSO : ItemSO
     {
-        public ItemRarity relicsRarity;
         public PowerType itemPowerType;
         public float[] upPower;
         public float[] cost;
@@ -32,12 +31,4 @@ namespace JHT
         LastestAttackUp
     }
 
-    public enum ItemRarity
-    {
-        Normal = 1,
-        Rare,
-        Epic,
-        Unique,
-        Legend
-    }
 }

@@ -11,7 +11,7 @@ namespace JHT
     public class ItemObject
     {
         public ItemSO itemSO { get; set; }
-        public int itemNum { get; set; }
+        public int itemNum;
 
         public Sprite itemIcon { get; set; }
 

@@ -59,7 +59,7 @@ namespace JHT
         private void OnAdd2() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item2.itemNum]);
         private void OnAdd3() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item3.itemNum]);
         private void OnRAdd1() => AddRelics1(ItemDataManager.Instance.GetAllRelicsData()[relics1.itemNum]);
-        private void OnRAdd2() => AddRelics2(ItemDataManager.Instance.GetAllRelicsData()[relics1.itemNum]);
-        private void OnRAdd3() => AddRelics3(ItemDataManager.Instance.GetAllRelicsData()[relics2.itemNum]);
+        private void OnRAdd2() => AddRelics2(ItemDataManager.Instance.GetAllRelicsData()[relics2.itemNum]);
+        private void OnRAdd3() => AddRelics3(ItemDataManager.Instance.GetAllRelicsData()[relics3.itemNum]);
     }
 }

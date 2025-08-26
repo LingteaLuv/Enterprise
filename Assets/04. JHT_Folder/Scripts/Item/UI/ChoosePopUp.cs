@@ -15,6 +15,8 @@ public class ChoosePopUp : MonoBehaviour
     [SerializeField] private Image item2;
     [SerializeField] private Image item2RarityImg;
 
+    [SerializeField] private TextMeshProUGUI item1PowerText;
+    [SerializeField] private TextMeshProUGUI item2PowerText;
 
     private RelicsObject relicsObj1;
     private RelicsObject relicsObj2;
@@ -28,6 +30,9 @@ public class ChoosePopUp : MonoBehaviour
         item2.sprite = relicsObj2.itemSO.icon;
         item1RarityImg.sprite = relicsObj1.itemRarityImage;
         item2RarityImg.sprite = relicsObj2.itemRarityImage;
+
+        item1PowerText.text = $"{relicsObj1.itemPowerType.ToString()} : {relicsObj1.itemPower}";
+        item2PowerText.text = $"{relicsObj2.itemPowerType.ToString()} : {relicsObj2.itemPower}";
 
         item1Button.onClick.AddListener(ClickButton1);
         item2Button.onClick.AddListener(ClickButton2);
