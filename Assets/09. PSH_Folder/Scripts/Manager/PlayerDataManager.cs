@@ -19,8 +19,8 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public BigInteger baseLevelUpCost = 1000; // 기본 레벨업 비용
     public double levelUpCostIncreaseRatio = 1.07; // 레벨업 비용 증가율
 
-    // 보유 캐릭터
-    public Dictionary<CharacterData, PlayerCharacterData> ownedCharacters = new Dictionary<CharacterData, PlayerCharacterData>();
+    // 보유 캐릭터 ID, 데이터
+    public Dictionary<int, PlayerCharacterData> ownedCharacters = new Dictionary<int, PlayerCharacterData>();
     // 캐릭터별 영혼조각 캐릭터ID, 개수
     public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
     // 성급업에 필요한 영혼조각 InitializeUpgradeCosts에 있음
@@ -120,7 +120,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     public PlayerCharacterData AddCharacter(CharacterData characterdata)
     {
-        if (ownedCharacters.TryGetValue(characterdata, out PlayerCharacterData existingCharData))
+        if (ownedCharacters.TryGetValue(characterdata.characterID, out PlayerCharacterData existingCharData))
         {
             int fragmentsGained = 0;
             switch (characterdata.rarity)
@@ -137,7 +137,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         else
         {
             PlayerCharacterData newCharData = new PlayerCharacterData(characterdata);
-            ownedCharacters.Add(characterdata, newCharData);
+            ownedCharacters.Add(characterdata.characterID, newCharData);
             Debug.Log($"[신규] {characterdata.characterName}({characterdata.rarity}성) 획득!");
             // 새로 추가된 캐릭터의 스탯을 즉시 계산
             newCharData.RecaculateStats();
