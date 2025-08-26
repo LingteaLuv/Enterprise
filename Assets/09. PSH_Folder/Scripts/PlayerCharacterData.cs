@@ -2,6 +2,17 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Numerics;
 
+public enum Stat
+{
+    Attack,
+    Health,
+    Defense,
+    CritChance,
+    CritDamage,
+    AttackSpeed
+}
+
+
 [System.Serializable]
 public class PlayerCharacterData
 {
