@@ -145,16 +145,45 @@ public class AuthManager : Singleton<AuthManager>
             if (status == SignInStatus.Success)
             {
                 Debug.Log("구글 로그인 성공: " + PlayGamesPlatform.Instance.GetUserId());
-                tcs.SetResult(true);
+                PlayGamesPlatform.Instance.RequestServerSideAccess(true, async code =>
+                {
+                    if (string.IsNullOrEmpty(code))
+                    {
+                        tcs.SetResult(false);
+                    }
+                    else
+                    {
+                        await PlayGamesSignUp(code);
+                        tcs.SetResult(true);
+                    }
+                    _isClicked = false; 
+                });
             }
             else
             {
                 Debug.LogError("구글 로그인 실패: " + status);
                 tcs.SetResult(false);
+                _isClicked = false;
             }
-            _isClicked = false;
         });
         return await tcs.Task;
+    }
+    
+    private async Task PlayGamesSignUp(string code)
+    {
+        Firebase.Auth.Credential credential =
+            Firebase.Auth.PlayGamesAuthProvider.GetCredential(code);
+        await FirebaseManager.Auth.SignInAndRetrieveDataWithCredentialAsync(credential);
+        
+        // 구글 로그인 한 계정을 CurrentUser로 설정
+        FirebaseUser user = FirebaseManager.Auth.CurrentUser;
+
+        if (user != null)
+        {
+            await DatabaseManager.Instance.SetNickname(user.DisplayName);
+            await user.ReloadAsync();
+            LoginCompleted?.Invoke();
+        }
     }
     
     /// <summary>
