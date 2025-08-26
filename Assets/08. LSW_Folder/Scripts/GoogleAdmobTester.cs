@@ -1,12 +1,14 @@
 using GoogleMobileAds.Api;
 using UnityEngine;
 
-public class GoogleAdmobTester : MonoBehaviour
+public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
 {
     private string _adID = "ca-app-pub-3940256099942544/1033173712";
     private InterstitialAd _loadedAd;
-    private void Awake()
+    
+    protected override void Awake()
     {
+        base.Awake();
         MobileAds.Initialize(OnInitialized);
     }
 
