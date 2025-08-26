@@ -25,6 +25,11 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
     // 성급업에 필요한 영혼조각 InitializeUpgradeCosts에 있음
     private Dictionary<int, int> starUpgradeCosts;
+    // 성급업 비용 상수
+    private const int STAR_UPGRADE_COST_1 = 20;
+    private const int STAR_UPGRADE_COST_2 = 40;
+    private const int STAR_UPGRADE_COST_3 = 120;
+    private const int STAR_UPGRADE_COST_4 = 180;
 
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
     public event System.Action OnOwnedCharactersChanged;
@@ -106,7 +111,10 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         starUpgradeCosts = new Dictionary<int, int>()
         {
-            { 1, 20 }, { 2, 40 }, { 3, 120 }, { 4, 180 }
+            { 1, STAR_UPGRADE_COST_1 }, 
+            { 2, STAR_UPGRADE_COST_2 },
+            { 3, STAR_UPGRADE_COST_3 }, 
+            { 4, STAR_UPGRADE_COST_4 }
         };
     }
 
