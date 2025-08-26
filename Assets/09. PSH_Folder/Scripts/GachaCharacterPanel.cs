@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,16 +26,16 @@ public class GachaCharacterPanel : MonoBehaviour
             case 1:
                 bg.color = Color.white;
                 break;
-                case 2:
+            case 2:
                 bg.color = Color.blue;
                 break;
-                case 3:
+            case 3:
                 bg.color = Color.yellow;
                 break;
             default:
                 break;
         }
-        
+
 
     }
 
