@@ -2,6 +2,7 @@ using JHT;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GachaListUI : MonoBehaviour
 {
@@ -62,10 +63,12 @@ public class GachaListUI : MonoBehaviour
         {
             GameObject itemGO = Instantiate(prefabToSpawn, contentParent);
 
+
+
             // 타입에 따라 적절한 UI 스크립트의 Init 함수를 호출
             if (resultData is PlayerCharacterData charData)
             {
-                CharacterPanelUI panelUI = itemGO.GetComponent<CharacterPanelUI>();
+                GachaCharacterPanel panelUI = itemGO.GetComponent<GachaCharacterPanel>();
                 if (panelUI != null) panelUI.Setup(charData);
             }
             else if (resultData is WeaponObject itemData)
