@@ -7,15 +7,21 @@ namespace LHI
         /// <summary>
         /// 데이터를 기반으로 캐릭터를 생성하는 메소드
         /// </summary>
-        /// <param name="charInfo">캐릭터 정보</param>
-        public override void CharacterRespawn(CharacterInfo charInfo)
+        /// <param name="ID">선원 아아디</param>
+        /// <param name="pos">진형 스타일</param>
+        /// <param name="posNum">자리 번호</param>
+        public override void CharacterRespawn(int ID, CharacterPosition pos, int posNum)
         {
-            // 캐릭터 풀에서 비활성화 중인 오브젝트를 찾아 활성화
-            FindInactiveObjects(charInfo);
-            // 프리팹에서 캐릭터 컴포넌트 가져오기
-            Debug.Log("CrewObjectPool - CharacterRespawn called");
+            // 캐릭터 ID 유효성 검사
+            if (CharacterIDCheck(ID) == false)
+                return;
 
-            Crew CrewData = this.transform.Find("CrewData").GetComponent<Crew>();
+            // 포지션에 맞는 캐릭터 오브젝트 가져오기
+            GameObject characterObj = FindObjects(posNum);
+
+            // 오브젝트의 컴포넌트 가져오기
+            Crew CrewData = characterObj.GetComponentInChildren<Crew>();
+
             // 캐릭터 오브젝트에 Crew 컴포넌트가 있는지 확인
             if (CrewData == null)
             {
@@ -23,24 +29,13 @@ namespace LHI
                 return;
             }
 
-            // 캐릭터 진화 강화 래벌 적용
-            // 수치 가져옴
+            // 캐릭터 정보를 CrewData에 설정
+            CrewData.characterData = CharacterManager.charactersDict[ID].characterData; // 캐릭터 데이터 설정
 
-            Debug.Log($"Character Info ID: {charInfo.id}, Name: {charInfo.characterData.characterName}");
-            // 캐릭터 데이터 설정 (강화 및 진화 수치 반영 필요)
-            CrewData.characterData.characterName = charInfo.characterData.characterName;
-            CrewData.characterData.role = charInfo.characterData.role;
-            CrewData.characterData.affiliation = charInfo.characterData.affiliation;
-            CrewData.characterData.characterSprite = charInfo.characterData.characterSprite;
+            // 진형에 따라 캐릭터 위치 설정 pos와 posNum에 따라 위치를 다르게 설정
 
-            CrewData.characterData.attack = charInfo.characterData.attack;
-            CrewData.characterData.health = charInfo.characterData.health;
-            CrewData.characterData.defense = charInfo.characterData.defense;
-            CrewData.characterData.criticalChance = charInfo.characterData.criticalChance;
-            CrewData.characterData.criticalDamage = charInfo.characterData.criticalDamage;
-            CrewData.characterData.speed = charInfo.characterData.speed;
-
-
+            // 캐릭터 오브젝트 활성화
+            characterObj.SetActive(true);
         }
     }
 }

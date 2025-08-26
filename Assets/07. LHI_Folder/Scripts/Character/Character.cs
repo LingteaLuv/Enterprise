@@ -4,16 +4,24 @@ namespace LHI
 {
     public abstract class Character : MonoBehaviour
     {
-        public float CurrentHP;
-        public float MaxHP;
+        public float currentHP;
+        public float maxHP;
+        public float attack;
+        public float defense;
 
-        public float CurrentSkillGauge;
-        public float MaxSkillGauge;
+        public float criticalChance;
+        public float criticalDamage;
 
         public abstract void TakeDamage(float damage);
 
         public abstract void Die();
 
-        // 힐, 스킬 게이지 충전 등의 메소드를 추가할 수 있습니다.
+        public abstract void Heal(float amount);
+
+        public abstract void Move();
+
+        public abstract void TargetFind();
+
+        // 스킬 시전의 방식에 관련해서 추후에 작성, 파악 필요
     }
 }
