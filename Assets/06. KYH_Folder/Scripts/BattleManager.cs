@@ -41,6 +41,7 @@ public class BattleManager : MonoBehaviour
             battleRoutine = null;
             IslandStageManager.Instance.OnBattleComplete();
             ClearEnemies();
+            ClearPlayer();
         }
     }
 
@@ -86,7 +87,7 @@ public class BattleManager : MonoBehaviour
             if (AllEnemiesDefeated())
                 break;
 
-            AutoControlUnits(); // 유닛 자동 행동 (구현 예정)
+           // AutoControlUnits(); // 유닛 자동 행동 (구현 예정)
             yield return null;
         }
 
@@ -116,11 +117,12 @@ public class BattleManager : MonoBehaviour
     {
         int count = baseEnemyCount + (stageIndex * growthPerStage);
         var spawnPoints = field.EnemySpawnPoints;
-        count = Mathf.Min(count, spawnPoints.Count);
+       // count = Mathf.Min(count, spawnPoints.Count);
 
         for (int i = 0; i < count; i++)
         {
-            var enemy = Instantiate(enemyPrefab, spawnPoints[i].position, Quaternion.identity);
+            int randIndex = Random.Range(0, spawnPoints.Count);
+            var enemy = Instantiate(enemyPrefab, spawnPoints[randIndex].position, Quaternion.identity);
             enemy.tag = "Enemy"; // 전투 종료 체크용
             spawnedEnemies.Add(enemy);
         }
@@ -143,10 +145,10 @@ public class BattleManager : MonoBehaviour
         return spawnedEnemies.Count == 0;
     }
 
-    private void AutoControlUnits()
-    {
-        // TODO: 추후 유닛 FSM이나 AI 구현 시 연결
-    }
+  //  private void AutoControlUnits()
+  //  {
+  //      // TODO: 추후 유닛 FSM이나 AI 구현 시 연결
+  //  }
 
     private void ClearEnemies()
     {
@@ -156,5 +158,14 @@ public class BattleManager : MonoBehaviour
                 Destroy(enemy);
         }
         spawnedEnemies.Clear();
+    }
+
+    private void ClearPlayer()
+    {
+        if (currentPlayer != null)
+        {
+            Destroy(currentPlayer);
+            currentPlayer = null;
+        }
     }
 }

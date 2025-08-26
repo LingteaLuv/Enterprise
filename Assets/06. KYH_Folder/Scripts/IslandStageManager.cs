@@ -22,7 +22,9 @@ public class IslandStageManager : MonoBehaviour
 
     
     [SerializeField] private TravelUIController travelUI;          // // 캔버스에서 배 이동을 연출하는 컨트롤러
-
+    [SerializeField] private GameObject chestPrefab;
+    [SerializeField] private GameObject flagPrefab;
+    [SerializeField] private List<IslandMaker> islandMakers;
     private int currentIndex = 0;                                  // 현재 진행 중인 섬의 인덱스
 
     private Coroutine handleReturnAndNext;
@@ -56,6 +58,8 @@ public class IslandStageManager : MonoBehaviour
     {
         Debug.Log($"[OnBattleComplete 호출됨] currentIndex: {currentIndex}");
 
+        SpawnClearMarker(currentIndex);
+
         if (!this.enabled)
             Debug.LogError(" IslandStageManager.enabled == false");
         if (!this.gameObject.activeInHierarchy)
@@ -69,11 +73,17 @@ public class IslandStageManager : MonoBehaviour
     /// </summary>
     private IEnumerator HandleReturnAndNext()
     {
+        DeactivateAllBattleFields();
+
         // 패널 연출 삽입
         bool done = false;
-        ScreenScrollEffectManager.Instance.ShowScrollEffect(() => done = true);
+
+        ScreenScrollEffectManager.Instance.ShowScrollEffect("전투 완료! 다음 섬으로 이동합니다...", () => {
+            done = true; 
+        });
         yield return new WaitUntil(() => done);
 
+        
 
         Debug.Log(" [HandleReturnAndNext] 진입");
 
@@ -86,6 +96,7 @@ public class IslandStageManager : MonoBehaviour
         {
             Debug.Log(" [HandleReturnAndNext] 모든 섬 완료 → StartStage 호출");
             StartStage();
+            // TODO : 마지막 섬 클리어 이후 반복 전투가 진행될때에는 섬에 생성되었던 깃발과 상자 이미지 상태의 초기화가 필요함.
             yield break;
         }
 
@@ -159,7 +170,10 @@ public class IslandStageManager : MonoBehaviour
 
         // 패널 연출 삽입
         bool done = false;
-        ScreenScrollEffectManager.Instance.ShowScrollEffect(() => done = true);
+
+        ScreenScrollEffectManager.Instance.ShowScrollEffect("섬에 도착했습니다!", () => {
+            done = true; 
+        });
         yield return new WaitUntil(() => done);
 
 
@@ -182,6 +196,30 @@ public class IslandStageManager : MonoBehaviour
         {
             Debug.Log($"- battleField[{i}]: {battleFields[i].name} → {(i == index ? "활성화" : "비활성화")}");
             battleFields[i].SetActive(i == index);
+        }
+    }
+
+    private void DeactivateAllBattleFields()
+    {
+        for (int i = 0; i < battleFields.Count; i++)
+            battleFields[i].SetActive(false);
+    }
+
+    private void SpawnClearMarker(int islandIndex)
+    {
+        if (islandIndex < 0 || islandIndex >= islandMakers.Count)
+        {
+            Debug.LogWarning("유효하지 않은 인덱스의 섬입니다.");
+            return;
+        }
+
+        var island = islandMakers[islandIndex];
+        var anchor = island.transform.Find("FlagPosition"); // 또는 ChestPosition
+        
+        if (anchor != null && flagPrefab != null)
+        {
+            Instantiate(flagPrefab, anchor.position, Quaternion.identity, island.transform);
+            Debug.Log($" 깃발, 상자 생성 완료: 섬 {islandIndex}");
         }
     }
 }
