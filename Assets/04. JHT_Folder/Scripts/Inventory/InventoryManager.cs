@@ -187,13 +187,13 @@ namespace JHT
 
                 if (obj == null)
                 {
-                    obj = new RelicsObject(so,rarity,level);
+                    obj = new RelicsObject(so, rarity, level);
                     OnAddInventory?.Invoke(obj);
                     return obj;
                 }
                 else
                 {
-                    OnChooseItem?.Invoke(obj, new RelicsObject(so, rarity,level));
+                    OnChooseItem?.Invoke(obj, new RelicsObject(so, rarity, level));
                     return obj;
                 }
             }
