@@ -1,8 +1,10 @@
 using JHT;
+using NUnit.Framework.Interfaces;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class GachaListUI : MonoBehaviour
 {
@@ -48,6 +50,7 @@ public class GachaListUI : MonoBehaviour
         }
         StartCoroutine(ShowResultsCoroutine(equipmentResults, equipmentResultItemPrefab));
     }
+
 
     private IEnumerator ShowResultsCoroutine<T>(List<T> results, GameObject prefabToSpawn) where T : class
     {
@@ -109,4 +112,5 @@ public class GachaListUI : MonoBehaviour
         canvasGroup.alpha = 1f;
         itemTransform.localScale = Vector3.one;
     }
+
 }

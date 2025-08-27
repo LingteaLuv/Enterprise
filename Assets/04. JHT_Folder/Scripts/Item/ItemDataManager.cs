@@ -27,7 +27,11 @@ namespace JHT
 
         public bool IsDataLoaded { get; private set; } = false;
 
+        
         public JHT_DataDownLoader downLoader;
+        
+        //데이터 로딩 완료시 호출
+        public System.Action<bool> OnRelicsDataLoadFinish;
 
         // 수정필요 : csv에서 데이터 받아온 후 초기화 할 수 있도록 설정 해야함 
         protected override void Awake()
@@ -40,6 +44,8 @@ namespace JHT
         private IEnumerator Start()
         {
             yield return null;
+
+            OnRelicsDataLoadFinish?.Invoke(false);
 
             weaponList = new();
             weaponDataDic = new();
@@ -169,6 +175,8 @@ namespace JHT
                 yield return null;
 
             downLoader = new JHT_DataDownLoader();
+
+            OnRelicsDataLoadFinish?.Invoke(true);
             yield return downLoader.DownloadData();
         }
 
