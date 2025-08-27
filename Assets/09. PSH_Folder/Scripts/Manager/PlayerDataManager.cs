@@ -30,7 +30,10 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     private const int STAR_UPGRADE_COST_2 = 40;
     private const int STAR_UPGRADE_COST_3 = 120;
     private const int STAR_UPGRADE_COST_4 = 180;
-
+    // 중복 획득시 영혼조각
+    private const int FRAGMENT_GAIN_1 = 10;
+    private const int FRAGMENT_GAIN_2 = 40;
+    private const int FRAGMENT_GAIN_3 = 300;
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
     public event System.Action OnOwnedCharactersChanged;
 
@@ -125,9 +128,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             int fragmentsGained = 0;
             switch (characterdata.rarity)
             {
-                case Rarity.C: fragmentsGained = 1; break;
-                case Rarity.B: fragmentsGained = 4; break;
-                case Rarity.A: fragmentsGained = 30; break;
+                case Rarity.C: fragmentsGained = FRAGMENT_GAIN_1; break;
+                case Rarity.B: fragmentsGained = FRAGMENT_GAIN_2; break;
+                case Rarity.A: fragmentsGained = FRAGMENT_GAIN_3; break;
             }
             AddSoulFragments(characterdata.characterID, fragmentsGained);
             Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
