@@ -84,7 +84,7 @@ public class AuthManager : Singleton<AuthManager>
         
         if (user != null)
         {
-            await user.ReloadAsync();
+            //await user.ReloadAsync();
             await DatabaseManager.Instance.SetNickname();
             LoginCompleted?.Invoke();
         }
@@ -101,14 +101,30 @@ public class AuthManager : Singleton<AuthManager>
         if (_isClicked) return false;
         _isClicked = true;
         Debug.Log("구글 로그인 버튼 입력");
-        GoogleSignInUser user = await GoogleSignIn.DefaultInstance.SignIn();
-        if (user != null)
+        try
         {
-            return await GoogleSignUp(user);
-        }
+            GoogleSignInUser user = await GoogleSignIn.DefaultInstance.SignIn();
+            if (user != null)
+            {
+                return await GoogleSignUp(user);
+            }
 
-        _isClicked = false;
-        return false;
+            return false;
+        }
+        catch (Google.GoogleSignIn.SignInException e)
+        {
+            Debug.LogWarning("구글 로그인 중 취소 또는 실패: " + e.Status);
+            return false;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("구글 로그인 중 예외 발생: " + e);
+            return false;
+        }
+        finally
+        {
+            _isClicked = false; // 플래그 항상 해제
+        }
     }
     
     private async Task<bool> GoogleSignUp(GoogleSignInUser userTask)
@@ -123,7 +139,7 @@ public class AuthManager : Singleton<AuthManager>
         if (user != null)
         {
             await DatabaseManager.Instance.SetNickname(user.DisplayName);
-            await user.ReloadAsync();
+            //await user.ReloadAsync();
             LoginCompleted?.Invoke();
         }
         _isClicked = false;
@@ -135,17 +151,15 @@ public class AuthManager : Singleton<AuthManager>
         if (_isClicked) return false;
         _isClicked = true;
         Debug.Log("플레이 게임즈 로그인 버튼 입력");
-        
+
         PlayGamesPlatform.Activate();
-        
         var tcs = new TaskCompletionSource<bool>();
-        
-        PlayGamesPlatform.Instance.Authenticate(status =>
+
+        async void RequestServerSide()
         {
-            if (status == SignInStatus.Success)
+            PlayGamesPlatform.Instance.RequestServerSideAccess(true, async code =>
             {
-                Debug.Log("구글 로그인 성공: " + PlayGamesPlatform.Instance.GetUserId());
-                PlayGamesPlatform.Instance.RequestServerSideAccess(true, async code =>
+                try
                 {
                     if (string.IsNullOrEmpty(code))
                     {
@@ -156,16 +170,42 @@ public class AuthManager : Singleton<AuthManager>
                         await PlayGamesSignUp(code);
                         tcs.SetResult(true);
                     }
-                    _isClicked = false; 
-                });
-            }
-            else
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("PlayGamesSignUp 실패: " + e);
+                    tcs.SetResult(false);
+                }
+                finally
+                {
+                    _isClicked = false;
+                }
+            });
+        }
+
+        if (!PlayGamesPlatform.Instance.IsAuthenticated())
+        {
+            PlayGamesPlatform.Instance.Authenticate(status =>
             {
-                Debug.LogError("구글 로그인 실패: " + status);
-                tcs.SetResult(false);
-                _isClicked = false;
-            }
-        });
+                if (status == SignInStatus.Success)
+                {
+                    Debug.Log("플레이 게임즈 로그인 성공: " + PlayGamesPlatform.Instance.GetUserId());
+                    RequestServerSide();
+                }
+                else
+                {
+                    Debug.LogError("구글 로그인 실패: " + status);
+                    tcs.SetResult(false);
+                    _isClicked = false;
+                }
+            });
+        }
+        else
+        {
+            // 이미 로그인 되어 있으면 서버 코드만 요청
+            RequestServerSide();
+        }
+
         return await tcs.Task;
     }
     
@@ -181,7 +221,7 @@ public class AuthManager : Singleton<AuthManager>
         if (user != null)
         {
             await DatabaseManager.Instance.SetNickname(user.DisplayName);
-            await user.ReloadAsync();
+            //await user.ReloadAsync();
             LoginCompleted?.Invoke();
         }
     }
