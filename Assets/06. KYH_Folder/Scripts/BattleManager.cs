@@ -2,11 +2,15 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
+
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
 
     private Coroutine battleRoutine;
+
+    [SerializeField] private Button _skipBtn;
 
     [Header("스폰 프리팹")]
     [SerializeField] private GameObject playerPrefab;
@@ -32,17 +36,19 @@ public class BattleManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Update()
+    private void Start()
+    {
+        _skipBtn.onClick.AddListener(Skip);
+    }
+
+    private void Skip()
     {
         // 임시 전투 종료 후 다음 섬 넘어가기위한 키 . 차후 삭제 예정
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && !isbattleover)
-        {
-            isbattleover = true;
-            battleRoutine = null;
-            IslandStageManager.Instance.OnBattleComplete();
-            ClearEnemies();
-            ClearPlayer();
-        }
+        isbattleover = true;
+        battleRoutine = null;
+        IslandStageManager.Instance.OnBattleComplete();
+        ClearEnemies();
+        ClearPlayer();
     }
 
     /// <summary>

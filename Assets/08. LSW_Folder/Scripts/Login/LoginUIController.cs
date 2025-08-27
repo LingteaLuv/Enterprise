@@ -49,7 +49,7 @@ public class LoginUIController : UIController<LoginUIController.LoginUIType>
                 infoPanel.OnGameStart = () =>
                 {
                     HideUI(LoginUIType.InfoPanel);
-                    SceneTransitionManager.Instance.LoadSceneWithLoading("LoadingScene", "GameScene", 2f);
+                    SceneTransitionManager.Instance.LoadSceneWithLoading("LoadingScene", "Game", 2f);
                 };
                 infoPanel.OnGameExit = () =>
                 {
