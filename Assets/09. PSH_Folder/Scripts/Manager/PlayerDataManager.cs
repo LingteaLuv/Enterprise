@@ -34,6 +34,10 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     private const int FRAGMENT_GAIN_1 = 10;
     private const int FRAGMENT_GAIN_2 = 40;
     private const int FRAGMENT_GAIN_3 = 300;
+    // 가챠 횟수
+    public int GachaPityCounter {  get; set; }
+
+
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
     public event System.Action OnOwnedCharactersChanged;
 
