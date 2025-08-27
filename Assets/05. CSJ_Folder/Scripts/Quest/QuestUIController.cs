@@ -84,7 +84,6 @@ public class QuestUIController : MonoBehaviour
     }
     
     
-    #if UNITY_EDITOR
     public Action OnForceClear;
     [SerializeField] private Button KillButton;
     [SerializeField] private Button GachaButton;
@@ -129,5 +128,4 @@ public class QuestUIController : MonoBehaviour
         QuestSignalManager.Instance.Upgrade(UpgradeType.Def,5);
         QuestSignalManager.Instance.Upgrade(UpgradeType.Hp, 5);
     }
-    #endif
 }
