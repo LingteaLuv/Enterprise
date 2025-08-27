@@ -165,34 +165,11 @@ namespace JHT
             return null;
         }
 
-        public void AddItem(ItemSO item, ItemRarity rarity,int level = -1)
+        public void AddItem(ItemRelicsSO item, ItemRarity rarity,int level = -1)
         {
-            bool exist = false;
-            int index = -1;
-
-            for (int i = 0; i < relicsList.Count; i++)
-            {
-                if (relicsList.Count <= 0)
-                    break;
-
-                if (item.itemNum == relicsList[i].itemNum)
-                {
-                    exist = true;
-                    index = i;
-                    break;
-                }
-            }
-
-            ItemRelicsSO so = (ItemRelicsSO)item;
-            if (!exist)
-            {
-                RelicsObject obj = new RelicsObject(so, rarity, level);
-                OnAddInventory?.Invoke(obj);
-            }
-            else
-            {
-                OnChooseItem?.Invoke(relicsList[index], new RelicsObject(so, rarity, level));
-            }
+            RelicsObject obj = new RelicsObject(item, rarity, level);
+            OnAddInventory?.Invoke(obj);
+            OnChangePanel?.Invoke(obj);
         }
 
 
@@ -302,18 +279,47 @@ namespace JHT
             }
         }
 
-
-        public void WeaponLevelSort(bool isLevelSort)
+        #region sort
+        public void WeaponStarSort()
         {
-            weaponList.Sort((a, b) => isLevelSort ? a.ItemLevel.CompareTo(b.ItemLevel)          //오름
-                                            : b.ItemLevel.CompareTo(a.ItemLevel));              //내림
+            weaponList.Sort((b,a) => a.ItemStar.CompareTo(b.ItemStar));          
         }
-    }
 
+        public void WeaponLevelSort()
+        {
+            if (currentMode == InventoryMode.Weapon)
+            {
+                weaponList.Sort((b,a) => a.ItemLevel.CompareTo(b.ItemLevel));            
+            }
+            else if(currentMode == InventoryMode.Relics)
+            {
+                relicsList.Sort((b,a) => a.itemLevel.CompareTo(b.itemLevel));      
+            }
+        }
+
+        public void WeaponPowerSort()
+        {
+            weaponList.Sort((b,a) =>  a.ItemPower.CompareTo(b.ItemPower));             
+        }
+
+        public void WeaponRarity()
+        {
+            if (currentMode == InventoryMode.Weapon)
+            {
+                weaponList.Sort((b, a) => a.rarity.CompareTo(b.rarity));
+            }
+            else if (currentMode == InventoryMode.Relics)
+            {
+                relicsList.Sort((b, a) => a.curRarity.CompareTo(b.curRarity));
+            }
+        }
+#endregion
+    }
     public enum InventoryMode
     {
         Weapon,
-        Relics
+        Relics,
+        Soul
     }
 
 }

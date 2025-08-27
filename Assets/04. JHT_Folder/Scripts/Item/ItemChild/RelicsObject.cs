@@ -12,7 +12,8 @@ namespace JHT
         Rare,
         Epic,
         Unique,
-        Legend
+        Legend,
+        None
     }
     [Serializable]
     public class RelicsObject : ItemObject

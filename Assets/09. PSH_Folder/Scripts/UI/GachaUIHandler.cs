@@ -29,12 +29,13 @@ public class GachaUIHandler : MonoBehaviour
     public Button equipMultipleBtn;
 
     [Header("유물 뽑기")]
-    // public RelicGachaManager relicGachaManager;
+    public RelicsGachaManager relicsGachaManager;
+    public Button relicsSingleBtn;
 
     [Header("결과 UI")]
     [Tooltip("뽑기 결과 화면 UI를 연결하세요.")]
     public GachaListUI gachaListPanel;
-
+    public RelicsGachaListUI relicsGachaListPanel;
 
     private void OnEnable()
     {
@@ -57,7 +58,11 @@ public class GachaUIHandler : MonoBehaviour
         // 장비 뽑기 버튼 이벤트 연결
         equipSingleBtn.onClick.AddListener(OnClick_EquipmentGacha_Single);
         equipMultipleBtn.onClick.AddListener(OnClick_EquipmentGacha_Multiple);
+
+        relicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Single);
+
     }
+
 
     #region 캐릭터 뽑기 함수
     public void OnClick_CharacterGacha_Single()
@@ -93,6 +98,14 @@ public class GachaUIHandler : MonoBehaviour
     }
     #endregion
 
+    #region 유물 뽑기 함수
+    public void OnClick_RelicsGacha_Single()
+    {
+        relicsGachaManager.GetGachaOneWeaponData();
+        relicsGachaListPanel.gameObject.SetActive(true);
+        relicsGachaListPanel.Init(relicsGachaManager);
+    }
+    #endregion
 
     /// <summary>
     /// 실제 뽑기를 처리하는 범용 함수
@@ -159,4 +172,6 @@ public class GachaUIHandler : MonoBehaviour
             }
         );
     }
+
+
 }
