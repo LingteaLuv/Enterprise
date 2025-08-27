@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6850154744912664253}
   - component: {fileID: -6935459070299424033}
   - component: {fileID: -1102497884977141862}
+  - component: {fileID: -6011357689683260809}
   m_Layer: 6
   m_Name: Player
   m_TagString: Crew
@@ -153,3 +154,26 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1, y: 2}
   m_Direction: 0
+--- !u!114 &-6011357689683260809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6753145925826544151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f197da7d771476b45b6e44063d16e602, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentHP: 0
+  maxHP: 0
+  attack: 5
+  defense: 0
+  attackRange: 0
+  moveSpeed: 3
+  attackDelay: 2
+  criticalChance: 0
+  criticalDamage: 0
+  CharacterData: {fileID: 0}
+  target: {fileID: 0}

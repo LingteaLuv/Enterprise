@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
@@ -11,6 +10,8 @@ public class BattleManager : MonoBehaviour
     private Coroutine battleRoutine;
 
     [SerializeField] private Button _skipBtn;
+    [SerializeField] private CameraFollow cameraFollow;
+
 
     [Header("스폰 프리팹")]
     [SerializeField] private GameObject playerPrefab;
@@ -43,9 +44,18 @@ public class BattleManager : MonoBehaviour
 
     private void Skip()
     {
-        // 임시 전투 종료 후 다음 섬 넘어가기위한 키 . 차후 삭제 예정
+        if (isbattleover) return; // 이미 스킵됨 → 무시
+
         isbattleover = true;
-        battleRoutine = null;
+
+        // 코루틴 중복 방지
+        if (battleRoutine != null)
+        {
+            StopCoroutine(battleRoutine);
+            battleRoutine = null;
+        }
+
+        // 클리어 처리
         IslandStageManager.Instance.OnBattleComplete();
         ClearEnemies();
         ClearPlayer();
@@ -107,6 +117,8 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
+            ClearPlayer();
+            ClearEnemies(); // 혹시라도 남아있으면 같이 제거
             IslandStageManager.Instance.OnBattleComplete();
         }
     }
@@ -117,6 +129,9 @@ public class BattleManager : MonoBehaviour
             Destroy(currentPlayer);
 
         currentPlayer = Instantiate(playerPrefab, field.PlayerSpawnPoint.position, Quaternion.identity);
+
+        if (cameraFollow != null)
+            cameraFollow.SetTarget(currentPlayer.transform);
     }
 
     private void SpawnEnemies(BattleField field, int stageIndex)

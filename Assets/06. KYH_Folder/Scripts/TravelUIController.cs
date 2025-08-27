@@ -41,7 +41,7 @@ public class TravelUIController : MonoBehaviour
     /// <summary>
     /// shipIcon을 index번째 마커로 이동 연출. 끝나면 onArrive 콜백.
     /// </summary>
-    public IEnumerator MoveShipToMarker(int index, Action onArrive)
+    public IEnumerator MoveShipToMarker(int Stageindex ,int index, Action onArrive)
     {
         Debug.Log($"[TravelUI] {index}번 섬으로 이동 시작!");
         Debug.Log($"[TravelUI] gameObject.activeInHierarchy: {gameObject.activeInHierarchy}, enabled: {enabled}");
@@ -58,7 +58,7 @@ public class TravelUIController : MonoBehaviour
 
         // (선택) 라벨 갱신
         if (stageLabel != null)
-            stageLabel.text = $"Island {index + 1}";
+            stageLabel.text = $"STAGE {Stageindex} - ISLAND {index + 1}";
 
         // Lerp by anchoredPosition
         Vector2 start = shipIcon.anchoredPosition;
