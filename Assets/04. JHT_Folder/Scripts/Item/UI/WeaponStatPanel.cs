@@ -13,6 +13,8 @@ namespace JHT
         [SerializeField] private Image weaponImage;
         [SerializeField] private Image[] starImages;
         [SerializeField] private TextMeshProUGUI nameText;
+        [SerializeField] private TextMeshProUGUI pointText;
+        [SerializeField] private TextMeshProUGUI needPointText;
         [SerializeField] private TextMeshProUGUI levelText; // 레벨 표시용 텍스트
         [SerializeField] private TextMeshProUGUI statText;
         [SerializeField] private TextMeshProUGUI powerText;
@@ -97,6 +99,9 @@ namespace JHT
             // 기본 정보 업데이트
             weaponImage.sprite = curWeapon.itemIcon;
             nameText.text = curWeapon.itemName;
+            pointText.text = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum).ToString();
+            // 나중에 강화포인트 관련 확정되면 추가
+            needPointText.text = "10";
             levelText.text = $"Lv. {curWeapon.ItemLevel}";
             switch (curWeapon.statType)
             {
