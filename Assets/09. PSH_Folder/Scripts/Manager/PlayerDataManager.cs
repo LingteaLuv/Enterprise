@@ -195,6 +195,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         if (!CurrencyManager.Instance.SpendCurrency(CurrencyType.EnhancementStone, levelUpCost)) { Debug.LogWarning("캐릭터 레벨업 실패: 재화 부족"); return false; }
         character.characterLevel++;
         Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.characterLevel})");
+        QuestSignalManager.Instance.LevelUp(ItemType.Character, 1);
         OnCharacterDataUpdated?.Invoke(character); // 데이터 변경 이벤트 발생
         CurrencyManager.Instance.UpdateCurrencyUI();
         return true;
