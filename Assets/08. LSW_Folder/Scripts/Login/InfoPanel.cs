@@ -23,6 +23,11 @@ public class InfoPanel : UIBase
         _linkBtn.onClick.AddListener(OnTouchLinkBtn);
         _deleteBtn.onClick.AddListener(async () => await OnTouchDeleteBtn());
         _logoutBtn.onClick.AddListener(OnTouchLogoutBtn);
+
+        if (!FirebaseManager.Auth.CurrentUser.IsAnonymous)
+        {
+            _linkBtn.gameObject.SetActive(false);
+        }
     }
     
     private async void OnEnable()

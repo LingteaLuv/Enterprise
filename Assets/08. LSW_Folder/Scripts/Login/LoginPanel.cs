@@ -10,6 +10,7 @@ public class LoginPanel : UIBase
     [SerializeField] private Button _playGamesLoginBtn;
 
     public Action OnLoginCompleted;
+    public Action OnLoginTried;
 
     private void Start()
     {
@@ -20,29 +21,30 @@ public class LoginPanel : UIBase
 
     private async Task OnTouchGoogleLoginBtn()
     {
+        OnLoginTried?.Invoke();
         if (await AuthManager.Instance.GoogleLogin())
         {
-            Debug.Log("구글 로그인 성공, Panel 변환");
+            Debug.Log("구글 로그인 성공");
             OnLoginCompleted?.Invoke();
         }
     }
     
     private async Task OnTouchGuestLoginBtn()
     {
-        Debug.Log("진입");
+        OnLoginTried?.Invoke();
         if (await AuthManager.Instance.GuestLogin())
         {
-            Debug.Log("게스트 로그인 성공, Panel 변환");
+            Debug.Log("게스트 로그인 성공");
             OnLoginCompleted?.Invoke();
         }
     }
     
     private async Task OnTouchPlayGamesLoginBtn()
     {
-        Debug.Log("진입");
+        OnLoginTried?.Invoke();
         if (await AuthManager.Instance.PlayGamesLogin())
         {
-            Debug.Log("게스트 로그인 성공, Panel 변환");
+            Debug.Log("플레이 게임즈 로그인 성공");
             OnLoginCompleted?.Invoke();
         }
     }

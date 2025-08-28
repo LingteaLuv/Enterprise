@@ -7,7 +7,8 @@ public class LoginUIController : UIController<LoginUIController.LoginUIType>
     {
         StartPanel,
         LoginPanel,
-        InfoPanel
+        InfoPanel,
+        LoadingPanel
     }
 
     private void Start()
@@ -36,9 +37,15 @@ public class LoginUIController : UIController<LoginUIController.LoginUIType>
             
             else if (ui is LoginPanel loginPanel)
             {
+                loginPanel.OnLoginTried = () =>
+                {
+                    ShowUI(LoginUIType.LoadingPanel);
+                    Debug.Log("로그인 시도 중");
+                };
                 loginPanel.OnLoginCompleted = () =>
                 {
                     HideUI(LoginUIType.LoginPanel);
+                    HideUI(LoginUIType.LoadingPanel);
                     ShowUI(LoginUIType.InfoPanel);
                     Debug.Log("로그인 성공");
                 };
