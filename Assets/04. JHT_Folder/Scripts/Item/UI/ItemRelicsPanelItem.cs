@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,11 +15,15 @@ namespace JHT
         public TextMeshProUGUI levelText;
         public Image itemRarityImage;
 
+        [Header("Current Click Item")]
+        public GameObject curClickItem;
+
         public void Init(RelicsObject item)
         {
             relicsObject = item;
-            RelicsObject obj = relicsObject;
 
+            ItemEventManager.Instance.OnClickItem -= HandleSelected;
+            ItemEventManager.Instance.OnClickItem += HandleSelected;
             SetRelics();
         }
         private void ShowItem()
@@ -37,5 +42,13 @@ namespace JHT
             levelText.text = $"Level : {relicsObject.itemLevel}";
             itemDetailButton.onClick.AddListener(ShowItem);
         }
+
+        private void HandleSelected(ItemObject clicked)
+        {
+            bool value = ReferenceEquals(clicked, relicsObject)
+                        || (clicked != null && clicked.itemNum == relicsObject.itemNum);
+            curClickItem.SetActive(value);
+        }
+
     }
 }
