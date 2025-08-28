@@ -87,6 +87,8 @@ namespace JHT
                 AddEnhancementPointsToEquipment(itemNum, -requiredPoints);
                 // 레벨업
                 weapon.ItemLevel++;
+                QuestSignalManager.Instance.LevelUp(global::ItemType.Equipment, 1);
+                
                 Debug.Log($"[InventoryManager] {weapon.itemName} 레벨업! (Lv.{weapon.ItemLevel - 1} -> Lv.{weapon.ItemLevel})");
                 return true;
             }
