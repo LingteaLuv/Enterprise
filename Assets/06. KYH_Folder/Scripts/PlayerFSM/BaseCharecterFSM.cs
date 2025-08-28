@@ -1,18 +1,19 @@
 using LHI;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
-public abstract class BaseMonsterFSM : LHI.Character
+public abstract class BaseCharecterFSM : LHI.Character
 {
     protected enum State { Idle, Move, Attack, Dead }
     protected State currentState;
 
     [Header("공통 데이터")]
-   // public float moveSpeed;         // 이동속도
-   // public float attackRange;       // 사거리
-   // public float attackDelay;       // 공격 딜레이
-   // public int maxHP;               // 최대 체력
-   // protected int currentHP;        // 현재 체력
-   public CharacterData CharacterData;
+    // public float moveSpeed;         // 이동속도
+    // public float attackRange;       // 사거리
+    // public float attackDelay;       // 공격 딜레이
+    // public int maxHP;               // 최대 체력
+    // protected int currentHP;        // 현재 체력
+    public CharacterData CharacterData;
 
     // TODO : 이 공통 데이터들은 차후에 난이도(Level) 이나 스테이지 숫자에 따라 비례증가 할 수 있으니 그에따라 계산하는 로직 필요할 수 있음( 특히 체력이나 공격력 등 )
 
@@ -70,7 +71,6 @@ public abstract class BaseMonsterFSM : LHI.Character
     public override void Die()
     {
         Debug.Log($"{gameObject.name} 사망");
-        BattleManager.Instance.OnEnemyDead(gameObject);
         // 애니메이션 / 이펙트 등
         // gameObject.SetActive(false);
         Destroy(gameObject);
@@ -78,14 +78,13 @@ public abstract class BaseMonsterFSM : LHI.Character
 
     public override void Heal(float amount)
     {
-        
+
     }
 
     public override void Move()
     {
-        
+
     }
 
-    
-}
 
+}
