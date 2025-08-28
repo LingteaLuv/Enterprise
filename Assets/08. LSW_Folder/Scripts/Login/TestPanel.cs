@@ -14,11 +14,11 @@ public class TestPanel : UIBase
 
     private void OnTouchedPlusGold()
     {
-        DatabaseManager.Instance.PlusGold();
+        //DatabaseManager.Instance.PlusGold();
     }
     
     private void OnTouchedMinusGold()
     {
-        DatabaseManager.Instance.MinusGold();
+        //DatabaseManager.Instance.MinusGold();
     }
 }

@@ -281,6 +281,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     
     #endregion
     
+    #region Currency
     
     private void CreditValueChanged(object sender, ValueChangedEventArgs args)
     {
@@ -288,12 +289,18 @@ public class DatabaseManager : Singleton<DatabaseManager>
 
         if (snapshot.Exists && snapshot.HasChild("Gold"))
         {
-            long gold = (long)snapshot.Child("Gold").Value;
-            _playerData.CreditData.Gold = (int)gold;
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.Gold,
+                snapshot.Child("Gold").Value.ToString());
         }
-        else
+        if (snapshot.Exists && snapshot.HasChild("Gem"))
         {
-            _playerData.CreditData.Gold = 0;
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.Gem,
+                snapshot.Child("Gem").Value.ToString());
+        }
+        if (snapshot.Exists && snapshot.HasChild("EnhancementStone"))
+        {
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.EnhancementStone,
+                snapshot.Child("EnhancementStone").Value.ToString());
         }
         OnChangedCreditData?.Invoke();
     }
@@ -303,30 +310,28 @@ public class DatabaseManager : Singleton<DatabaseManager>
         DatabaseReference creditRef = FirebaseManager.DataReference.Child(_uid).Child("CreditData");
         creditRef.ValueChanged += CreditValueChanged;
     }
-
-    #region Test
-
-    public void PlusGold()
+    
+    public void AddCurrency(string type, int value)
     {
-        DatabaseReference goldRef = FirebaseManager.DataReference.Child(_uid).Child("CreditData").Child("Gold");
+        DatabaseReference goldRef = FirebaseManager.DataReference.Child(_uid).Child("CreditData").Child(type);
         goldRef.RunTransaction(data =>
         {
             if (data.Value == null)
             {
-                data.Value = 1;
+                data.Value = value;
             }
             else
             {
                 int currentGold = Convert.ToInt32(data.Value);
-                data.Value = currentGold + 1;
+                data.Value = currentGold + value;
             }
             return TransactionResult.Success(data);
         });
     }
     
-    public void MinusGold()
+    public void SpendCurrency(string type, int value)
     {
-        DatabaseReference goldRef = FirebaseManager.DataReference.Child(_uid).Child("CreditData").Child("Gold");
+        DatabaseReference goldRef = FirebaseManager.DataReference.Child(_uid).Child("CreditData").Child(type);
         goldRef.RunTransaction(data =>
         {
             if (data.Value == null)
@@ -336,17 +341,80 @@ public class DatabaseManager : Singleton<DatabaseManager>
             else
             {
                 int currentGold = Convert.ToInt32(data.Value);
-                if (currentGold > 0)
+                if (currentGold >= value)
                 {
-                    data.Value = currentGold - 1;
+                    data.Value = currentGold - value;
                 }
                 else
                 {
-                    data.Value = 0;
+                    return TransactionResult.Abort();
                 }
             }
             return TransactionResult.Success(data);
         });
     }
     #endregion
+    
+    public void Attendance(Action<int> callback)
+    {
+        DatabaseReference goldRef = FirebaseManager.DataReference.Child(_uid).Child("UserData").Child("Date");
+        goldRef.RunTransaction(data =>
+        {
+            if (data.Value == null)
+            {
+                data.Value = 1;
+                callback(1);
+            }
+            else
+            {
+                int curDate = Convert.ToInt32(data.Value);
+                data.Value = curDate + 1;
+                callback(curDate + 1);
+            }
+            
+            return TransactionResult.Success(data);
+        });
+        FirebaseManager.DataReference.Child(_uid).Child("UserData").Child("RewardTime")
+            .SetValueAsync(ServerValue.Timestamp);
+    }
+
+    private async Task<bool> CheckAttendance()
+    {
+        var snapshot = await FirebaseManager.DataReference.Child(_uid).Child("UserData").Child("RewardTime")
+            .GetValueAsync();
+
+        long rewardTime = snapshot.Exists ? long.Parse(snapshot.Value.ToString()) : 0;
+
+        var tempRef = FirebaseManager.DataReference.Child("CurrentTime").Push();
+        await tempRef.SetValueAsync(ServerValue.Timestamp);
+        var timeSnapshot = await tempRef.GetValueAsync();
+        long serverTime = long.Parse(timeSnapshot.Value.ToString());
+        await tempRef.RemoveValueAsync();
+
+        DateTime currentTime = DateTimeOffset.FromUnixTimeMilliseconds(serverTime).UtcDateTime;
+        DateTime currentTimeKor = currentTime.AddHours(9);
+
+        DateTime resetTime = new DateTime(currentTimeKor.Year, currentTimeKor.Month, currentTimeKor.Day, 6, 0, 0);
+        if (currentTimeKor.Hour < 6)
+        {
+            resetTime = resetTime.AddDays(-1);
+        }
+        
+        DateTime lastRewardTime = DateTimeOffset.FromUnixTimeMilliseconds(rewardTime).UtcDateTime;
+
+        return lastRewardTime < resetTime;
+    }
+
+    public async Task CheckTodayReward(Action callback)
+    {
+        if (await CheckAttendance())
+        {
+            Debug.Log("출석 가능");
+            callback();
+        }
+        else
+        {
+            Debug.Log("출석 불가");
+        }
+    }
 }
