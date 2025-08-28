@@ -11,7 +11,6 @@ public class TabBarController : MonoBehaviour
     [SerializeField] Button gachaBtn;
     [SerializeField] Button shopBtn;
     [SerializeField] Button questBtn;
-    [SerializeField] Button attendanceBtn;
 
     [Header("버튼에 연결된 UI")]
     [SerializeField] GameObject basicStatPanel;
@@ -20,10 +19,9 @@ public class TabBarController : MonoBehaviour
     [SerializeField] GameObject gachaPanel;
     [SerializeField] GameObject shopPanel;
     [SerializeField] GameObject questPanel;
-    [SerializeField] GameObject attendancePanel;
 
     [Header("공용 닫기 버튼")]
-    //[SerializeField] Button closeBtn;
+    [SerializeField] Button closeBtn;
     [SerializeField] Button homeBtn;
 
     private Dictionary<Button, GameObject> tabToPanel;
@@ -39,18 +37,22 @@ public class TabBarController : MonoBehaviour
             { gachaBtn, gachaPanel },
             { shopBtn, shopPanel },
             { questBtn, questPanel },
-            { attendanceBtn, attendancePanel }
         };
 
         Init();
     }
 
+    private void OnDisable()
+    {
+        Debug.Log($"111111111111111111111{name} - {GetType().Name} Disabled", this);
+    }
+    
     void Init()
     {
         // 초기 상태: 모든 패널 끄기, 닫기 버튼 숨김
         foreach (var panel in tabToPanel.Values)
             panel.SetActive(false);
-        //closeBtn.gameObject.SetActive(false);
+        closeBtn.gameObject.SetActive(false);
 
         // 탭 버튼 이벤트 연결
         foreach (var item in tabToPanel)
@@ -63,13 +65,13 @@ public class TabBarController : MonoBehaviour
                 CloseAllPanels();
                 panel.SetActive(true);
                 currentOpenPanel = panel;
-                //closeBtn.transform.position = tabBtn.transform.position;
-                //closeBtn.gameObject.SetActive(true);
+                closeBtn.transform.position = tabBtn.transform.position;
+                closeBtn.gameObject.SetActive(true);
             });
         }
 
         // 공용 닫기 버튼 이벤트 연결
-        /*closeBtn.onClick.AddListener(() =>
+        closeBtn.onClick.AddListener(() =>
         {
             if (currentOpenPanel != null)
             {
@@ -77,7 +79,7 @@ public class TabBarController : MonoBehaviour
                 currentOpenPanel = null;
             }
             closeBtn.gameObject.SetActive(false);
-        });*/
+        });
 
         homeBtn.onClick.AddListener(() =>
         {
@@ -86,7 +88,7 @@ public class TabBarController : MonoBehaviour
                 currentOpenPanel.SetActive(false);
                 currentOpenPanel = null;
             }
-            //closeBtn.gameObject.SetActive(false);
+            closeBtn.gameObject.SetActive(false);
         });
     }
 
@@ -95,6 +97,6 @@ public class TabBarController : MonoBehaviour
         foreach (var panel in tabToPanel.Values)
             panel.SetActive(false);
         currentOpenPanel = null;
-        //closeBtn.gameObject.SetActive(false);
+        closeBtn.gameObject.SetActive(false);
     }
 }
