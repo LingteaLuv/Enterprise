@@ -182,23 +182,13 @@ public class CharacterPanelUI : MonoBehaviour
         else
         {
             // 기존 로직: 캐릭터 정보창 열기
-            if (characterInfoUIPanel != null)
+            if (ownerScrollView != null)
             {
-                characterInfoUIPanel.SetActive(true);
-
-                CharacterInfoUI infoUI = characterInfoUIPanel.GetComponent<CharacterInfoUI>();
-                if (infoUI != null)
-                {
-                    infoUI.Setup(currentPlayerCharData);
-                }
-                else
-                {
-                    Debug.LogWarning("CharacterInfoUI 컴포넌트를 찾을 수 없습니다.");
-                }
+                ownerScrollView.ShowCharacterInfo(currentPlayerCharData);
             }
             else
             {
-                Debug.LogWarning("CharacterInfoUI Panel을 찾을 수 없습니다.");
+                Debug.LogError("CharacterPanelUI에 ownerScrollView가 연결되지 않았습니다!");
             }
         }
     }

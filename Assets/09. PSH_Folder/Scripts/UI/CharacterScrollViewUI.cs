@@ -43,6 +43,9 @@ public class CharacterScrollViewUI : MonoBehaviour
     public Button formationButton;
     public GameObject formationPanel;
 
+    [Header("캐릭터 정보")]
+    public CharacterInfoUI characterInfoPanel; // 캐릭터 정보 패널 참조
+
     [Header("버튼 색상")]
     public Color selectedColor = Color.white;
     public Color normalColor = Color.gray;
@@ -51,6 +54,7 @@ public class CharacterScrollViewUI : MonoBehaviour
     private CrewRoleFilterOption currentCrewRoleFilter = CrewRoleFilterOption.All;
     private FactionFilterOption currentFactionFilter = FactionFilterOption.All;
     private List<CharacterPanelUI> panelPool = new List<CharacterPanelUI>();
+    private List<PlayerCharacterData> sortedCharacterList = new List<PlayerCharacterData>(); // 정렬된 리스트 저장
 
     void Start()
     {
@@ -261,28 +265,43 @@ public class CharacterScrollViewUI : MonoBehaviour
 
     public void RefreshDisplay()
     {
-        // 1. 정렬된 캐릭터 목록 가져오기
-        List<PlayerCharacterData> characters = GetSortedCharacters();
+        // 1. 정렬된 캐릭터 목록 가져오기 및 저장
+        sortedCharacterList = GetSortedCharacters();
 
         // 2. 필요한 만큼만 패널을 생성하여 풀(Pool)을 채웁니다.
-        while (panelPool.Count < characters.Count)
+        while (panelPool.Count < sortedCharacterList.Count)
         {
             GameObject panelGO = Instantiate(characterPanelPrefab, contentPanel);
             panelPool.Add(panelGO.GetComponent<CharacterPanelUI>());
         }
 
         // 3. 풀에 있는 패널들에 데이터를 설정하고 활성화합니다.
-        for (int i = 0; i < characters.Count; i++)
+        for (int i = 0; i < sortedCharacterList.Count; i++)
         {
             panelPool[i].ownerScrollView = this;
-            panelPool[i].Setup(characters[i]);
+            panelPool[i].Setup(sortedCharacterList[i]);
             panelPool[i].gameObject.SetActive(true);
         }
 
         // 4. 사용하지 않는 나머지 패널들은 비활성화합니다.
-        for (int i = characters.Count; i < panelPool.Count; i++)
+        for (int i = sortedCharacterList.Count; i < panelPool.Count; i++)
         {
             panelPool[i].gameObject.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 캐릭터 정보 패널을 열고 데이터를 설정합니다.
+    /// </summary>
+    public void ShowCharacterInfo(PlayerCharacterData character)
+    {
+        if (characterInfoPanel != null)
+        {
+            characterInfoPanel.Setup(character, sortedCharacterList);
+        }
+        else
+        {
+            Debug.LogError("CharacterInfoUI 패널이 CharacterScrollViewUI에 연결되지 않았습니다!");
         }
     }
 

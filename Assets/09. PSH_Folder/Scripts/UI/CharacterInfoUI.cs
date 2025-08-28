@@ -33,6 +33,13 @@ public class CharacterInfoUI : MonoBehaviour
 
     public TextMeshProUGUI battlePoint;
 
+    [Header("좌우 버튼")]
+    public Button prevButton;
+    public Button nextButton;
+
+    private List<PlayerCharacterData> characterList;
+    private int currentIndex;
+
     private PlayerCharacterData currentCharacterData; // 현재 표시 중인 캐릭터 데이터
 
     void Awake()
@@ -57,41 +64,89 @@ public class CharacterInfoUI : MonoBehaviour
         {
             starUpgradeButton.onClick.AddListener(OnStarUpgradeButtonClicked);
         }
+
+        // 좌우 버튼 이벤트 연결
+        if (prevButton != null)
+        {
+            prevButton.onClick.AddListener(PreviousCharacter);
+        }
+        if (nextButton != null)
+        {
+            nextButton.onClick.AddListener(NextCharacter);
+        }
     }
 
     /// <summary>
-    /// 캐릭터 정보를 설정하고 패널을 활성화합니다.
+    /// 캐릭터 정보 리스트와 현재 인덱스를 기반으로 패널을 설정합니다.
     /// </summary>
-    /// <param name="data">표시할 플레이어 캐릭터 데이터</param>
-    public void Setup(PlayerCharacterData data)
+    public void Setup(PlayerCharacterData character, List<PlayerCharacterData> list)
     {
-        currentCharacterData = data;
+        characterList = list;
+        // 전달된 캐릭터가 리스트 내에서 몇 번째인지 찾습니다.
+        currentIndex = characterList.FindIndex(c => c == character);
 
-        if (data != null)
+        if (currentIndex == -1)
         {
-            characterNameText.text = $"이름 : {data.characterdata.characterName}";
-            characterImage.sprite = data.characterdata.characterSprite;
-            levelText.text = $"캐릭터 레벨 : {data.characterLevel}";
+            Debug.LogError("선택된 캐릭터가 리스트에 없습니다!");
+            ClosePanel();
+            return;
+        }
 
-            // 캐릭터별 영혼 조각 UI 갱신
+        DisplayCharacter();
+        gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// 현재 인덱스의 캐릭터 정보를 화면에 표시합니다.
+    /// </summary>
+    private void DisplayCharacter()
+    {
+        // 현재 인덱스로 캐릭터 데이터 가져오기
+        currentCharacterData = characterList[currentIndex];
+
+        if (currentCharacterData != null)
+        {
+            characterNameText.text = $"이름 : {currentCharacterData.characterdata.characterName}";
+            characterImage.sprite = currentCharacterData.characterdata.characterSprite;
+            levelText.text = $"캐릭터 레벨 : {currentCharacterData.characterLevel}";
+
             UpdateSoulFragmentsUI();
-
-            // 캐릭터 레벨업 UI (비용, 버튼 활성화/비활성화) 갱신
             UpdateLevelUpUI();
-
-            // 성급 업그레이드 UI 갱신
             UpdateStarUpgradeUI();
-
-            // 모든 캐릭터 스탯 표시 갱신
             UpdateCharacterStatsDisplay();
-
-            // 패널 활성화
-            gameObject.SetActive(true);
         }
         else
         {
-            Debug.LogWarning("CharacterInfoUI: 전달된 캐릭터 데이터가 null입니다."); // 전달된 캐릭터 데이터가 null입니다.
-            ClosePanel(); // 데이터가 없으면 패널 닫기
+            Debug.LogWarning("CharacterInfoUI: 현재 인덱스의 캐릭터 데이터가 null입니다.");
+            ClosePanel();
+        }
+
+        // 좌우 버튼 활성화/비활성화 로직
+        prevButton.interactable = currentIndex > 0;
+        nextButton.interactable = currentIndex < characterList.Count - 1;
+    }
+
+    /// <summary>
+    /// 이전 캐릭터를 표시합니다.
+    /// </summary>
+    public void PreviousCharacter()
+    {
+        if (currentIndex > 0)
+        {
+            currentIndex--;
+            DisplayCharacter();
+        }
+    }
+
+    /// <summary>
+    /// 다음 캐릭터를 표시합니다.
+    /// </summary>
+    public void NextCharacter()
+    {
+        if (currentIndex < characterList.Count - 1)
+        {
+            currentIndex++;
+            DisplayCharacter();
         }
     }
 
@@ -322,7 +377,7 @@ public class CharacterInfoUI : MonoBehaviour
         // 현재 이 정보창에 표시된 캐릭터의 데이터가 변경된 경우에만 UI를 새로고침합니다.
         if (currentCharacterData != null && currentCharacterData == updatedData)
         {
-            Setup(currentCharacterData);
+            DisplayCharacter();
         }
     }
 
