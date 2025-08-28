@@ -47,7 +47,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         // 클리어한 퀘스트 개수, 완료 버튼을 누를때 +1
         private int ClearedQuestCount;
         // 현재 퀘스트가 요구하는 스테이지, 완료 버튼을 눌러서 새 사이클이 시작될 때 +1
-        private int CurrentQuestStage;
+        private int CurrentQuestStage = 1;
         // 현재 플레이어가 클리어한 스테이지, 클리어 스테이지를 signal로 받아 +1
         private int CurrentClearedStage;
 
@@ -148,6 +148,9 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 넣을 GeneralQuest가 없다면 중단
             if (_generalQuests.Count != 0) return;
             
+            // 튜토리얼 삽입(수정)
+            InsertTutorials();
+            
             // 우선 스테이지 클리어 미션을 삽입
             InsertStageClearMission();
             
@@ -221,23 +224,23 @@ namespace _05._CSJ_Folder.Scripts.Quest
         /// </summary>
         private void InsertRoutineQuest()
         {
-            // 튜토리얼 퀘스트 큐에 원소가 존재할 경우 맨 앞의 값으로 없다면 int.max로 값을 채운다
-            int target = _tutorialQuests.Count > 0 ?_tutorialQuests.Peek().targetStage : int.MaxValue;
+            // // 튜토리얼 퀘스트 큐에 원소가 존재할 경우 맨 앞의 값으로 없다면 int.max로 값을 채운다
+            // int target = _tutorialQuests.Count > 0 ?_tutorialQuests.Peek().targetStage : int.MaxValue;
             // 다음 사이클 큐에 들어있느 퀘스트들을 검사한다.
             foreach (var quest in GetNextParity())
             {
-                // 타깃이 현재 퀘스트 번호 +1 보다 작거나 같은 경우 = 타깃 차례인 경우
-                if (target <= GeneralQuestCount + 1)
-                {
-                    // 튜토리얼 삽입을 진행한다
-                    InsertTutorials();
-                    // 타깃을 다음 대상으로 변경한다.
-                    target = _tutorialQuests.Count > 0 ?_tutorialQuests.Peek().targetStage : int.MaxValue;
-                }
+                // // 타깃이 현재 퀘스트 번호 +1 보다 작거나 같은 경우 = 타깃 차례인 경우
+                // if (target <= GeneralQuestCount + 1)
+                // {
+                //     // 튜토리얼 삽입을 진행한다
+                //     InsertTutorials();
+                //     // 타깃을 다음 대상으로 변경한다.
+                //     target = _tutorialQuests.Count > 0 ?_tutorialQuests.Peek().targetStage : int.MaxValue;
+                // }
     
                 // ※ quest의 경우 quest 번호로 정렬된 큐이므로 quest 번호 순으로 최초 삽입 스테이지가 정렬된다고 가정  
                 // 추후 앞부분에 quest가 추가될 예정이라면 이부분에 변경 필요
-                if (quest.RequiredQuestClearMin > GeneralQuestCount)
+                if (quest.RequiredQuestClearMin > CurrentQuestStage)
                 {
                     return;
                 }
@@ -245,7 +248,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 //일반 퀘스트에 삽입
                 _generalQuests.Enqueue(quest);
                 GeneralQuestCount++;
-                if (target == int.MaxValue) return;
+                // if (target == int.MaxValue) return;
             }
         }
 
@@ -268,8 +271,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 만약 튜토리얼 큐의 COUNT가 0인 경우 탈출
             if (_tutorialQuests.Count == 0) return;
             
-            // 튜토리얼이 있고 타깃 차례인 경우 (2차 검사)
-            while (_tutorialQuests.Count >0 &&_tutorialQuests.Peek().targetStage <= GeneralQuestCount + 1)
+            // 튜토리얼이 있고 타깃 차례인 경우
+            while (_tutorialQuests.Count >0 &&_tutorialQuests.Peek().targetStage <= CurrentQuestStage)
             {
                 // 튜토리얼 큐의 제일 앞의 questid를 검사하고
                 if (_instances.TryGetValue(_tutorialQuests.Peek().questId, out var inst))
@@ -678,8 +681,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             
         }
-
-#if  UNITY_EDITOR
+        // 클리어 버튼 / 정식 빌드에선 빠질 예정
         private void ForceQuestComplete()
         {
             CurrentClearedStage++;
@@ -687,7 +689,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             inst.ForceComplete();   
             MarkCompleted(GetActiveQuestDefinition(),inst);
         }
-#endif
 
     }
 }

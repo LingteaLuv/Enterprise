@@ -89,12 +89,12 @@ public class QuestUIController : MonoBehaviour
     [SerializeField] private Button GachaButton;
     [SerializeField] private Button LevelUpButton;
     [SerializeField] private Button UpgradeButton;
-    public void OnClickCheatButton()
+    private void OnClickCheatButton()
     {
         OnForceClear?.Invoke();
     }
     
-    public void SubmitButton()
+    private void SubmitButton()
     {
         _CheatButton.onClick.AddListener(OnClickCheatButton);
         /*KillButton.onClick.AddListener(OnClickKillButton);
@@ -103,26 +103,26 @@ public class QuestUIController : MonoBehaviour
         UpgradeButton.onClick.AddListener(OnClickUpgradeButton);*/
     }
 
-    public void OnClickKillButton()
+    private void OnClickKillButton()
     {
         QuestSignalManager.Instance.KillEnemy(MonsterId.All);
     }
 
-    public void OnClickGachaButton()
+    private void OnClickGachaButton()
     {
         QuestSignalManager.Instance.GachaPull(ItemType.Character, 5);
         QuestSignalManager.Instance.GachaPull(ItemType.Equipment, 5);
         QuestSignalManager.Instance.GachaPull(ItemType.Relic, 5);
     }
 
-    public void OnClickLevelUpButton()
+    private void OnClickLevelUpButton()
     {
         QuestSignalManager.Instance.LevelUp(ItemType.Character, 5);
         QuestSignalManager.Instance.LevelUp(ItemType.Relic, 5);
         QuestSignalManager.Instance.LevelUp(ItemType.Equipment, 5);
     }
 
-    public void OnClickUpgradeButton()
+    private void OnClickUpgradeButton()
     {
         QuestSignalManager.Instance.Upgrade(UpgradeType.Atk,5);
         QuestSignalManager.Instance.Upgrade(UpgradeType.Def,5);
