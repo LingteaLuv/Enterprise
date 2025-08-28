@@ -104,12 +104,24 @@ namespace JHT
 
         private void UpdateStarDisplay(int currentStars)
         {
+            if (starImages == null) return;
+
             for (int i = 0; i < starImages.Length; i++)
             {
-                starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
+                var img = starImages[i];
+                if (img == null) continue;  // Destroy되었거나 참조 끊긴 경우 스킵
+
+                img.color = (i < currentStars) ? Color.yellow : Color.grey;
             }
         }
-
+        private void OnDestroy()
+        {
+            if (weaponObject != null)
+            {
+                weaponObject.OnChangeLevel -= RefreshUI;
+                weaponObject.OnChangeStar -= RefreshUI;
+            }
+        }
         #endregion
 
         private void ShowItem()
