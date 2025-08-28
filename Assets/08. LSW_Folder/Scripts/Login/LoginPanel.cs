@@ -11,6 +11,7 @@ public class LoginPanel : UIBase
 
     public Action OnLoginCompleted;
     public Action OnLoginTried;
+    public Action OnLoginFailed;
 
     private void Start()
     {
@@ -26,7 +27,9 @@ public class LoginPanel : UIBase
         {
             Debug.Log("구글 로그인 성공");
             OnLoginCompleted?.Invoke();
+            return;
         }
+        OnLoginFailed?.Invoke();
     }
     
     private async Task OnTouchGuestLoginBtn()
@@ -36,7 +39,9 @@ public class LoginPanel : UIBase
         {
             Debug.Log("게스트 로그인 성공");
             OnLoginCompleted?.Invoke();
+            return;
         }
+        OnLoginFailed?.Invoke();
     }
     
     private async Task OnTouchPlayGamesLoginBtn()
@@ -46,6 +51,8 @@ public class LoginPanel : UIBase
         {
             Debug.Log("플레이 게임즈 로그인 성공");
             OnLoginCompleted?.Invoke();
+            return;
         }
+        OnLoginFailed?.Invoke();
     }
 }

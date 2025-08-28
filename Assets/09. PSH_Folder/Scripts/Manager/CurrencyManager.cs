@@ -50,9 +50,9 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
     // 인스펙터에서 초기 재화량을 설정하기 위한 문자열 필드
     [Header("초기 재화 설정 (인스펙터용)")]
-    [SerializeField] private string _initialGoldString = "0";
-    [SerializeField] private string _initialEnhancementStoneString = "0";
-    [SerializeField] private string _initialGemString = "0";
+    [SerializeField] private string _initialGoldString;
+    [SerializeField] private string _initialEnhancementStoneString;
+    [SerializeField] private string _initialGemString;
 
     protected async override void Awake()
     {
@@ -76,16 +76,19 @@ public class CurrencyManager : Singleton<CurrencyManager>
         
         await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gold", (value) =>
         {
+            Debug.Log($"Gold DB 로드 {value}");
             _initialGoldString = value.ToString();
         });
         
         await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/EnhancementStone", (value) =>
         {
+            Debug.Log($"EnhancementStone DB 로드 {value}");
             _initialEnhancementStoneString = value.ToString();
         });
         
         await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gem", (value) =>
         {
+            Debug.Log($"Gem DB 로드 {value}");
             _initialGemString = value.ToString();
         });
         

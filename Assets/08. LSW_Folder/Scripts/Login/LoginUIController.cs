@@ -49,6 +49,11 @@ public class LoginUIController : UIController<LoginUIController.LoginUIType>
                     ShowUI(LoginUIType.InfoPanel);
                     Debug.Log("로그인 성공");
                 };
+                /*loginPanel.OnLoginCompleted = () =>
+                {
+                    HideUI(LoginUIType.LoadingPanel);
+                    Debug.Log("로그인 실패");
+                };*/
             }
             
             else if (ui is InfoPanel infoPanel)

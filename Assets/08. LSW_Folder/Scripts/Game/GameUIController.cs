@@ -1,7 +1,10 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameUIController : UIController<GameUIController.GameUIType>
 {
+    [SerializeField] private Toggle _attendanceBtn;
+    
     public enum GameUIType
     {
         AttendancePanel,
@@ -19,5 +22,10 @@ public class GameUIController : UIController<GameUIController.GameUIType>
                 };
             }
         }
+        _attendanceBtn.onValueChanged.AddListener((isOn) =>
+        {
+            if (isOn) HideUI(GameUIType.AttendancePanel);
+            else ShowUI(GameUIType.AttendancePanel);
+        });
     }
 }
