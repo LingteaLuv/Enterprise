@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 using TMPro;
 
 /// <summary>
@@ -53,14 +54,14 @@ public class CurrencyManager : Singleton<CurrencyManager>
     [SerializeField] private string _initialEnhancementStoneString = "0";
     [SerializeField] private string _initialGemString = "0";
 
-    protected override void Awake()
+    protected async override void Awake()
     {
         base.Awake();
 
-        InitializeWallet(); // 처음 시작 시 지갑 초기화
+        await InitializeWallet(); // 처음 시작 시 지갑 초기화
     }
 
-    private void InitializeWallet()
+    private async Task InitializeWallet()
     {
         // 모든 재화 종류에 대해 초기값을 0으로 설정합니다.
         foreach (CurrencyType type in System.Enum.GetValues(typeof(CurrencyType)))
@@ -71,17 +72,33 @@ public class CurrencyManager : Singleton<CurrencyManager>
             }
         }
 
+        string rootPath = $"{FirebaseManager.Auth.CurrentUser.UserId}/CreditData";
+        
+        await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gold", (value) =>
+        {
+            _initialGoldString = value.ToString();
+        });
+        
+        await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/EnhancementStone", (value) =>
+        {
+            _initialEnhancementStoneString = value.ToString();
+        });
+        
+        await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gem", (value) =>
+        {
+            _initialGemString = value.ToString();
+        });
+        
         // 인스펙터에서 설정된 초기 재화량을 적용합니다.
         AddCurrencyFromInspectorString(CurrencyType.Gold, _initialGoldString);
         AddCurrencyFromInspectorString(CurrencyType.EnhancementStone, _initialEnhancementStoneString);
         AddCurrencyFromInspectorString(CurrencyType.Gem, _initialGemString);
-
-        Debug.Log("[CurrencyManager] 지갑 초기화 및 초기 재화 지급 완료.");
+        
         UpdateCurrencyUI();
     }
 
     // 헬퍼 함수: 문자열에서 재화를 추가
-    private void AddCurrencyFromInspectorString(CurrencyType type, string amountString)
+    public void AddCurrencyFromInspectorString(CurrencyType type, string amountString)
     {
         if (BigInteger.TryParse(amountString, out BigInteger amount))
         {
@@ -115,11 +132,13 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
         if (currencyWallet.ContainsKey(type))
         {
-            currencyWallet[type] += amount;
+            //currencyWallet[type] += amount;
+            DatabaseManager.Instance.AddCurrency(type.ToString(), (int)amount);
         }
         else
         {
-            currencyWallet.Add(type, amount);
+            //currencyWallet.Add(type, amount);
+            DatabaseManager.Instance.AddCurrency(type.ToString(), (int)amount);
         }
         Debug.Log($"[CurrencyManager] {type} 획득: +{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
         // TODO: 재화 UI 갱신 이벤트 호출
