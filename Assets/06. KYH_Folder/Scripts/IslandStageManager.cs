@@ -26,6 +26,7 @@ public class IslandStageManager : MonoBehaviour
     [SerializeField] private GameObject flagPrefab;
     [SerializeField] private List<IslandMaker> islandMakers;
     private int currentIndex = 0;                                  // 현재 진행 중인 섬의 인덱스
+    private int stageIndex = 1;                                    // 스테이지는 1부터 시작
 
     private Coroutine handleReturnAndNext;
     private Coroutine moveToAndEnter;
@@ -94,8 +95,11 @@ public class IslandStageManager : MonoBehaviour
 
         if (currentIndex >= islandSets.Count)
         {
+            stageIndex++; // 스테이지 수 증가
             Debug.Log(" [HandleReturnAndNext] 모든 섬 완료 → StartStage 호출");
             StartStage();
+            
+            ResetClearMarkers();
             // TODO : 마지막 섬 클리어 이후 반복 전투가 진행될때에는 섬에 생성되었던 깃발과 상자 이미지 상태의 초기화가 필요함.
             yield break;
         }
@@ -162,7 +166,7 @@ public class IslandStageManager : MonoBehaviour
         Debug.Log($"[MoveToAndEnter] index={index} 시작");
 
         bool arrive = false;
-        yield return travelUI.MoveShipToMarker(index, () =>
+        yield return travelUI.MoveShipToMarker(stageIndex , index, () =>
         {
             arrive = true;
             Debug.Log($"[MoveToAndEnter] onArrive 수신 index={index}");
@@ -218,8 +222,24 @@ public class IslandStageManager : MonoBehaviour
         
         if (anchor != null && flagPrefab != null)
         {
-            Instantiate(flagPrefab, anchor.position, Quaternion.identity, island.transform);
+            Instantiate(flagPrefab, anchor.position, Quaternion.identity, anchor);
             Debug.Log($" 깃발, 상자 생성 완료: 섬 {islandIndex}");
+        }
+    }
+
+    private void ResetClearMarkers()
+    {
+        foreach (var island in islandMakers)
+        {
+            Transform anchor = island.transform.Find("FlagPosition");
+            if (anchor == null) continue;
+
+            for (int i = anchor.childCount - 1; i >= 0; i--)
+            {
+                Destroy(anchor.GetChild(i).gameObject);
+            }
+
+            Debug.Log($"플래그 제거 완료 - {island.name}");
         }
     }
 }
