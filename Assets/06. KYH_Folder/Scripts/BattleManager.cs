@@ -156,6 +156,8 @@ public class BattleManager : MonoBehaviour
     {
         if (spawnedEnemies.Contains(enemy))
             spawnedEnemies.Remove(enemy);
+        
+        QuestSignalManager.Instance.KillEnemy(MonsterId.All, 1);
 
         if (AllEnemiesDefeated())
         {

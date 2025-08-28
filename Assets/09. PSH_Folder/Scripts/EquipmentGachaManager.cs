@@ -109,6 +109,10 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
 
                     // 획득한 포인트를 해당 장비의 ID와 함께 InventoryManager에 추가
                     InventoryManager.Instance.AddEnhancementPointsToEquipment(weapon.itemNum, pointsToAdd);
+
+                    // ▼▼▼ 자동 강화 로직 추가 ▼▼▼
+                    AutoEnhanceWeapon(weapon);
+                    // ▲▲▲ 자동 강화 로직 추가 ▲▲▲
                 }
                 else
                 {
@@ -118,6 +122,45 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
         }
         return success;
     }
+
+    // ▼▼▼ 자동 강화 메서드 추가 ▼▼▼
+    private void AutoEnhanceWeapon(WeaponObject weapon)
+    {
+        if (weapon == null) return;
+
+        Debug.Log($"[EquipmentGachaManager] {weapon.itemName} (ID: {weapon.itemNum}) 자동 강화를 시작합니다.");
+
+        const int levelUpCost = 10; // 레벨업 비용
+        const int maxLevel = 50; // 최대 레벨
+
+        // 강화 가능 조건: 포인트 충분, 최대 레벨 미만, 성급업 대기 상태 아님
+        bool needsStarUp = weapon.ItemLevel > 0 && weapon.ItemLevel % 10 == 0 && weapon.ItemStar < (weapon.ItemLevel / 10);
+        bool canLevelUp = InventoryManager.Instance.GetEnhancementPoints(weapon.itemNum) >= levelUpCost && weapon.ItemLevel < maxLevel && !needsStarUp;
+
+        while (canLevelUp)
+        {
+            // 레벨업 시도
+            bool levelUpSuccess = InventoryManager.Instance.LevelUpEquipment(weapon.itemNum);
+
+            if (levelUpSuccess)
+            {
+                Debug.Log($"[EquipmentGachaManager] {weapon.itemName} 레벨업! 현재 레벨: {weapon.ItemLevel}");
+
+                // 레벨업 후 조건 다시 확인
+                needsStarUp = weapon.ItemLevel > 0 && weapon.ItemLevel % 10 == 0 && weapon.ItemStar < (weapon.ItemLevel / 10);
+                canLevelUp = InventoryManager.Instance.GetEnhancementPoints(weapon.itemNum) >= levelUpCost && weapon.ItemLevel < maxLevel && !needsStarUp;
+            }
+            else
+            {
+                // 레벨업 실패 (포인트 부족 등) - 루프 종료
+                Debug.LogWarning($"[EquipmentGachaManager] {weapon.itemName} 레벨업 실패. 자동 강화를 중단합니다.");
+                break;
+            }
+        }
+
+        Debug.Log($"[EquipmentGachaManager] {weapon.itemName} 자동 강화를 종료합니다. 최종 레벨: {weapon.ItemLevel}");
+    }
+    // ▲▲▲ 자동 강화 메서드 추가 ▲▲▲
     // ▲▲▲ PerformMultipleGacha 오버라이드 및 강화 포인트 로직 수정 ▲▲▲
 }
 

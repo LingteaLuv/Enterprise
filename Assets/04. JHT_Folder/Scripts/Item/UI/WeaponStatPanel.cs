@@ -8,7 +8,7 @@ namespace JHT
     {
         private WeaponObject curWeapon;
 
-        [SerializeField] private HoldButton levelUpBtn;
+        // [SerializeField] private HoldButton levelUpBtn;
         [SerializeField] private Button starUpBtn;
         [SerializeField] private Image weaponImage;
         [SerializeField] private Image[] starImages;
@@ -21,7 +21,7 @@ namespace JHT
 
         private void Awake()
         {
-            levelUpBtn.onHoldAction.AddListener(OnLevelUpButtonClick);
+            // levelUpBtn.onHoldAction.AddListener(OnLevelUpButtonClick);
             starUpBtn.onClick.AddListener(OnStarUpButtonClick);
         }
 
@@ -139,7 +139,7 @@ namespace JHT
             // 레벨업 버튼 활성화 로직 (성급업이 가능하지 않을 때만 활성화)
             bool hasEnoughPoints = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum) >= 10;
             bool isMaxLevel = curWeapon.ItemLevel >= 50;
-            levelUpBtn.interactable = hasEnoughPoints && !isMaxLevel && !canStarUp;
+            // levelUpBtn.interactable = hasEnoughPoints && !isMaxLevel && !canStarUp;
         }
 
         private void UpdateStarDisplay(int currentStars)
