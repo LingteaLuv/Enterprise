@@ -53,7 +53,7 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     /// <summary>
     /// 레벨업시 보내는 시그널
     /// </summary>
-    /// <param name="gachaId"></param>
+    /// <param name="LevelUpId"></param>
     /// <param name="count"></param>
     /// <param name="general"></param>
     /// <param name="daily"></param>
