@@ -9,13 +9,12 @@ using UnityEngine;
 public class EquipDataImporter
 {
     // CSV 파일이 위치한 실제 경로
-    private static string csvFilePath = Application.dataPath + "/Editor/CSVData/EquipData.csv";
+    private static string csvFilePath = Application.dataPath + "/CSVData/EquipData.csv";
 
     // ScriptableObject 에셋을 저장할 기본 경로
     private static string soSavePath = "Assets/Resources/EquipData/";
 
-    // 상단 메뉴에 "Tools/Import Character Data" 메뉴를 추가합니다.
-    [MenuItem("Tools/Import Equip Data")]
+    [MenuItem("Tools/Import Data/Equip ")]
     public static void ImportData()
     {
         if (!File.Exists(csvFilePath))
