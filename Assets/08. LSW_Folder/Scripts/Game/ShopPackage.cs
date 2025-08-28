@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,18 +18,23 @@ public class ShopPackage : MonoBehaviour
     public void Init(string packageId)
     {
         _packageId = packageId;
-        DatabaseManager.Instance.LoadPackageData(_packageId, (price, isPurchased) =>
-        {
-            _priceText.text = price;
-            _purchaseBtn.interactable = !isPurchased;
-            UpdatePanel();
-        });
+        _priceText.text = $"무료 패키지 : 100 Gem 획득";
+        _purchaseBtn.interactable = true;
+        UpdatePanel();
     }
     
     private void OnTouchPurchaseBtn()
     {
         DatabaseManager.Instance.SavePackage(_packageId);
         GoogleAdmobTester.Instance.ShowAd();
+        DatabaseManager.Instance.LoadPackageData(_packageId, (price, reward) =>
+        {
+            DatabaseManager.Instance.AddCurrency("Gem", -price);
+            foreach (var kvp in reward)
+            {
+                DatabaseManager.Instance.AddCurrency($"{kvp.Key}", Convert.ToInt32(kvp.Value));
+            }
+        });
         UpdatePanel();
     }
 
