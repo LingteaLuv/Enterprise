@@ -9,7 +9,7 @@ namespace JHT
     {
         public List<WeaponObject> weaponList;
         public List<RelicsObject> relicsList;
-        public float myMoney;
+        public float myRelicsPoints;
 
         public Action<ItemObject> OnAddInventory;
         public Action<ItemObject> OnRemoveInventory;
@@ -18,6 +18,8 @@ namespace JHT
         public Action<RelicsObject,RelicsObject> OnChooseItem;
         public Action<RelicsObject,RelicsObject,bool> OnChangeItem;
         public Action<RelicsObject> OnChangePanel;
+
+        public Action<float> OnChangeRelicsPoints;
 
         public InventoryMode currentMode;
 
@@ -242,8 +244,14 @@ namespace JHT
 
         public void DestoryRelics(RelicsObject obj)
         {
-            myMoney += obj.itemCost;
+            myRelicsPoints += obj.itemCost;
             RemoveItem(obj);
+            ChangeRelicsPoints(myRelicsPoints);
+        }
+
+        public void ChangeRelicsPoints(float value)
+        {
+            OnChangeRelicsPoints?.Invoke(value);
         }
 
         public ItemObject GetItemData(ItemObject obj)

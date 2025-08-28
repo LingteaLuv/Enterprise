@@ -31,11 +31,13 @@ public class GachaUIHandler : MonoBehaviour
     [Header("유물 뽑기")]
     public RelicsGachaManager relicsGachaManager;
     public Button relicsSingleBtn;
+    public Button specialRelicsSingleBtn;
 
     [Header("결과 UI")]
     [Tooltip("뽑기 결과 화면 UI를 연결하세요.")]
     public GachaListUI gachaListPanel;
     public RelicsGachaListUI relicsGachaListPanel;
+    [SerializeField] private TextMeshProUGUI relicsPoints;
 
     private void OnEnable()
     {
@@ -59,8 +61,11 @@ public class GachaUIHandler : MonoBehaviour
         equipSingleBtn.onClick.AddListener(OnClick_EquipmentGacha_Single);
         equipMultipleBtn.onClick.AddListener(OnClick_EquipmentGacha_Multiple);
 
+        // 유물 뽑기 버튼 이벤트 연결 및 인벤토리 액션연결
         relicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Single);
-
+        specialRelicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Special);
+        InventoryManager.Instance.OnChangeRelicsPoints += ShowRelicsPoint;
+        ShowRelicsPoint(InventoryManager.Instance.myRelicsPoints);
     }
 
 
@@ -101,7 +106,14 @@ public class GachaUIHandler : MonoBehaviour
     #region 유물 뽑기 함수
     public void OnClick_RelicsGacha_Single()
     {
-        relicsGachaManager.GetGachaOneWeaponData();
+        relicsGachaManager.GetGachaOneRelicsData(true);
+        relicsGachaListPanel.gameObject.SetActive(true);
+        relicsGachaListPanel.Init(relicsGachaManager);
+    }
+
+    public void OnClick_RelicsGacha_Special()
+    {
+        relicsGachaManager.GetGachaOneRelicsData(false);
         relicsGachaListPanel.gameObject.SetActive(true);
         relicsGachaListPanel.Init(relicsGachaManager);
     }
@@ -175,5 +187,13 @@ public class GachaUIHandler : MonoBehaviour
         );
     }
 
+    private void ShowRelicsPoint(float value)
+    {
+        relicsPoints.text = value.ToString();
+    }
 
+    //private void OnDestroy()
+    //{
+    //    InventoryManager.Instance.OnChangeRelicsPoints -= ShowRelicsPoint;
+    //}
 }
