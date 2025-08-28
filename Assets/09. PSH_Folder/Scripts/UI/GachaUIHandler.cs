@@ -1,5 +1,6 @@
 using JHT;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,6 +21,7 @@ public class GachaUIHandler : MonoBehaviour
     public CharacterGachaManager characterGachaManager;
     public Button charSingleBtn;
     public Button charMultipleBtn;
+    public TextMeshProUGUI gachaPityCountText;
 
     [Header("장비 뽑기")]
     public EquipmentGachaManager equipmentGachaManager;
@@ -27,17 +29,25 @@ public class GachaUIHandler : MonoBehaviour
     public Button equipMultipleBtn;
 
     [Header("유물 뽑기")]
-    // public RelicGachaManager relicGachaManager;
+    public RelicsGachaManager relicsGachaManager;
+    public Button relicsSingleBtn;
 
     [Header("결과 UI")]
     [Tooltip("뽑기 결과 화면 UI를 연결하세요.")]
     public GachaListUI gachaListPanel;
+    public RelicsGachaListUI relicsGachaListPanel;
 
+    private void OnEnable()
+    {
+        // UI가 활성화될 때마다 천장 텍스트를 갱신합니다.
+        UpdateCharacterPityText();
+    }
 
+    // 캐릭터 뽑기 버튼 이벤트 연결
     private void Start()
     {
         // 탭 버튼 이벤트 연결
-        charButton.onClick.AddListener(() => { charPanel.SetActive(true); equipPanel.SetActive(false); relicPanel.SetActive(false); });
+        charButton.onClick.AddListener(() => { charPanel.SetActive(true); equipPanel.SetActive(false); relicPanel.SetActive(false); UpdateCharacterPityText(); });
         equipButton.onClick.AddListener(() => { charPanel.SetActive(false); equipPanel.SetActive(true); relicPanel.SetActive(false); });
         relicButton.onClick.AddListener(() => { charPanel.SetActive(false); equipPanel.SetActive(false); relicPanel.SetActive(true); });
 
@@ -48,7 +58,11 @@ public class GachaUIHandler : MonoBehaviour
         // 장비 뽑기 버튼 이벤트 연결
         equipSingleBtn.onClick.AddListener(OnClick_EquipmentGacha_Single);
         equipMultipleBtn.onClick.AddListener(OnClick_EquipmentGacha_Multiple);
+
+        relicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Single);
+
     }
+
 
     #region 캐릭터 뽑기 함수
     public void OnClick_CharacterGacha_Single()
@@ -59,6 +73,15 @@ public class GachaUIHandler : MonoBehaviour
     public void OnClick_CharacterGacha_Multiple()
     {
         HandleGacha(characterGachaManager, 10);
+    }
+
+    public void UpdateCharacterPityText()
+    {
+        if (gachaPityCountText != null && characterGachaManager != null)
+        {
+            int remaining = CharacterGachaManager.GACHA_CEILING_COUNT - characterGachaManager.gachaPityCounter;
+            gachaPityCountText.text = "3성 확정까지\n<color=yellow>" + remaining + "회</color> 남음";
+        }
     }
     #endregion
 
@@ -75,6 +98,14 @@ public class GachaUIHandler : MonoBehaviour
     }
     #endregion
 
+    #region 유물 뽑기 함수
+    public void OnClick_RelicsGacha_Single()
+    {
+        relicsGachaManager.GetGachaOneWeaponData();
+        relicsGachaListPanel.gameObject.SetActive(true);
+        relicsGachaListPanel.Init(relicsGachaManager);
+    }
+    #endregion
 
     /// <summary>
     /// 실제 뽑기를 처리하는 범용 함수
@@ -89,7 +120,12 @@ public class GachaUIHandler : MonoBehaviour
 
         int totalCost = manager.singleGachaCost * count;
         string itemType = "아이템";
-        if (typeof(T) == typeof(PlayerCharacterData)) itemType = "캐릭터";
+        bool isCharacterGacha = false;
+        if (typeof(T) == typeof(PlayerCharacterData))
+        {
+            itemType = "캐릭터";
+            isCharacterGacha = true;
+        }
         else if (typeof(T) == typeof(ItemObject)) itemType = "장비";
 
         UIManager.Instance.ShowConfirm(
@@ -100,26 +136,29 @@ public class GachaUIHandler : MonoBehaviour
                 {
                     Debug.Log($"UI 버튼 클릭으로 {itemType} {count}회 뽑기를 실행했습니다.");
 
-                    // [디버그 로그 추가]
                     if (manager.LastGachaResults == null)
                     {
                         Debug.LogError("[GachaUIHandler] LastGachaResults 리스트가 null입니다!");
                         return;
                     }
-                    Debug.Log($"[GachaUIHandler] 결과 리스트 확인. 아이템 개수: {manager.LastGachaResults.Count}, 리스트 타입: {manager.LastGachaResults.GetType().Name}");
 
-                    // THE CRITICAL PART
+                    // 결과창 표시
                     if (manager.LastGachaResults is List<PlayerCharacterData> characterResults)
                     {
-                        Debug.Log("[GachaUIHandler] 캐릭터 결과 UI를 호출합니다.");
                         gachaListPanel.DisplayCharacterResults(characterResults);
                         gachaListPanel.gameObject.SetActive(true);
                     }
                     else if (manager.LastGachaResults is List<ItemObject> equipmentResults)
                     {
-                        Debug.Log("[GachaUIHandler] 장비 결과 UI를 호출합니다.");
                         gachaListPanel.DisplayEquipmentResults(equipmentResults);
                         gachaListPanel.gameObject.SetActive(true);
+                    }
+
+                    // *** 올바른 위치 ***
+                    // 캐릭터 뽑기였다면, 뽑기가 모두 끝난 이 시점에서 텍스트를 갱신합니다.
+                    if (isCharacterGacha)
+                    {
+                        UpdateCharacterPityText();
                     }
                 }
                 else
@@ -133,4 +172,6 @@ public class GachaUIHandler : MonoBehaviour
             }
         );
     }
+
+
 }

@@ -39,7 +39,7 @@ namespace JHT
 
         public void AddWeapon(ItemWeaponSO item)
         {
-            InventoryManager.Instance.AddItem(item,ItemRarity.Normal);
+           // InventoryManager.Instance.AddItem(item,ItemRarity.Normal);
         }
         public void AddRelics1(ItemRelicsSO item)
         {

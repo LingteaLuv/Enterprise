@@ -16,9 +16,6 @@ namespace JHT
         public EquipType equipType; // 세부분류 - 무기) 칼 도끼 활 등
         public string statType;
 
-        //확인용 변수
-        public float curPower;
-
         private float itemPower;
         public float ItemPower { get { return itemPower; } set { itemPower = value; OnChangePower?.Invoke(itemPower); } }
         public Action<float> OnChangePower;
@@ -105,7 +102,6 @@ namespace JHT
             {
                 ItemPower = so.upPowerPercent[itemStar];
             }
-            curPower = itemPower;
             ItemLevel = this.ItemLevel;
             CheckUpgrade(so);
         }
