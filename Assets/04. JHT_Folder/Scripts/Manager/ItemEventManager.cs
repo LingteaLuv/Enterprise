@@ -9,12 +9,21 @@ namespace JHT
         {
             base.Awake();
         }
-
+        public ItemObject CurrentSelected { get; private set; }
         public Action<ItemObject> OnClickItem;
 
+        public PlayerCharacterData currentSelected { get; private set; }
+        public Action<PlayerCharacterData> OnClickPlayerItem;
         public void ClickItem(ItemObject obj)
         {
+            CurrentSelected = obj;
             OnClickItem?.Invoke(obj);
+        }
+
+        public void ClickPlayerData(PlayerCharacterData obj)
+        {
+            currentSelected = obj;
+            OnClickPlayerItem?.Invoke(obj);
         }
         
         public float ItemLevelPower(ItemObject obj)

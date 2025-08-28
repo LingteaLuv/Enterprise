@@ -1,3 +1,4 @@
+using JHT;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,6 +11,8 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
 {
     public Transform contentPanel;
     public GameObject soulFragmentPanelPrefab;
+
+    public SoulStatPanel characterStatPanel;
 
     // UI 패널들을 재사용하기 위한 오브젝트 풀
     private List<SoulFragmentPanel> panelPool = new List<SoulFragmentPanel>();
@@ -29,6 +32,7 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
         {
             Debug.LogWarning("SoulFragmentScrollViewController: PlayerDataManager.Instance가 null입니다.");
         }
+        ItemEventManager.Instance.OnClickPlayerItem += ShowPlayerStat;
     }
 
     private void OnDisable()
@@ -37,6 +41,7 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
         if (PlayerDataManager.Instance != null)
         {
             PlayerDataManager.Instance.OnOwnedCharactersChanged -= RefreshDisplay;
+            ItemEventManager.Instance.OnClickPlayerItem -= ShowPlayerStat;
         }
     }
 
@@ -96,5 +101,15 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
         var sortedCharacters = charactersQuery.OrderBy(c => c.characterdata.characterName);
 
         return sortedCharacters.ToList();
+    }
+
+
+    private void ShowPlayerStat(PlayerCharacterData data)
+    {
+        if (data == null)
+            return;
+
+        characterStatPanel.gameObject.SetActive(true);
+        characterStatPanel.Init(data);
     }
 }

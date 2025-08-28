@@ -1,4 +1,5 @@
 using JHT;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -22,6 +23,9 @@ namespace JHT
 
         private WeaponObject weaponObject; // 표시할 무기 데이터
         private WeaponStatPanel weaponStatPanel; // 캐싱하여 사용
+
+        [Header("Current Click Item")]
+        public GameObject curClickItem;
         #region Weapon
 
         public TextMeshProUGUI itemCountText;
@@ -70,6 +74,11 @@ namespace JHT
 
             // UI 즉시 갱신
             RefreshUI();
+
+            // 아이템 디테일 선택시 이벤트
+            ItemEventManager.Instance.OnClickItem -= HandleSelected;
+            ItemEventManager.Instance.OnClickItem += HandleSelected;
+
         }
 
         private void RefreshUI(int dummy = 0) // 이벤트 콜백을 위해 파라미터 추가
@@ -163,5 +172,12 @@ namespace JHT
             itemStarImage.sprite = so.starImage[value];
         }
         #endregion
+        private void HandleSelected(ItemObject clicked)
+        {
+            WeaponObject obj = (WeaponObject)itemObject;
+            bool value = ReferenceEquals(clicked, obj)
+                        || (clicked != null && clicked.itemNum == obj.itemNum);
+            curClickItem.SetActive(value);
+        }
     }
 }

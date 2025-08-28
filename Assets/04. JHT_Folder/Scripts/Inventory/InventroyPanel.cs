@@ -26,7 +26,6 @@ namespace JHT
         [SerializeField] private WeaponStatPanel weaponStatPanel;
         [SerializeField] private RelicsStatPanel relicsStatPanel;
 
-
         [Header("DropDown")] 
         [SerializeField] private TMP_Dropdown weaponDropDown;
         [SerializeField] private TMP_Dropdown relicsDropDown;
@@ -164,6 +163,7 @@ namespace JHT
                     weaponStatPanel.gameObject.SetActive(true);
 
                 weaponStatPanel.ShowStats(inst);
+
             }
             else
             {
@@ -174,13 +174,6 @@ namespace JHT
 
                 relicsStatPanel.Init(inst);
             }
-        }
-
-        private void AddItem(ItemObject item)
-        {
-            ItemPanelPrefab obj = Instantiate(itemPanelPrefab);
-            obj.transform.SetParent(weaponPanelParent);
-            obj.Init(item);
         }
 
 
