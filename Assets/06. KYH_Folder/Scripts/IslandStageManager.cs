@@ -60,6 +60,8 @@ public class IslandStageManager : MonoBehaviour
         Debug.Log($"[OnBattleComplete 호출됨] currentIndex: {currentIndex}");
 
         SpawnClearMarker(currentIndex);
+        
+        QuestSignalManager.Instance.ETCAchieve("IslandClear");
 
         if (!this.enabled)
             Debug.LogError(" IslandStageManager.enabled == false");

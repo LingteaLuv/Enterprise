@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro; // TextMeshPro 사용
@@ -123,6 +124,23 @@ public class BasicStatUI : MonoBehaviour
         {
             RefreshUI(); // 레벨업 성공 시 UI 갱신
             CurrencyManager.Instance.UpdateCurrencyUI();
+            UpgradeType upType;
+            switch (type)
+            {
+                case BasicStatType.Attack:
+                    upType = upType = UpgradeType.Atk;
+                    break;
+                case BasicStatType.Defense:
+                    upType = upType = UpgradeType.Def;
+                    break;
+                case BasicStatType.Health:
+                    upType = upType = UpgradeType.Hp;
+                    break;
+                default:
+                    upType = UpgradeType.Atk;
+                    break;
+            }
+                QuestSignalManager.Instance.Upgrade(upType,_levelsToGain);
         }
     }
 

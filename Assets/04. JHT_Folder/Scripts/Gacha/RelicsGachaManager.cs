@@ -61,6 +61,7 @@ public class RelicsGachaManager : MonoBehaviour
         yield return new WaitUntil(() => levelResult != -1);
 
         AddResult(relicsResult, rarityResult, levelResult);
+        QuestSignalManager.Instance.GachaPull(ItemType.Relic,1);
     }
 
     public void GetSO()
