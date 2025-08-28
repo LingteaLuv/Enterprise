@@ -145,13 +145,15 @@ public class GachaUIHandler : MonoBehaviour
                     // 결과창 표시
                     if (manager.LastGachaResults is List<PlayerCharacterData> characterResults)
                     {
-                        gachaListPanel.DisplayCharacterResults(characterResults);
                         gachaListPanel.gameObject.SetActive(true);
+                        gachaListPanel.DisplayCharacterResults(characterResults);
+                        QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
                     }
                     else if (manager.LastGachaResults is List<ItemObject> equipmentResults)
                     {
-                        gachaListPanel.DisplayEquipmentResults(equipmentResults);
                         gachaListPanel.gameObject.SetActive(true);
+                        gachaListPanel.DisplayEquipmentResults(equipmentResults);
+                        QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
                     }
 
                     // *** 올바른 위치 ***

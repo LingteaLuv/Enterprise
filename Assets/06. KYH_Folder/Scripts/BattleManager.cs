@@ -40,6 +40,7 @@ public class BattleManager : MonoBehaviour
     private void Start()
     {
         _skipBtn.onClick.AddListener(Skip);
+        _skipBtn.interactable = false;
     }
 
     private void Skip()
@@ -70,6 +71,7 @@ public class BattleManager : MonoBehaviour
         currentStageIndex = stageIndex;
         battleRoutine = StartCoroutine(BattleRoutine());
         Debug.Log("battleRoutine 시작됨");
+        _skipBtn.interactable = true;
     }
 
     /// <summary>
@@ -117,6 +119,7 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
+            _skipBtn.interactable = false;
             ClearPlayer();
             ClearEnemies(); // 혹시라도 남아있으면 같이 제거
             IslandStageManager.Instance.OnBattleComplete();
@@ -153,6 +156,8 @@ public class BattleManager : MonoBehaviour
     {
         if (spawnedEnemies.Contains(enemy))
             spawnedEnemies.Remove(enemy);
+        
+        QuestSignalManager.Instance.KillEnemy(MonsterId.All, 1);
 
         if (AllEnemiesDefeated())
         {

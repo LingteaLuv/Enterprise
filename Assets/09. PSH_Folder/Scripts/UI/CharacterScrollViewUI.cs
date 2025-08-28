@@ -35,36 +35,66 @@ public class CharacterScrollViewUI : MonoBehaviour
     public GameObject characterPanelPrefab;
     public TMP_Dropdown sortDropdown;
     public TMP_Dropdown crewRoleFilterDropdown;
-    public TMP_Dropdown factionFilterDropdown; // 새로운 드롭다운 필드
+    public TMP_Dropdown factionFilterDropdown;
 
     [Header("편성 모드")]
     public bool isFormationMode = false;
-    public Button formationModeButton;
-    public TextMeshProUGUI formationModeButtonText;
+    public Button charInfoButton;
+    public Button formationButton;
     public GameObject formationPanel;
+
+    [Header("버튼 색상")]
+    public Color selectedColor = Color.white;
+    public Color normalColor = Color.gray;
 
     private CharacterSortOption currentSort = CharacterSortOption.Stars;
     private CrewRoleFilterOption currentCrewRoleFilter = CrewRoleFilterOption.All;
-    private FactionFilterOption currentFactionFilter = FactionFilterOption.All; // 새로운 필터 변수
+    private FactionFilterOption currentFactionFilter = FactionFilterOption.All;
     private List<CharacterPanelUI> panelPool = new List<CharacterPanelUI>();
 
     void Start()
     {
+        // 정렬, 필터 드롭다운
         sortDropdown.onValueChanged.AddListener(OnSortDropdownChanged);
         crewRoleFilterDropdown.onValueChanged.AddListener(OnCrewRoleFilterDropdownChanged);
-        // 새로운 드롭다운 리스너 추가
         factionFilterDropdown.onValueChanged.AddListener(OnFactionFilterDropdownChanged);
 
-        if (formationModeButton != null)
+        if (charInfoButton != null)
         {
-            formationModeButton.onClick.AddListener(ToggleFormationMode);
+            charInfoButton.onClick.AddListener(DisableFormationMode);
         }
-        UpdateFormationButtonText();
+        if (formationButton != null)
+        {
+            formationButton.onClick.AddListener(EnableFormationMode);
+        }
+        UpdateFormationButtonVisuals();
 
         // 드롭다운 옵션 초기화
-        PopulateSortDropdown(); // 새로 추가
+        PopulateSortDropdown();
         PopulateCrewRoleFilterDropdown();
         PopulateFactionFilterDropdown();
+    }
+
+    private void UpdateFormationButtonVisuals()
+    {
+        if (charInfoButton == null || formationButton == null) return;
+
+        var charInfoButtonColors = charInfoButton.colors;
+        var formationButtonColors = formationButton.colors;
+
+        if (isFormationMode)
+        {
+            charInfoButtonColors.normalColor = normalColor;
+            formationButtonColors.normalColor = selectedColor;
+        }
+        else
+        {
+            charInfoButtonColors.normalColor = selectedColor;
+            formationButtonColors.normalColor = normalColor;
+        }
+
+        charInfoButton.colors = charInfoButtonColors;
+        formationButton.colors = formationButtonColors;
     }
 
     // SortDropdown 옵션을 채우는 함수
@@ -191,47 +221,42 @@ public class CharacterScrollViewUI : MonoBehaviour
         RefreshDisplay();
     }
 
-    public void ToggleFormationMode()
+    public void EnableFormationMode()
     {
-        // 편성 모드를 종료하려는 경우 (isFormationMode가 true에서 false로 바뀌기 직전)
-        if (isFormationMode) // 현재 편성 모드 상태가 true라면, 이제 종료하려는 것
+        isFormationMode = true;
+        Debug.Log("편성 모드 활성화");
+        UpdateFormationButtonVisuals();
+        RefreshDisplay();
+        formationPanel.SetActive(true);
+    }
+
+    public void DisableFormationMode()
+    {
+        if (PlayerDataManager.Instance != null)
         {
-            if (PlayerDataManager.Instance != null)
+            int a = PlayerDataManager.Instance.IsValidFormation();
+            if (a == 1)
             {
-                int a = PlayerDataManager.Instance.IsValidFormation();
-                if (a == 1)
-                {
-                    UIManager.Instance.ShowWarning("모든 포지션에 최소 1명을 배치해야합니다.");
-                    // 편성 모드를 종료하지 않고 유지합니다.
-                    return; // 함수 종료, isFormationMode는 true로 유지됨
-                }
-                else if (a == 2)
-                {
-                    UIManager.Instance.ShowWarning("배치 인원이 5명이 아닙니다.");
-                    return;
-                }
+                UIManager.Instance.ShowWarning("모든 포지션에 최소 1명을 배치해야합니다.");
+                return;
             }
-            else
+            else if (a == 2)
             {
-                Debug.LogError("PlayerDataManager.Instance가 null입니다. 편성 유효성 검사를 수행할 수 없습니다.");
+                UIManager.Instance.ShowWarning("배치 인원이 5명이 아닙니다.");
                 return;
             }
         }
-
-        // 유효성 검사를 통과했거나, 편성 모드로 진입하는 경우 (isFormationMode가 false에서 true로 바뀌는 경우)
-        isFormationMode = !isFormationMode;
-        Debug.Log("편성 모드 상태: " + isFormationMode);
-        UpdateFormationButtonText();
-        RefreshDisplay();
-        formationPanel.SetActive(isFormationMode);
-    }
-
-    private void UpdateFormationButtonText()
-    {
-        if (formationModeButtonText != null)
+        else
         {
-            formationModeButtonText.text = isFormationMode ? "캐릭터 편성" : "캐릭터 정보";
+            Debug.LogError("PlayerDataManager.Instance가 null입니다. 편성 유효성 검사를 수행할 수 없습니다.");
+            return;
         }
+
+        isFormationMode = false;
+        Debug.Log("편성 모드 비활성화");
+        UpdateFormationButtonVisuals();
+        RefreshDisplay();
+        formationPanel.SetActive(false);
     }
 
     public void RefreshDisplay()
