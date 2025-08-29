@@ -107,7 +107,10 @@ public class DatabaseManager : Singleton<DatabaseManager>
         DatabaseReference dataRef = FirebaseManager.DataReference.Child(path);
         DataSnapshot snapshot = await dataRef.GetValueAsync();
 
-        if (!snapshot.Exists || snapshot.Value == null) return;
+        if (!snapshot.Exists || snapshot.Value == null)
+        {
+            return;
+        }
         
         T data = (T)Convert.ChangeType(snapshot.Value, typeof(T));
         callback(data);
@@ -263,7 +266,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         });
     }
     
-    public void LoadPackageData(string packageId, Action<string, bool> callback)
+    public void LoadPackageData(string packageId, Action<int, Dictionary<string, object>> callback)
     {
         DatabaseReference packageRef = FirebaseManager.DataReference
             .Child("SharedData").Child("PackageData").Child(packageId);
@@ -272,9 +275,9 @@ public class DatabaseManager : Singleton<DatabaseManager>
             if (task.IsCompleted && task.Result.Exists)
             {
                 var data = task.Result;
-                string price = data.Child("Price").Value.ToString();
-                bool isPurchased = Convert.ToBoolean(data.Child("IsPurchased").Value);
-                callback(price, isPurchased);
+                int price = Convert.ToInt32(data.Child("Price").Value);
+                Dictionary<string, object> reward = (Dictionary<string, object>)data.Child("Reward").Value;
+                callback(price, reward);
             }
         });
     }

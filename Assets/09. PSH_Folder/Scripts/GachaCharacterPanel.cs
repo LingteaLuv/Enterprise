@@ -30,7 +30,7 @@ public class GachaCharacterPanel : MonoBehaviour
                 bg.color = Color.blue;
                 break;
             case 3:
-                bg.color = Color.yellow;
+                bg.color = Color.magenta;
                 break;
             default:
                 break;

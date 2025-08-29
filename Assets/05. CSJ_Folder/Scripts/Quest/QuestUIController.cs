@@ -31,9 +31,7 @@ public class QuestUIController : MonoBehaviour
     private void Awake()
     {
         _questButton.onClick.AddListener(OnClickQuest);
-        #if UNITY_EDITOR
         SubmitButton();
-        #endif
     }
 
     private void OnClickQuest()
