@@ -10,13 +10,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
 {
     private FirebaseUser _user;
     private string _uid;
-    private PlayerData _playerData;
-    public PlayerData PlayerData => _playerData;
-    
-    private void Start()
-    {
-        _playerData = new PlayerData();
-    }
     
     public event Action OnChangedNickname;
     public event Action OnChangedCreditData;
@@ -34,8 +27,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
         Init();
         await FirebaseManager.DataReference.Child(_uid).RemoveValueAsync();
     }
-
-    #region Nickname
     
     /// <summary>
     /// Firebase RTDB에 단일 데이터를 저장하는 메서드
@@ -133,6 +124,8 @@ public class DatabaseManager : Singleton<DatabaseManager>
         callback(data);
     }
     
+    #region Nickname
+    
     /// <summary>
     /// 유저의 닉네임을 입력받은 값으로 DB에 저장하는 메서드 
     /// </summary>
@@ -181,7 +174,9 @@ public class DatabaseManager : Singleton<DatabaseManager>
         }
     }
     #endregion
-    
+
+    #region Time
+
     /// <summary>
     /// 오프라인이 되었을 때 접속 종료 시각을 저장하는 메서드
     /// </summary>
@@ -199,23 +194,36 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// 온라인이 되었을 때 보상을 계산하기 위해 최근 종료 시각을 불러오는 메서드
     /// </summary>
     /// <param name="callback"></param>
-    public void LoadLogOutTime(Action<long> callback)
+    public async Task<long> LoadLogOutTime()
     {
-        FirebaseManager.DataReference.Child(_uid).Child("UserData").Child("LogOutTime")
-            .GetValueAsync().ContinueWithOnMainThread(task =>
+        var snapshot = await FirebaseManager.DataReference.Child(_uid).Child("UserData").Child("LogOutTime")
+            .GetValueAsync();
+        if (snapshot.Exists)
         {
-            if (task.IsCompleted && task.Result.Exists)
-            {
-                long savedTime = Convert.ToInt64(task.Result.Value);
-                callback(savedTime);
-            }
-            else
-            {
-                callback(0);
-            }
-        });
+            return Convert.ToInt64(snapshot.Value);
+        }
+        return 0;
     }
 
+    public async Task<long> CurrentServerTime()
+    {
+        DatabaseReference tempRef = FirebaseManager.DataReference.Child("CurrentTime").Push();
+        await tempRef.SetValueAsync(ServerValue.Timestamp);
+        DataSnapshot timeSnapshot = await tempRef.GetValueAsync();
+        long serverTime = Convert.ToInt64(timeSnapshot.Value);
+        await tempRef.RemoveValueAsync();
+        return serverTime;
+    }
+    
+    public async Task<long> CheckOfflineTime()
+    {
+        long logOutTime = await LoadLogOutTime();
+        long currentTime = await CurrentServerTime();
+        return currentTime / 1000 - logOutTime;
+    }
+    
+    #endregion
+    
     #region Package
 
     public void SavePackage(string packageName)
@@ -357,7 +365,9 @@ public class DatabaseManager : Singleton<DatabaseManager>
         });
     }
     #endregion
-    
+
+    #region Attendance
+
     public void Attendance(Action<int> callback)
     {
         DatabaseReference goldRef = FirebaseManager.DataReference.Child(_uid).Child("UserData").Child("Date");
@@ -388,12 +398,8 @@ public class DatabaseManager : Singleton<DatabaseManager>
 
         long rewardTime = snapshot.Exists ? long.Parse(snapshot.Value.ToString()) : 0;
 
-        var tempRef = FirebaseManager.DataReference.Child("CurrentTime").Push();
-        await tempRef.SetValueAsync(ServerValue.Timestamp);
-        var timeSnapshot = await tempRef.GetValueAsync();
-        long serverTime = long.Parse(timeSnapshot.Value.ToString());
-        await tempRef.RemoveValueAsync();
-
+        long serverTime = await CurrentServerTime();
+        
         DateTime currentTime = DateTimeOffset.FromUnixTimeMilliseconds(serverTime).UtcDateTime;
         DateTime currentTimeKor = currentTime.AddHours(9);
 
@@ -420,4 +426,8 @@ public class DatabaseManager : Singleton<DatabaseManager>
             Debug.Log("출석 불가");
         }
     }
+
+    #endregion
+
+    
 }
