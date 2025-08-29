@@ -164,7 +164,7 @@ namespace JHT
         private IEnumerator RelicsEndInit()
         {
             yield return new WaitForEndOfFrame();
-            //encyclopediaPanel.RelicsInit();
+            encyclopediaPanel.RelicsInit();
 
             yield return DownLoadCSV();
         }
@@ -185,11 +185,17 @@ namespace JHT
 
         public Dictionary<int, ItemWeaponSO> GetAllWeaponData()
         {
+            if (weaponDataDic.Count <= 0)
+                return null;
+
             return weaponDataDic;
         }
 
         public Dictionary<int, ItemRelicsSO> GetAllRelicsData()
         {
+            if (relicsDataDic.Count <= 0)
+                return null;
+
             return relicsDataDic;
         }
 

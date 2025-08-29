@@ -10,6 +10,7 @@ namespace JHT
         public PowerType itemPowerType;
         public float[] upPower;
         public float[] cost;
+        public float[] startPower;
         public Sprite[] rarityImage;
     }
 

@@ -16,6 +16,7 @@ public class RelicsGachaManager : MonoBehaviour
     ItemDataManager dataManager;
     [SerializeField] private RelicsGachaLootTable rarityTable;
     [SerializeField] private RelicsGachaLootTable levelTable;
+    [SerializeField] private RelicsGachaLootTable specialTable;
 
     private InventoryManager inventoryManager;
 
@@ -41,19 +42,28 @@ public class RelicsGachaManager : MonoBehaviour
         }
     }
 
-    public void GetGachaOneWeaponData()
+    public void GetGachaOneRelicsData(bool value)
     {
-        StartCoroutine(GetData());
+        StartCoroutine(GetData(value));
     }
 
-    private IEnumerator GetData()
+    private IEnumerator GetData(bool value)
     {
+        if (value)
+        {
+            GetRarity();
+            while (rarityResult == ItemRarity.None)
+                yield return null;
+        }
+        else
+        {
+            GetSpecialRarity();
+            while (rarityResult == ItemRarity.None)
+                yield return null;
+        }
+
         GetSO();
         while (relicsResult == null)
-            yield return null;
-
-        GetRarity();
-        while (rarityResult == ItemRarity.None)
             yield return null;
 
         GetLevel();
@@ -74,6 +84,12 @@ public class RelicsGachaManager : MonoBehaviour
     public void GetRarity()
     {
         RelicsGacha picked = rarityTable.GetRandomRange();
+        rarityResult = picked.rarity;
+    }
+
+    public void GetSpecialRarity()
+    {
+        RelicsGacha picked = specialTable.GetRandomRange();
         rarityResult = picked.rarity;
     }
 
