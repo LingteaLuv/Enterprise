@@ -164,7 +164,7 @@ namespace JHT
         private IEnumerator RelicsEndInit()
         {
             yield return new WaitForEndOfFrame();
-            //encyclopediaPanel.RelicsInit();
+            encyclopediaPanel.RelicsInit();
 
             yield return DownLoadCSV();
         }

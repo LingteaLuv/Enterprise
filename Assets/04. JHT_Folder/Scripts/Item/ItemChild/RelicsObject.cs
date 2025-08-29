@@ -36,7 +36,7 @@ namespace JHT
             itemNum = so.itemNum;
             itemName = so.itemName;
 
-            itemPower = so.upPower[(int)curRarity - 1] * level;
+            itemPower = so.startPower[(int)curRarity - 1] + so.upPower[(int)curRarity - 1] * level;
             itemCost = so.cost[(int)curRarity - 1] * level;
             itemRarityImage = so.rarityImage[(int)curRarity - 1];
         }
