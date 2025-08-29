@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-// using System.Numerics; // BigInteger를 사용하지 않으므로 제거
+using UnityEngine.EventSystems;
 
-public class CharacterInfoUI : MonoBehaviour
+public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
     [Header("UI 요소")]
     public TextMeshProUGUI characterNameText;
@@ -39,6 +39,10 @@ public class CharacterInfoUI : MonoBehaviour
 
     private List<PlayerCharacterData> characterList;
     private int currentIndex;
+
+    [Header("스와이프 설정")]
+    public float swipeThreshold = 50f; // 스와이프로 인식할 최소 픽셀 거리
+    private Vector2 dragStartPosition;
 
     private PlayerCharacterData currentCharacterData; // 현재 표시 중인 캐릭터 데이터
 
@@ -389,4 +393,35 @@ public class CharacterInfoUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    #region 스와이프 처리
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        Debug.Log("드래그 시작!");
+        dragStartPosition = eventData.position;
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        Debug.Log("드래그 끝!");
+        Vector2 dragEndPosition = eventData.position;
+        float dragDistance = dragEndPosition.x - dragStartPosition.x;
+
+        // 오른쪽으로 스와이프 (이전 캐릭터)
+        if (dragDistance > swipeThreshold)
+        {
+            Debug.Log("오른쪽으로 스와이프 감지");
+            PreviousCharacter();
+        }
+        // 왼쪽으로 스와이프 (다음 캐릭터)
+        else if (dragDistance < -swipeThreshold)
+        {
+            Debug.Log("왼쪽으로 스와이프 감지");
+            NextCharacter();
+        }
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+    }
+    #endregion
 }

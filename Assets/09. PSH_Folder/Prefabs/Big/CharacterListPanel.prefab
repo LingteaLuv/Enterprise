@@ -6917,7 +6917,6 @@ GameObject:
   - component: {fileID: 131723446786803885}
   - component: {fileID: 1225616439190171647}
   - component: {fileID: 8560488472760339645}
-  - component: {fileID: 1848959919001810781}
   m_Layer: 5
   m_Name: PrevBtn
   m_TagString: Untagged
@@ -7025,23 +7024,6 @@ MonoBehaviour:
   m_Interactable: 1
   m_TargetGraphic: {fileID: 1225616439190171647}
   m_OnClick:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &1848959919001810781
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7228887275617512469}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a228621e9523f1049be21748548b7bd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  holdDelay: 0.5
-  repeatInterval: 0.1
-  onHoldAction:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &7259358545226643698
@@ -8681,7 +8663,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &7931846117398859070
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8782,6 +8764,7 @@ MonoBehaviour:
   battlePoint: {fileID: 8507854885874180850}
   prevButton: {fileID: 8560488472760339645}
   nextButton: {fileID: 1327036825210985145}
+  swipeThreshold: 50
 --- !u!1 &8559749419946757953
 GameObject:
   m_ObjectHideFlags: 0
@@ -9067,7 +9050,6 @@ GameObject:
   - component: {fileID: 7761896129153740364}
   - component: {fileID: 8101235959226667912}
   - component: {fileID: 1327036825210985145}
-  - component: {fileID: 3467390089855418034}
   m_Layer: 5
   m_Name: NextBtn
   m_TagString: Untagged
@@ -9177,23 +9159,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &3467390089855418034
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9147408643098819936}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a228621e9523f1049be21748548b7bd5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  holdDelay: 0.5
-  repeatInterval: 0.1
-  onHoldAction:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &9150801772739088620
 GameObject:
   m_ObjectHideFlags: 0
@@ -9212,7 +9177,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &4086059574237907443
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9353,7 +9318,7 @@ RectTransform:
   m_Father: {fileID: 4613065524577421419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
