@@ -18,6 +18,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     [Header("편성 UI")]
     public GameObject formationIndicator; // 편성에 포함되었는지 표시하는 UI 오브젝트 (예: 체크마크 이미지)
+
     [HideInInspector]
     public CharacterScrollViewUI ownerScrollView; // 부모 스크롤 뷰
 
@@ -25,16 +26,19 @@ public class CharacterPanelUI : MonoBehaviour
     public Image crewRoleIcon;
     public Image factionIcon;
 
-    private GameObject characterInfoUIPanel;
-    private PlayerCharacterData currentPlayerCharData; // 이 패널이 표시하는 캐릭터 데이터
+    private RedDotController redDotController; // 레드닷 컨트롤러 참조
+    public PlayerCharacterData currentPlayerCharData { get; private set; } // 이 패널이 표시하는 캐릭터 데이터
+
+    private void Awake()
+    {
+        // 자식 오브젝트에서 RedDotController를 자동으로 찾아 할당합니다.
+        redDotController = GetComponentInChildren<RedDotController>(true);
+    }
 
     private void Start()
     {
         button = GetComponent<Button>();
         button.onClick.AddListener(OnPanelButtonClicked);
-
-        // 비활성화된 오브젝트를 포함하여 CharacterInfoUI를 찾습니다.
-        characterInfoUIPanel = FindAnyObjectByType<CharacterInfoUI>(FindObjectsInactive.Include)?.gameObject;
     }
 
     /// <summary>
@@ -59,6 +63,12 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 직업, 속성 아이콘 업데이트
         UpdateIcon();
+
+        // 레드닷 컨트롤러를 통해 알림 상태를 업데이트합니다.
+        if (redDotController != null)
+        {
+            redDotController.CheckNotifications(currentPlayerCharData);
+        }
     }
 
     /// <summary>
@@ -143,64 +153,21 @@ public class CharacterPanelUI : MonoBehaviour
     /// </summary>
     private void OnPanelButtonClicked()
     {
-        // 부모 스크롤뷰가 할당되었고, 편성 모드가 활성화 상태일 때
-        if (ownerScrollView != null && ownerScrollView.isFormationMode)
+        // 편성 모드일 때는 DraggableCharacter 스크립트가 입력을 처리하므로,
+        // 여기서는 캐릭터 정보창을 여는 로직만 남겨둡니다.
+        if (ownerScrollView != null)
         {
-            // 편성 로직 처리
-            bool isInFormation = PlayerDataManager.Instance.IsInFormation(currentPlayerCharData);
-
-            if (isInFormation)
+            // 편성 모드가 아닐 때만 정보창을 엽니다.
+            if (!ownerScrollView.isFormationMode)
             {
-                // 이미 편성에 있으면 제거
-                PlayerDataManager.Instance.RemoveCharacterFromFormation(currentPlayerCharData);
+                ownerScrollView.ShowCharacterInfo(currentPlayerCharData);
             }
-            else
-            {
-                // 편성에 없으면 추가 시도
-                int result = PlayerDataManager.Instance.AddCharacterToFormation(currentPlayerCharData);
-                switch (result)
-                {
-                    case 1:
-                        UIManager.Instance.ShowToast($"{currentPlayerCharData}는 이미 다른 곳에 편성되었습니다.");
-                        break;
-                    case 2:
-                        UIManager.Instance.ShowToast("편성이 가득 찼습니다.");
-                        break;
-                    case 3:
-                        UIManager.Instance.ShowToast("선장은 1명만 배치할 수 있습니다.");
-                        break;
-                    case 4:
-                        UIManager.Instance.ShowToast("각 포지션에는 최대 2명까지 배치할 수 있습니다.");
-                        break;
-                    default:
-                        break;
-                }
-            }
-            // 시각적 상태 업데이트
-            UpdateFormationVisuals();
         }
         else
         {
-            // 기존 로직: 캐릭터 정보창 열기
-            if (characterInfoUIPanel != null)
-            {
-                characterInfoUIPanel.SetActive(true);
-
-                CharacterInfoUI infoUI = characterInfoUIPanel.GetComponent<CharacterInfoUI>();
-                if (infoUI != null)
-                {
-                    infoUI.Setup(currentPlayerCharData);
-                }
-                else
-                {
-                    Debug.LogWarning("CharacterInfoUI 컴포넌트를 찾을 수 없습니다.");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("CharacterInfoUI Panel을 찾을 수 없습니다.");
-            }
+            Debug.LogError("CharacterPanelUI에 ownerScrollView가 연결되지 않았습니다!");
         }
     }
 }
+
 

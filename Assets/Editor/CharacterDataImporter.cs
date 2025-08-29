@@ -8,13 +8,12 @@ using UnityEngine;
 public class CharacterDataImporter
 {
     // CSV 파일이 위치한 실제 경로
-    private static string csvFilePath = Application.dataPath + "/Editor/CSVData/CharacterData.csv";
+    private static string csvFilePath = Application.dataPath + "/CSVData/CharacterData.csv";
 
     // ScriptableObject 에셋을 저장할 기본 경로
     private static string soSavePath = "Assets/Resources/CharacterData/";
 
-    // 상단 메뉴에 "Tools/Import Character Data" 메뉴를 추가합니다.
-    [MenuItem("Tools/Import Character Data")]
+    [MenuItem("Tools/Import Data/Character")]
     public static void ImportData()
     {
         if (!File.Exists(csvFilePath))
