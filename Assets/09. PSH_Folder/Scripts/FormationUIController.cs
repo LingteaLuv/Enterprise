@@ -1,15 +1,19 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FormationUIController : MonoBehaviour
 {
+    [Header("편성 슬롯")]
     public FormationSlotUI frontSlot; // Deckhand
     public FormationSlotUI middleSlot; // Sailor
     public FormationSlotUI rearSlot; // Cook
     public FormationSlotUI lastSlot; // Captain
 
+    [Header("UI 요소")]
     public Button autoFormationButton; // 자동 편성 버튼
+    public TextMeshProUGUI teamBattlePowerText; // 팀 전투력 텍스트
 
     private void Start()
     {
@@ -44,10 +48,6 @@ public class FormationUIController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// PlayerDataManager.OnCharacterDataUpdated 이벤트를 처리하는 함수입니다.
-    /// </summary>
-    /// <param name="updatedCharacter">업데이트된 캐릭터 데이터 (여기서는 직접 사용하지 않고 전체 UI를 갱신)</param>
     private void HandleCharacterDataUpdated(PlayerCharacterData updatedCharacter)
     {
         Debug.Log($"[FUC] HandleCharacterDataUpdated 호출됨: {updatedCharacter.characterdata.characterName}");
@@ -55,9 +55,6 @@ public class FormationUIController : MonoBehaviour
         RefreshFormationDisplay();
     }
 
-    /// <summary>
-    /// PlayerDataManager의 편성 데이터를 기반으로 UI를 갱신합니다.
-    /// </summary>
     public void RefreshFormationDisplay()
     {
         Debug.Log("[FUC] RefreshFormationDisplay 호출됨.");
@@ -68,7 +65,6 @@ public class FormationUIController : MonoBehaviour
         }
 
         // 각 포지션 슬롯에 해당하는 캐릭터 리스트를 가져와 Setup 함수를 호출합니다.
-        // TryGetValue를 사용하여 해당 포지션에 캐릭터가 없을 경우 빈 리스트를 전달합니다.
         List<PlayerCharacterData> characters;
 
         if (frontSlot != null)
@@ -91,11 +87,17 @@ public class FormationUIController : MonoBehaviour
             PlayerDataManager.Instance.formation.TryGetValue(CrewRole.Captain, out characters);
             lastSlot.Setup(characters ?? new List<PlayerCharacterData>());
         }
+
+        // 팀 전투력 UI 갱신
+        if (teamBattlePowerText != null)
+        {
+            teamBattlePowerText.text = $"팀 전투력: {DataUtility.FormatNumber(PlayerDataManager.Instance.teamBattlePower)}";
+        }
     }
 
     public void AutoFormating()
-    {        
+    {
         string str = PlayerDataManager.Instance.AutoFormTeam() ? "성공" : "실패";
-        Debug.Log("자동 편성"+ str);
+        Debug.Log("자동 편성" + str);
     }
 }
