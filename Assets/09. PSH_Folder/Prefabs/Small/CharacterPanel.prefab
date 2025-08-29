@@ -826,6 +826,7 @@ GameObject:
   - component: {fileID: 6147195164875831172}
   - component: {fileID: 4068402945258578522}
   - component: {fileID: 3487394889911182255}
+  - component: {fileID: 2207845291271264951}
   m_Layer: 5
   m_Name: CharacterPanel
   m_TagString: Untagged
@@ -926,6 +927,10 @@ MonoBehaviour:
   ownerScrollView: {fileID: 0}
   crewRoleIcon: {fileID: 2213083368069896545}
   factionIcon: {fileID: 8662754989479734135}
+  currentPlayerCharData:
+    characterdata: {fileID: 0}
+    characterLevel: 0
+    stars: 0
 --- !u!114 &3487394889911182255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -970,6 +975,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2207845291271264951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7455510813989405012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5737ea70ded417b40a48ceac63c07299, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDuration: 0.4
 --- !u!1 &8044515662503087061
 GameObject:
   m_ObjectHideFlags: 0

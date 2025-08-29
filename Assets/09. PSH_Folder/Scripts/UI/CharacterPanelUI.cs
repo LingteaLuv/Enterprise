@@ -26,7 +26,7 @@ public class CharacterPanelUI : MonoBehaviour
     public Image factionIcon;
 
     private GameObject characterInfoUIPanel;
-    private PlayerCharacterData currentPlayerCharData; // 이 패널이 표시하는 캐릭터 데이터
+    public PlayerCharacterData currentPlayerCharData; // 이 패널이 표시하는 캐릭터 데이터
 
     private void Start()
     {
@@ -143,53 +143,19 @@ public class CharacterPanelUI : MonoBehaviour
     /// </summary>
     private void OnPanelButtonClicked()
     {
-        // 부모 스크롤뷰가 할당되었고, 편성 모드가 활성화 상태일 때
-        if (ownerScrollView != null && ownerScrollView.isFormationMode)
+        // 편성 모드일 때는 DraggableCharacter 스크립트가 입력을 처리하므로,
+        // 여기서는 캐릭터 정보창을 여는 로직만 남겨둡니다.
+        if (ownerScrollView != null)
         {
-            // 편성 로직 처리
-            bool isInFormation = PlayerDataManager.Instance.IsInFormation(currentPlayerCharData);
-
-            if (isInFormation)
-            {
-                // 이미 편성에 있으면 제거
-                PlayerDataManager.Instance.RemoveCharacterFromFormation(currentPlayerCharData);
-            }
-            else
-            {
-                // 편성에 없으면 추가 시도
-                int result = PlayerDataManager.Instance.AddCharacterToFormation(currentPlayerCharData);
-                switch (result)
-                {
-                    case 1:
-                        UIManager.Instance.ShowToast($"{currentPlayerCharData}는 이미 다른 곳에 편성되었습니다.");
-                        break;
-                    case 2:
-                        UIManager.Instance.ShowToast("편성이 가득 찼습니다.");
-                        break;
-                    case 3:
-                        UIManager.Instance.ShowToast("선장은 1명만 배치할 수 있습니다.");
-                        break;
-                    case 4:
-                        UIManager.Instance.ShowToast("각 포지션에는 최대 2명까지 배치할 수 있습니다.");
-                        break;
-                    default:
-                        break;
-                }
-            }
-            // 시각적 상태 업데이트
-            UpdateFormationVisuals();
-        }
-        else
-        {
-            // 기존 로직: 캐릭터 정보창 열기
-            if (ownerScrollView != null)
+            // 편성 모드가 아닐 때만 정보창을 엽니다.
+            if (!ownerScrollView.isFormationMode)
             {
                 ownerScrollView.ShowCharacterInfo(currentPlayerCharData);
             }
-            else
-            {
-                Debug.LogError("CharacterPanelUI에 ownerScrollView가 연결되지 않았습니다!");
-            }
+        }
+        else
+        {
+            Debug.LogError("CharacterPanelUI에 ownerScrollView가 연결되지 않았습니다!");
         }
     }
 }
