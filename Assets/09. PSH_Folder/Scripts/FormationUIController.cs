@@ -14,6 +14,7 @@ public class FormationUIController : MonoBehaviour
     private void Start()
     {
         autoFormationButton.onClick.AddListener(AutoFormating);
+        gameObject.SetActive(false); // 초기에는 비활성화
     }
     void OnEnable()
     {
