@@ -555,9 +555,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             _questUI.OnRewardRequest += ReceiveReward;
             OnQuestCompleted += _questUI.UpdateQuest;
             OnQuestUpdated += _questUI.UpdateQuest;
-#if UNITY_EDITOR
             _questUI.OnForceClear += ForceQuestComplete;
-#endif
             
             // 퀘스트 ui에 퀘스트 정보를 전달합니다
             OnQuestUpdated?.Invoke(GetActiveQuestDefinition(), GetActiveGeneralInstance());
