@@ -2021,7 +2021,7 @@ MonoBehaviour:
   _dontDestroyOnLoad: 1
   weaponList: []
   relicsList: []
-  myMoney: 0
+  myRelicsPoints: 0
   currentMode: 0
 --- !u!4 &277753486
 Transform:
@@ -3151,6 +3151,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89283384f5370bb44ac2650801029ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &474006994 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8378661879186551060, guid: d810adda16df70c448d8cc2230148a79, type: 3}
+  m_PrefabInstance: {fileID: 1148227539}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &474006995 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2180014939783821622, guid: d810adda16df70c448d8cc2230148a79, type: 3}
@@ -7143,7 +7148,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1212962105
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8182,7 +8187,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _uiList:
   - {fileID: 90315353}
-  _attendanceBtn: {fileID: 1513442777}
+  _attendanceToggle: {fileID: 0}
+  _toolToggle: {fileID: 0}
 --- !u!1 &1365152785
 GameObject:
   m_ObjectHideFlags: 0
@@ -9555,7 +9561,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9b86c138b1c0a74297d43fd43fb0147, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  redDotObject: {fileID: 0}
+  redDotObject: {fileID: 474006994}
   notificationTypes: 02000000
 --- !u!1 &1665893200
 GameObject:
