@@ -48,9 +48,6 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
     void Awake()
     {
-        // 초기에는 비활성화
-        gameObject.SetActive(false);
-
         // 닫기 버튼 이벤트 연결
         if (closeButton != null)
         {
