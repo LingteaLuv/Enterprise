@@ -8,54 +8,17 @@ public class RelicsGachaLootTable : ScriptableObject
 {
     [SerializeField] private List<RelicsGacha> _items;
     [System.NonSerialized] private bool isInitialized = false;
-
-    private float _totalWeight;
+    [System.NonSerialized] private float _totalWeight;
 
     private void Initialize()
     {
-        if (isInitialized)
-
-            if (_items == null || _items.Count == 0)
-            {
-                _totalWeight = 0f;
-                isInitialized = true;
-                return;
-            }
-        for (int i = 0; i < _items.Count; i++)
-        {
-            if (_items[i].weight < 0f)
-            {
-                Debug.LogWarning($"[Initialize] 음수 weight: {_items[i].rarity.ToString()}");
-                _items[i].weight = 0f;
-            }
-        }
-
-        _totalWeight = _items.Sum(item => item.weight);
-        isInitialized = true;
-    }
-
-    private void AltInitalize()
-    {
         if (!isInitialized)
         {
-            _totalWeight = 0;
-            foreach (var item in _items)
-            {
-                _totalWeight += item.weight;
-            }
-
-            for (int i = 0; i < _items.Count; i++)
-            {
-                if (_items[i].weight < 0f)
-                {
-                    Debug.LogWarning($"[LootTable] 음수 weight: {_items[i].rarity.ToString()}");
-                    _items[i].weight = 0f;
-                }
-            }
-
+            _totalWeight = _items.Sum(item => item.weight);
             isInitialized = true;
         }
     }
+
 
     public RelicsGacha GetRandomRange()
     {

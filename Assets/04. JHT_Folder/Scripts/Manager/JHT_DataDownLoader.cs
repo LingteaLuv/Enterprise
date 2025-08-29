@@ -64,7 +64,9 @@ namespace JHT
                     so.icon = Resources.Load<Sprite>(row[3]);
                     so.itemPowerType = (PowerType)Enum.Parse(typeof(PowerType), row[5]);
                     so.upPower[rarity - 1] = float.Parse(row[6]);
+                    so.startPower[rarity - 1] = float.Parse(row[8]);
                     so.cost[rarity - 1] = float.Parse(row[7]);
+                    
                     //so.rarityImage[rarity-1] = Resources.Load<Sprite>(row[8]);
                 }
             }
