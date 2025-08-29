@@ -18,6 +18,7 @@ public class CharacterPanelUI : MonoBehaviour
 
     [Header("편성 UI")]
     public GameObject formationIndicator; // 편성에 포함되었는지 표시하는 UI 오브젝트 (예: 체크마크 이미지)
+
     [HideInInspector]
     public CharacterScrollViewUI ownerScrollView; // 부모 스크롤 뷰
 
@@ -25,16 +26,19 @@ public class CharacterPanelUI : MonoBehaviour
     public Image crewRoleIcon;
     public Image factionIcon;
 
-    private GameObject characterInfoUIPanel;
-    public PlayerCharacterData currentPlayerCharData; // 이 패널이 표시하는 캐릭터 데이터
+    private RedDotController redDotController; // 레드닷 컨트롤러 참조
+    public PlayerCharacterData currentPlayerCharData { get; private set; } // 이 패널이 표시하는 캐릭터 데이터
+
+    private void Awake()
+    {
+        // 자식 오브젝트에서 RedDotController를 자동으로 찾아 할당합니다.
+        redDotController = GetComponentInChildren<RedDotController>(true);
+    }
 
     private void Start()
     {
         button = GetComponent<Button>();
         button.onClick.AddListener(OnPanelButtonClicked);
-
-        // 비활성화된 오브젝트를 포함하여 CharacterInfoUI를 찾습니다.
-        characterInfoUIPanel = FindAnyObjectByType<CharacterInfoUI>(FindObjectsInactive.Include)?.gameObject;
     }
 
     /// <summary>
@@ -59,6 +63,12 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 직업, 속성 아이콘 업데이트
         UpdateIcon();
+
+        // 레드닷 컨트롤러를 통해 알림 상태를 업데이트합니다.
+        if (redDotController != null)
+        {
+            redDotController.CheckNotifications(currentPlayerCharData);
+        }
     }
 
     /// <summary>
@@ -159,4 +169,5 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 }
+
 
