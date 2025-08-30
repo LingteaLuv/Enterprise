@@ -10,6 +10,7 @@ namespace JHT
         public List<WeaponObject> weaponList;
         public List<RelicsObject> relicsList;
         public float myRelicsPoints;
+        public int relicsCoupon;
 
         public Action<ItemObject> OnAddInventory;
         public Action<ItemObject> OnRemoveInventory;
@@ -19,24 +20,33 @@ namespace JHT
         public Action<RelicsObject,RelicsObject,bool> OnChangeItem;
         public Action<RelicsObject> OnChangePanel;
 
+        public Action<ItemObject> OnAddItemForEncyclopedia;
+
         public Action<float> OnChangeRelicsPoints;
 
         public InventoryMode currentMode;
 
-        public void OnEnable()
+        protected override void Awake()
         {
-            if(weaponList == null)
+            base.Awake();
+            
+            if (weaponList == null)
                 weaponList = new();
 
-            if(relicsList == null)
+            if (relicsList == null)
                 relicsList = new();
 
+        }
+
+        private void OnEnable()
+        {
+            
             OnAddInventory += AddInventroyItem;
             OnRemoveInventory += RemoveInventroyIndex;
             OnChangeItem += AddRelicsItem;
         }
 
-        public void OnDisable()
+        private void OnDisable()
         {
             OnAddInventory -= AddInventroyItem;
             OnRemoveInventory -= RemoveInventroyIndex;
@@ -312,10 +322,12 @@ namespace JHT
             if (item.itemSO.itemType == ItemType.Equip)
             {
                 weaponList.Add((WeaponObject)item);
+                OnAddItemForEncyclopedia?.Invoke(item);
             }
             else
             {
                 relicsList.Add((RelicsObject)item);
+                OnAddItemForEncyclopedia?.Invoke(item);
             }
         }
 

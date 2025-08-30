@@ -106,16 +106,26 @@ public class GachaUIHandler : MonoBehaviour
     #region 유물 뽑기 함수
     public void OnClick_RelicsGacha_Single()
     {
-        relicsGachaManager.GetGachaOneRelicsData(true);
-        relicsGachaListPanel.gameObject.SetActive(true);
-        relicsGachaListPanel.Init(relicsGachaManager);
+        if (InventoryManager.Instance.relicsCoupon >= relicsGachaManager.relicsCouponCost)
+        {
+            ShowSelectPopUp(relicsGachaManager, true);
+        }
+        else
+        {
+            UIManager.Instance.ShowToast("유물 쿠폰이 부족합니다!", 2f);
+        }
     }
 
     public void OnClick_RelicsGacha_Special()
     {
-        relicsGachaManager.GetGachaOneRelicsData(false);
-        relicsGachaListPanel.gameObject.SetActive(true);
-        relicsGachaListPanel.Init(relicsGachaManager);
+        if (InventoryManager.Instance.myRelicsPoints >= relicsGachaManager.relicsSpecialCost)
+        {
+            ShowSelectPopUp(relicsGachaManager, false);
+        }
+        else
+        {
+            UIManager.Instance.ShowToast($"{relicsGachaManager.relicsSpecialCost - InventoryManager.Instance.myRelicsPoints}만큼 유물잔해가 부족합니다!", 2f);
+        }
     }
     #endregion
 
@@ -185,6 +195,36 @@ public class GachaUIHandler : MonoBehaviour
                 Debug.Log($"{itemType} {count}회 뽑기 취소됨");
             }
         );
+    }
+
+    private void ShowSelectPopUp(RelicsGachaManager manager,bool isNormal)
+    {
+
+        if (isNormal)
+        {
+            UIManager.Instance.ShowConfirm("유물 뽑기를 진행 하시겠습니까?",
+            () =>
+            {
+                manager.GetGachaOneRelicsData(true);
+                relicsGachaListPanel.gameObject.SetActive(true);
+                relicsGachaListPanel.Init(manager);
+
+                InventoryManager.Instance.relicsCoupon -= manager.relicsCouponCost;
+            });
+        }
+        else
+        {
+            UIManager.Instance.ShowConfirm("스페셜 유물 뽑기를 진행 하시겠습니까?",
+            () =>
+            {
+                manager.GetGachaOneRelicsData(false);
+                relicsGachaListPanel.gameObject.SetActive(true);
+                relicsGachaListPanel.Init(manager);
+
+                InventoryManager.Instance.myRelicsPoints -= manager.relicsSpecialCost;
+            });
+        }
+        
     }
 
     private void ShowRelicsPoint(float value)

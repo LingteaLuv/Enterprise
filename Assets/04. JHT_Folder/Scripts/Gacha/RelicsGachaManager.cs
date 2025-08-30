@@ -10,6 +10,9 @@ public class RelicsGachaManager : MonoBehaviour
     public ItemRarity rarityResult;
     public int levelResult;
 
+    public int relicsCouponCost;
+    public float relicsSpecialCost;
+
     private List<ItemRelicsSO> gachaData;
 
 
