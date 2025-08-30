@@ -28,13 +28,13 @@ namespace JHT
 
         private void Start()
         {
-            oneAddButton.onClick.AddListener(OnAdd1);
-            twoAddButton.onClick.AddListener(OnAdd2);
-            threeAddButton.onClick.AddListener(OnAdd3);
-
-            oneAddRButton.onClick.AddListener(OnRAdd1);
-            twoAddRButton.onClick.AddListener(OnRAdd2);
-            threeAddRButton.onClick.AddListener(OnRAdd3);
+            //oneAddButton.onClick.AddListener(OnAdd1);
+            //twoAddButton.onClick.AddListener(OnAdd2);
+            //threeAddButton.onClick.AddListener(OnAdd3);
+            //
+            //oneAddRButton.onClick.AddListener(OnRAdd1);
+            //twoAddRButton.onClick.AddListener(OnRAdd2);
+            //threeAddRButton.onClick.AddListener(OnRAdd3);
         }
 
         public void AddWeapon(ItemWeaponSO item)
@@ -55,11 +55,11 @@ namespace JHT
             InventoryManager.Instance.AddItem(item, ItemRarity.Normal, 1);
         }
 
-        private void OnAdd1() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item1.itemNum]);
-        private void OnAdd2() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item2.itemNum]);
-        private void OnAdd3() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item3.itemNum]);
-        private void OnRAdd1() => AddRelics1(ItemDataManager.Instance.GetAllRelicsData()[relics1.itemNum]);
-        private void OnRAdd2() => AddRelics2(ItemDataManager.Instance.GetAllRelicsData()[relics2.itemNum]);
-        private void OnRAdd3() => AddRelics3(ItemDataManager.Instance.GetAllRelicsData()[relics3.itemNum]);
+        //private void OnAdd1() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item1.itemNum]);
+        //private void OnAdd2() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item2.itemNum]);
+        //private void OnAdd3() => AddWeapon(ItemDataManager.Instance.GetAllWeaponData()[item3.itemNum]);
+        //private void OnRAdd1() => AddRelics1(ItemDataManager.Instance.GetAllRelicsData()[relics1.itemNum]);
+        //private void OnRAdd2() => AddRelics2(ItemDataManager.Instance.GetAllRelicsData()[relics2.itemNum]);
+        //private void OnRAdd3() => AddRelics3(ItemDataManager.Instance.GetAllRelicsData()[relics3.itemNum]);
     }
 }

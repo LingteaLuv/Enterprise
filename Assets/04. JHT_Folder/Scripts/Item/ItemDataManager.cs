@@ -16,11 +16,11 @@ namespace JHT
         private const string RELICS_LABEL = "ItemRelics";
 
         public List<ItemWeaponSO> weaponList;
-        public Dictionary<int, ItemWeaponSO> weaponDataDic;
+        public Dictionary<string, ItemWeaponSO> weaponDataDic;
         public EncyclopediaPanel encyclopediaPanel;
         
         public List<ItemRelicsSO> relicsList;
-        public Dictionary<int, ItemRelicsSO> relicsDataDic;
+        public Dictionary<string, ItemRelicsSO> relicsDataDic;
 
         private AsyncOperationHandle<IList<ItemWeaponSO>> weaponHandle;
         private AsyncOperationHandle<IList<ItemRelicsSO>> relicsHandle;
@@ -106,12 +106,12 @@ namespace JHT
 
             for (int i =0; i < list.Count; i++)
             {
-                if (!weaponDataDic.ContainsKey(list[i].itemNum))
-                    weaponDataDic.Add(list[i].itemNum, list[i]);
+                if (!weaponDataDic.ContainsKey(list[i].itemName))
+                    weaponDataDic.Add(list[i].itemName, list[i]);
             }
 
             IsDataLoaded = true; // 데이터 로딩 완료!
-
+            StartCoroutine(WeaponEndInit());
             /*if (weaponHandle.Status == AsyncOperationStatus.Succeeded)
             {
                 //if (encyclopediaPanel == null)
@@ -149,8 +149,8 @@ namespace JHT
 
             for (int i = 0; i < list.Count; i++)
             {
-                if (!relicsDataDic.ContainsKey(list[i].itemNum))
-                    relicsDataDic.Add(list[i].itemNum, list[i]);
+                if (!relicsDataDic.ContainsKey(list[i].itemName))
+                    relicsDataDic.Add(list[i].itemName, list[i]);
             }
 
             if (relicsHandle.Status == AsyncOperationStatus.Succeeded)
@@ -183,7 +183,7 @@ namespace JHT
         #endregion
 
 
-        public Dictionary<int, ItemWeaponSO> GetAllWeaponData()
+        public Dictionary<string, ItemWeaponSO> GetAllWeaponData()
         {
             if (weaponDataDic.Count <= 0)
                 return null;
@@ -191,7 +191,7 @@ namespace JHT
             return weaponDataDic;
         }
 
-        public Dictionary<int, ItemRelicsSO> GetAllRelicsData()
+        public Dictionary<string, ItemRelicsSO> GetAllRelicsData()
         {
             if (relicsDataDic.Count <= 0)
                 return null;
