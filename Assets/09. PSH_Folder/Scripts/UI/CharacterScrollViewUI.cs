@@ -29,7 +29,8 @@ public enum FactionFilterOption
     Monster
 }
 
-public class CharacterScrollViewUI : MonoBehaviour
+// 1. MonoBehaviour 대신 UIBase를 상속받도록 변경
+public class CharacterScrollViewUI : UIBase
 {
     public Transform contentPanel;
     public GameObject characterPanelPrefab;
@@ -55,6 +56,27 @@ public class CharacterScrollViewUI : MonoBehaviour
     private FactionFilterOption currentFactionFilter = FactionFilterOption.All;
     private List<CharacterPanelUI> panelPool = new List<CharacterPanelUI>();
     private List<PlayerCharacterData> sortedCharacterList = new List<PlayerCharacterData>(); // 정렬된 리스트 저장
+
+    // 2. ResetPanel 메서드를 오버라이드하여 초기화 로직 구현
+    public override void ResetPanel()
+    {
+        base.ResetPanel(); // 기본 ResetPanel 호출 (로그 출력 등)
+
+        // 만약 캐릭터 상세 정보 패널이 열려있다면, 닫아줍니다.
+        if (characterInfoPanel != null && characterInfoPanel.gameObject.activeSelf)
+        {
+            characterInfoPanel.gameObject.SetActive(false);
+            Debug.Log("CharacterScrollViewUI가 리셋되어, 열려있던 상세 정보창을 닫습니다.");
+        }
+
+        // 추가로, 편성 모드도 비활성화 상태로 되돌릴 수 있습니다.
+        if (isFormationMode)
+        {
+            isFormationMode = false;
+            UpdateFormationButtonVisuals();
+            if (formationPanel != null) formationPanel.SetActive(false);
+        }
+    }
 
     void Start()
     {
@@ -117,7 +139,7 @@ public class CharacterScrollViewUI : MonoBehaviour
     void OnFactionFilterDropdownChanged(int index)
     {
         currentFactionFilter = (FactionFilterOption)index;
-        RefreshDisplay();
+        RefreshUI();
     }
 
     // FactionFilterDropdown 옵션을 채우는 함수
@@ -172,7 +194,7 @@ public class CharacterScrollViewUI : MonoBehaviour
     void OnCrewRoleFilterDropdownChanged(int index)
     {
         currentCrewRoleFilter = (CrewRoleFilterOption)index;
-        RefreshDisplay();
+        RefreshUI();
     }
 
     // CrewRoleFilterDropdown 옵션을 채우는 함수
@@ -192,11 +214,11 @@ public class CharacterScrollViewUI : MonoBehaviour
     {
         if (PlayerDataManager.Instance != null)
         {
-            PlayerDataManager.Instance.OnOwnedCharactersChanged += RefreshDisplay;
+            PlayerDataManager.Instance.OnOwnedCharactersChanged += RefreshUI;
             PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterUpdate;
 
             // PlayerDataManager가 준비되었을 때만 RefreshDisplay를 호출합니다.
-            RefreshDisplay();
+            RefreshUI();
         }
         else
         {
@@ -207,7 +229,7 @@ public class CharacterScrollViewUI : MonoBehaviour
     // 비활성화될 때 이벤트 리스너를 해제하여 메모리 누수를 방지합니다.
     private void OnDisable()
     {
-        PlayerDataManager.Instance.OnOwnedCharactersChanged -= RefreshDisplay;
+        PlayerDataManager.Instance.OnOwnedCharactersChanged -= RefreshUI;
         PlayerDataManager.Instance.OnCharacterDataUpdated -= HandleCharacterUpdate;
     }
 
@@ -216,13 +238,13 @@ public class CharacterScrollViewUI : MonoBehaviour
     private void HandleCharacterUpdate(PlayerCharacterData data)
     {
         // 캐릭터 데이터가 업데이트되면 스크롤 뷰를 새로고침합니다.
-        RefreshDisplay();
+        RefreshUI();
     }
 
     void OnSortDropdownChanged(int index)
     {
         currentSort = (CharacterSortOption)index;
-        RefreshDisplay();
+        RefreshUI();
     }
 
     public void EnableFormationMode()
@@ -230,7 +252,7 @@ public class CharacterScrollViewUI : MonoBehaviour
         isFormationMode = true;
         Debug.Log("편성 모드 활성화");
         UpdateFormationButtonVisuals();
-        RefreshDisplay();
+        RefreshUI();
         formationPanel.SetActive(true);
     }
 
@@ -259,11 +281,11 @@ public class CharacterScrollViewUI : MonoBehaviour
         isFormationMode = false;
         Debug.Log("편성 모드 비활성화");
         UpdateFormationButtonVisuals();
-        RefreshDisplay();
+        RefreshUI();
         formationPanel.SetActive(false);
     }
 
-    public void RefreshDisplay()
+    public override void RefreshUI()
     {
         // 1. 정렬된 캐릭터 목록 가져오기 및 저장
         sortedCharacterList = GetSortedCharacters();
