@@ -3148,7 +3148,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3171555873133572382, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
   m_PrefabInstance: {fileID: 201740839}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1788095598}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b334a8afb950bb045ab771382ebdbe6e, type: 3}
@@ -7410,7 +7410,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3171555873133572382, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
   m_PrefabInstance: {fileID: 561379827}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1160348429}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b334a8afb950bb045ab771382ebdbe6e, type: 3}
@@ -7870,6 +7870,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 587713259}
   m_CullTransparentMesh: 1
+--- !u!1 &615049244 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9167018578190776493, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
+  m_PrefabInstance: {fileID: 2098738991}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -10743,11 +10748,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   islandSets:
   - {fileID: 1135728068}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 615049244}
+  - {fileID: 1194614259}
+  - {fileID: 1885614892}
+  - {fileID: 1788095598}
+  - {fileID: 1160348429}
   shipPositions: []
   battleFields:
   - {fileID: 116827938}
@@ -12150,6 +12155,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1155193584}
   m_CullTransparentMesh: 1
+--- !u!1 &1160348429 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9167018578190776493, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
+  m_PrefabInstance: {fileID: 561379827}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1165234608
 GameObject:
   m_ObjectHideFlags: 0
@@ -12357,6 +12367,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1194614259 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9167018578190776493, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
+  m_PrefabInstance: {fileID: 1315198564}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1223414338
 GameObject:
   m_ObjectHideFlags: 0
@@ -13535,7 +13550,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3171555873133572382, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
   m_PrefabInstance: {fileID: 1315198564}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1194614259}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b334a8afb950bb045ab771382ebdbe6e, type: 3}
@@ -17488,7 +17503,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3171555873133572382, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
   m_PrefabInstance: {fileID: 1672487638}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1885614892}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b334a8afb950bb045ab771382ebdbe6e, type: 3}
@@ -19205,6 +19220,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1778901665}
   m_CullTransparentMesh: 1
+--- !u!1 &1788095598 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9167018578190776493, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
+  m_PrefabInstance: {fileID: 201740839}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1793276284
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20191,9 +20211,16 @@ MonoBehaviour:
   crewRoleFilterDropdown: {fileID: 49792980}
   factionFilterDropdown: {fileID: 429629290}
   isFormationMode: 0
-  formationModeButton: {fileID: 1031633943}
-  formationModeButtonText: {fileID: 2063580117}
+  charInfoButton: {fileID: 0}
+  formationButton: {fileID: 0}
   formationPanel: {fileID: 1873889420}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  normalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+--- !u!1 &1885614892 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9167018578190776493, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
+  m_PrefabInstance: {fileID: 1672487638}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1890755893
 GameObject:
   m_ObjectHideFlags: 0
@@ -21359,7 +21386,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3171555873133572382, guid: 3bac04b55c1975d4ea6b12b3ada338ec, type: 3}
   m_PrefabInstance: {fileID: 2098738991}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 615049244}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b334a8afb950bb045ab771382ebdbe6e, type: 3}

@@ -15,7 +15,7 @@ public class BattleField : MonoBehaviour
 
     private void Awake()
     {
-        // 🟡 EnemySpawnPoints가 비어있거나 null이라면 자동으로 찾기
+        // EnemySpawnPoints가 비어있거나 null이라면 자동으로 찾기
         if (EnemySpawnPoints == null || EnemySpawnPoints.Count == 0)
         {
             // 이 오브젝트의 자식 중에서 "EnemySpawnPoint"라는 이름을 가진 Transform을 찾음

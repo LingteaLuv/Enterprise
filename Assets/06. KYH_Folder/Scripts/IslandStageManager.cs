@@ -194,6 +194,22 @@ public class IslandStageManager : MonoBehaviour
         StopCoroutine(moveToAndEnter);
     }
 
+    public void ResetStageAfterDefeat()
+    {
+        Debug.Log("[ResetStageAfterDefeat] 패배로 인해 스테이지 재시작");
+
+        // 모든 섬/전투 필드 초기화
+        for (int i = 0; i < islandSets.Count; i++)
+            islandSets[i].SetActive(false);
+        DeactivateAllBattleFields();
+
+        // 깃발/상자 제거
+        ResetClearMarkers();
+
+        // 다시 처음부터 시작
+        StartStage();
+    }
+
     private void SetBattleField(int index)
     {
         Debug.Log($"[SetBattleField] index={index}");

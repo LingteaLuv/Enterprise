@@ -62,12 +62,14 @@ public class RangeMonsterFSM : BaseMonsterFSM
 
             Debug.Log($"{gameObject.name}이(가) 원거리 투사체 발사!");
 
+            // 투사체 생성 및 초기화
             GameObject proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
 
-            // 안전하게 Projectile 컴포넌트 확인
             var projectile = proj.GetComponent<Projectile>();
             if (projectile != null)
-                projectile.Init(target.position);
+            {
+                projectile.Init(target.position, attack); // 공격력 넘기기
+            }
 
             yield return new WaitForSeconds(attackDelay);
         }
