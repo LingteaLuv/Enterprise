@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 각종 뽑기 버튼의 OnClick 이벤트를 받아 적절한 Gacha Manager에게 작업을 요청하는 클래스입니다.
 /// </summary>
-public class GachaUIHandler : MonoBehaviour
+public class GachaUIHandler : UIBase
 {
     [Header("패널 및 탭 버튼")]
     public GameObject charPanel;
@@ -39,8 +39,25 @@ public class GachaUIHandler : MonoBehaviour
     public RelicsGachaListUI relicsGachaListPanel;
     [SerializeField] private TextMeshProUGUI relicsPoints;
 
-    private void OnEnable()
+    public override void ResetPanel()
     {
+        base.ResetPanel();
+
+        // 열려있을 수 있는 결과창들을 모두 닫습니다.
+        if (gachaListPanel != null) gachaListPanel.gameObject.SetActive(false);
+        if (relicsGachaListPanel != null) relicsGachaListPanel.gameObject.SetActive(false);
+
+        // 기본 탭인 캐릭터 뽑기 탭으로 되돌립니다.
+        if (charPanel != null) charPanel.SetActive(true);
+        if (equipPanel != null) equipPanel.SetActive(false);
+        if (relicPanel != null) relicPanel.SetActive(false);
+
+        Debug.Log("GachaUIHandler가 리셋되어, 모든 결과창을 닫고 기본 탭으로 돌립니다.");
+    }
+
+    public override void RefreshUI()
+    {
+        base.RefreshUI();
         // UI가 활성화될 때마다 천장 텍스트를 갱신합니다.
         UpdateCharacterPityText();
     }
@@ -197,7 +214,7 @@ public class GachaUIHandler : MonoBehaviour
         );
     }
 
-    private void ShowSelectPopUp(RelicsGachaManager manager,bool isNormal)
+    private void ShowSelectPopUp(RelicsGachaManager manager, bool isNormal)
     {
 
         if (isNormal)
@@ -224,7 +241,7 @@ public class GachaUIHandler : MonoBehaviour
                 InventoryManager.Instance.myRelicsPoints -= manager.relicsSpecialCost;
             });
         }
-        
+
     }
 
     private void ShowRelicsPoint(float value)

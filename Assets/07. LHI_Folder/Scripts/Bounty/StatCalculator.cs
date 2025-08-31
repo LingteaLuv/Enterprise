@@ -4,7 +4,7 @@ using UnityEngine;
 /// 캐릭터 현상금(전투력) 계산을 담당하는 정적 클래스
 /// 각 역할별로 스탯에 다른 가중치를 적용하여 전투력을 산출합니다.
 /// </summary>
-public static class StatCalculator_
+public static class StatCalculator
 {
     #region 스탯별 가중치 설정
     // 역할별 공격력 가중치
