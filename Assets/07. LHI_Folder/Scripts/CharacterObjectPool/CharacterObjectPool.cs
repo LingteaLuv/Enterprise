@@ -11,7 +11,7 @@ namespace LHI
         public int characterpoolSize = 5; // 캐릭터 풀의 크기
         public GameObject characterPrefab; // 캐릭터 프리팹
 
-        void Awake()
+        void Awake()    
         {
             // 캐릭터 풀 오브젝트 생성
             for (int i = 0; i < characterpoolSize; i++)
