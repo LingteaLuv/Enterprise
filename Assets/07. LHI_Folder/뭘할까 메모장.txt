@@ -45,3 +45,22 @@ Move()
 권용호
 캐릭터 스탯 구현 시작
 전투 구현 담당인 권용호 님과 소통 필요
+
+현상금 산정
+캐릭터 변경시에
+스탯 변경시에
+
+
+현상금 변경
+
+캐릭터 편성 쪽에 이벤트 정의하고 Invoke 하기
+변성 캐릭터 스탯 변경시에 이벤트 정의하고 Invoke 하기
+
+현상금 매니저에서 위 2개의 이벤트 구독하기 (동일메서드로 처리 가능)
+현상금 재산정 메서드 작성하기
+
+StatCalculator
+PlayerDataManager.RecalculateTeamBattlePower
+StatEvents
+PlayerCharacterData_80줄
+중요한 부분은 모두 찾은거 같은데, 전혀 모르겠음
