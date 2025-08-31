@@ -336,7 +336,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
 
         // 전투력 계산
         currentCharacterData.RecaculateStats();
-        battlePoint.text = $"전투력 : {DataUtility.FormatNumber(StatCalculator.ComputeFinalPower(currentCharacterData))}";
+        battlePoint.text = $"전투력 : {DataUtility.FormatNumber(currentCharacterData.battlePower)}";
     }
 
     /// <summary>
