@@ -24,6 +24,7 @@ public class TabBarController : MonoBehaviour
     [Header("공용 닫기 버튼")]
     [SerializeField] Button closeBtn;
     [SerializeField] Button homeBtn;
+    [SerializeField] Button blocker;
 
     private Dictionary<Button, UIBase> tabToPanel;
     private Dictionary<UIBase, Vector3> panelOriginalPositions;
@@ -92,6 +93,7 @@ public class TabBarController : MonoBehaviour
         // 공용 닫기 버튼 이벤트 연결
         closeBtn.onClick.AddListener(ClosePanelAndAnimateButtonOut);
         homeBtn.onClick.AddListener(ClosePanelAndAnimateButtonOut);
+        blocker.onClick.AddListener(ClosePanelAndAnimateButtonOut);
     }
 
     private void OnTabSelected(Button tabBtn, UIBase panel)
@@ -112,6 +114,7 @@ public class TabBarController : MonoBehaviour
         }
 
         currentOpenPanel = panel;
+        blocker.gameObject.SetActive(true);
     }
 
     #region Close Button Animations
@@ -184,6 +187,7 @@ public class TabBarController : MonoBehaviour
         AnimatePanelOut(currentOpenPanel);
         AnimateCloseButtonOut();
         currentOpenPanel = null;
+        blocker.gameObject.SetActive(false);
     }
 }
 
