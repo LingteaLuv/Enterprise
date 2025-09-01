@@ -22,7 +22,9 @@ namespace JHT
 
         public Action<ItemObject> OnAddItemForEncyclopedia;
 
+        [Header("유물재화")]
         public Action<float> OnChangeRelicsPoints;
+        public Action<int> OnChangeRelicsCoupon;
 
         public InventoryMode currentMode;
 
@@ -226,6 +228,7 @@ namespace JHT
             RelicsObject obj = new RelicsObject(item, rarity, level);
             OnAddInventory?.Invoke(obj);
             OnChangePanel?.Invoke(obj);
+            OnChangeRelicsCoupon?.Invoke(relicsCoupon);
         }
 
 
