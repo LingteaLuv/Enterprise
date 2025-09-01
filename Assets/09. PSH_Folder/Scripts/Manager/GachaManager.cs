@@ -112,7 +112,7 @@ public class GachaManager : MonoBehaviour
         // UI 갱신
         if (characterScrollViewUI != null)
         {
-            characterScrollViewUI.RefreshDisplay();
+            characterScrollViewUI.RefreshUI();
         }
         else
         {
@@ -153,7 +153,7 @@ public class GachaManager : MonoBehaviour
         // UI 갱신
         if (characterScrollViewUI != null)
         {
-            characterScrollViewUI.RefreshDisplay();
+            characterScrollViewUI.RefreshUI();
         }
         else
         {

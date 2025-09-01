@@ -54,6 +54,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     [SerializeField] private string _initialEnhancementStoneString;
     [SerializeField] private string _initialGemString;
 
+    public bool IsFireBase;
     protected async override void Awake()
     {
         base.Awake();
@@ -71,27 +72,28 @@ public class CurrencyManager : Singleton<CurrencyManager>
                 currencyWallet.Add(type, 0);
             }
         }
+        if (IsFireBase)
+        {
+            string rootPath = $"{FirebaseManager.Auth.CurrentUser.UserId}/CreditData";
 
-        string rootPath = $"{FirebaseManager.Auth.CurrentUser.UserId}/CreditData";
-        
-        await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gold", (value) =>
-        {
-            Debug.Log($"Gold DB 로드 {value}");
-            _initialGoldString = value.ToString();
-        });
-        
-        await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/EnhancementStone", (value) =>
-        {
-            Debug.Log($"EnhancementStone DB 로드 {value}");
-            _initialEnhancementStoneString = value.ToString();
-        });
-        
-        await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gem", (value) =>
-        {
-            Debug.Log($"Gem DB 로드 {value}");
-            _initialGemString = value.ToString();
-        });
-        
+            await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gold", (value) =>
+            {
+                Debug.Log($"Gold DB 로드 {value}");
+                _initialGoldString = value.ToString();
+            });
+
+            await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/EnhancementStone", (value) =>
+            {
+                Debug.Log($"EnhancementStone DB 로드 {value}");
+                _initialEnhancementStoneString = value.ToString();
+            });
+
+            await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gem", (value) =>
+            {
+                Debug.Log($"Gem DB 로드 {value}");
+                _initialGemString = value.ToString();
+            });
+        }
         // 인스펙터에서 설정된 초기 재화량을 적용합니다.
         AddCurrencyFromInspectorString(CurrencyType.Gold, _initialGoldString);
         AddCurrencyFromInspectorString(CurrencyType.EnhancementStone, _initialEnhancementStoneString);
