@@ -1,8 +1,6 @@
-using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
-using static UnityEditor.Progress;
 
 namespace JHT
 {
