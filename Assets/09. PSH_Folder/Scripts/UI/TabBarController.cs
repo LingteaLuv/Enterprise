@@ -39,12 +39,12 @@ public class TabBarController : MonoBehaviour
     {
         tabToPanel = new Dictionary<Button, UIBase>
         {
-            { basicStatBtn, basicStatPanel },
+            //{ basicStatBtn, basicStatPanel },
             { characterListBtn, characterListPanel },
             { invenBtn, invenPanel },
             { gachaBtn, gachaPanel },
             { shopBtn, shopPanel },
-            { questBtn, questPanel },
+            //{ questBtn, questPanel },
         };
 
         // 패널의 원래 위치 저장

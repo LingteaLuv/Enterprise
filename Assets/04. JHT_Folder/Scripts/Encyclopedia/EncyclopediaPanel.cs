@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 
 namespace JHT
@@ -43,6 +40,11 @@ namespace JHT
             getRelicsDic = new();
         }
 
+        private void Start()
+        {
+            gameObject.SetActive(false);
+        }
+        
         private void OnEnable()
         {
             OnOutPanel += OutPanel;
