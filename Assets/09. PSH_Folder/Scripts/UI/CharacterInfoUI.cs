@@ -188,19 +188,14 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     {
         if (currentCharacterData == null || levelUpCostText == null || levelUpButton == null) return;
 
-        // 실제 레벨에 따른 레벨업 비용 계산 (PlayerDataManager에서 가져옴)
-        // PlayerDataManager.Instance.baseLevelUpCost가 BigInteger라면 cost도 BigInteger
-        // PlayerDataManager.Instance.baseLevelUpCost가 float/double이라면 cost도 float/double
-        // 여기서는 BigInteger를 가정하고 double로 계산 후 BigInteger로 캐스팅
-        double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, currentCharacterData.characterLevel - 1);
-        System.Numerics.BigInteger cost = (System.Numerics.BigInteger)costDouble;
+        // PlayerCharacterData로부터 직접 비용을 가져옵니다. 계산 로직이 UI에서 분리되었습니다.
+        System.Numerics.BigInteger cost = currentCharacterData.GetNextLevelUpCost();
 
         CurrencyType costType = CurrencyType.EnhancementStone;
 
         levelUpCostText.text = $"비용 : {DataUtility.FormatNumber(cost)} 강화석";
 
         // 재화가 충분한지 확인하여 버튼 활성화/비활성화
-        // InventoryManager.Instance.GetCurrency가 BigInteger를 반환한다고 가정
         if (CurrencyManager.Instance != null && CurrencyManager.Instance.GetCurrency(costType) >= cost)
         {
             levelUpButton.interactable = true;
@@ -267,72 +262,12 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     {
         if (currentCharacterData == null) return;
 
-        // ATK 스탯 데이터 찾기 (CSV 헤더에 맞춰 "attackPower"로 변경)
-        StatData atkStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.Attack);
-        if (atkStatData != null)
-        {
-            // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
-            float atkValue = StatManager.CalculateStatValue(atkStatData, currentCharacterData.characterLevel);
-            atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(atkValue)}";
-            currentCharacterData.characterStats[Stat.Attack] = atkValue;
-        }
-        else
-        {
-            atkDisplay.text = "ATK Stat Not Found";
-        }
-
-        // HP 스탯 데이터 찾기 (CSV 헤더에 맞춰 "health"로 변경)
-        StatData hpStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.Health);
-        if (hpStatData != null)
-        {
-            // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
-            float hpValue = StatManager.CalculateStatValue(hpStatData, currentCharacterData.characterLevel);
-            hpDisplay.text = $"체력 : {DataUtility.FormatNumber(hpValue)}";
-            currentCharacterData.characterStats[Stat.Health] = hpValue;
-        }
-        else
-        {
-            hpDisplay.text = "HP Stat Not Found";
-        }
-
-        // DEF 스탯 데이터 찾기 (CSV 헤더에 맞춰 "defensePower"로 변경)
-        StatData defStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.Defense);
-        if (defStatData != null)
-        {
-            // StatManager.CalculateStatValue가 float을 반환하므로 타입 변경
-            float defValue = StatManager.CalculateStatValue(defStatData, currentCharacterData.characterLevel);
-            defDisplay.text = $"방어력 : {DataUtility.FormatNumber(defValue)}";
-            currentCharacterData.characterStats[Stat.Defense] = defValue;
-        }
-        else
-        {
-            defDisplay.text = "DEF Stat Not Found";
-        }
-
-        // CritChance 데이터 가져오기 레벨업
-        StatData criChanStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.CritChance);
-        if (criChanStatData != null)
-        {
-            float criChanValue = criChanStatData.value;
-            criChanDisplay.text = $"치명타 확률 : {criChanValue}%";
-        }
-
-        // CritDmg 데이터 가져오기 레벨업
-        StatData criDmgStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.CritDamage);
-        if (criDmgStatData != null)
-        {
-            float criDmgValue = criDmgStatData.value;
-            criDmgDisplay.text = $"치명타 피해 : {criDmgValue}%";
-        }
-
-        // ATKSpd 데이터 가져오기 레벨업
-        StatData atkSpdStatData = currentCharacterData.characterdata.baseStats.Find(s => s.statName == Stat.AttackSpeed);
-        if (atkSpdStatData != null)
-        {
-            float atkSpdValue = atkSpdStatData.value;
-            atkSpdDisplay.text = $"공격 속도 : {atkSpdValue}";
-        }
-        // 치확 치피 공속 얘네는 나중에 다른 업글 수단 생기면 업데이트해야함 statmanager에서 따로 매서드 추가해야할듯
+        atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Attack])}";
+        hpDisplay.text = $"체력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Health])}";
+        defDisplay.text = $"방어력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Defense])}";
+        criChanDisplay.text = $"치명타 확률 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritChance])}%";
+        criDmgDisplay.text = $"치명타 피해 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritDamage])}%";
+        atkSpdDisplay.text = $"공격 속도 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.AttackSpeed])}";
 
         // 전투력 계산
         currentCharacterData.RecaculateStats();
@@ -350,6 +285,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         // 이 UI는 그 이벤트를 수신하여 스스로 갱신됩니다.
         // 따라서 이 함수에서는 단순히 레벨업 시도만 하면 됩니다.
         PlayerDataManager.Instance.TryLevelUpCharacter(currentCharacterData);
+        UpdateCharacterStatsDisplay();
     }
 
     /// <summary>

@@ -66,13 +66,18 @@ public class PlayerCharacterData
 
         finalStats.Clear();
 
-        // 캐릭터 스탯 적용
-        foreach (var stat in characterStats)
+        // 1. 캐릭터의 원본 데이터(SO)를 기반으로 현재 레벨에 맞는 스탯을 계산합니다.
+        if (characterdata != null && characterdata.baseStats != null)
         {
-            finalStats[stat.Key] = stat.Value;
+            foreach (var baseStat in characterdata.baseStats)
+            {
+                // StatManager를 사용하여 레벨에 맞는 스탯 값을 계산합니다.
+                float calculatedValue = StatManager.CalculateStatValue(baseStat, this.characterLevel);
+                finalStats[baseStat.statName] = calculatedValue;
+            }
         }
 
-        // 기본 스탯 적용 
+        // 2. 기본 스탯 적용 (BasicStatManager)
         if (BasicStatManager.Instance != null)
         {
             finalStats[Stat.Health] = finalStats.GetValueOrDefault(Stat.Health, 0) + BasicStatManager.Instance.GetStatValue(BasicStatType.Health);
@@ -80,14 +85,11 @@ public class PlayerCharacterData
             finalStats[Stat.Defense] = finalStats.GetValueOrDefault(Stat.Defense, 0) + BasicStatManager.Instance.GetStatValue(BasicStatType.Defense);
         }
 
-        // 장비 스탯 적용
-        // 유물 스탯 적용
+        // 3. 장비 및 유물 스탯 적용 (향후 확장)
 
         // --- 전투력 계산 시작 ---
-        // StatCalculator.cs의 공식을 사용하여 전투력을 계산합니다.
         battlePower = (BigInteger)StatCalculator.ComputeFinalPower(this);
         // --- 전투력 계산 끝 ---
-
 
         // 전투력이 변경되었는지 확인하고 이벤트 호출
         if (oldPower != battlePower)
@@ -95,6 +97,16 @@ public class PlayerCharacterData
             Debug.Log($"전투력 변경 감지: {oldPower} -> {battlePower}");
             StatEvents.RaiseCharacterBattlePowerChanged(this, oldPower, battlePower);
         }
+    }
+
+    /// <summary>
+    /// 다음 레벨업에 필요한 비용을 계산하여 반환합니다.
+    /// </summary>
+    public BigInteger GetNextLevelUpCost()
+    {
+        // PlayerDataManager의 설정값을 가져와 현재 레벨에 맞는 비용을 계산합니다.
+        double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, this.characterLevel - 1);
+        return (BigInteger)costDouble;
     }
 
     /// <summary>
