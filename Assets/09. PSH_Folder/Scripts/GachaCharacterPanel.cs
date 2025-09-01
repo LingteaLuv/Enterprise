@@ -8,6 +8,10 @@ public class GachaCharacterPanel : MonoBehaviour
     public Image[] starImages; // 별 이미지 배열
     public Image bg;
 
+    [Header("직업, 속성 아이콘")]
+    public Image crewRoleIcon;
+    public Image factionIcon;
+
     /// <summary>
     /// 캐릭터 데이터로 이 패널의 UI를 설정합니다.
     /// </summary>
@@ -36,7 +40,8 @@ public class GachaCharacterPanel : MonoBehaviour
                 break;
         }
 
-
+        // 아이콘 업데이트
+        UpdateIcon(data);
     }
 
     /// <summary>
@@ -48,5 +53,10 @@ public class GachaCharacterPanel : MonoBehaviour
         {
             starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
         }
+    }
+    public void UpdateIcon(PlayerCharacterData data)
+    {
+        crewRoleIcon.sprite = data.crewRoleIcon;
+        factionIcon.sprite = data.factionIcon;
     }
 }

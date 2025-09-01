@@ -21,6 +21,10 @@ public class PlayerCharacterData
     public int characterLevel;
     public int stars; // 성급
 
+    [Header("직업, 속성 아이콘")]
+    public Sprite crewRoleIcon;
+    public Sprite factionIcon;
+
     // Key: 스탯 이름(string), Value: 현재 스탯 양 캐릭터의 레벨에 따라서 변경
     public Dictionary<Stat, float> characterStats = new Dictionary<Stat, float>();
 
@@ -39,6 +43,10 @@ public class PlayerCharacterData
         characterdata = so;
         characterLevel = 1;
         stars = (int)so.rarity; // CharacterData의 rarity는 Enum이므로 int로 캐스팅
+
+        // 아이콘
+        crewRoleIcon = GetIcon(so.crewRole);
+        factionIcon = GetIcon(so.faction);
 
         characterStats = new Dictionary<Stat, float>();
         foreach (var stat in so.baseStats)
@@ -87,6 +95,20 @@ public class PlayerCharacterData
             Debug.Log($"전투력 변경 감지: {oldPower} -> {battlePower}");
             StatEvents.RaiseCharacterBattlePowerChanged(this, oldPower, battlePower);
         }
+    }
+
+    /// <summary>
+    /// 캐릭터 직업, 속성에 따라 아이콘을 업데이트합니다.
+    /// </summary>
+    public Sprite GetIcon(CrewRole role)
+    {
+        string path = $"PSHTest/Icon/{role}";
+        return Resources.Load<Sprite>(path);
+    }
+    public Sprite GetIcon(Faction role)
+    {
+        string path = $"PSHTest/Icon/{role}";
+        return Resources.Load<Sprite>(path);
     }
 }
 
