@@ -9,13 +9,13 @@ public class BossBattleTestManager : MonoBehaviour
     {
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            Debug.Log("❌ 보스전 패배!");
+            Debug.Log(" 보스전 패배!");
             SceneManager.LoadScene(returnSceneName);
         }
 
         if (Keyboard.current.enterKey.wasPressedThisFrame)
         {
-            Debug.Log("✅ 보스전 승리!");
+            Debug.Log(" 보스전 승리!");
             GlobalStageManager.Instance.currentStageIndex++;
             GlobalStageManager.Instance.bossBattleTriggered = false;
 

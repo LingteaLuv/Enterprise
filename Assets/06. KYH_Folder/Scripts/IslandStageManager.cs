@@ -61,8 +61,16 @@ public class IslandStageManager : MonoBehaviour
     {
         Debug.Log($"[OnBattleComplete 호출됨] currentIndex: {currentIndex}");
 
-        SpawnClearMarker(currentIndex);
-        
+        // 보스전에 아직 진입하지 않은 상태에서만 깃발 생성
+        if (GlobalStageManager.Instance.bossBattleTriggered == false)
+        {
+            SpawnClearMarker(currentIndex);
+        }
+        else
+        {
+            Debug.Log($" 깃발 생략됨 (보스전 패배 이후 루프): index={currentIndex}");
+        }
+
         QuestSignalManager.Instance.ETCAchieve("IslandClear");
 
         if (!this.enabled)
