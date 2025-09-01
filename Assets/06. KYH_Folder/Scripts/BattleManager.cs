@@ -171,10 +171,43 @@ public class BattleManager : MonoBehaviour
         return spawnedEnemies.Count == 0;
     }
 
-  //  private void AutoControlUnits()
-  //  {
-  //      // TODO: 추후 유닛 FSM이나 AI 구현 시 연결
-  //  }
+    //  private void AutoControlUnits()
+    //  {
+    //      // TODO: 추후 유닛 FSM이나 AI 구현 시 연결
+    //  }
+
+    public void OnPlayerDead()
+    {
+        if (isbattleover) return;
+
+        isbattleover = true;
+
+        if (battleRoutine != null)
+        {
+            StopCoroutine(battleRoutine);
+            battleRoutine = null;
+        }
+
+        _skipBtn.interactable = false;
+
+        ClearEnemies(); // 적 정리
+        ClearPlayer();  // 플레이어 제거
+
+        Debug.Log("플레이어 사망 → 패배 처리 시작");
+
+        // 패배 처리 흐름 시작
+        StartCoroutine(HandleDefeat());
+    }
+
+    private IEnumerator HandleDefeat()
+    {
+        ScreenScrollEffectManager.Instance.ShowScrollEffect("패배했습니다. 첫번째 섬부터 재도전합니다.", () => { });
+
+        yield return new WaitForSeconds(1f);
+
+        // TODO: 재도전, 로비 이동, 스테이지 리셋 등 원하는 처리
+        IslandStageManager.Instance.ResetStageAfterDefeat();
+    }
 
     private void ClearEnemies()
     {
