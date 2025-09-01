@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace JHT
 {
-    public class ItemRelicsPanelItem : MonoBehaviour
+    public class ItemRelicsPanelItem : JHT_PooledObject
     {
         public RelicsObject relicsObject;
 
@@ -26,6 +26,16 @@ namespace JHT
             ItemEventManager.Instance.OnClickItem += HandleSelected;
             SetRelics();
         }
+
+        public void Outit(RelicsObject item)
+        {
+            if (relicsObject == item)
+            {
+                relicsObject = null;
+            }
+;
+        }
+
         private void ShowItem()
         {
             ItemEventManager.Instance.ClickItem(relicsObject);

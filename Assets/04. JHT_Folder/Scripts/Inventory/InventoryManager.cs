@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using static UnityEditor.Progress;
 
 namespace JHT
 {
@@ -236,19 +237,14 @@ namespace JHT
         {
             if (value)
             {
-                RelicsObject inst = relicsList.Find(x => x.itemNum == obj1.itemNum);
-
                 DestoryRelics(obj2);
-                if (inst == null)
-                {
-                    relicsList.Add(obj1);
-                    OnChangePanel?.Invoke(obj1);
-                }
+                relicsList.Add(obj1);
+                OnChangePanel?.Invoke(obj1);
+                
             }
             else
             {
                 DestoryRelics(obj1);
-                
                 relicsList.Add(obj2);
                 OnChangePanel?.Invoke(obj2);
             }
@@ -258,7 +254,7 @@ namespace JHT
         public void DestoryRelics(RelicsObject obj)
         {
             myRelicsPoints += obj.itemCost;
-            RemoveItem(obj);
+            relicsList.RemoveAll(r => r.itemNum == obj.itemNum);
             ChangeRelicsPoints(myRelicsPoints);
         }
 
@@ -288,6 +284,7 @@ namespace JHT
             return null;
         }
 
+        // relics는 이제 안씀
         public void RemoveItem(ItemObject item)
         {
             if (item.itemSO.itemType == ItemType.Equip)
@@ -303,6 +300,7 @@ namespace JHT
             }
             else
             {
+                //relicsList.RemoveAll(r => r.itemNum == item.itemNum);
                 if (relicsList.Contains((RelicsObject)item))
                 {
                     OnRemoveInventory?.Invoke(item);
