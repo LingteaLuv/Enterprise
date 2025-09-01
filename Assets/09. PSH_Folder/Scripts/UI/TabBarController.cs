@@ -13,21 +13,22 @@ public class TabBarController : MonoBehaviour
     [SerializeField] Button shopBtn;
     [SerializeField] Button questBtn;
 
-    [Header("버튼에 연결된 UI")]
-    [SerializeField] GameObject basicStatPanel;
-    [SerializeField] GameObject characterListPanel;
-    [SerializeField] GameObject invenPanel;
-    [SerializeField] GameObject gachaPanel;
-    [SerializeField] GameObject shopPanel;
-    [SerializeField] GameObject questPanel;
+    [Header("버튼에 연결된 UI (UIBase를 상속받아야 함)")]
+    [SerializeField] UIBase basicStatPanel;
+    [SerializeField] UIBase characterListPanel;
+    [SerializeField] UIBase invenPanel;
+    [SerializeField] UIBase gachaPanel;
+    [SerializeField] UIBase shopPanel;
+    [SerializeField] UIBase questPanel;
 
     [Header("공용 닫기 버튼")]
     [SerializeField] Button closeBtn;
     [SerializeField] Button homeBtn;
+    [SerializeField] Button blocker;
 
-    private Dictionary<Button, GameObject> tabToPanel;
-    private Dictionary<GameObject, Vector3> panelOriginalPositions;
-    private GameObject currentOpenPanel;
+    private Dictionary<Button, UIBase> tabToPanel;
+    private Dictionary<UIBase, Vector3> panelOriginalPositions;
+    private UIBase currentOpenPanel;
 
     // 애니메이션을 위한 변수
     private float animationDuration = 0.4f; // 애니메이션 시간
@@ -36,7 +37,7 @@ public class TabBarController : MonoBehaviour
 
     private void Awake()
     {
-        tabToPanel = new Dictionary<Button, GameObject>
+        tabToPanel = new Dictionary<Button, UIBase>
         {
             { basicStatBtn, basicStatPanel },
             { characterListBtn, characterListPanel },
@@ -47,10 +48,11 @@ public class TabBarController : MonoBehaviour
         };
 
         // 패널의 원래 위치 저장
-        panelOriginalPositions = new Dictionary<GameObject, Vector3>();
+        panelOriginalPositions = new Dictionary<UIBase, Vector3>();
         foreach (var panel in tabToPanel.Values)
         {
-            panelOriginalPositions[panel] = panel.transform.localPosition;
+            if (panel != null)
+                panelOriginalPositions[panel] = panel.transform.localPosition;
         }
 
         Init();
@@ -62,33 +64,39 @@ public class TabBarController : MonoBehaviour
         closeBtn.transform.DOKill();
         foreach (var panel in tabToPanel.Values)
         {
-            panel.transform.DOKill();
+            if (panel != null)
+                panel.transform.DOKill();
         }
-        Debug.Log($"111111111111111111111{name} - {GetType().Name} Disabled", this);
+        Debug.Log($"{name} - {GetType().Name} Disabled", this);
     }
 
     void Init()
     {
         // 초기 상태: 모든 패널 끄기, 닫기 버튼 숨김
         foreach (var panel in tabToPanel.Values)
-            panel.SetActive(false);
+        {
+            if (panel != null)
+                panel.gameObject.SetActive(false);
+        }
         closeBtn.gameObject.SetActive(false);
 
         // 탭 버튼 이벤트 연결
         foreach (var item in tabToPanel)
         {
             Button tabBtn = item.Key;
-            GameObject panel = item.Value;
+            UIBase panel = item.Value;
 
-            tabBtn.onClick.AddListener(() => { OnTabSelected(tabBtn, panel); });
+            if (tabBtn != null && panel != null)
+                tabBtn.onClick.AddListener(() => { OnTabSelected(tabBtn, panel); });
         }
 
         // 공용 닫기 버튼 이벤트 연결
         closeBtn.onClick.AddListener(ClosePanelAndAnimateButtonOut);
         homeBtn.onClick.AddListener(ClosePanelAndAnimateButtonOut);
+        blocker.onClick.AddListener(ClosePanelAndAnimateButtonOut);
     }
 
-    private void OnTabSelected(Button tabBtn, GameObject panel)
+    private void OnTabSelected(Button tabBtn, UIBase panel)
     {
         bool isFirstOpen = currentOpenPanel == null;
         bool isDifferentTab = currentOpenPanel != panel;
@@ -106,6 +114,7 @@ public class TabBarController : MonoBehaviour
         }
 
         currentOpenPanel = panel;
+        blocker.gameObject.SetActive(true);
     }
 
     #region Close Button Animations
@@ -145,19 +154,19 @@ public class TabBarController : MonoBehaviour
     #endregion
 
     #region Panel Animations
-    private void AnimatePanelIn(GameObject panel)
+    private void AnimatePanelIn(UIBase panel)
     {
         panel.transform.DOKill(); // 진행중인 트윈 중단
         Vector3 originalPos = panelOriginalPositions[panel];
         Vector3 startPos = originalPos - new Vector3(0, panelOffsetY, 0);
 
         panel.transform.localPosition = startPos;
-        panel.SetActive(true);
+        panel.SetShow(); // SetActive(true) 및 RefreshUI() 호출
 
         panel.transform.DOLocalMove(originalPos, animationDuration).SetEase(Ease.OutBack);
     }
 
-    private void AnimatePanelOut(GameObject panel)
+    private void AnimatePanelOut(UIBase panel)
     {
         if (panel == null) return;
         panel.transform.DOKill(); // 진행중인 트윈 중단
@@ -167,7 +176,8 @@ public class TabBarController : MonoBehaviour
 
         panel.transform.DOLocalMove(endPos, animationDuration).SetEase(Ease.InBack).OnComplete(() =>
         {
-            panel.SetActive(false);
+            panel.SetHide(); // SetActive(false) 호출
+            panel.ResetPanel(); // ★★★ 상태 초기화 메서드 호출! ★★★
         });
     }
     #endregion
@@ -177,6 +187,8 @@ public class TabBarController : MonoBehaviour
         AnimatePanelOut(currentOpenPanel);
         AnimateCloseButtonOut();
         currentOpenPanel = null;
+        blocker.gameObject.SetActive(false);
     }
 }
+
 

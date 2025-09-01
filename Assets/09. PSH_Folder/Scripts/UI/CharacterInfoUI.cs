@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
+// 1. MonoBehaviour 대신 UIBase를 상속받고, 드래그 인터페이스들을 구현합니다.
+public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
     [Header("UI 요소")]
     public TextMeshProUGUI characterNameText;
@@ -14,6 +15,7 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
     [Header("닫기 버튼")]
     public Button closeButton;
+    public Button blocker;
 
     [Header("캐릭터 레벨업 UI")]
     public TextMeshProUGUI levelUpCostText; // 캐릭터 레벨업 비용
@@ -51,7 +53,12 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         // 닫기 버튼 이벤트 연결
         if (closeButton != null)
         {
-            closeButton.onClick.AddListener(ClosePanel);
+            closeButton.onClick.AddListener(SetHide);
+        }
+
+        if (blocker != null)
+        {
+            blocker.onClick.AddListener(SetHide);
         }
 
         // 캐릭터 레벨업 버튼 이벤트 연결 (HoldButton의 onHoldAction 사용)
@@ -89,7 +96,7 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         if (currentIndex == -1)
         {
             Debug.LogError("선택된 캐릭터가 리스트에 없습니다!");
-            ClosePanel();
+            SetHide(); // ClosePanel() 대신 SetHide() 사용
             return;
         }
 
@@ -119,7 +126,7 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         else
         {
             Debug.LogWarning("CharacterInfoUI: 현재 인덱스의 캐릭터 데이터가 null입니다.");
-            ClosePanel();
+            SetHide(); // ClosePanel() 대신 SetHide() 사용
         }
 
         // 좌우 버튼 활성화/비활성화 로직
@@ -170,7 +177,7 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         }
         else
         {
-            soulFragmentsText.text = "영혼 조각 : 0"; // 데이터를 찾을 수 없을 때 기본값
+            soulFragmentsText.text = "영혼 조각 : 0";
         }
     }
 
@@ -186,11 +193,10 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         // PlayerDataManager.Instance.baseLevelUpCost가 float/double이라면 cost도 float/double
         // 여기서는 BigInteger를 가정하고 double로 계산 후 BigInteger로 캐스팅
         double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, currentCharacterData.characterLevel - 1);
-        System.Numerics.BigInteger cost = (System.Numerics.BigInteger)costDouble; // BigInteger로 캐스팅
+        System.Numerics.BigInteger cost = (System.Numerics.BigInteger)costDouble;
 
-        CurrencyType costType = CurrencyType.EnhancementStone; // 비용 재화 타입
+        CurrencyType costType = CurrencyType.EnhancementStone;
 
-        // DataUtility.FormatNumber가 BigInteger를 받는지 확인 필요. float을 받는다면 cost를 float으로 변경
         levelUpCostText.text = $"비용 : {DataUtility.FormatNumber(cost)} 강화석";
 
         // 재화가 충분한지 확인하여 버튼 활성화/비활성화
@@ -272,7 +278,7 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         }
         else
         {
-            atkDisplay.text = "ATK Stat Not Found"; // ATK 스탯을 찾을 수 없습니다.
+            atkDisplay.text = "ATK Stat Not Found";
         }
 
         // HP 스탯 데이터 찾기 (CSV 헤더에 맞춰 "health"로 변경)
@@ -286,7 +292,7 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         }
         else
         {
-            hpDisplay.text = "HP Stat Not Found"; // HP 스탯을 찾을 수 없습니다.
+            hpDisplay.text = "HP Stat Not Found";
         }
 
         // DEF 스탯 데이터 찾기 (CSV 헤더에 맞춰 "defensePower"로 변경)
@@ -300,7 +306,7 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         }
         else
         {
-            defDisplay.text = "DEF Stat Not Found"; // DEF 스탯을 찾을 수 없습니다.
+            defDisplay.text = "DEF Stat Not Found";
         }
 
         // CritChance 데이터 가져오기 레벨업
@@ -330,7 +336,7 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
 
         // 전투력 계산
         currentCharacterData.RecaculateStats();
-        battlePoint.text = $"전투력 : {DataUtility.FormatNumber(StatCalculator.ComputeFinalPower(currentCharacterData))}";
+        battlePoint.text = $"전투력 : {DataUtility.FormatNumber(currentCharacterData.battlePower)}";
     }
 
     /// <summary>
@@ -382,12 +388,10 @@ public class CharacterInfoUI : MonoBehaviour, IBeginDragHandler, IEndDragHandler
         }
     }
 
-    /// <summary>
-    /// 캐릭터 정보 패널을 비활성화합니다.
-    /// </summary>
-    public void ClosePanel()
+    // 3. ClosePanel()을 UIBase의 SetHide()를 오버라이드 하도록 변경
+    public override void SetHide()
     {
-        gameObject.SetActive(false);
+        base.SetHide(); // gameObject.SetActive(false)를 호출
     }
 
     #region 스와이프 처리

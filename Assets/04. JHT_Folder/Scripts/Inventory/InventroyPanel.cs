@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace JHT
 {
-    public class InventroyPanel : MonoBehaviour
+    public class InventroyPanel : UIBase
     {
         [Header("Spawn_ItemPanel")]
         [SerializeField] private Transform weaponPanelParent;
@@ -39,8 +39,19 @@ namespace JHT
         private List<ItemPanelPrefab> itemPanelPool = new List<ItemPanelPrefab>();
         private List<ItemRelicsPanelItem> itemRelicsPanelPool = new List<ItemRelicsPanelItem>();
 
-        
-        //private List<ItemPanelPrefab> items;
+        public override void ResetPanel()
+        {
+            base.ResetPanel();
+
+            // 열려있을 수 있는 상세 정보 패널들을 모두 닫습니다.
+            if (weaponStatPanel != null) weaponStatPanel.gameObject.SetActive(false);
+            if (relicsStatPanel != null) relicsStatPanel.gameObject.SetActive(false);
+
+            // 기본 탭인 장비 인벤토리로 되돌립니다.
+            ChangeWeaponMode();
+
+            Debug.Log("InventoryPanel이 리셋되어, 모든 상세창을 닫고 기본 탭으로 돌립니다.");
+        }
 
         private void OnEnable()
         {
