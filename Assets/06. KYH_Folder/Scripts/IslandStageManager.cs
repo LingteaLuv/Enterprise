@@ -1,6 +1,8 @@
+using DG.Tweening.Core.Easing;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 섬 이동, 배 이동, 전투 흐름을 통합 관리하는 매니저
@@ -25,8 +27,8 @@ public class IslandStageManager : MonoBehaviour
     [SerializeField] private GameObject chestPrefab;
     [SerializeField] private GameObject flagPrefab;
     [SerializeField] private List<IslandMaker> islandMakers;
-    private int currentIndex = 0;                                  // 현재 진행 중인 섬의 인덱스
-    private int stageIndex = 1;                                    // 스테이지는 1부터 시작
+    private int currentIndex = 0;                                  // 현재 진행 중인 섬의 인덱스 번호
+                                      
 
     private Coroutine handleReturnAndNext;
     private Coroutine moveToAndEnter;
@@ -97,13 +99,24 @@ public class IslandStageManager : MonoBehaviour
 
         if (currentIndex >= islandSets.Count)
         {
-            stageIndex++; // 스테이지 수 증가
-            Debug.Log(" [HandleReturnAndNext] 모든 섬 완료 → StartStage 호출");
-            StartStage();
-            
-            ResetClearMarkers();
-            // TODO : 마지막 섬 클리어 이후 반복 전투가 진행될때에는 섬에 생성되었던 깃발과 상자 이미지 상태의 초기화가 필요함.
-            yield break;
+            Debug.Log(" [HandleReturnAndNext] 모든 섬 완료");
+
+            if (!GlobalStageManager.Instance.bossBattleTriggered)
+            {
+                Debug.Log("→ 보스전 자동 진입 조건 만족 (처음 클리어)");
+                GlobalStageManager.Instance.bossBattleTriggered = true;
+
+                // 보스 씬으로 이동
+                SceneManager.LoadScene("BossBattleScene");
+                yield break;
+            }
+            else
+            {
+                Debug.Log("→ 이미 보스전 진입한 상태, 일반 반복 전투 재시작");
+                ResetClearMarkers();
+                StartStage(); // 반복 전투 시작
+                yield break;
+            }
         }
 
         Debug.Log($"➡ [HandleReturnAndNext] MoveToAndEnter({currentIndex}) 호출 시도");
@@ -168,7 +181,7 @@ public class IslandStageManager : MonoBehaviour
         Debug.Log($"[MoveToAndEnter] index={index} 시작");
 
         bool arrive = false;
-        yield return travelUI.MoveShipToMarker(stageIndex , index, () =>
+        yield return travelUI.MoveShipToMarker(GlobalStageManager.Instance.currentStageIndex, index, () =>
         {
             arrive = true;
             Debug.Log($"[MoveToAndEnter] onArrive 수신 index={index}");
