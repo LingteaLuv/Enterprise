@@ -71,8 +71,13 @@ public abstract class BaseCharecterFSM : LHI.Character
     public override void Die()
     {
         Debug.Log($"{gameObject.name} 사망");
-        // 애니메이션 / 이펙트 등
-        // gameObject.SetActive(false);
+
+        // 플레이어라면 BattleManager에 패배 알림
+        if (CompareTag("Crew"))
+        {
+            BattleManager.Instance.OnPlayerDead();
+        }
+
         Destroy(gameObject);
     }
 

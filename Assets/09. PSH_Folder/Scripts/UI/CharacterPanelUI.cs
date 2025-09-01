@@ -119,6 +119,15 @@ public class CharacterPanelUI : MonoBehaviour
     }
 
     /// <summary>
+    /// PlayerCharacterData에서 아이콘을 가져옵니다
+    /// </summary>
+    public void UpdateIcon()
+    {
+        crewRoleIcon.sprite = currentPlayerCharData.crewRoleIcon;
+        factionIcon.sprite = currentPlayerCharData.factionIcon;
+    }
+
+    /// <summary>
     /// 현재 편성 상태에 따라 시각적 표시를 업데이트합니다.
     /// </summary>
     public void UpdateFormationVisuals()
@@ -130,24 +139,7 @@ public class CharacterPanelUI : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 캐릭터 직업, 속성에 따라 아이콘을 업데이트합니다.
-    /// </summary>
-    public void UpdateIcon()
-    {
-        crewRoleIcon.sprite = GetIcon(currentPlayerCharData.characterdata.crewRole);
-        factionIcon.sprite = GetIcon(currentPlayerCharData.characterdata.faction);
-    }
-    public Sprite GetIcon(CrewRole role)
-    {
-        string path = $"PSHTest/Icon/{role}";
-        return Resources.Load<Sprite>(path);
-    }
-    public Sprite GetIcon(Faction role)
-    {
-        string path = $"PSHTest/Icon/{role}";
-        return Resources.Load<Sprite>(path);
-    }
+    
     /// <summary>
     /// 패널 버튼 클릭 시 호출됩니다.
     /// </summary>
