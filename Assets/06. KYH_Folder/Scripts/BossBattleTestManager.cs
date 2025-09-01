@@ -1,25 +1,30 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class BossBattleTestManager : MonoBehaviour
 {
-    [SerializeField] private string returnSceneName = "0828Demo";
+    [SerializeField] private Button _successBtn;
+    [SerializeField] private Button _failBtn;
+    
+    private string returnSceneName = "Game";
+        
     private void Update()
     {
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
-            Debug.Log(" 보스전 패배!");
-            SceneManager.LoadScene(returnSceneName);
-        }
-
-        if (Keyboard.current.enterKey.wasPressedThisFrame)
+        _successBtn.onClick.AddListener(() =>
         {
             Debug.Log(" 보스전 승리!");
             GlobalStageManager.Instance.currentStageIndex++;
             GlobalStageManager.Instance.bossBattleTriggered = false;
 
             SceneManager.LoadScene(returnSceneName);
-        }
+        });
+        
+        _failBtn.onClick.AddListener(() =>
+        {
+            Debug.Log(" 보스전 패배!");
+            SceneManager.LoadScene(returnSceneName);
+        });
     }
 }
