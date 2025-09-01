@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,16 +6,26 @@ using UnityEngine.UI;
 
 public class SettingPanel : UIBase
 {
-    [SerializeField] Button _bugReportButton;
+    [SerializeField] private Button _exitBtn;
+    [SerializeField] private Button _bugReportButton;
     
-    [SerializeField] Slider _musicSlider;
-    [SerializeField] Slider _effectSlider;
+    [SerializeField] private Slider _musicSlider;
+    [SerializeField] private Slider _effectSlider;
+    
+    public Action OnTouchedExitBtn;
     
     private void Start()
     {
+        _exitBtn.onClick.AddListener(() =>
+        {
+            OnTouchedExitBtn?.Invoke();
+            gameObject.SetActive(false);
+        });
+        gameObject.SetActive(false);
+        
         _bugReportButton.onClick.AddListener(() =>
         {
-            Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSe6Q1V_gKJZvaKluFWdPRBpss0Rn6B5FnecEgl-s1lOxSwIjw/viewform?usp=sharing&ouid=100453097753956903851");
+            Application.OpenURL("https://forms.gle/nyEfTEzds2rUKATs7");
         });
         _musicSlider.onValueChanged.AddListener((volume) => SettingManager.Instance.SetBGM(volume));
         _effectSlider.onValueChanged.AddListener((volume) => SettingManager.Instance.SetSFX(volume));
