@@ -7488,13 +7488,14 @@ MonoBehaviour:
   shopBtn: {fileID: 1772253193}
   questBtn: {fileID: 658041632}
   basicStatPanel: {fileID: 1311549206}
-  characterListPanel: {fileID: 3651778993295271958}
-  invenPanel: {fileID: 482250669493929021}
-  gachaPanel: {fileID: 2833093475123870284}
-  shopPanel: {fileID: 473962067}
+  characterListPanel: {fileID: 5266332652274490831}
+  invenPanel: {fileID: 8731099046409581907}
+  gachaPanel: {fileID: 191994027123231353}
+  shopPanel: {fileID: 473962075}
   questPanel: {fileID: 923186306}
   closeBtn: {fileID: 1257699570}
   homeBtn: {fileID: 864686006}
+  blocker: {fileID: 0}
 --- !u!114 &1122490231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8507,6 +8508,7 @@ MonoBehaviour:
   _initialGoldString: 10000000
   _initialEnhancementStoneString: 10000000
   _initialGemString: 10000000
+  IsFireBase: 0
 --- !u!4 &1177797044
 Transform:
   m_ObjectHideFlags: 0
@@ -14448,13 +14450,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1898042604}
+  - component: {fileID: 1898042605}
   m_Layer: 5
   m_Name: RelicsGachaList
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1898042604
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14476,6 +14479,23 @@ RectTransform:
   m_AnchoredPosition: {x: -2.5410156, y: -81.18}
   m_SizeDelta: {x: -70.241, y: 1762.2}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1898042605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1898042603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63e1ca622fe834e49bb44be9ca0b1df3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  relicsPanelItem: {fileID: 4431251666574094987, guid: e275ec817e6870a49adfedb46a1ec61d, type: 3}
+  backPanel: {fileID: 1947330760511921460}
+  relicsItemParent: {fileID: 6662085052970573091}
+  choosePopup: {fileID: 6077786940090780806}
+  closeButton: {fileID: 3139028806015639668}
 --- !u!1 &1901312790
 GameObject:
   m_ObjectHideFlags: 0
@@ -16671,7 +16691,7 @@ MonoBehaviour:
   relicsSingleBtn: {fileID: 7285924229519630967}
   specialRelicsSingleBtn: {fileID: 2481456869218544431}
   gachaListPanel: {fileID: 2260133394961603810}
-  relicsGachaListPanel: {fileID: 6438390579185726569}
+  relicsGachaListPanel: {fileID: 1898042605}
   relicsPoints: {fileID: 1617521214}
 --- !u!224 &192649949861253060
 RectTransform:
@@ -17809,6 +17829,7 @@ GameObject:
   - component: {fileID: 3947084013819892925}
   - component: {fileID: 8731099046409581906}
   - component: {fileID: 5497173430569383904}
+  - component: {fileID: 8731099046409581907}
   m_Layer: 5
   m_Name: InventoryPanel
   m_TagString: Untagged
@@ -21594,7 +21615,6 @@ GameObject:
   - component: {fileID: 996157555812056220}
   - component: {fileID: 5852900115076531764}
   - component: {fileID: 1590563908090518212}
-  - component: {fileID: 7614585592963211155}
   m_Layer: 5
   m_Name: ItemInventroy
   m_TagString: Untagged
@@ -23311,7 +23331,6 @@ GameObject:
   - component: {fileID: 1007498128903270011}
   - component: {fileID: 5381831972350574909}
   - component: {fileID: 5293790919462465120}
-  - component: {fileID: 6438390579185726569}
   m_Layer: 5
   m_Name: RelicsGachaListPanel
   m_TagString: Untagged
@@ -25767,7 +25786,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2841351629666249423
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30937,6 +30956,7 @@ MonoBehaviour:
   levelResult: 0
   relicsCouponCost: 0
   relicsSpecialCost: 100
+  isChoose: 0
   rarityTable: {fileID: 11400000, guid: 9489301009471d242b903631afbac30e, type: 2}
   levelTable: {fileID: 11400000, guid: 34c27d4338615ca42bdaea4e76d433e3, type: 2}
   specialTable: {fileID: 11400000, guid: e3b913bdc05ff174dbb979aa3e29f8df, type: 2}
@@ -31545,6 +31565,7 @@ MonoBehaviour:
   levelText: {fileID: 4099583057537864603}
   soulFragmentsText: {fileID: 2561440150193864080}
   closeButton: {fileID: 2311472638055296512}
+  blocker: {fileID: 0}
   levelUpCostText: {fileID: 1413783572281563303}
   levelUpButton: {fileID: 4149562569082796888}
   starUpgradeCostText: {fileID: 2563599676585649537}
@@ -36942,23 +36963,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2596536760202157779}
   m_CullTransparentMesh: 1
---- !u!114 &6438390579185726569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1947330760511921460}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63e1ca622fe834e49bb44be9ca0b1df3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  relicsPanelItem: {fileID: 4431251666574094987, guid: e275ec817e6870a49adfedb46a1ec61d, type: 3}
-  backPanel: {fileID: 4139353537475843331}
-  relicsItemParent: {fileID: 6662085052970573091}
-  choosePopup: {fileID: 6077786940090780806}
-  closeButton: {fileID: 3139028806015639668}
 --- !u!1 &6443692960609617328
 GameObject:
   m_ObjectHideFlags: 0
@@ -40871,32 +40875,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &7614585592963211155
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1474106682203270668}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f7bbcd6c68b48545887dbcdcaa47c53, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponPanelParent: {fileID: 4139184068123828555}
-  relicsPanelParent: {fileID: 4601616292979506381}
-  itemPanelPrefab: {fileID: -7351495467950165020, guid: 24b29d0cdc261be49949cb5433d2625a, type: 3}
-  itemRelicsPanelItem: {fileID: 7856120394745026077, guid: df7e9e4017a0b4145a24574e5561dd94, type: 3}
-  weaponInventory: {fileID: 1488137200718052933}
-  relicsInventory: {fileID: 9040445751741509275}
-  soulInventory: {fileID: 424823020}
-  equipModeButton: {fileID: 2543614877544490266}
-  relicsModeButton: {fileID: 4510946755332244784}
-  soulButton: {fileID: 6361008468485132806}
-  weaponStatPanel: {fileID: 3942630774747626676}
-  relicsStatPanel: {fileID: 4572545160053802889}
-  weaponDropDown: {fileID: 1147858757527128184}
-  relicsDropDown: {fileID: 4884784797619725029}
 --- !u!222 &7626152777076672847
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -43674,6 +43652,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 482250669493929021}
   m_CullTransparentMesh: 1
+--- !u!114 &8731099046409581907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 482250669493929021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f7bbcd6c68b48545887dbcdcaa47c53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponPanelParent: {fileID: 4139184068123828555}
+  relicsPanelParent: {fileID: 4601616292979506381}
+  itemPanelPrefab: {fileID: -7351495467950165020, guid: 24b29d0cdc261be49949cb5433d2625a, type: 3}
+  itemRelicsPanelItem: {fileID: 7856120394745026077, guid: df7e9e4017a0b4145a24574e5561dd94, type: 3}
+  weaponInventory: {fileID: 1488137200718052933}
+  relicsInventory: {fileID: 9040445751741509275}
+  soulInventory: {fileID: 424823020}
+  equipModeButton: {fileID: 2543614877544490266}
+  relicsModeButton: {fileID: 4510946755332244784}
+  soulButton: {fileID: 6361008468485132806}
+  weaponStatPanel: {fileID: 3942630774747626676}
+  relicsStatPanel: {fileID: 4572545160053802889}
+  weaponDropDown: {fileID: 1147858757527128184}
+  relicsDropDown: {fileID: 4884784797619725029}
 --- !u!114 &8736511916861913024
 MonoBehaviour:
   m_ObjectHideFlags: 0
