@@ -88,6 +88,13 @@ public class PlayerCharacterData
 
         // 3. 장비 및 유물 스탯 적용 (향후 확장)
 
+        if (EquippedWeapon != null)
+        {
+            finalStats[Stat.Health] = finalStats[Stat.Health] * (1+  InventoryManager.Instance.GetWeaponStat(EquippedWeapon.itemNum) / 100);
+            finalStats[Stat.Attack] = finalStats[Stat.Attack] * (1 + InventoryManager.Instance.GetWeaponStat(EquippedWeapon.itemNum) / 100);
+            finalStats[Stat.Defense] = finalStats[Stat.Defense] * (1 + InventoryManager.Instance.GetWeaponStat(EquippedWeapon.itemNum) / 100);
+        }
+
         // --- 전투력 계산 시작 ---
         battlePower = (BigInteger)StatCalculator.ComputeFinalPower(this);
         // --- 전투력 계산 끝 ---
