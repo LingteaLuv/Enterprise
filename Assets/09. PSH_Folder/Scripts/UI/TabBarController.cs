@@ -108,6 +108,15 @@ public class TabBarController : MonoBehaviour
         }
         else if (isDifferentTab)
         {
+            // 다른 탭으로 전환하기 전, 현재 열린 패널이 캐릭터 목록이고 편성 모드라면 유효성 검사를 수행합니다.
+            if (currentOpenPanel is CharacterScrollViewUI characterListPanel && characterListPanel.isFormationMode)
+            {
+                if (!characterListPanel.TryDisableFormationMode())
+                {
+                    return; // 모드 해제에 실패했으므로, 탭 전환을 중단합니다.
+                }
+            }
+
             AnimateCloseButtonMove(tabBtn);
             AnimatePanelOut(currentOpenPanel);
             AnimatePanelIn(panel);
@@ -184,6 +193,16 @@ public class TabBarController : MonoBehaviour
 
     void ClosePanelAndAnimateButtonOut()
     {
+        // 만약 현재 열린 패널이 캐릭터 목록이고 편성 모드 중이라면,
+        // 모드 해제를 시도하고 실패 시 창을 닫지 않습니다.
+        if (currentOpenPanel is CharacterScrollViewUI characterListPanel && characterListPanel.isFormationMode)
+        {
+            if (!characterListPanel.TryDisableFormationMode())
+            {
+                return; // 모드 해제에 실패했으므로, 창 닫기 프로세스를 중단합니다.
+            }
+        }
+
         AnimatePanelOut(currentOpenPanel);
         AnimateCloseButtonOut();
         currentOpenPanel = null;

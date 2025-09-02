@@ -87,7 +87,7 @@ public class CharacterScrollViewUI : UIBase
 
         if (charInfoButton != null)
         {
-            charInfoButton.onClick.AddListener(DisableFormationMode);
+            charInfoButton.onClick.AddListener(() => TryDisableFormationMode());
         }
         if (formationButton != null)
         {
@@ -256,7 +256,7 @@ public class CharacterScrollViewUI : UIBase
         formationPanel.SetActive(true);
     }
 
-    public void DisableFormationMode()
+    public bool TryDisableFormationMode()
     {
         if (PlayerDataManager.Instance != null)
         {
@@ -264,25 +264,26 @@ public class CharacterScrollViewUI : UIBase
             if (a == 1)
             {
                 UIManager.Instance.ShowWarning("모든 포지션에 최소 1명을 배치해야합니다.");
-                return;
+                return false;
             }
             else if (a == 2)
             {
                 UIManager.Instance.ShowWarning("배치 인원이 5명이 아닙니다.");
-                return;
+                return false;
             }
         }
         else
         {
             Debug.LogError("PlayerDataManager.Instance가 null입니다. 편성 유효성 검사를 수행할 수 없습니다.");
-            return;
+            return false;
         }
 
         isFormationMode = false;
         Debug.Log("편성 모드 비활성화");
         UpdateFormationButtonVisuals();
         RefreshUI();
-        formationPanel.SetActive(false);
+        if (formationPanel != null) formationPanel.SetActive(false);
+        return true;
     }
 
     public override void RefreshUI()
