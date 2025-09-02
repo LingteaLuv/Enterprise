@@ -14,9 +14,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
         #region Def
 
         #region SerializedFields
-        //기간제 퀘스트
-        [SerializeField] private TemporaryQuestListSO _dailyQuestLists;
-        [SerializeField] private TemporaryQuestListSO _weeklyQuestLists;
         // 퀘스트 시그널
         [SerializeField] private QuestSignalSO _signal;
 
@@ -25,9 +22,12 @@ namespace _05._CSJ_Folder.Scripts.Quest
         [SerializeField] private TutorialSequenceSO _tutorialSequence;
         // 루틴 시퀀스
         [SerializeField] private RoutineSequenceSO _routineSequence;
+
+        [SerializeField] private TemporaryQuestListSO _temporaryQuest;
         //private QuestSaveData _save;
 
         [SerializeField] private GameObject QuestUI; 
+        [SerializeField] private TemporaryQuestController _temporaryQuestController;
         #endregion
         
         // quest Queue
@@ -36,11 +36,18 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private Queue<RoutineQuestDefinitionSO> _oddSequence;
         private Queue<RoutineQuestDefinitionSO> _evenSequence;
         
+        private Queue<TemporaryQuestDefinitionSO> _dailyQuests;
+        private List<TemporaryQuestDefinitionSO> _ClearedDailyQuests;
+        private Queue<TemporaryQuestDefinitionSO> _weeklyQuests;
+        private List<TemporaryQuestDefinitionSO> _ClearedWeeklyQuests;
+        
         // event Dictionary
         // 퀘스트 정의 딕셔너리 < questId, definitionSO>
         private Dictionary<string, QuestDefinitionSO> _defs;
         // 인스턴스 딕셔너리 < questId, Instance>
         private Dictionary<string, QuestInstance>  _instances;
+
+        private Dictionary<string, TemporaryInstance> _temporaryInstances;
 
         // 일반 퀘스트 번호, 생성할 때마다 +1
         private int GeneralQuestCount = 1;
@@ -59,6 +66,9 @@ namespace _05._CSJ_Folder.Scripts.Quest
         public Action<QuestDefinitionSO, QuestInstance> OnQuestUpdated;
         // UI에 퀘스트 완료 표시와 연결
         public Action<QuestDefinitionSO, QuestInstance> OnQuestCompleted;
+        
+        public Action<TemporaryQuestDefinitionSO, TemporaryInstance> OnTempoQuestUpdated;
+
         // 추후 보상관련 사용
         public Action<QuestRewardSO.RewardEntry> OnRewardGranted;
         #endregion
@@ -70,6 +80,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 자료구조 초기화
             _defs = new Dictionary<string, QuestDefinitionSO>();
             _instances = new Dictionary<string, QuestInstance>();
+            _temporaryInstances = new Dictionary<string, TemporaryInstance>();
             _tutorialQuests = new Queue<TutorialQuestDefinitionSO>();
             _generalQuests = new Queue<GeneralQuestDefinitionSO>();
             
@@ -83,25 +94,41 @@ namespace _05._CSJ_Folder.Scripts.Quest
             {
                 // 중복 방지
                 _signal.OnSignal -= OnSignal;
-                _signal.OnSignal += OnSignal;
+                _signal.OnSignalComplete -= OnSignalComplete;
+                _signal.OnSignal += OnSignal;                
+                _signal.OnSignalComplete += OnSignalComplete;
+            }
+            // TODO : 기간 퀘스트 동작
+            TemporaryQuestInit(true);
+
+            LoadTemporaryQuests();
+
+            if (_temporaryQuestController != null)
+            {
+                _temporaryQuestController.QuestInit(_temporaryQuest, _temporaryInstances);
             }
             
             // 일반 퀘스트 동작
             GeneralQuestEnqueue();
             EnsureGeneralActive();
-
-            // TODO : 기간 퀘스트 동작
             
             // 퀘스트 UI 활성화
             ActiveQuestUI();
+
         }
 
         private void OnDestroy()
         {
             // 시그널 이벤트 구독 해제
-            if(_signal != null) _signal.OnSignal -= OnSignal;
+            if(_signal != null) 
+            {
+                _signal.OnSignal -= OnSignal;                
+                _signal.OnSignalComplete -= OnSignalComplete;
+                
+            }
             // 퀘스트 UI 구독 해제
             _questUI.OnRewardRequest -= ReceiveReward;
+            
 #if UNITY_EDITOR
             // 테스트용 코드 구독해제
             _questUI.OnForceClear -= ForceQuestComplete;
@@ -133,6 +160,14 @@ namespace _05._CSJ_Folder.Scripts.Quest
             Debug.LogError($"Quest not found: {questId}");
             return null;
         }
+
+        public QuestDefinitionSO GetDefinition(string questId)
+        {
+            if (_defs.TryGetValue(questId, out var def))
+                return def;
+            Debug.LogError($"Quest not found: {questId}");
+            return null;
+        }
         #endregion
 
         #region GeneralQuest
@@ -143,10 +178,12 @@ namespace _05._CSJ_Folder.Scripts.Quest
         /// </summary>
         private void GeneralQuestEnqueue()
         {
-            //TODO : 추후 Save 데이터와 연동
-            
-            // 넣을 GeneralQuest가 없다면 중단
+            // 일반 퀘스트 큐에 원소가 들어있다면 탈출
             if (_generalQuests.Count != 0) return;
+            
+            //TODO : 추후 Save 데이터와 연동
+            // QuestCount의 경우 queue에 넣기 전에 저장을 진행하여 Load할 때 참조 오류가 일어나지 않도록 사용
+            // SaveQuestCount();
             
             // 튜토리얼 삽입(수정)
             InsertTutorials();
@@ -272,7 +309,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (_tutorialQuests.Count == 0) return;
             
             // 튜토리얼이 있고 타깃 차례인 경우
-            while (_tutorialQuests.Count >0 &&_tutorialQuests.Peek().targetStage <= CurrentQuestStage)
+            while (_tutorialQuests.Count >0 && _tutorialQuests.Peek().targetStage <= CurrentQuestStage)
             {
                 // 튜토리얼 큐의 제일 앞의 questid를 검사하고
                 if (_instances.TryGetValue(_tutorialQuests.Peek().questId, out var inst))
@@ -329,8 +366,13 @@ namespace _05._CSJ_Folder.Scripts.Quest
         /// <param name="amount">퀘스트의 성취도</param>
         private void OnSignal(QuestType_Enum type, string signalKey, int amount)
         {
+            Debug.Log($"{type}: {signalKey}: {amount}");
             // TODO : 추후 기간제 퀘스트 쪽도 추가해야 함
-            if (type != QuestType_Enum.General) return;
+            if (type != QuestType_Enum.General)
+            {
+                OnTemporaryProgress(type, signalKey, amount);
+                return;
+            }
             
             // 키 값이 stageclear인 경우
             if (signalKey == QuestKeys.StageClear())
@@ -382,6 +424,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (activeGeneral == null) return;
 
             var def = GetActiveQuestDefinition();
+            // TODO : Save와 연계
+            // DatabaseManager.Instance.SaveCount(CurrentClearedStage);
             
             // 만약 현재 인스턴스의 def가 스테이지 클리어이고 완료조건이 충족되었다면
             if (def.GeneralType == GeneralType_Enum.StageClear && 
@@ -398,7 +442,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         /// </summary>
         private bool IsInstanceComplete(QuestDefinitionSO def, QuestInstance inst)
         {
-            return inst.IsCompleted(def.Goal.RequireCount);
+            return inst.IsCompleted(def);
         }
 
         /// <summary>
@@ -443,13 +487,13 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 인스턴스에서 questId로 탐색 실패시 (=_instances에 def가 없는 경우)
             if (!_instances.TryGetValue(def.questId, out var inst))
             {
-                // 새로운 인스턴스를 생성합니다.
-                inst = new QuestInstance
-                {
-                    QuestId = def.questId,
-                    QuestState = QuestState_Enum.Active,
-                    GeneralQuestCount = ClearedQuestCount + 1,
-                };
+                    // 새로운 인스턴스를 생성합니다.
+                    inst = new QuestInstance
+                    {
+                        QuestId = def.questId,
+                        QuestState = QuestState_Enum.Active,
+                        GeneralQuestCount = ClearedQuestCount + 1,
+                    };
                 // 인스턴스를 추가합니다.
                 _instances.Add(def.questId, inst);
             }
@@ -484,7 +528,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 if (kv.Value.QuestState == QuestState_Enum.Active) return kv.Value;
             }
             
-            Debug.LogError("활성화 인터페이스 탐색 실패");
             // 탐색에 실패하면 null값을 반환합니다.
             return null;
         }
@@ -515,6 +558,9 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (def.isGeneral)
                 // 일반 퀘스트의 보상처리를 마무리합니다.
                 OnGeneralCompleted();
+
+            if (def.isTemporary)
+                OnTemporaryCompleted(inst);
 
             // 저장을 진행합니다
             Save();
@@ -555,6 +601,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
             _questUI.OnRewardRequest += ReceiveReward;
             OnQuestCompleted += _questUI.UpdateQuest;
             OnQuestUpdated += _questUI.UpdateQuest;
+
+            OnTempoQuestUpdated += _temporaryQuestController.UpdateQuest;
             _questUI.OnForceClear += ForceQuestComplete;
             
             // 퀘스트 ui에 퀘스트 정보를 전달합니다
@@ -600,11 +648,18 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (_routineSequence != null)
             {
                 // 각 사이클 별 시퀀스에 sequence 내부 def들을 questId로 정렬해서 queue에 삽입
-                _oddSequence = EnqueueOrderById(_routineSequence.OddRoutine);
-                _evenSequence = EnqueueOrderById(_routineSequence.EvenRoutine);
+                _oddSequence = EnqueueOrderById(_routineSequence.GetSequence());
+                _evenSequence = EnqueueOrderById(_routineSequence.GetEvenRoutine());
             }
             
             // TODO : 일일 퀘스트와 주간 퀘스트 추가
+
+            if (_temporaryQuest != null)
+            {
+                _dailyQuests = EnqueueOrderById(_temporaryQuest.GetSequence());
+                _weeklyQuests = EnqueueOrderById(_temporaryQuest.GetWeeklyQuests());
+            }
+            
             
             // 스테이지 클리어 템플릿이 존재하고 이게 defs에 없다면
             if(_stageClearTemplate && !_defs.ContainsKey(_stageClearTemplate.questId))
@@ -656,10 +711,24 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         private void Save()
         {
+            var _inst = GetActiveGeneralInstance();
+            // DatabaseManager.Instance.SaveQuest(_inst.QuestState.ToString(), _inst.QuestId, _inst.CurrentGoalCount);
+        }
+
+        // private void SaveQuestCount()
+        // {
+        //     DatabaseManager.Instance.SaveCount(GeneralQuestCount);
+        //     DatabaseManager.Instance.SaveCount(ClearedQuestCount);
+        //     DatabaseManager.Instance.SaveCount(CurrentQuestStage);
+        //     DatabaseManager.Instance.SaveCount(CurrentClearedStage);
+        // }
+
+        private void Load()
+        {
             
         }
 
-        private void Load()
+        private void LoadTemporaryQuests()
         {
             
         }
@@ -674,11 +743,95 @@ namespace _05._CSJ_Folder.Scripts.Quest
         }
         #endregion
 
-        // TODO : 추후 기간제 퀘스트 생성
-        private void TemporaryQuestInit()
+        #region TemporaryQuest
+        // TODO : Manager에서 날짜 초기화 정보를 받아오고 날짜가 초기화 되었을 시 호출
+        private void TemporaryQuestInit(bool isWeekReset)
         {
-            
+            ResetTemporaryQuests(_dailyQuests, QuestType_Enum.Daily);
+            if (isWeekReset)
+            {
+                ResetTemporaryQuests(_weeklyQuests, QuestType_Enum.Weekly);
+            }
         }
+
+        private void ResetTemporaryQuests(IEnumerable<TemporaryQuestDefinitionSO> quests, QuestType_Enum questType)
+        {
+            if(quests == null) return;
+
+            foreach (var quest in quests)
+            {
+                if (quest == null) continue;
+                
+                var inst = GetTemporaryInstance(quest);
+                inst.QuestState = QuestState_Enum.Active;
+                inst.GoalCountInit();
+            }
+
+            Save();
+        }
+
+
+        private TemporaryInstance GetTemporaryInstance(TemporaryQuestDefinitionSO def)
+        {
+            if (!_temporaryInstances.TryGetValue(def.questId, out var inst))
+            {  
+                inst = new TemporaryInstance()
+                {
+                    QuestId = def.questId,
+                };
+                _instances.Add(def.questId, inst);
+                _temporaryInstances.Add(def.questId, inst);
+            }
+
+            return inst;
+        }
+
+        private void OnSignalComplete(string signalName)
+        {
+            QuestInstance inst = GetInstance(signalName);
+            QuestDefinitionSO def = GetDefinition(signalName);
+            ReceiveReward(def, inst);
+        }
+
+        private void OnTemporaryCompleted(QuestInstance inst)
+        {
+            inst.QuestState = QuestState_Enum.Received;
+            _temporaryQuestController.UpdateQuest(GetDefinition(inst.QuestId) as TemporaryQuestDefinitionSO, inst as TemporaryInstance);
+        }
+
+        private void OnTemporaryProgress(QuestType_Enum type, string signalKey, int progress)
+        {
+            Debug.Log("TemporaryProgress");
+            foreach (var t in _temporaryInstances)
+            {
+                string questId = t.Key;
+                var inst = t.Value;
+                
+                if(!_defs.TryGetValue(questId, out var def)) continue;
+                var goal = def.Goal; 
+                if (goal is null) return;
+
+                if (inst.QuestState == QuestState_Enum.Received) continue;
+                    
+                var delta = goal.ProgressDeltaFrom(signalKey, progress);
+                // 만약 진척도가 <=0이라면; 키가 일치하지 않는다면
+                if (delta <= 0) return;
+                
+                var before = inst.CurrentGoalCount;
+                var require = goal.RequireCount;
+                inst.GoalCountAdjust(Mathf.Clamp(before + delta, 0, require));
+                
+                // 만약 갱신한 인스턴스의 완료 조건이 충족됬을 경우
+                if (IsInstanceComplete(def, inst))
+                    // ui에 클리어로 전환합니다.
+                    MarkCompleted(def, inst);
+                // 퀘스트 사양이 바뀌었으므로 업데이트 이벤트를 호출한다 
+                OnTempoQuestUpdated?.Invoke(def as TemporaryQuestDefinitionSO, inst);
+            }
+        }
+        
+        #endregion
+        
         // 클리어 버튼 / 정식 빌드에선 빠질 예정
         private void ForceQuestComplete()
         {

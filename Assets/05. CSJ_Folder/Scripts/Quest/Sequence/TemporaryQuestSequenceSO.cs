@@ -4,14 +4,20 @@ using UnityEngine;
 namespace _05._CSJ_Folder.Scripts.Quest.Sequence
 {
     [CreateAssetMenu(menuName = "Quest/Sequence/Temporary")]
-    public class TemporaryQuestListSO : ScriptableObject, ISequence<QuestDefinitionSO>
+    public class TemporaryQuestListSO : ScriptableObject, ISequence<TemporaryQuestDefinitionSO>
     {
-        public QuestType_Enum ListType;
-        public QuestDefinitionSO[] Quests;
+        public TemporaryQuestDefinitionSO[] DailyQuests;
+        
+        public TemporaryQuestDefinitionSO[] WeeklyQuests;
 
-        public QuestDefinitionSO[] GetSequence()
+        public TemporaryQuestDefinitionSO[] GetSequence()
         {
-            return Quests;
+            return DailyQuests;
+        }
+
+        public TemporaryQuestDefinitionSO[] GetWeeklyQuests()
+        {
+            return WeeklyQuests;
         }
     }
 }

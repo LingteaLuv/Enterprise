@@ -110,5 +110,10 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
         if(daily) _signal.Raise(QuestType_Enum.Daily, key, count);
         if(weekly) _signal.Raise(QuestType_Enum.Weekly, key, count);
     }
+
+    public void OnCompleteQuest(string QuestId)
+    {
+        _signal.OnComplete(QuestId);
+    }
     
 }

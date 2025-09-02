@@ -33,5 +33,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.Definition
         /// 일반 퀘스트인지 반환
         /// </summary>
         public bool isGeneral => QuestType == QuestType_Enum.General;
+
+        public bool isTemporary => QuestType == QuestType_Enum.Weekly || QuestType == QuestType_Enum.Daily;
     }
 }

@@ -95,10 +95,10 @@ public class QuestUIController : MonoBehaviour
     private void SubmitButton()
     {
         _CheatButton.onClick.AddListener(OnClickCheatButton);
-        /*KillButton.onClick.AddListener(OnClickKillButton);
+        KillButton.onClick.AddListener(OnClickKillButton);
         GachaButton.onClick.AddListener(OnClickGachaButton);
         LevelUpButton.onClick.AddListener(OnClickLevelUpButton);
-        UpgradeButton.onClick.AddListener(OnClickUpgradeButton);*/
+        UpgradeButton.onClick.AddListener(OnClickUpgradeButton);
     }
 
     private void OnClickKillButton()
