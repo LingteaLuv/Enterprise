@@ -10,7 +10,7 @@ public class BossBattleTestManager : MonoBehaviour
     
     private string returnSceneName = "Game";
         
-    private void Update()
+    private void Start()
     {
         _successBtn.onClick.AddListener(() =>
         {

@@ -6,7 +6,6 @@ using DG.Tweening;
 public class TabBarController : MonoBehaviour
 {
     [Header("하단 버튼")]
-    [SerializeField] Button basicStatBtn;
     [SerializeField] Button characterListBtn;
     [SerializeField] Button invenBtn;
     [SerializeField] Button gachaBtn;
@@ -14,7 +13,6 @@ public class TabBarController : MonoBehaviour
     [SerializeField] Button questBtn;
 
     [Header("버튼에 연결된 UI (UIBase를 상속받아야 함)")]
-    [SerializeField] UIBase basicStatPanel;
     [SerializeField] UIBase characterListPanel;
     [SerializeField] UIBase invenPanel;
     [SerializeField] UIBase gachaPanel;
@@ -39,7 +37,6 @@ public class TabBarController : MonoBehaviour
     {
         tabToPanel = new Dictionary<Button, UIBase>
         {
-            //{ basicStatBtn, basicStatPanel },
             { characterListBtn, characterListPanel },
             { invenBtn, invenPanel },
             { gachaBtn, gachaPanel },
