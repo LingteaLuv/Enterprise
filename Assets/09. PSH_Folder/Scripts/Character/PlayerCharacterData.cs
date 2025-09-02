@@ -1,6 +1,7 @@
-using UnityEngine;
+using JHT;
 using System.Collections.Generic;
 using System.Numerics;
+using UnityEngine;
 
 public enum Stat
 {
@@ -28,8 +29,8 @@ public class PlayerCharacterData
     // Key: 스탯 이름(string), Value: 현재 스탯 양 캐릭터의 레벨에 따라서 변경
     public Dictionary<Stat, float> characterStats = new Dictionary<Stat, float>();
 
-    //[Header("장비")]
-    // 장비 코드 정보만 저장
+    [Header("장비")]
+    public WeaponObject EquippedWeapon { get; set; } = null;
 
     //[Header("유물")]
     // 적용되고 있는 유물 정보만 저장
