@@ -6,7 +6,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "RelicsGachaLootTable", menuName = "RelicsGachaLootTable/RlicsGachaTable")]
 public class RelicsGachaLootTable : ScriptableObject
 {
-    [SerializeField] private List<RelicsGacha> _items;
+    public int tableNum;
+    public List<RelicsGacha> _items;
     [System.NonSerialized] private bool isInitialized = false;
     [System.NonSerialized] private float _totalWeight;
 
@@ -44,5 +45,5 @@ public class RelicsGachaLootTable : ScriptableObject
 public class RelicsGacha
 {
     public ItemRarity rarity;
-    public float weight;
+    public int weight;
 }

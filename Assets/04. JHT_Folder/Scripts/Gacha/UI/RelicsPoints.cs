@@ -11,7 +11,7 @@ public class RelicsPoints : MonoBehaviour
 
     [SerializeField] private Image fillImage; 
 
-    private event Action<float> OnChangeValue;
+    private event Action OnChangeValue;
 
     RelicsGachaManager gachaManager;
     void Start()
@@ -24,18 +24,18 @@ public class RelicsPoints : MonoBehaviour
         gachaManager = manager;
         relicsMaxPointText.text = manager.relicsSpecialCost.ToString(); 
         InventoryManager.Instance.OnChangeRelicsPoints += ShowRelicsPoint;
-        ShowRelicsPoint(InventoryManager.Instance.myRelicsPoints);
+        ShowRelicsPoint();
         OnChangeValue += ChangeRelicsPoint;
     }
 
-    private void ShowRelicsPoint(float value)
+    private void ShowRelicsPoint()
     {
-        relicsPointText.text = value.ToString();
-        OnChangeValue?.Invoke(value);
+        relicsPointText.text = InventoryManager.Instance.relicsPoints.ToString();
+        OnChangeValue?.Invoke();
     }
 
-    private void ChangeRelicsPoint(float value)
+    private void ChangeRelicsPoint()
     {
-        fillImage.fillAmount = value / gachaManager.relicsSpecialCost;
+        fillImage.fillAmount = InventoryManager.Instance.relicsPoints / gachaManager.relicsSpecialCost;
     }
 }

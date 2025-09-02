@@ -11,6 +11,7 @@ namespace JHT
         [SerializeField] private Image relicsImage;
         [SerializeField] private TextMeshProUGUI powerText;
         [SerializeField] private TextMeshProUGUI levelText;
+        [SerializeField] private TextMeshProUGUI powerTypeText;
 
         public void Init(RelicsObject relics)
         {
@@ -20,6 +21,7 @@ namespace JHT
             relicsImage.sprite = relics.itemSO.icon;
             powerText.text = relics.itemPower.ToString();
             levelText.text = relics.itemLevel.ToString();
+            powerTypeText.text = relics.itemPowerType.ToString();
         }
     }
 }
