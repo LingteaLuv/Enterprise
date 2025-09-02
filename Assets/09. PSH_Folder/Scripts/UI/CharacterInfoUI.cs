@@ -42,6 +42,12 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     private List<PlayerCharacterData> characterList;
     private int currentIndex;
 
+    [Header("장비 UI")]
+    [SerializeField] private EquipmentListUI equipmentListUI;
+    [SerializeField] private Button openEquipmentListButton;
+    [SerializeField] private Image equippedWeaponIcon;
+    [SerializeField] private Sprite emptyWeaponSlotIcon; // 장비가 없을 때 표시할 기본 아이콘
+
     [Header("스와이프 설정")]
     public float swipeThreshold = 50f; // 스와이프로 인식할 최소 픽셀 거리
     private Vector2 dragStartPosition;
@@ -81,6 +87,11 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (nextButton != null)
         {
             nextButton.onClick.AddListener(NextCharacter);
+        }
+
+        if (openEquipmentListButton != null)
+        {
+            openEquipmentListButton.onClick.AddListener(OnOpenEquipmentList);
         }
     }
 
@@ -330,6 +341,23 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         base.SetHide(); // gameObject.SetActive(false)를 호출
     }
 
+    public override void ResetPanel()
+    {
+        equipmentListUI.gameObject.SetActive(false);
+    }
+    private void OnOpenEquipmentList()
+    {
+        if (equipmentListUI != null)
+        {
+            equipmentListUI.gameObject.SetActive(true);
+            equipmentListUI.ShowForCharacter(currentCharacterData);
+        }
+        else
+        {
+            Debug.LogError("EquipmentListUI가 연결되지 않았습니다!");
+        }
+    }
+
     #region 스와이프 처리
     public void OnBeginDrag(PointerEventData eventData)
     {
@@ -362,3 +390,4 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     }
     #endregion
 }
+
