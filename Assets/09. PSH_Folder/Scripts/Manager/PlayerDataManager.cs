@@ -1,3 +1,4 @@
+using JHT;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     private const int FRAGMENT_GAIN_2 = 40;
     private const int FRAGMENT_GAIN_3 = 300;
     // 가챠 횟수
-    public int GachaPityCounter {  get; set; }
+    public int GachaPityCounter { get; set; }
 
 
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
@@ -118,9 +119,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         starUpgradeCosts = new Dictionary<int, int>()
         {
-            { 1, STAR_UPGRADE_COST_1 }, 
+            { 1, STAR_UPGRADE_COST_1 },
             { 2, STAR_UPGRADE_COST_2 },
-            { 3, STAR_UPGRADE_COST_3 }, 
+            { 3, STAR_UPGRADE_COST_3 },
             { 4, STAR_UPGRADE_COST_4 }
         };
     }
@@ -276,6 +277,64 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
         return false;
     }
+
+    #region 장비 관리
+
+    /// <summary>
+    /// 캐릭터에게 무기를 장착시킵니다. (스탯/직업 검사 없음)
+    /// </summary>
+    public bool EquipWeapon(PlayerCharacterData character, WeaponObject weapon)
+    {
+        if (character == null || weapon == null)
+        {
+            Debug.LogError("캐릭터 또는 무기 데이터가 null입니다.");
+            return false;
+        }
+
+        // 다른 캐릭터가 이미 장착했는지 확인
+        if (weapon.EquippedByCharacterId != null)
+        {
+            Debug.LogWarning($"{weapon.itemName}은(는) 이미 다른 캐릭터(ID: {weapon.EquippedByCharacterId})가 장착 중입니다.");
+            return false;
+        }
+
+        // 현재 캐릭터가 다른 무기를 장착하고 있다면 해제
+        if (character.EquippedWeapon != null)
+        {
+            UnequipWeapon(character);
+        }
+
+        // 무기 장착
+        character.EquippedWeapon = weapon;
+        weapon.EquippedByCharacterId = character.characterdata.characterID.ToString();
+
+        Debug.Log($"{character.characterdata.characterName}이(가) {weapon.itemName}을(를) 장착했습니다.");
+        OnCharacterDataUpdated?.Invoke(character); // UI 갱신 등을 위해 이벤트 호출
+
+        return true;
+    }
+
+    /// <summary>
+    /// 캐릭터의 무기 장착을 해제합니다. (스탯 검사 없음)
+    /// </summary>
+    public void UnequipWeapon(PlayerCharacterData character)
+    {
+        if (character == null || character.EquippedWeapon == null)
+        {
+            return;
+        }
+
+        WeaponObject weaponToUnequip = character.EquippedWeapon;
+
+        Debug.Log($"{character.characterdata.characterName}의 {weaponToUnequip.itemName} 장착을 해제합니다.");
+
+        weaponToUnequip.EquippedByCharacterId = null;
+        character.EquippedWeapon = null;
+
+        OnCharacterDataUpdated?.Invoke(character); // UI 갱신 등을 위해 이벤트 호출
+    }
+
+    #endregion
 
     /// <summary>
     /// 보유 캐릭터 중 전투력이 높은 순서대로 편성을 자동으로 구성합니다.
