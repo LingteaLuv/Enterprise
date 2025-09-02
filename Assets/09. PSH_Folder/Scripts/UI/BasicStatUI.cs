@@ -5,7 +5,7 @@ using TMPro; // TextMeshPro 사용
 using System.Collections.Generic; // Dictionary 사용
 using System.Numerics; // BigInteger 사용
 
-public class BasicStatUI : MonoBehaviour
+public class BasicStatUI : UIBase
 {
     [Header("스탯 UI 그룹 (공격력, 방어력, 체력 순서)")]
     public BasicStatUIGroup[] statUIGroups; // 각 스탯별 UI 요소를 담을 배열
@@ -28,7 +28,7 @@ public class BasicStatUI : MonoBehaviour
         public HoldButton levelUpButton; // 레벨업 버튼
     }
 
-    void Awake()
+    private void Awake()
     {
         // 각 스탯 그룹의 레벨업 버튼에 리스너 연결
         foreach (var group in statUIGroups)
@@ -50,16 +50,10 @@ public class BasicStatUI : MonoBehaviour
         UpdateMultiplierButtonText();
     }
 
-    void OnEnable()
-    {
-        // 패널이 활성화될 때마다 UI 갱신
-        RefreshUI();
-    }
-
     /// <summary>
     /// 모든 기본 스탯 UI를 갱신합니다.
     /// </summary>
-    public void RefreshUI()
+    public override void RefreshUI()
     {
         if (BasicStatManager.Instance == null)
         {

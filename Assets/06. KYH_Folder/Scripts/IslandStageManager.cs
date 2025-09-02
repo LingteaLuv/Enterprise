@@ -109,7 +109,7 @@ public class IslandStageManager : MonoBehaviour
         {
             Debug.Log(" [HandleReturnAndNext] 모든 섬 완료");
 
-            if (!GlobalStageManager.Instance.bossBattleTriggered)
+            /*if (!GlobalStageManager.Instance.bossBattleTriggered)
             {
                 Debug.Log("→ 보스전 자동 진입 조건 만족 (처음 클리어)");
                 GlobalStageManager.Instance.bossBattleTriggered = true;
@@ -117,14 +117,11 @@ public class IslandStageManager : MonoBehaviour
                 // 보스 씬으로 이동
                 SceneManager.LoadScene("BossBattleScene");
                 yield break;
-            }
-            else
-            {
-                Debug.Log("→ 이미 보스전 진입한 상태, 일반 반복 전투 재시작");
-                ResetClearMarkers();
-                StartStage(); // 반복 전투 시작
-                yield break;
-            }
+            }*/
+            Debug.Log("→ 이미 보스전 진입한 상태, 일반 반복 전투 재시작");
+            ResetClearMarkers();
+            StartStage(); // 반복 전투 시작
+            yield break;
         }
 
         Debug.Log($"➡ [HandleReturnAndNext] MoveToAndEnter({currentIndex}) 호출 시도");

@@ -42,6 +42,10 @@ namespace JHT
 
         private void Start()
         {
+            ItemDataManager.Instance.OnWeaponInit -= WeaponInit;
+            ItemDataManager.Instance.OnWeaponInit += WeaponInit;
+            ItemDataManager.Instance.OnRelicInit -= RelicsInit;
+            ItemDataManager.Instance.OnRelicInit += RelicsInit;
             gameObject.SetActive(false);
         }
         
