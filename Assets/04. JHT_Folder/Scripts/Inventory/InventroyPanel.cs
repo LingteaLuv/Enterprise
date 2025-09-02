@@ -77,7 +77,7 @@ namespace JHT
             relicsModeButton.onClick.AddListener(ChangeRelicsMode);
             soulButton.onClick.AddListener(ChangeSoulMode);
 
-            ItemEventManager.Instance.OnClickItem += ShowItemStat;
+            itemEventManager.OnClickItem += ShowItemStat;
 
             ReSetItemPanel(null);
             ReSetRelicsPanel(null);

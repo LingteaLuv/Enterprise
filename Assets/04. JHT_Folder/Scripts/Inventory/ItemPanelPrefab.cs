@@ -100,7 +100,7 @@ namespace JHT
             if (weaponObject == null) return;
 
             Debug.Log(weaponObject.itemName + " (레벨 " + weaponObject.ItemLevel + ") 상세 정보 보기");
-            weaponStatPanel = FindAnyObjectByType<WeaponStatPanel>();
+            weaponStatPanel = transform.root.GetComponent<GameUIController>().StatPanel;
             if (weaponStatPanel != null)
             {
                 weaponStatPanel.ShowStats(weaponObject);
