@@ -11,6 +11,7 @@ public class AttendancePanel : UIBase
     [SerializeField] private List<Image> _attendanceImages;
 
     private int _attendance;
+    private bool _isTouched;
     
     public Action OnTouchedExitBtn;
 
@@ -18,7 +19,13 @@ public class AttendancePanel : UIBase
     {
         Debug.Log("Start 진입");
         _exitBtn.onClick.AddListener(() =>OnTouchedExitBtn?.Invoke());
-        _completeBtn.onClick.AddListener(OnTouchedCompleteBtn);
+        _completeBtn.onClick.AddListener(()=>
+        {
+            if (!_isTouched)
+            {
+                OnTouchedCompleteBtn();
+            }
+        });
         _completeBtn.interactable = false;
         
         await Init();
@@ -67,11 +74,15 @@ public class AttendancePanel : UIBase
         }
         DatabaseManager.Instance.Attendance((value) =>
         {
-            Debug.Log($"{_attendance}번째 이미지 알파값 변경 진행");
-            Color color = _attendanceImages[_attendance].color;
-            color.a = 0.1f;
-            _attendanceImages[_attendance].color = color;
-            _attendance++;
+            if (!_isTouched)
+            {
+                Debug.Log($"{_attendance}번째 이미지 알파값 변경 진행");
+                Color color = _attendanceImages[_attendance].color;
+                color.a = 0.1f;
+                _attendanceImages[_attendance].color = color;
+                _attendance++;
+                _isTouched = true;
+            }
         });
     }
 }

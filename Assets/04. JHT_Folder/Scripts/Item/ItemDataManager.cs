@@ -1,12 +1,10 @@
+using System;
 using JHT;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.ResourceManagement.Util;
 using System.Collections;
-using Unity.VisualScripting;
-using System.Linq;
 
 namespace JHT
 {
@@ -18,7 +16,6 @@ namespace JHT
 
         public List<ItemWeaponSO> weaponList;
         public Dictionary<string, ItemWeaponSO> weaponDataDic;
-        public EncyclopediaPanel encyclopediaPanel;
         
         public List<ItemRelicsSO> relicsList;
         public Dictionary<string, ItemRelicsSO> relicsDataDic;
@@ -37,7 +34,9 @@ namespace JHT
         public JHT_DataDownLoader downLoader;
         
         //데이터 로딩 완료시 호출
-        public System.Action<bool> OnRelicsDataLoadFinish;
+        public Action<bool> OnRelicsDataLoadFinish;
+        public Action OnRelicInit;
+        public Action OnWeaponInit;
 
         // 수정필요 : csv에서 데이터 받아온 후 초기화 할 수 있도록 설정 해야함 
         protected override void Awake()
@@ -135,7 +134,7 @@ namespace JHT
         private IEnumerator WeaponEndInit()
         {
             yield return new WaitForEndOfFrame();
-            encyclopediaPanel.WeaponInit();
+            OnWeaponInit?.Invoke();
         }
         #endregion
 
@@ -178,7 +177,7 @@ namespace JHT
         private IEnumerator RelicsEndInit()
         {
             yield return new WaitForEndOfFrame();
-            encyclopediaPanel.RelicsInit();
+            OnRelicInit?.Invoke();
 
             yield return DownLoadCSV();
         }

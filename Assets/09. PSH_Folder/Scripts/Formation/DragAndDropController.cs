@@ -5,8 +5,8 @@ using UnityEngine.UI;
 public class DragAndDropController : Singleton<DragAndDropController>
 {
     [Header("UI 설정")]
-    [Tooltip("고스트 아이콘이 생성될 최상위 캔버스입니다.")]
-    public Canvas mainCanvas;
+    //[Tooltip("고스트 아이콘이 생성될 최상위 캔버스입니다.")]
+    private Canvas mainCanvas;
     [SerializeField] private GameObject ghostIconPrefab; // 따라다니는 아이콘의 프리팹
 
     // 드래그 시작/종료 시 발생하는 이벤트
@@ -91,5 +91,11 @@ public class DragAndDropController : Singleton<DragAndDropController>
     {
         draggedCharacterData = null;
         OnDragEnd?.Invoke();
+    }
+
+    public void GetCanvas(Canvas canvas)
+    {
+        mainCanvas = canvas;
+        Debug.Log("DragAndDropController : MainCanvcas 연결 완료");
     }
 }

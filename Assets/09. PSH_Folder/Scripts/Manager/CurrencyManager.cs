@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Numerics;
@@ -44,16 +45,13 @@ public class CurrencyManager : Singleton<CurrencyManager>
     // 각 재화(CurrencyType)를 얼마나 보유하고 있는지 저장하는 딕셔너리
     private Dictionary<CurrencyType, BigInteger> currencyWallet = new Dictionary<CurrencyType, BigInteger>();
 
-    public TextMeshProUGUI goldText;
-    public TextMeshProUGUI stoneText;
-    public TextMeshProUGUI gemText;
-
     // 인스펙터에서 초기 재화량을 설정하기 위한 문자열 필드
     [Header("초기 재화 설정 (인스펙터용)")]
     [SerializeField] private string _initialGoldString;
     [SerializeField] private string _initialEnhancementStoneString;
     [SerializeField] private string _initialGemString;
 
+    public Action<string, string, string> OnUpdateCurrency;
     public bool IsFireBase;
     protected async override void Awake()
     {
@@ -98,10 +96,13 @@ public class CurrencyManager : Singleton<CurrencyManager>
         AddCurrencyFromInspectorString(CurrencyType.Gold, _initialGoldString);
         AddCurrencyFromInspectorString(CurrencyType.EnhancementStone, _initialEnhancementStoneString);
         AddCurrencyFromInspectorString(CurrencyType.Gem, _initialGemString);
-        
-        UpdateCurrencyUI();
     }
 
+    private void Start()
+    {
+        UpdateCurrencyUI();
+    }
+    
     // 헬퍼 함수: 문자열에서 재화를 추가
     public void AddCurrencyFromInspectorString(CurrencyType type, string amountString)
     {
@@ -176,9 +177,10 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
     public void UpdateCurrencyUI()
     {
-        goldText.text = $"gold : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gold])}";
-        stoneText.text = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
-        gemText.text = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gem])}";
+        string s1 = $"gold : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gold])}";
+        string s2 = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
+        string s3 = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gem])}";
+        OnUpdateCurrency?.Invoke(s1,s2,s3);
     }
 
     // 인스펙터에서 값이 변경될 때 호출됩니다.
