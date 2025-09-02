@@ -12,6 +12,7 @@ namespace JHT
     {
         private const string WEAPON_LABEL = "ItemWeapon";
         private const string RELICS_LABEL = "ItemRelics";
+        private const string LOOTTABLE_LABEL = "RootTable";
 
         public List<ItemWeaponSO> weaponList;
         public Dictionary<string, ItemWeaponSO> weaponDataDic;
@@ -19,12 +20,17 @@ namespace JHT
         public List<ItemRelicsSO> relicsList;
         public Dictionary<string, ItemRelicsSO> relicsDataDic;
 
+        public List<RelicsGachaLootTable> lootTableList;
+        public Dictionary<int, RelicsGachaLootTable> lootTableDic;
+
         private AsyncOperationHandle<IList<ItemWeaponSO>> weaponHandle;
         private AsyncOperationHandle<IList<ItemRelicsSO>> relicsHandle;
+        private AsyncOperationHandle<IList<RelicsGachaLootTable>> lootTableHandler;
 
         public bool IsDataLoaded { get; private set; } = false;
+        public bool IsRelicsDataLoaded { get; private set; } = false;
+        public bool IsLootTableDataLoaded { get; private set; } = false;
 
-        
         public JHT_DataDownLoader downLoader;
         
         //데이터 로딩 완료시 호출
@@ -52,16 +58,23 @@ namespace JHT
             relicsList = new();
             relicsDataDic = new();
 
+            lootTableList = new();
+            lootTableDic = new();
+
             ItemWeaponSO[] loadedWeapons = Resources.LoadAll<ItemWeaponSO>("EquipData");
             LoadWeaponList(loadedWeapons);
+
             //weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>(WEAPON_LABEL);
             relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>(RELICS_LABEL);
+            lootTableHandler = Addressables.LoadAssetsAsync<RelicsGachaLootTable>(LOOTTABLE_LABEL);
 
             //yield return weaponHandle;
             yield return relicsHandle;
+            yield return lootTableHandler;
 
             //LoadWeaponList(weaponHandle);
             LoadRelicsList(relicsHandle);
+            LoadLootTableList(lootTableHandler);
         }
         #region 장비
         private void LoadWeaponList(ItemWeaponSO[] objs)
@@ -156,6 +169,7 @@ namespace JHT
             {
                 //if (encyclopediaPanel == null)
                 //    encyclopediaPanel = FindObjectOfType<EncyclopediaPanel>();
+                IsRelicsDataLoaded = true;
                 StartCoroutine(RelicsEndInit());
             }
         }
@@ -170,7 +184,7 @@ namespace JHT
 
         private IEnumerator DownLoadCSV()
         {
-            while (!IsDataLoaded)
+            while (!IsRelicsDataLoaded)
                 yield return null;
 
             downLoader = new JHT_DataDownLoader();
@@ -181,6 +195,56 @@ namespace JHT
 
         #endregion
 
+        #region 가챠 테이블
+        private void LoadLootTableList(AsyncOperationHandle<IList<RelicsGachaLootTable>> table)
+        {
+            List<RelicsGachaLootTable> list = new();
+
+            foreach (var r in table.Result)
+            {
+                list.Add(r);
+            }
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                lootTableList.Add(list[i]);
+            }
+
+            LoadLootTableFinish(lootTableList);
+        }
+
+        private void LoadLootTableFinish(List<RelicsGachaLootTable> list)
+        {
+            lootTableDic.Clear();
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (!lootTableDic.ContainsKey(list[i].tableNum))
+                    lootTableDic.Add(list[i].tableNum, list[i]);
+            }
+
+            if (lootTableHandler.Status == AsyncOperationStatus.Succeeded)
+            {
+                //if (encyclopediaPanel == null)
+                //    encyclopediaPanel = FindObjectOfType<EncyclopediaPanel>();
+                IsLootTableDataLoaded = true;
+                StartCoroutine(LootTableEndit());
+            }
+        }
+
+        private IEnumerator LootTableEndit()
+        {
+            yield return new WaitForEndOfFrame();
+
+            while (!IsLootTableDataLoaded)
+                yield return null;
+
+            downLoader = new JHT_DataDownLoader();
+
+            OnRelicsDataLoadFinish?.Invoke(true);
+            yield return downLoader.DownloadData();
+        }
+        #endregion
 
         public Dictionary<string, ItemWeaponSO> GetAllWeaponData()
         {
