@@ -23,8 +23,7 @@ public class DragAndDropController : Singleton<DragAndDropController>
         base.Awake();
         if (mainCanvas == null)
         {
-            mainCanvas = FindObjectOfType<Canvas>();
-            if (mainCanvas != null) Debug.LogWarning("[DragAndDropController] Main Canvas가 자동으로 할당되었습니다. 정확한 동작을 위해 직접 할당하는 것을 권장합니다.");
+            Debug.Log("[DragAndDropController] 캔버스연결행애");
         }
     }
 

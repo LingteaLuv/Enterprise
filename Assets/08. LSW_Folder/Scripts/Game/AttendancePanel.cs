@@ -14,7 +14,7 @@ public class AttendancePanel : UIBase
     
     public Action OnTouchedExitBtn;
 
-    private async void Start()
+    private async void Awake()
     {
         Debug.Log("Start 진입");
         _exitBtn.onClick.AddListener(() =>OnTouchedExitBtn?.Invoke());
@@ -37,7 +37,7 @@ public class AttendancePanel : UIBase
             {
                 int index = i;
                 Color color = _attendanceImages[index].color;
-                color.a = 20;
+                color.a = 0.1f;
                 _attendanceImages[index].color = color;
             }
         });

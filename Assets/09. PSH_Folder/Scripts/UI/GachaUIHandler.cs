@@ -37,7 +37,7 @@ public class GachaUIHandler : UIBase
     [Tooltip("뽑기 결과 화면 UI를 연결하세요.")]
     public GachaListUI gachaListPanel;
     public RelicsGachaListUI relicsGachaListPanel;
-    [SerializeField] private TextMeshProUGUI relicsPoints;
+    [SerializeField] private RelicsPoints relicsPoints;
 
     public override void ResetPanel()
     {
@@ -81,8 +81,7 @@ public class GachaUIHandler : UIBase
         // 유물 뽑기 버튼 이벤트 연결 및 인벤토리 액션연결
         relicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Single);
         specialRelicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Special);
-        InventoryManager.Instance.OnChangeRelicsPoints += ShowRelicsPoint;
-        ShowRelicsPoint(InventoryManager.Instance.myRelicsPoints);
+        relicsPoints.Init(relicsGachaManager);
     }
 
 
@@ -242,11 +241,6 @@ public class GachaUIHandler : UIBase
             });
         }
 
-    }
-
-    private void ShowRelicsPoint(float value)
-    {
-        relicsPoints.text = value.ToString();
     }
 
     //private void OnDestroy()

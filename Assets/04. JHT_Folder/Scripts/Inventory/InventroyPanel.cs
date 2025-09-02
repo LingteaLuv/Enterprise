@@ -1,4 +1,5 @@
 using JHT;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -37,8 +38,8 @@ namespace JHT
         private ItemEventManager itemEventManager;
 
         private List<ItemPanelPrefab> itemPanelPool = new List<ItemPanelPrefab>();
-        private List<ItemRelicsPanelItem> itemRelicsPanelPool = new List<ItemRelicsPanelItem>();
 
+        private JHT_ObjectPool relicsPool;
         public override void ResetPanel()
         {
             base.ResetPanel();
@@ -53,8 +54,16 @@ namespace JHT
             Debug.Log("InventoryPanel이 리셋되어, 모든 상세창을 닫고 기본 탭으로 돌립니다.");
         }
 
+        private void Awake()
+        {
+            if (relicsPool == null)
+                relicsPool = new(itemRelicsPanelItem, relicsPanelParent, 10);
+
+        }
+
         private void OnEnable()
         {
+            
             inventoryManager = InventoryManager.Instance;
             itemEventManager = ItemEventManager.Instance;
 
@@ -91,6 +100,7 @@ namespace JHT
 
         private void Start()
         {
+
             curMode = InventoryMode.Weapon;
             inventoryManager.currentMode = curMode;
 
@@ -220,34 +230,21 @@ namespace JHT
 
         private void ReSetRelicsPanel(ItemObject changedItem)
         {
-            // 1. 모든 풀링된 패널을 비활성화
-            foreach (ItemRelicsPanelItem panel in itemRelicsPanelPool)
+
+            for (int i =0; i < inventoryManager.relicsList.Count; i++)
             {
-                panel.gameObject.SetActive(false);
+                ItemRelicsPanelItem item = (ItemRelicsPanelItem)relicsPool.list[i];
+                item.Outit(inventoryManager.relicsList[i]);
+                relicsPool.list[i].Release();
             }
-            Debug.Log($"{inventoryManager.relicsList.Count}");
-            // 2. 인벤토리 리스트를 기반으로 패널을 재사용/생성하여 업데이트
+
             for (int i = 0; i < inventoryManager.relicsList.Count; i++)
             {
-                ItemRelicsPanelItem currentPanel;
-                if (i < itemRelicsPanelPool.Count)
-                {
-                    // 풀에 사용 가능한 패널이 있으면 재사용
-                    currentPanel = itemRelicsPanelPool[i];
-                }
-                else
-                {
-                    // 풀이 부족하면 새로 생성하고 풀에 추가
-                    currentPanel = Instantiate(itemRelicsPanelItem);
-                    currentPanel.transform.SetParent(relicsPanelParent);
-                    itemRelicsPanelPool.Add(currentPanel);
-                }
-
-                RelicsObject relics = inventoryManager.relicsList[i];
-                currentPanel.Init(relics);
-                currentPanel.gameObject.SetActive(true);
+                ItemRelicsPanelItem panel = relicsPool.GetPooled() as ItemRelicsPanelItem;
+                panel.Init(inventoryManager.relicsList[i]);
             }
         }
+
 
         private void ChangeWeaponMode()
         {

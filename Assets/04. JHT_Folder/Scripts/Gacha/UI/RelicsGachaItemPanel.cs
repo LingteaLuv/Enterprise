@@ -27,7 +27,7 @@ public class RelicsGachaItemPanel : MonoBehaviour
 
         curPowerType = relicsGachaManager.relicsResult.itemPowerType;
 
-        curPower = curSO.upPower[(int)curRarity - 1] * curLevel;
+        curPower = curSO.startPower[(int)curRarity - 1] + curSO.upPower[(int)curRarity - 1] * curLevel;
         rarityImage.sprite = curSO.rarityImage[(int)curRarity - 1];
 
         powerText.text = curPower.ToString();

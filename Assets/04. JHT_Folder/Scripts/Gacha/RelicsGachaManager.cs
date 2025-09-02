@@ -13,6 +13,8 @@ public class RelicsGachaManager : MonoBehaviour
     public int relicsCouponCost;
     public float relicsSpecialCost;
 
+    public bool isChoose;
+
     private List<ItemRelicsSO> gachaData;
 
 

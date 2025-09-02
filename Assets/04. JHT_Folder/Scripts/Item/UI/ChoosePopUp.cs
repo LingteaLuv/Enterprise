@@ -21,6 +21,7 @@ public class ChoosePopUp : MonoBehaviour
     [SerializeField] private TextMeshProUGUI item1PowerTypeText;
     [SerializeField] private TextMeshProUGUI item1PowerText;
     [SerializeField] private TextMeshProUGUI item1Name;
+    private float item1Power;
 
     [Header("Item2 information")]
     [SerializeField] private Image item2;
@@ -32,6 +33,7 @@ public class ChoosePopUp : MonoBehaviour
     [SerializeField] private TextMeshProUGUI item2PowerText;
     [SerializeField] private TextMeshProUGUI compareText;
     [SerializeField] private TextMeshProUGUI item2Name;
+    private float item2Power;
 
 
     private RelicsObject relicsObj1;
@@ -44,6 +46,14 @@ public class ChoosePopUp : MonoBehaviour
     private bool selectMyItem;
     public bool SelectMyItem { get { return selectMyItem; } set { selectMyItem = value; OnSelect?.Invoke(selectMyItem); } }
     private event Action<bool> OnSelect;
+
+    //JHT_ObjectPool pool;
+    //
+    //private void Start()
+    //{
+    //    pool = new JHT_ObjectPool()
+    //}
+
     public void Init(RelicsObject obj1, RelicsObject obj2)
     {
         relicsObj1 = obj1;
@@ -58,7 +68,8 @@ public class ChoosePopUp : MonoBehaviour
 
         OnSelect += ChooseItem;
 
-        CompareObj(obj1, obj2);
+        CompareObj();
+        selectButton.interactable = false;
     }
 
     public void OnDisable()
@@ -70,10 +81,13 @@ public class ChoosePopUp : MonoBehaviour
     // 아이템 1 세팅
     private void Item1Setting()
     {
-        item1.sprite = relicsObj1.itemSO.icon;
+        ItemRelicsSO so = (ItemRelicsSO)relicsObj1.itemSO;
+
+        item1.sprite = so.icon;
         item1RarityImg.sprite = relicsObj1.itemRarityImage;
 
-        item1PowerText.text = $"{relicsObj1.itemPower}";
+        item1Power = so.startPower[(int)relicsObj1.curRarity - 1] + so.upPower[(int)relicsObj1.curRarity - 1] * relicsObj1.itemLevel;
+        item1PowerText.text = $"{item1Power.ToString()}";
         item1PowerTypeText.text = $"{relicsObj1.itemPowerType.ToString()} : ";
 
         item1RarityText.text = $"{relicsObj1.curRarity}";
@@ -85,28 +99,40 @@ public class ChoosePopUp : MonoBehaviour
     // 아이템 2 세팅
     private void Item2Setting()
     {
-        item2.sprite = relicsObj2.itemSO.icon;
+        ItemRelicsSO so = (ItemRelicsSO)relicsObj2.itemSO;
+
+        item2.sprite = so.icon;
         item2RarityImg.sprite = relicsObj2.itemRarityImage;
 
-        item2PowerText.text = $"{relicsObj2.itemPower}";
-
+        item2Power = so.startPower[(int)relicsObj2.curRarity - 1] + so.upPower[(int)relicsObj2.curRarity - 1] * relicsObj2.itemLevel;
+        item2PowerText.text = $"{item2Power.ToString()}";
         item2PowerTypeText.text = $"{relicsObj2.itemPowerType.ToString()} : ";
 
         item2RarityText.text = $"{relicsObj2.curRarity}";
 
         item2RarityColor.color = SetItemRarityColor(relicsObj2);
         item2Name.text = relicsObj2.itemName;
-
     }
 
     private void ClickButton1()
     {
         SelectMyItem = true;
+
+
+        if (!selectButton.interactable)
+        {
+            selectButton.interactable = true;
+        }
     }
 
     private void ClickButton2()
     {
         SelectMyItem = false;
+
+        if (!selectButton.interactable)
+        {
+            selectButton.interactable = true;
+        }
     }
 
     private void SelectItem()
@@ -135,9 +161,9 @@ public class ChoosePopUp : MonoBehaviour
         }
     }
 
-    private void CompareObj(RelicsObject obj1, RelicsObject obj2)
+    private void CompareObj()
     {
-        compare = obj1.itemPower - obj2.itemPower;
+        compare = item1Power - item2Power;
         if (compare > 0)
         {
             downImage.SetActive(true);

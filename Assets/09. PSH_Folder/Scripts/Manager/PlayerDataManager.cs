@@ -196,6 +196,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         character.characterLevel++;
         Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.characterLevel})");
         QuestSignalManager.Instance.LevelUp(ItemType.Character, 1);
+        character.RecaculateStats();
         OnCharacterDataUpdated?.Invoke(character); // 데이터 변경 이벤트 발생
         CurrencyManager.Instance.UpdateCurrencyUI();
         return true;

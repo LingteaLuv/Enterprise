@@ -22,8 +22,6 @@ public class RelicsGachaListUI : MonoBehaviour
 
     public void Init(RelicsGachaManager relicsGachaManager)
     {
-        backPanel.SetActive(true);
-
         relicsGachaManager.OnChooseItem -= ShowChooseItem;
         relicsGachaManager.OnChooseItem += ShowChooseItem;
         closeButton.onClick.AddListener(ClosePanel);
@@ -40,17 +38,20 @@ public class RelicsGachaListUI : MonoBehaviour
         relicsGachaManager.rarityResult != ItemRarity.None &&
         relicsGachaManager.levelResult > 0);
 
+        backPanel.SetActive(true);
 
         RelicsGachaItemPanel panel = Instantiate(relicsPanelItem);
         panel.transform.SetParent(relicsItemParent);
         panel.Init(relicsGachaManager);
+        
     }
 
     private void ClosePanel()
     {
         if(this.gameObject.activeSelf)
         {
-            backPanel.SetActive(false);
+            if(backPanel.activeSelf)
+                backPanel.SetActive(false);
 
             closeButton.onClick.RemoveListener(ClosePanel);
             gameObject.SetActive(false);
