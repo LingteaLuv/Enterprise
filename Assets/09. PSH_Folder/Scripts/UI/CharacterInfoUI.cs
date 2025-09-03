@@ -1,8 +1,9 @@
+using JHT;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 // 1. MonoBehaviour 대신 UIBase를 상속받고, 드래그 인터페이스들을 구현합니다.
 public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDragHandler
@@ -12,6 +13,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     public Image characterImage;
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI soulFragmentsText; // 캐릭터별 영혼 조각
+    public TextMeshProUGUI crewRoleFactionText;
 
     [Header("닫기 버튼")]
     public Button closeButton;
@@ -44,8 +46,9 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
 
     [Header("장비 UI")]
     [SerializeField] private EquipmentListUI equipmentListUI;
-    [SerializeField] private Button openEquipmentListButton;
-    [SerializeField] private Image equippedWeaponIcon;
+    // 버튼 순서: 0:무기, 1:방패, 2:갑옷
+    [SerializeField] private Button[] openEquipmentListButtons = new Button[3];
+    [SerializeField] private Image[] equippedWeaponIcons = new Image[3];
     [SerializeField] private Sprite emptyWeaponSlotIcon; // 장비가 없을 때 표시할 기본 아이콘
 
     [Header("스와이프 설정")]
@@ -89,9 +92,12 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             nextButton.onClick.AddListener(NextCharacter);
         }
 
-        if (openEquipmentListButton != null)
+        // 장비 버튼 이벤트 연결
+        if (openEquipmentListButtons.Length >= 3)
         {
-            openEquipmentListButton.onClick.AddListener(OnOpenEquipmentList);
+            openEquipmentListButtons[0].onClick.AddListener(() => OnOpenEquipmentList(EquipCategory.Weapon));
+            openEquipmentListButtons[1].onClick.AddListener(() => OnOpenEquipmentList(EquipCategory.Shield));
+            openEquipmentListButtons[2].onClick.AddListener(() => OnOpenEquipmentList(EquipCategory.Armor));
         }
     }
 
@@ -125,19 +131,21 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
 
         if (currentCharacterData != null)
         {
-            characterNameText.text = $"이름 : {currentCharacterData.characterdata.characterName}";
+            characterNameText.text = $"{currentCharacterData.characterdata.characterName}";
             characterImage.sprite = currentCharacterData.characterdata.characterSprite;
-            levelText.text = $"캐릭터 레벨 : {currentCharacterData.characterLevel}";
+            levelText.text = $"LV {currentCharacterData.characterLevel}";
+            crewRoleFactionText.text = $"{currentCharacterData.characterdata.crewRole} {currentCharacterData.characterdata.faction}";
 
             UpdateSoulFragmentsUI();
             UpdateLevelUpUI();
             UpdateStarUpgradeUI();
             UpdateCharacterStatsDisplay();
+            UpdateEquipmentIcons(); // 장비 아이콘 업데이트 호출
         }
         else
         {
             Debug.LogWarning("CharacterInfoUI: 현재 인덱스의 캐릭터 데이터가 null입니다.");
-            SetHide(); // ClosePanel() 대신 SetHide() 사용
+            SetHide();
         }
 
         // 좌우 버튼 활성화/비활성화 로직
@@ -179,12 +187,9 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         int characterId = currentCharacterData.characterdata.characterID;
         int currentFragments = 0;
 
-        // PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments);
-        // PlayerDataManager.Instance가 BigInteger를 사용한다면, currentFragments도 BigInteger여야 합니다.
-        // 현재는 int로 가정합니다.
         if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments))
         {
-            soulFragmentsText.text = $"영혼 조각 : {currentFragments}";
+            soulFragmentsText.text = $"영혼 조각 : {currentFragments} \n 승급";
         }
         else
         {
@@ -345,16 +350,39 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     {
         equipmentListUI.gameObject.SetActive(false);
     }
-    private void OnOpenEquipmentList()
+    private void OnOpenEquipmentList(EquipCategory category)
     {
         if (equipmentListUI != null)
         {
             equipmentListUI.gameObject.SetActive(true);
-            equipmentListUI.ShowForCharacter(currentCharacterData);
+            equipmentListUI.ShowForCharacter(currentCharacterData, category);
         }
         else
         {
             Debug.LogError("EquipmentListUI가 연결되지 않았습니다!");
+        }
+    }
+
+    private void UpdateEquipmentIcons()
+    {
+        if (currentCharacterData == null) return;
+
+        // 버튼 순서: 0:무기, 1:방패, 2:갑옷
+        UpdateIconForCategory(EquipCategory.Weapon, 0);
+        UpdateIconForCategory(EquipCategory.Shield, 1);
+        UpdateIconForCategory(EquipCategory.Armor, 2);
+    }
+
+    private void UpdateIconForCategory(EquipCategory category, int iconIndex)
+    {
+        if (currentCharacterData.equippedItems.TryGetValue(category, out WeaponObject equippedItem) && equippedItem != null)
+        {
+            // WeaponObject에 'itemIcon'이라는 Sprite 프로퍼티가 있다고 가정합니다.
+            equippedWeaponIcons[iconIndex].sprite = equippedItem.itemIcon;
+        }
+        else
+        {
+            equippedWeaponIcons[iconIndex].sprite = emptyWeaponSlotIcon;
         }
     }
 
@@ -390,4 +418,3 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     }
     #endregion
 }
-

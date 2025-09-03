@@ -16,6 +16,7 @@ public class EquipmentListUI : MonoBehaviour
     private InventoryManager inventoryManager;
 
     private PlayerCharacterData currentCharacter;
+    private EquipCategory currentCategory;
     private List<WeaponObject> displayedWeaponList = new List<WeaponObject>();
 
     private void Awake()
@@ -70,9 +71,10 @@ public class EquipmentListUI : MonoBehaviour
         ClearDisplay();
     }
 
-    public void ShowForCharacter(PlayerCharacterData character)
+    public void ShowForCharacter(PlayerCharacterData character, EquipCategory category)
     {
         this.currentCharacter = character;
+        this.currentCategory = category;
         RefreshDisplay();
         detailPanel.gameObject.SetActive(false);
     }
@@ -98,27 +100,41 @@ public class EquipmentListUI : MonoBehaviour
             return;
         }
 
-        var filteredList = FilterWeapons();
+        var filteredList = FilterEquipment();
         displayedWeaponList = SortWeapons(filteredList);
         UpdateWeaponPanels();
     }
 
-    private List<WeaponObject> FilterWeapons()
+    private List<WeaponObject> FilterEquipment()
     {
+        // 1. 해당 카테고리의 장비만 필터링
+        // 2. 다른 캐릭터가 장착하지 않은 장비만 필터링
+        // 3. 현재 캐릭터가 장착할 수 있는 장비만 필터링 (직업 제한 등)
         return inventoryManager.weaponList.Where(weapon =>
         {
+            bool isCorrectCategory = weapon.equipCategory == this.currentCategory;
             bool isNotEquipped = string.IsNullOrEmpty(weapon.EquippedByCharacterId);
-            bool isEquippable = IsEquippableByCharacter(weapon, currentCharacter);
-            return isNotEquipped && isEquippable;
+            bool isEquippableByRole = IsEquippableByCharacter(weapon, currentCharacter);
+
+            return isCorrectCategory && isNotEquipped && isEquippableByRole;
         }).ToList();
     }
 
     private bool IsEquippableByCharacter(WeaponObject weapon, PlayerCharacterData character)
     {
         if (weapon == null || character == null) return false;
+
+        // Armor and Shields can be equipped by any role.
+        if (weapon.equipCategory == EquipCategory.Armor || weapon.equipCategory == EquipCategory.Shield)
+        {
+            return true;
+        }
+
+        // For weapons, check the character's role.
         ItemWeaponSO weaponSO = (ItemWeaponSO)weapon.itemSO;
-        CrewRole role = character.characterdata.crewRole;
         EquipType type = weaponSO.equipType;
+        CrewRole role = character.characterdata.crewRole;
+
         switch (role)
         {
             case CrewRole.Captain:
@@ -153,7 +169,7 @@ public class EquipmentListUI : MonoBehaviour
 
         while (itemPanelPool.Count < displayedWeaponList.Count)
         {
-            ItemEquipPanel newPanel = Instantiate(itemEquipPanelPrefab, weaponPanelParent); // *** 타입 변경
+            ItemEquipPanel newPanel = Instantiate(itemEquipPanelPrefab, weaponPanelParent);
             itemPanelPool.Add(newPanel);
         }
 
@@ -177,7 +193,7 @@ public class EquipmentListUI : MonoBehaviour
 
     private void ShowDetailPanel(WeaponObject weapon)
     {
-        detailPanel.ShowPanel(weapon, currentCharacter);
+        detailPanel.ShowPanel(weapon, currentCharacter, currentCategory);
     }
 
     private void ClearDisplay()

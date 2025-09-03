@@ -278,60 +278,80 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         return false;
     }
 
-    #region 장비 관리
+    #region 아이템 관리
 
     /// <summary>
-    /// 캐릭터에게 무기를 장착시킵니다. (스탯/직업 검사 없음)
+    /// 캐릭터에게 아이템을 장착시킵니다.
     /// </summary>
-    public bool EquipWeapon(PlayerCharacterData character, WeaponObject weapon)
+    public bool EquipItem(PlayerCharacterData character, WeaponObject newItem)
     {
-        if (character == null || weapon == null)
+        if (character == null || newItem == null)
         {
-            Debug.LogError("캐릭터 또는 무기 데이터가 null입니다.");
+            Debug.LogError("캐릭터 또는 아이템 데이터가 null입니다.");
             return false;
         }
 
         // 다른 캐릭터가 이미 장착했는지 확인
-        if (weapon.EquippedByCharacterId != null)
+        if (!string.IsNullOrEmpty(newItem.EquippedByCharacterId))
         {
-            Debug.LogWarning($"{weapon.itemName}은(는) 이미 다른 캐릭터(ID: {weapon.EquippedByCharacterId})가 장착 중입니다.");
+            Debug.LogWarning($"{newItem.itemName}은(는) 이미 다른 캐릭터(ID: {newItem.EquippedByCharacterId})가 장착 중입니다.");
             return false;
         }
 
-        // 현재 캐릭터가 다른 무기를 장착하고 있다면 해제
-        if (character.EquippedWeapon != null)
+        EquipCategory category = newItem.equipCategory;
+
+        // 현재 슬롯에 다른 아이템을 장착하고 있다면 해제
+        if (character.equippedItems.ContainsKey(category))
         {
-            UnequipWeapon(character);
+            UnequipItem(character, category);
         }
 
-        // 무기 장착
-        character.EquippedWeapon = weapon;
-        weapon.EquippedByCharacterId = character.characterdata.characterID.ToString();
+        // 아이템 장착
+        character.equippedItems[category] = newItem;
+        newItem.EquippedByCharacterId = character.characterdata.characterID.ToString();
 
-        Debug.Log($"{character.characterdata.characterName}이(가) {weapon.itemName}을(를) 장착했습니다.");
+        Debug.Log($"{character.characterdata.characterName}이(가) {newItem.itemName}을(를) {category} 슬롯에 장착했습니다.");
         OnCharacterDataUpdated?.Invoke(character); // UI 갱신 등을 위해 이벤트 호출
 
         return true;
     }
 
     /// <summary>
-    /// 캐릭터의 무기 장착을 해제합니다. (스탯 검사 없음)
+    /// 캐릭터의 특정 카테고리 아이템 장착을 해제합니다.
     /// </summary>
-    public void UnequipWeapon(PlayerCharacterData character)
+    public void UnequipItem(PlayerCharacterData character, EquipCategory category)
     {
-        if (character == null || character.EquippedWeapon == null)
+        if (character == null || !character.equippedItems.ContainsKey(category))
         {
             return;
         }
 
-        WeaponObject weaponToUnequip = character.EquippedWeapon;
+        WeaponObject itemToUnequip = character.equippedItems[category];
 
-        Debug.Log($"{character.characterdata.characterName}의 {weaponToUnequip.itemName} 장착을 해제합니다.");
+        Debug.Log($"{character.characterdata.characterName}의 {category} 슬롯에서 {itemToUnequip.itemName} 장착을 해제합니다.");
 
-        weaponToUnequip.EquippedByCharacterId = null;
-        character.EquippedWeapon = null;
+        itemToUnequip.EquippedByCharacterId = null;
+        character.equippedItems.Remove(category);
 
         OnCharacterDataUpdated?.Invoke(character); // UI 갱신 등을 위해 이벤트 호출
+    }
+
+    /// <summary>
+    /// 캐릭터의 특정 아이템 장착을 해제합니다.
+    /// </summary>
+    public void UnequipItem(PlayerCharacterData character, WeaponObject itemToUnequip)
+    {
+        if (character == null || itemToUnequip == null)
+        {
+            return;
+        }
+
+        // 아이템의 카테고리를 찾아서 해당 카테고리의 장착을 해제
+        EquipCategory category = itemToUnequip.equipCategory;
+        if (character.equippedItems.ContainsKey(category) && character.equippedItems[category] == itemToUnequip)
+        {
+            UnequipItem(character, category);
+        }
     }
 
     #endregion

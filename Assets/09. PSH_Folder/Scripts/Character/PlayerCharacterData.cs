@@ -30,7 +30,7 @@ public class PlayerCharacterData
     public Dictionary<Stat, float> characterStats = new Dictionary<Stat, float>();
 
     [Header("장비")]
-    public WeaponObject EquippedWeapon { get; set; } = null;
+    public Dictionary<EquipCategory, WeaponObject> equippedItems = new Dictionary<EquipCategory, WeaponObject>();
 
     //[Header("유물")]
     // 적용되고 있는 유물 정보만 저장
@@ -54,6 +54,10 @@ public class PlayerCharacterData
         {
             characterStats[stat.statName] = stat.value;
         }
+
+        // 장비 딕셔너리 초기화
+        equippedItems = new Dictionary<EquipCategory, WeaponObject>();
+
         // 최초 스탯 계산. BasicStatManager가 준비되기 전에 호출될 수 있으므로 battlePower만 초기화합니다.
         battlePower = 0;
     }
@@ -87,12 +91,16 @@ public class PlayerCharacterData
         }
 
         // 3. 장비 및 유물 스탯 적용 (향후 확장)
-
-        if (EquippedWeapon != null)
+        // 참고: 현재 스탯은 각 장비마다 곱연산으로 적용됩니다. (예: 10% 증가 장비 2개 = 1.1 * 1.1 = 1.21 배)
+        // 합연산을 원한다면 (1 + 0.1 + 0.1 = 1.2배) 별도의 로직 구현이 필요합니다.
+        foreach (var weapon in equippedItems.Values)
         {
-            finalStats[Stat.Health] = finalStats[Stat.Health] * (1+  InventoryManager.Instance.GetWeaponStat(EquippedWeapon.itemNum) / 100);
-            finalStats[Stat.Attack] = finalStats[Stat.Attack] * (1 + InventoryManager.Instance.GetWeaponStat(EquippedWeapon.itemNum) / 100);
-            finalStats[Stat.Defense] = finalStats[Stat.Defense] * (1 + InventoryManager.Instance.GetWeaponStat(EquippedWeapon.itemNum) / 100);
+            if (weapon != null)
+            {
+                finalStats[Stat.Health] = finalStats[Stat.Health] * (1 + InventoryManager.Instance.GetWeaponStat(weapon.itemNum) / 100f);
+                finalStats[Stat.Attack] = finalStats[Stat.Attack] * (1 + InventoryManager.Instance.GetWeaponStat(weapon.itemNum) / 100f);
+                finalStats[Stat.Defense] = finalStats[Stat.Defense] * (1 + InventoryManager.Instance.GetWeaponStat(weapon.itemNum) / 100f);
+            }
         }
 
         // --- 전투력 계산 시작 ---
