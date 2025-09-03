@@ -125,7 +125,7 @@ public class GachaUIHandler : UIBase
     #region 유물 뽑기 함수
     public void OnClick_RelicsGacha_Single()
     {
-        if (InventoryManager.Instance.relicsCoupon >= relicsGachaManager.relicsCouponCost)
+        if (InventoryManager.Instance.RelicsCoupon >= relicsGachaManager.relicsCouponCost)
         {
             ShowSelectPopUp(relicsGachaManager,relicsGachaManager.relicsTablelevel);
         }
@@ -137,13 +137,13 @@ public class GachaUIHandler : UIBase
 
     public void OnClick_RelicsGacha_Special()
     {
-        if (InventoryManager.Instance.relicsPoints >= relicsGachaManager.relicsSpecialCost)
+        if (InventoryManager.Instance.RelicsPoints >= relicsGachaManager.relicsSpecialCost)
         {
             ShowSelectPopUp(relicsGachaManager, -1);
         }
         else
         {
-            UIManager.Instance.ShowToast($"{relicsGachaManager.relicsSpecialCost - InventoryManager.Instance.relicsPoints}만큼 유물잔해가 부족합니다!", 2f);
+            UIManager.Instance.ShowToast($"{relicsGachaManager.relicsSpecialCost - InventoryManager.Instance.RelicsPoints}만큼 유물잔해가 부족합니다!", 2f);
         }
     }
     #endregion
@@ -212,7 +212,7 @@ public class GachaUIHandler : UIBase
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
-                InventoryManager.Instance.relicsCoupon -= manager.relicsCouponCost;
+                InventoryManager.Instance.RelicsCoupon -= manager.relicsCouponCost;
             });
         }
         else
@@ -224,7 +224,7 @@ public class GachaUIHandler : UIBase
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
-                InventoryManager.Instance.relicsPoints -= manager.relicsSpecialCost;
+                InventoryManager.Instance.RelicsPoints -= manager.relicsSpecialCost;
             });
         }
 

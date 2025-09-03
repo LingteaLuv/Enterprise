@@ -1,4 +1,5 @@
 using JHT;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -45,6 +46,33 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
         }
     }
 
+    public void RefreshDisplayForValue(int value)
+    {
+        // 1. 영혼 조각을 1개 이상 가진 캐릭터 목록을 가져옵니다.
+        List<PlayerCharacterData> charactersWithFragments = GetCharactersWithFragments(value);
+
+        // 2. 필요한 만큼만 패널을 생성하여 풀(Pool)을 채웁니다.
+        while (panelPool.Count < charactersWithFragments.Count)
+        {
+            GameObject panelGO = Instantiate(soulFragmentPanelPrefab, contentPanel);
+            panelPool.Add(panelGO.GetComponent<SoulFragmentPanel>());
+        }
+
+        // 3. 풀에 있는 패널들에 데이터를 설정하고 활성화합니다.
+        for (int i = 0; i < charactersWithFragments.Count; i++)
+        {
+            panelPool[i].SetUp(charactersWithFragments[i]);
+            panelPool[i].gameObject.SetActive(true);
+        }
+
+        // 4. 사용하지 않는 나머지 패널들은 비활성화합니다.
+        for (int i = charactersWithFragments.Count; i < panelPool.Count; i++)
+        {
+            panelPool[i].gameObject.SetActive(false);
+        }
+    }
+
+
     /// <summary>
     /// 영혼 조각을 보유한 캐릭터 목록을 가져와 UI를 새로고칩니다.
     /// </summary>
@@ -78,7 +106,7 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
     /// PlayerDataManager로부터 영혼 조각을 1개 이상 보유한 캐릭터의 데이터 리스트를 가져옵니다.
     /// </summary>
     /// <returns>영혼 조각을 보유한 캐릭터 데이터 리스트</returns>
-    private List<PlayerCharacterData> GetCharactersWithFragments()
+    private List<PlayerCharacterData> GetCharactersWithFragments(int value = -1)
     {
         if (PlayerDataManager.Instance == null)
         {
@@ -97,8 +125,25 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
             return hasFragments && fragmentCount > 0;
         });
 
-        // 캐릭터 이름순으로 정렬합니다. (다른 정렬 기준을 원하면 여기를 수정)
-        var sortedCharacters = charactersQuery.OrderBy(c => c.characterdata.characterName);
+
+        IOrderedEnumerable<PlayerCharacterData> sortedCharacters = null;
+
+        switch (value)
+        {
+            case 0:
+                sortedCharacters = charactersQuery.OrderByDescending(c => c.battlePower);
+                break;
+            case 1:
+                sortedCharacters = charactersQuery.OrderByDescending(c => c.stars);
+                break;
+            case 2:
+                sortedCharacters = charactersQuery.OrderByDescending(c => c.characterLevel);
+                break;
+            case -1:
+                sortedCharacters = charactersQuery.OrderBy(c => c.characterdata.characterName);
+                break;
+        }
+        
 
         return sortedCharacters.ToList();
     }
