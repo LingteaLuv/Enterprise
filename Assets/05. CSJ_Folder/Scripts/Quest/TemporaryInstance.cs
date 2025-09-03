@@ -2,6 +2,6 @@
 {
     public class TemporaryInstance :QuestInstance
     {
-           
+           public QuestType_Enum QuestType { get; set; }
     }
 }

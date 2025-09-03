@@ -36,6 +36,7 @@ public class QuestListController : MonoBehaviour
 
     public void Refresh(TemporaryQuestDefinitionSO quest, TemporaryInstance inst)
     {
+        if (questDic == null) return;
         if(questDic.TryGetValue(quest,out var card))
             card.CardSet(quest, inst);
     }

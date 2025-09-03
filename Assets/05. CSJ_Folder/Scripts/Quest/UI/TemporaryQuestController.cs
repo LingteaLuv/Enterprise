@@ -27,13 +27,15 @@ public class TemporaryQuestController : MonoBehaviour
     private Dictionary<TemporaryQuestDefinitionSO, TemporaryInstance> _weeklyQuests;
 
     private bool isReady = false;
+    public bool isStarted = false;
     
     private void OnEnable()
     {
-        if (!isReady)
+        if (!isReady && !isStarted)
         {
             Debug.Log("Disable");
             gameObject.SetActive(false);
+            isStarted = true;
             return;
         } 
         Debug.Log("Enable");
@@ -107,8 +109,6 @@ public class TemporaryQuestController : MonoBehaviour
                 _weeklyQuests[quest] = inst;
             }
         }
-
-        Debug.Log("isReady");
-        isReady = true;
+        
     }
 }

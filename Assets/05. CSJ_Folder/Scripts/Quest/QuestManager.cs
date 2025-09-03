@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using _05._CSJ_Folder.Scripts.Quest.Definition;
 using _05._CSJ_Folder.Scripts.Quest.Sequence;
 using JetBrains.Annotations;
@@ -9,7 +10,7 @@ using UnityEngine;
 
 namespace _05._CSJ_Folder.Scripts.Quest
 {
-    public class QuestManager : MonoBehaviour, IRewardGiver
+    public class QuestManager : Singleton<QuestManager>, IRewardGiver
     {
         #region Def
 
@@ -71,6 +72,9 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         // 추후 보상관련 사용
         public Action<QuestRewardSO.RewardEntry> OnRewardGranted;
+
+        private Coroutine _nextResetCoroutine;
+        private bool _isResetting;
         #endregion
 
         #region UnityLifeCycle
@@ -99,7 +103,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 _signal.OnSignalComplete += OnSignalComplete;
             }
             // TODO : 기간 퀘스트 동작
-            TemporaryQuestInit(true);
+            RegisterTemporaryQuests();
 
             LoadTemporaryQuests();
 
@@ -114,6 +118,19 @@ namespace _05._CSJ_Folder.Scripts.Quest
             
             // 퀘스트 UI 활성화
             ActiveQuestUI();
+
+        }
+
+        private async void Start()
+        {
+            await DatabaseManager.Instance.EnsureServerOffset();
+
+            bool dailyCheck = DatabaseManager.Instance.QuickDailyCheck();
+            bool weeklyCheck = DatabaseManager.Instance.QuickWeeklyCheck();
+
+            await CheckTemporaryQuestsReset(dailyCheck, weeklyCheck);
+
+            ScheduleNextResetTick();
 
         }
 
@@ -488,7 +505,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (!_instances.TryGetValue(def.questId, out var inst))
             {
                     // 새로운 인스턴스를 생성합니다.
-                    inst = new QuestInstance
+                     inst = new QuestInstance
                     {
                         QuestId = def.questId,
                         QuestState = QuestState_Enum.Active,
@@ -604,6 +621,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
             OnTempoQuestUpdated += _temporaryQuestController.UpdateQuest;
             _questUI.OnForceClear += ForceQuestComplete;
+
+            _temporaryQuestController.isStarted = true;
             
             // 퀘스트 ui에 퀘스트 정보를 전달합니다
             OnQuestUpdated?.Invoke(GetActiveQuestDefinition(), GetActiveGeneralInstance());
@@ -744,15 +763,107 @@ namespace _05._CSJ_Folder.Scripts.Quest
         #endregion
 
         #region TemporaryQuest
-        // TODO : Manager에서 날짜 초기화 정보를 받아오고 날짜가 초기화 되었을 시 호출
-        private void TemporaryQuestInit(bool isWeekReset)
+
+        private void RegisterTemporaryQuests()
         {
-            ResetTemporaryQuests(_dailyQuests, QuestType_Enum.Daily);
-            if (isWeekReset)
+            RegisterTemporary(_dailyQuests);
+            RegisterTemporary(_weeklyQuests);
+        }
+
+        private void RegisterTemporary(IEnumerable<TemporaryQuestDefinitionSO> quests)
+        {
+            if (quests == null) return;
+            foreach (var quest in quests)
             {
-                ResetTemporaryQuests(_weeklyQuests, QuestType_Enum.Weekly);
+                if (quest == null) continue;
+                GetTemporaryInstance(quest);
             }
         }
+
+        private async Task CheckTemporaryQuestsReset(bool daily, bool weekly)
+        {
+            if(_isResetting) return;
+            _isResetting = true;
+
+            try
+            {
+                bool needDailyReset = false;
+                bool needWeeklyReset = false;
+
+                if (daily)
+                {
+                    needDailyReset = await DatabaseManager.Instance.DailyCheckIn();
+                }
+
+                if (weekly)
+                {
+                    needWeeklyReset = await DatabaseManager.Instance.WeeklyCheckIn();
+                }
+
+                if (needDailyReset)
+                {
+                    ResetTemporaryQuests(_dailyQuests, QuestType_Enum.Daily);
+                    await DatabaseManager.Instance.SetDailyQuestTime();
+                }
+
+                if (needWeeklyReset)
+                {
+                    ResetTemporaryQuests(_weeklyQuests, QuestType_Enum.Weekly);
+                    await DatabaseManager.Instance.SetWeeklyQuestTime();
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"기간제 퀘스트 초기화 오류: {e}");
+            }
+            finally
+            {
+                _isResetting = false;
+            }
+        }
+
+        private void ScheduleNextResetTick(int resetHour = 6, DayOfWeek resetDay = DayOfWeek.Monday)
+        {
+            if (_nextResetCoroutine != null)
+                StopCoroutine(_nextResetCoroutine);
+            _nextResetCoroutine = StartCoroutine(WaitUntilNextBoundary(resetHour, resetDay));
+        }
+
+        private IEnumerator WaitUntilNextBoundary(int resetHour, DayOfWeek resetDay)
+        {
+            var approxMs = DatabaseManager.Instance.GetApproxServerTime();
+            if (approxMs == 0)
+            {
+                yield return new WaitForSeconds(5f);
+                approxMs = DatabaseManager.Instance.GetApproxServerTime();
+            }
+            
+            var nowStd = approxMs == 0
+                ? DateTime.UtcNow.AddHours(9)
+                : DateTimeOffset.FromUnixTimeMilliseconds(approxMs).UtcDateTime.AddHours(9);
+            
+            DateTime nextDaily = new DateTime(nowStd.Year, nowStd.Month, nowStd.Day, resetHour, 0, 0);
+            if (nowStd.Hour >= resetHour)
+                nextDaily = nextDaily.AddDays(1);
+            
+            DateTime nextWeekly = new DateTime(nowStd.Year, nowStd.Month, nowStd.Day, resetHour, 0, 0);
+            if (nowStd > nextWeekly)
+                nextWeekly = nextWeekly.AddDays(7);
+
+            var nextBoundary = nextDaily < nextWeekly ? nextDaily : nextWeekly;
+            double WaitSec = (nextBoundary - nowStd).TotalSeconds;
+            if (WaitSec < 1) WaitSec = 1;
+            
+            yield return new WaitForSeconds((float)WaitSec + 1f);
+
+            yield return DatabaseManager.Instance.EnsureServerOffset();
+            bool daily = DatabaseManager.Instance.QuickDailyCheck();
+            bool weekly = DatabaseManager.Instance.QuickWeeklyCheck();
+            yield return CheckTemporaryQuestsReset(daily, weekly).AsIEnumeeratior();
+            
+            ScheduleNextResetTick(resetHour, resetDay);
+        }
+
 
         private void ResetTemporaryQuests(IEnumerable<TemporaryQuestDefinitionSO> quests, QuestType_Enum questType)
         {
@@ -766,7 +877,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 inst.QuestState = QuestState_Enum.Active;
                 inst.GoalCountInit();
             }
-
             Save();
         }
 
@@ -778,6 +888,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 inst = new TemporaryInstance()
                 {
                     QuestId = def.questId,
+                    QuestType = def.QuestType,
                 };
                 _instances.Add(def.questId, inst);
                 _temporaryInstances.Add(def.questId, inst);
@@ -801,7 +912,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         private void OnTemporaryProgress(QuestType_Enum type, string signalKey, int progress)
         {
-            Debug.Log("TemporaryProgress");
             foreach (var t in _temporaryInstances)
             {
                 string questId = t.Key;
@@ -811,22 +921,24 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 var goal = def.Goal; 
                 if (goal is null) return;
 
+
                 if (inst.QuestState == QuestState_Enum.Received) continue;
+                if (type != inst.QuestType) continue;
                     
                 var delta = goal.ProgressDeltaFrom(signalKey, progress);
                 // 만약 진척도가 <=0이라면; 키가 일치하지 않는다면
-                if (delta <= 0) return;
+                if (delta <= 0) continue;
                 
                 var before = inst.CurrentGoalCount;
                 var require = goal.RequireCount;
                 inst.GoalCountAdjust(Mathf.Clamp(before + delta, 0, require));
                 
                 // 만약 갱신한 인스턴스의 완료 조건이 충족됬을 경우
-                if (IsInstanceComplete(def, inst))
-                    // ui에 클리어로 전환합니다.
-                    MarkCompleted(def, inst);
+                IsInstanceComplete(def, inst);
+                    
                 // 퀘스트 사양이 바뀌었으므로 업데이트 이벤트를 호출한다 
                 OnTempoQuestUpdated?.Invoke(def as TemporaryQuestDefinitionSO, inst);
+                Debug.Log($"{def.questName}, {def.questId}");
             }
         }
         
@@ -841,5 +953,13 @@ namespace _05._CSJ_Folder.Scripts.Quest
             MarkCompleted(GetActiveQuestDefinition(),inst);
         }
 
+    }
+
+    internal static class TaskHelper
+    {
+        public static IEnumerator AsIEnumeeratior(this Task task)
+        {
+            while (!task.IsCompleted) yield return null;
+        }
     }
 }
