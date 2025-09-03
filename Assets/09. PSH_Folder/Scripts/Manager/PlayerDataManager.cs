@@ -181,6 +181,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         characterSoulFragments[characterId] -= cost;
         playerCharData.stars++;
         Debug.Log($"{playerCharData.characterdata.characterName}이(가) {playerCharData.stars}성으로 승급했습니다!");
+        playerCharData.RecaculateStats();
         OnCharacterDataUpdated?.Invoke(playerCharData); // 데이터 변경 이벤트 발생
         return true;
     }
@@ -291,14 +292,15 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             return false;
         }
 
+        PlayerCharacterData oldOwner = null;
         // 아이템이 이미 다른 캐릭터에게 장착되어 있다면, 그 캐릭터에게서 해제합니다.
         if (!string.IsNullOrEmpty(newItem.EquippedByCharacterId))
         {
-            if (int.TryParse(newItem.EquippedByCharacterId, out int ownerId) && ownedCharacters.TryGetValue(ownerId, out PlayerCharacterData oldOwner))
+            if (int.TryParse(newItem.EquippedByCharacterId, out int ownerId) && ownedCharacters.TryGetValue(ownerId, out oldOwner))
             {
                 if (oldOwner != character)
                 {
-                    UnequipItem(oldOwner, newItem);
+                    UnequipItem(oldOwner, newItem, false); // 내부 호출이므로 이벤트는 나중에 한번에 처리
                 }
             }
         }
@@ -308,7 +310,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         // 현재 캐릭터의 해당 카테고리에 이미 다른 아이템이 있다면 해제합니다.
         if (character.equippedItems.ContainsKey(category))
         {
-            UnequipItem(character, category);
+            UnequipItem(character, category, false); // 내부 호출이므로 이벤트는 나중에 한번에 처리
         }
 
         // 새로운 아이템을 장착합니다.
@@ -316,7 +318,16 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         newItem.EquippedByCharacterId = character.characterdata.characterID.ToString();
 
         Debug.Log($"{character.characterdata.characterName}이(가) {newItem.itemName}을(를) {category} 슬롯에 장착했습니다.");
-        OnCharacterDataUpdated?.Invoke(character); // UI 갱신 등을 위해 이벤트 호출
+
+        // 스탯 재계산 및 이벤트 호출
+        character.RecaculateStats();
+        OnCharacterDataUpdated?.Invoke(character);
+
+        if (oldOwner != null && oldOwner != character)
+        {
+            oldOwner.RecaculateStats();
+            OnCharacterDataUpdated?.Invoke(oldOwner);
+        }
 
         return true;
     }
@@ -324,7 +335,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     /// <summary>
     /// 캐릭터의 특정 카테고리 아이템 장착을 해제합니다.
     /// </summary>
-    public void UnequipItem(PlayerCharacterData character, EquipCategory category)
+    public void UnequipItem(PlayerCharacterData character, EquipCategory category, bool triggerUpdate = true)
     {
         if (character == null || !character.equippedItems.ContainsKey(category))
         {
@@ -338,13 +349,17 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         itemToUnequip.EquippedByCharacterId = null;
         character.equippedItems.Remove(category);
 
-        OnCharacterDataUpdated?.Invoke(character); // UI 갱신 등을 위해 이벤트 호출
+        if (triggerUpdate)
+        {
+            character.RecaculateStats();
+            OnCharacterDataUpdated?.Invoke(character);
+        }
     }
 
     /// <summary>
     /// 캐릭터의 특정 아이템 장착을 해제합니다.
     /// </summary>
-    public void UnequipItem(PlayerCharacterData character, WeaponObject itemToUnequip)
+    public void UnequipItem(PlayerCharacterData character, WeaponObject itemToUnequip, bool triggerUpdate = true)
     {
         if (character == null || itemToUnequip == null)
         {
@@ -354,7 +369,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         EquipCategory category = itemToUnequip.equipCategory;
         if (character.equippedItems.ContainsKey(category) && character.equippedItems[category] == itemToUnequip)
         {
-            UnequipItem(character, category);
+            UnequipItem(character, category, triggerUpdate);
         }
     }
 

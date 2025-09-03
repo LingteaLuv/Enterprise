@@ -278,6 +278,10 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     {
         if (currentCharacterData == null) return;
 
+        // 1. 먼저 스탯을 다시 계산합니다.
+        currentCharacterData.RecaculateStats();
+
+        // 2. 갱신된 스탯으로 UI를 업데이트합니다.
         atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Attack])}";
         hpDisplay.text = $"체력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Health])}";
         defDisplay.text = $"방어력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Defense])}";
@@ -285,8 +289,6 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         criDmgDisplay.text = $"치명타 피해 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritDamage])}%";
         atkSpdDisplay.text = $"공격 속도 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.AttackSpeed])}";
 
-        // 전투력 계산
-        currentCharacterData.RecaculateStats();
         battlePoint.text = $"전투력 : {DataUtility.FormatNumber(currentCharacterData.battlePower)}";
     }
 
@@ -301,7 +303,6 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         // 이 UI는 그 이벤트를 수신하여 스스로 갱신됩니다.
         // 따라서 이 함수에서는 단순히 레벨업 시도만 하면 됩니다.
         PlayerDataManager.Instance.TryLevelUpCharacter(currentCharacterData);
-        UpdateCharacterStatsDisplay();
     }
 
     /// <summary>
@@ -319,13 +320,19 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     private void OnEnable()
     {
         // PlayerDataManager의 이벤트에 구독
-        PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterUpdate;
+        if (PlayerDataManager.Instance != null)
+        {
+            PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterUpdate;
+        }
     }
 
     private void OnDisable()
     {
         // PlayerDataManager의 이벤트 구독 해제
-        PlayerDataManager.Instance.OnCharacterDataUpdated -= HandleCharacterUpdate;
+        if (PlayerDataManager.Instance != null)
+        {
+            PlayerDataManager.Instance.OnCharacterDataUpdated -= HandleCharacterUpdate;
+        }
     }
 
     /// <summary>
