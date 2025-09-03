@@ -15,6 +15,10 @@ namespace JHT // 동일한 네임스페이스 사용
         public TextMeshProUGUI nameText;
         public TextMeshProUGUI levelText;
 
+        [Header("Equipped Status")]
+        [SerializeField] private GameObject equippedByPanel;
+        [SerializeField] private TextMeshProUGUI equippedByText;
+
         private WeaponObject weaponObject; // 이 패널이 나타내는 무기
         public event Action<WeaponObject> OnPanelClicked;
 
@@ -40,6 +44,7 @@ namespace JHT // 동일한 네임스페이스 사용
             });
 
             RefreshUI();
+            UpdateEquippedStatus();
         }
 
         private void RefreshUI(int dummy = 0)
@@ -65,6 +70,35 @@ namespace JHT // 동일한 네임스페이스 사용
             {
                 if (starImages[i] == null) continue;
                 starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
+            }
+        }
+
+        private void UpdateEquippedStatus()
+        {
+            if (equippedByPanel == null) return;
+
+            if (!string.IsNullOrEmpty(weaponObject.EquippedByCharacterId))
+            {
+                equippedByPanel.SetActive(true);
+                if (int.TryParse(weaponObject.EquippedByCharacterId, out int charId) && PlayerDataManager.Instance != null)
+                {
+                    if (PlayerDataManager.Instance.ownedCharacters.TryGetValue(charId, out PlayerCharacterData owner))
+                    {
+                        equippedByText.text = $"장착중: {owner.characterdata.characterName}";
+                    }
+                    else
+                    {
+                        equippedByText.text = "장착중 (정보 없음)";
+                    }
+                }
+                else
+                {
+                    equippedByText.text = "장착중";
+                }
+            }
+            else
+            {
+                equippedByPanel.SetActive(false);
             }
         }
 

@@ -291,22 +291,27 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             return false;
         }
 
-        // 다른 캐릭터가 이미 장착했는지 확인
+        // 아이템이 이미 다른 캐릭터에게 장착되어 있다면, 그 캐릭터에게서 해제합니다.
         if (!string.IsNullOrEmpty(newItem.EquippedByCharacterId))
         {
-            Debug.LogWarning($"{newItem.itemName}은(는) 이미 다른 캐릭터(ID: {newItem.EquippedByCharacterId})가 장착 중입니다.");
-            return false;
+            if (int.TryParse(newItem.EquippedByCharacterId, out int ownerId) && ownedCharacters.TryGetValue(ownerId, out PlayerCharacterData oldOwner))
+            {
+                if (oldOwner != character)
+                {
+                    UnequipItem(oldOwner, newItem);
+                }
+            }
         }
 
         EquipCategory category = newItem.equipCategory;
 
-        // 현재 슬롯에 다른 아이템을 장착하고 있다면 해제
+        // 현재 캐릭터의 해당 카테고리에 이미 다른 아이템이 있다면 해제합니다.
         if (character.equippedItems.ContainsKey(category))
         {
             UnequipItem(character, category);
         }
 
-        // 아이템 장착
+        // 새로운 아이템을 장착합니다.
         character.equippedItems[category] = newItem;
         newItem.EquippedByCharacterId = character.characterdata.characterID.ToString();
 
@@ -346,7 +351,6 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             return;
         }
 
-        // 아이템의 카테고리를 찾아서 해당 카테고리의 장착을 해제
         EquipCategory category = itemToUnequip.equipCategory;
         if (character.equippedItems.ContainsKey(category) && character.equippedItems[category] == itemToUnequip)
         {

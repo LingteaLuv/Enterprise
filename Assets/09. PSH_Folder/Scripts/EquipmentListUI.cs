@@ -8,11 +8,11 @@ public class EquipmentListUI : MonoBehaviour
 {
     [Header("UI Elements")]
     [SerializeField] private Transform weaponPanelParent;
-    [SerializeField] private ItemEquipPanel itemEquipPanelPrefab; // *** 타입 변경
+    [SerializeField] private ItemEquipPanel itemEquipPanelPrefab;
     [SerializeField] private TMP_Dropdown weaponDropDown;
     [SerializeField] private EquipmentDetailPanel detailPanel;
 
-    private List<ItemEquipPanel> itemPanelPool = new List<ItemEquipPanel>(); // *** 타입 변경
+    private List<ItemEquipPanel> itemPanelPool = new List<ItemEquipPanel>();
     private InventoryManager inventoryManager;
 
     private PlayerCharacterData currentCharacter;
@@ -39,6 +39,10 @@ public class EquipmentListUI : MonoBehaviour
     {
         inventoryManager.OnAddInventory += HandleInventoryChanged;
         inventoryManager.OnRemoveInventory += HandleInventoryChanged;
+        if (PlayerDataManager.Instance != null)
+        {
+            PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterDataUpdated;
+        }
 
         if (weaponDropDown != null)
         {
@@ -52,6 +56,10 @@ public class EquipmentListUI : MonoBehaviour
         {
             inventoryManager.OnAddInventory -= HandleInventoryChanged;
             inventoryManager.OnRemoveInventory -= HandleInventoryChanged;
+        }
+        if (PlayerDataManager.Instance != null)
+        {
+            PlayerDataManager.Instance.OnCharacterDataUpdated -= HandleCharacterDataUpdated;
         }
 
         if (weaponDropDown != null)
@@ -75,13 +83,35 @@ public class EquipmentListUI : MonoBehaviour
     {
         this.currentCharacter = character;
         this.currentCategory = category;
+
+        detailPanel.gameObject.SetActive(true);
+
+        // Show details of the currently equipped item for this category, or show an empty panel.
+        if (character.equippedItems.TryGetValue(category, out WeaponObject equippedItem))
+        {
+            detailPanel.ShowItem(equippedItem, character, category);
+        }
+        else
+        {
+            detailPanel.ShowEmpty(character, category);
+        }
+
         RefreshDisplay();
-        detailPanel.gameObject.SetActive(false);
     }
 
     private void HandleInventoryChanged(ItemObject changedItem)
     {
         if (currentCharacter != null)
+        {
+            RefreshDisplay();
+        }
+    }
+
+    private void HandleCharacterDataUpdated(PlayerCharacterData updatedCharacter)
+    {
+        // If the currently displayed character's data changes, or if any character's equipment changes,
+        // refresh the list to update equipped statuses.
+        if (gameObject.activeInHierarchy)
         {
             RefreshDisplay();
         }
@@ -94,11 +124,7 @@ public class EquipmentListUI : MonoBehaviour
 
     private void RefreshDisplay()
     {
-        if (currentCharacter == null)
-        {
-            ClearDisplay();
-            return;
-        }
+        if (currentCharacter == null) return;
 
         var filteredList = FilterEquipment();
         displayedWeaponList = SortWeapons(filteredList);
@@ -107,16 +133,11 @@ public class EquipmentListUI : MonoBehaviour
 
     private List<WeaponObject> FilterEquipment()
     {
-        // 1. 해당 카테고리의 장비만 필터링
-        // 2. 다른 캐릭터가 장착하지 않은 장비만 필터링
-        // 3. 현재 캐릭터가 장착할 수 있는 장비만 필터링 (직업 제한 등)
         return inventoryManager.weaponList.Where(weapon =>
         {
             bool isCorrectCategory = weapon.equipCategory == this.currentCategory;
-            bool isNotEquipped = string.IsNullOrEmpty(weapon.EquippedByCharacterId);
             bool isEquippableByRole = IsEquippableByCharacter(weapon, currentCharacter);
-
-            return isCorrectCategory && isNotEquipped && isEquippableByRole;
+            return isCorrectCategory && isEquippableByRole;
         }).ToList();
     }
 
@@ -124,13 +145,11 @@ public class EquipmentListUI : MonoBehaviour
     {
         if (weapon == null || character == null) return false;
 
-        // Armor and Shields can be equipped by any role.
         if (weapon.equipCategory == EquipCategory.Armor || weapon.equipCategory == EquipCategory.Shield)
         {
             return true;
         }
 
-        // For weapons, check the character's role.
         ItemWeaponSO weaponSO = (ItemWeaponSO)weapon.itemSO;
         EquipType type = weaponSO.equipType;
         CrewRole role = character.characterdata.crewRole;
@@ -178,9 +197,8 @@ public class EquipmentListUI : MonoBehaviour
             var panel = itemPanelPool[i];
             panel.SetUp(displayedWeaponList[i]);
 
-            // 클릭 이벤트 구독
-            panel.OnPanelClicked -= ShowDetailPanel; // 중복 구독 방지
-            panel.OnPanelClicked += ShowDetailPanel;
+            panel.OnPanelClicked -= OnItemPanelClicked;
+            panel.OnPanelClicked += OnItemPanelClicked;
 
             panel.gameObject.SetActive(true);
         }
@@ -191,9 +209,9 @@ public class EquipmentListUI : MonoBehaviour
         }
     }
 
-    private void ShowDetailPanel(WeaponObject weapon)
+    private void OnItemPanelClicked(WeaponObject weapon)
     {
-        detailPanel.ShowPanel(weapon, currentCharacter, currentCategory);
+        detailPanel.ShowItem(weapon, currentCharacter, currentCategory);
     }
 
     private void ClearDisplay()
