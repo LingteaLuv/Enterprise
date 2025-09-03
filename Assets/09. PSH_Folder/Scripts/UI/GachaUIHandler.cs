@@ -174,31 +174,15 @@ public class GachaUIHandler : UIBase
                 {
                     Debug.Log($"UI 버튼 클릭으로 {itemType} {count}회 뽑기를 실행했습니다.");
 
-                    if (manager.LastGachaResults == null)
-                    {
-                        Debug.LogError("[GachaUIHandler] LastGachaResults 리스트가 null입니다!");
-                        return;
-                    }
-
-                    // 결과창 표시
-                    if (manager.LastGachaResults is List<PlayerCharacterData> characterResults)
-                    {
-                        gachaListPanel.gameObject.SetActive(true);
-                        gachaListPanel.DisplayCharacterResults(characterResults);
-                        QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
-                    }
-                    else if (manager.LastGachaResults is List<ItemObject> equipmentResults)
-                    {
-                        gachaListPanel.gameObject.SetActive(true);
-                        gachaListPanel.DisplayEquipmentResults(equipmentResults);
-                        QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
-                    }
-
-                    // *** 올바른 위치 ***
-                    // 캐릭터 뽑기였다면, 뽑기가 모두 끝난 이 시점에서 텍스트를 갱신합니다.
+                    // Manager가 결과 표시를 담당하므로, 여기서는 퀘스트 신호만 보냅니다.
                     if (isCharacterGacha)
                     {
+                        QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
                         UpdateCharacterPityText();
+                    }
+                    else if (itemType == "장비")
+                    {
+                        QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
                     }
                 }
                 else
@@ -246,5 +230,5 @@ public class GachaUIHandler : UIBase
     //private void OnDestroy()
     //{
     //    InventoryManager.Instance.OnChangeRelicsPoints -= ShowRelicsPoint;
-    //}
+    //} 
 }

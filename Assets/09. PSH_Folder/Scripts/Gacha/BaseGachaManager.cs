@@ -28,6 +28,29 @@ public abstract class BaseGachaManager<T> : MonoBehaviour where T : class
     // 마지막 뽑기 결과 (타입은 자식 클래스가 결정)
     public List<T> LastGachaResults { get; protected set; }
 
+    protected virtual void Start()
+    {
+        if (resultPanel == null)
+        {
+            Debug.Log("[BaseGachaManager] Result Panel이 할당되지 않아, 씬에서 'GachaListPanel'을 찾습니다.");
+            resultPanel = GameObject.Find("GachaListPanel");
+
+            if (resultPanel == null)
+            {
+                Debug.LogError("[BaseGachaManager] 'GachaListPanel'이라는 이름의 GameObject를 씬에서 찾을 수 없습니다. Gacha Manager의 인스펙터에서 Result Panel을 수동으로 할당해주세요.");
+            }
+            else
+            {
+                Debug.Log("[BaseGachaManager] 'GachaListPanel'을 성공적으로 찾아 할당했습니다.");
+                resultPanel.SetActive(false); // 시작 시에는 비활성화
+            }
+        }
+        else
+        {
+            resultPanel.SetActive(false); // 시작 시에는 비활성화
+        }
+    }
+
     /// <summary>
     /// 자식 클래스에서 구현해야 할 핵심 뽑기 로직입니다.
     /// 주어진 등급(rarity)에 해당하는 아이템 1개를 뽑아 반환합니다.
