@@ -15,7 +15,7 @@ namespace JHT
         public string EquippedByCharacterId { get; set; } = null; // 장착한 캐릭터의 ID
         public EquipCategory equipCategory; // 분류 - 무기 방패 갑옷
         public EquipType equipType; // 세부분류 - 무기) 칼 도끼 활 등
-        public string statType;
+        public Stat statType;
 
         private float itemPower;
         public float ItemPower { get { return itemPower; } set { itemPower = value; OnChangePower?.Invoke(itemPower); } }

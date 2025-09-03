@@ -19,7 +19,7 @@ namespace JHT
         public Rarity rarity; // 1, 2, 3성 등급
         public EquipCategory equipCategory; // 분류 - 무기 방패 갑옷
         public EquipType equipType; // 세부분류 - 무기) 칼 도끼 활 등
-        public string statType; // 장비가 올려주는 스탯 이름, enum값으로 해야하는데 현재 string으로 구현되있어서 추후 바꿔야함  
+        public Stat statType; // 장비가 올려주는 스탯 이름
         [field: SerializeField] public WeaponType weaponType { get; private set; }
 
         //[field: SerializeField] public CharacterWeponType characterWeaponType { get; private set; } //캐릭터 정보 가져오기
