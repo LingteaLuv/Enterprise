@@ -109,7 +109,11 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         if (resultPanel != null)
         {
             resultPanel.SetActive(true);
-            // resultPanel.GetComponent<ResultUI>().DisplayResults(LastGachaResults);
+            GachaListUI resultUI = resultPanel.GetComponent<GachaListUI>();
+            if (resultUI != null)
+            {
+                resultUI.DisplayCharacterResults(LastGachaResults);
+            }
         }
         CurrencyManager.Instance.UpdateCurrencyUI();
 

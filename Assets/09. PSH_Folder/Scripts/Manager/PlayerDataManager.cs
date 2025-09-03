@@ -1,3 +1,4 @@
+using JHT;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     private const int FRAGMENT_GAIN_2 = 40;
     private const int FRAGMENT_GAIN_3 = 300;
     // 가챠 횟수
-    public int GachaPityCounter {  get; set; }
+    public int GachaPityCounter { get; set; }
 
 
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
@@ -118,9 +119,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         starUpgradeCosts = new Dictionary<int, int>()
         {
-            { 1, STAR_UPGRADE_COST_1 }, 
+            { 1, STAR_UPGRADE_COST_1 },
             { 2, STAR_UPGRADE_COST_2 },
-            { 3, STAR_UPGRADE_COST_3 }, 
+            { 3, STAR_UPGRADE_COST_3 },
             { 4, STAR_UPGRADE_COST_4 }
         };
     }
@@ -180,6 +181,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         characterSoulFragments[characterId] -= cost;
         playerCharData.stars++;
         Debug.Log($"{playerCharData.characterdata.characterName}이(가) {playerCharData.stars}성으로 승급했습니다!");
+        playerCharData.RecaculateStats();
         OnCharacterDataUpdated?.Invoke(playerCharData); // 데이터 변경 이벤트 발생
         return true;
     }
@@ -276,6 +278,102 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
         return false;
     }
+
+    #region 아이템 관리
+
+    /// <summary>
+    /// 캐릭터에게 아이템을 장착시킵니다.
+    /// </summary>
+    public bool EquipItem(PlayerCharacterData character, WeaponObject newItem)
+    {
+        if (character == null || newItem == null)
+        {
+            Debug.LogError("캐릭터 또는 아이템 데이터가 null입니다.");
+            return false;
+        }
+
+        PlayerCharacterData oldOwner = null;
+        // 아이템이 이미 다른 캐릭터에게 장착되어 있다면, 그 캐릭터에게서 해제합니다.
+        if (!string.IsNullOrEmpty(newItem.EquippedByCharacterId))
+        {
+            if (int.TryParse(newItem.EquippedByCharacterId, out int ownerId) && ownedCharacters.TryGetValue(ownerId, out oldOwner))
+            {
+                if (oldOwner != character)
+                {
+                    UnequipItem(oldOwner, newItem, false); // 내부 호출이므로 이벤트는 나중에 한번에 처리
+                }
+            }
+        }
+
+        EquipCategory category = newItem.equipCategory;
+
+        // 현재 캐릭터의 해당 카테고리에 이미 다른 아이템이 있다면 해제합니다.
+        if (character.equippedItems.ContainsKey(category))
+        {
+            UnequipItem(character, category, false); // 내부 호출이므로 이벤트는 나중에 한번에 처리
+        }
+
+        // 새로운 아이템을 장착합니다.
+        character.equippedItems[category] = newItem;
+        newItem.EquippedByCharacterId = character.characterdata.characterID.ToString();
+
+        Debug.Log($"{character.characterdata.characterName}이(가) {newItem.itemName}을(를) {category} 슬롯에 장착했습니다.");
+
+        // 스탯 재계산 및 이벤트 호출
+        character.RecaculateStats();
+        OnCharacterDataUpdated?.Invoke(character);
+
+        if (oldOwner != null && oldOwner != character)
+        {
+            oldOwner.RecaculateStats();
+            OnCharacterDataUpdated?.Invoke(oldOwner);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 캐릭터의 특정 카테고리 아이템 장착을 해제합니다.
+    /// </summary>
+    public void UnequipItem(PlayerCharacterData character, EquipCategory category, bool triggerUpdate = true)
+    {
+        if (character == null || !character.equippedItems.ContainsKey(category))
+        {
+            return;
+        }
+
+        WeaponObject itemToUnequip = character.equippedItems[category];
+
+        Debug.Log($"{character.characterdata.characterName}의 {category} 슬롯에서 {itemToUnequip.itemName} 장착을 해제합니다.");
+
+        itemToUnequip.EquippedByCharacterId = null;
+        character.equippedItems.Remove(category);
+
+        if (triggerUpdate)
+        {
+            character.RecaculateStats();
+            OnCharacterDataUpdated?.Invoke(character);
+        }
+    }
+
+    /// <summary>
+    /// 캐릭터의 특정 아이템 장착을 해제합니다.
+    /// </summary>
+    public void UnequipItem(PlayerCharacterData character, WeaponObject itemToUnequip, bool triggerUpdate = true)
+    {
+        if (character == null || itemToUnequip == null)
+        {
+            return;
+        }
+
+        EquipCategory category = itemToUnequip.equipCategory;
+        if (character.equippedItems.ContainsKey(category) && character.equippedItems[category] == itemToUnequip)
+        {
+            UnequipItem(character, category, triggerUpdate);
+        }
+    }
+
+    #endregion
 
     /// <summary>
     /// 보유 캐릭터 중 전투력이 높은 순서대로 편성을 자동으로 구성합니다.

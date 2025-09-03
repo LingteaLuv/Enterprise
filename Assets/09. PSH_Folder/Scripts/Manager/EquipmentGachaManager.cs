@@ -1,10 +1,8 @@
-
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using JHT;
 
-// ▼▼▼ 강화 포인트 확률 설정을 위한 클래스 추가 ▼▼▼
 [System.Serializable]
 public class EnhancementPointChance
 {
@@ -12,16 +10,13 @@ public class EnhancementPointChance
     [Range(0, 100)]
     public float chance; // 0-100%
 }
-// ▲▲▲ 강화 포인트 확률 설정을 위한 클래스 추가 ▲▲▲
 
 public class EquipmentGachaManager : BaseGachaManager<ItemObject>
 {
     private List<ItemWeaponSO> gachaPool = new List<ItemWeaponSO>();
 
-    // ▼▼▼ 강화 포인트 확률 리스트 추가 ▼▼▼
     [Header("강화 포인트 확률")]
     public List<EnhancementPointChance> enhancementPointChances;
-    // ▲▲▲ 강화 포인트 확률 리스트 추가 ▲▲▲
 
     private void Start()
     {
@@ -69,69 +64,78 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
         return InventoryManager.Instance.AddItem(drawnWeaponSO);
     }
 
-    // ▼▼▼ PerformMultipleGacha 오버라이드 및 강화 포인트 로직 수정 ▼▼▼
     public override bool PerformMultipleGacha(int count)
     {
-        // BaseGachaManager의 기본 뽑기 로직을 먼저 실행합니다.
-        // 이 호출이 재화 소모 및 아이템 뽑기를 처리하고 LastGachaResults를 채웁니다.
-        bool success = base.PerformMultipleGacha(count);
-
-        if (success)
+        if (!CurrencyManager.Instance.SpendCurrency(currencyType, singleGachaCost * count))
         {
-            // 강화 포인트 확률의 총합을 계산합니다.
-            float totalChance = enhancementPointChances.Sum(epc => epc.chance);
-            if (totalChance <= 0)
-            {
-                Debug.LogError("[EquipmentGachaManager] 강화 포인트 확률의 총합이 0보다 작거나 같습니다!");
-                return false; // 또는 기본값으로 처리
-            }
+            Debug.Log($"가챠 실패: 재화({currencyType})가 부족합니다.");
+            return false;
+        }
 
-            // 뽑힌 각 아이템에 대해 강화 포인트 로직을 실행합니다.
+        LastGachaResults = new List<ItemObject>();
+        for (int i = 0; i < count; i++)
+        {
+            Rarity chosenRarity = GetRandomRarity();
+            ItemObject drawnItem = DrawItem(chosenRarity);
+            if (drawnItem != null)
+            {
+                LastGachaResults.Add(drawnItem);
+            }
+        }
+
+        Dictionary<int, int> enhancementPointsMap = new Dictionary<int, int>();
+        float totalChance = enhancementPointChances.Sum(epc => epc.chance);
+
+        if (totalChance > 0)
+        {
             foreach (var drawnItem in LastGachaResults)
             {
                 if (drawnItem is WeaponObject weapon)
                 {
-                    float randomPoint = Random.Range(0, totalChance); // 0부터 totalChance 사이의 난수
-
+                    float randomPoint = Random.Range(0, totalChance);
                     int pointsToAdd = 0;
                     foreach (var epc in enhancementPointChances)
                     {
                         if (randomPoint < epc.chance)
                         {
                             pointsToAdd = epc.points;
-                            break; // 해당 확률 구간에 속하면 루프 종료
+                            break;
                         }
                         else
                         {
                             randomPoint -= epc.chance;
                         }
                     }
-
-                    // 획득한 포인트를 해당 장비의 ID와 함께 InventoryManager에 추가
                     InventoryManager.Instance.AddEnhancementPointsToEquipment(weapon.itemNum, pointsToAdd);
-
-                    // ▼▼▼ 자동 강화 로직 추가 ▼▼▼
+                    enhancementPointsMap[weapon.itemNum] = pointsToAdd;
                     AutoEnhanceWeapon(weapon);
-                    // ▲▲▲ 자동 강화 로직 추가 ▲▲▲
-                }
-                else
-                {
-                    Debug.LogWarning($"[EquipmentGachaManager] 뽑힌 아이템이 WeaponObject가 아닙니다: {drawnItem.GetType().Name}");
                 }
             }
         }
-        return success;
+
+        Debug.Log($"{count}회 뽑기 완료! {LastGachaResults.Count}개의 아이템 획득.");
+
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(true);
+            GachaListUI resultUI = resultPanel.GetComponent<GachaListUI>();
+            if (resultUI != null)
+            {
+                resultUI.DisplayEquipmentResults(LastGachaResults, enhancementPointsMap);
+            }
+        }
+        CurrencyManager.Instance.UpdateCurrencyUI();
+        return true;
     }
 
-    // ▼▼▼ 자동 강화 메서드 추가 ▼▼▼
     private void AutoEnhanceWeapon(WeaponObject weapon)
     {
         if (weapon == null) return;
 
         Debug.Log($"[EquipmentGachaManager] {weapon.itemName} (ID: {weapon.itemNum}) 자동 강화를 시작합니다.");
 
-        const int levelUpCost = 10; // 레벨업 비용
-        const int maxLevel = 50; // 최대 레벨
+        const int levelUpCost = 10;
+        const int maxLevel = 50;
 
         // 강화 가능 조건: 포인트 충분, 최대 레벨 미만, 성급업 대기 상태 아님
         bool needsStarUp = weapon.ItemLevel > 0 && weapon.ItemLevel % 10 == 0 && weapon.ItemStar < (weapon.ItemLevel / 10);
@@ -160,7 +164,4 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
 
         Debug.Log($"[EquipmentGachaManager] {weapon.itemName} 자동 강화를 종료합니다. 최종 레벨: {weapon.ItemLevel}");
     }
-    // ▲▲▲ 자동 강화 메서드 추가 ▲▲▲
-    // ▲▲▲ PerformMultipleGacha 오버라이드 및 강화 포인트 로직 수정 ▲▲▲
 }
-

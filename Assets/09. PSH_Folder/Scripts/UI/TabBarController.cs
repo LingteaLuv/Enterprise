@@ -10,14 +10,12 @@ public class TabBarController : MonoBehaviour
     [SerializeField] Button invenBtn;
     [SerializeField] Button gachaBtn;
     [SerializeField] Button shopBtn;
-    [SerializeField] Button questBtn;
 
     [Header("버튼에 연결된 UI (UIBase를 상속받아야 함)")]
     [SerializeField] UIBase characterListPanel;
     [SerializeField] UIBase invenPanel;
     [SerializeField] UIBase gachaPanel;
     [SerializeField] UIBase shopPanel;
-    [SerializeField] UIBase questPanel;
 
     [Header("공용 닫기 버튼")]
     [SerializeField] Button closeBtn;
@@ -41,7 +39,6 @@ public class TabBarController : MonoBehaviour
             { invenBtn, invenPanel },
             { gachaBtn, gachaPanel },
             { shopBtn, shopPanel },
-            //{ questBtn, questPanel },
         };
 
         // 패널의 원래 위치 저장
