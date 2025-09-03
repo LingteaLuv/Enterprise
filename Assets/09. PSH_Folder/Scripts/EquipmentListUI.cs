@@ -79,6 +79,15 @@ public class EquipmentListUI : MonoBehaviour
         ClearDisplay();
     }
 
+    public void ResetPanel()
+    {
+        currentCharacter = null;
+        if (weaponDropDown != null) weaponDropDown.value = 0;
+        ClearDisplay();
+        if (detailPanel != null) detailPanel.gameObject.SetActive(false);
+        gameObject.SetActive(false);
+    }
+
     public void ShowForCharacter(PlayerCharacterData character, EquipCategory category)
     {
         this.currentCharacter = character;

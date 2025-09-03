@@ -355,7 +355,11 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
 
     public override void ResetPanel()
     {
-        equipmentListUI.gameObject.SetActive(false);
+        if (equipmentListUI != null && equipmentListUI.gameObject.activeSelf)
+        {
+            equipmentListUI.ResetPanel();
+        }
+        gameObject.SetActive(false);
     }
     private void OnOpenEquipmentList(EquipCategory category)
     {
