@@ -91,15 +91,18 @@ public class PlayerCharacterData
         }
 
         // 3. 장비 및 유물 스탯 적용 (향후 확장)
-        // 참고: 현재 스탯은 각 장비마다 곱연산으로 적용됩니다. (예: 10% 증가 장비 2개 = 1.1 * 1.1 = 1.21 배)
-        // 합연산을 원한다면 (1 + 0.1 + 0.1 = 1.2배) 별도의 로직 구현이 필요합니다.
         foreach (var weapon in equippedItems.Values)
         {
             if (weapon != null)
             {
-                finalStats[Stat.Health] = finalStats[Stat.Health] * (1 + InventoryManager.Instance.GetWeaponStat(weapon.itemNum) / 100f);
-                finalStats[Stat.Attack] = finalStats[Stat.Attack] * (1 + InventoryManager.Instance.GetWeaponStat(weapon.itemNum) / 100f);
-                finalStats[Stat.Defense] = finalStats[Stat.Defense] * (1 + InventoryManager.Instance.GetWeaponStat(weapon.itemNum) / 100f);
+                ItemWeaponSO weaponSO = (ItemWeaponSO)weapon.itemSO;
+                Stat statToModify = weaponSO.statType;
+                float statBonus = InventoryManager.Instance.GetWeaponStat(weapon.itemNum) / 100f;
+
+                if (finalStats.ContainsKey(statToModify))
+                {
+                    finalStats[statToModify] = finalStats[statToModify] * (1 + statBonus);
+                }
             }
         }
 
