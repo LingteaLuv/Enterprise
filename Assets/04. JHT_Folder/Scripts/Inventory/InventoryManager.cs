@@ -8,7 +8,7 @@ namespace JHT
     {
         public List<WeaponObject> weaponList;
         public List<RelicsObject> relicsList;
-        public float myRelicsPoints;
+        public float relicsPoints;
         public int relicsCoupon;
 
         public Action<ItemObject> OnAddInventory;
@@ -22,7 +22,7 @@ namespace JHT
         public Action<ItemObject> OnAddItemForEncyclopedia;
 
         [Header("유물재화")]
-        public Action<float> OnChangeRelicsPoints;
+        public Action OnChangeRelicsPoints;
         public Action<int> OnChangeRelicsCoupon;
 
         public InventoryMode currentMode;
@@ -251,14 +251,14 @@ namespace JHT
 
         public void DestoryRelics(RelicsObject obj)
         {
-            myRelicsPoints += obj.itemCost;
+            relicsPoints += obj.itemCost;
             relicsList.RemoveAll(r => r.itemNum == obj.itemNum);
-            ChangeRelicsPoints(myRelicsPoints);
+            ChangeRelicsPoints();
         }
 
-        public void ChangeRelicsPoints(float value)
+        public void ChangeRelicsPoints()
         {
-            OnChangeRelicsPoints?.Invoke(value);
+            OnChangeRelicsPoints?.Invoke();
         }
 
         public ItemObject GetItemData(ItemObject obj)

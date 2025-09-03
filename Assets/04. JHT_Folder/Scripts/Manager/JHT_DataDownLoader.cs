@@ -11,17 +11,19 @@ namespace JHT
     public class JHT_DataDownLoader
     {
         public const string itemRelicsURL = "https://docs.google.com/spreadsheets/d/1yrgwWQ_XijgUwjyUSkgDH9wji0oHuoYjEcmjZdZVGmg/export?format=csv"; //범위 설정 : &range=A2:B, 두번쨰시트 : &gid~~
-        
+        public const string lootTableURL = "https://docs.google.com/spreadsheets/d/13MgAe8F47N4GJRDn4vg4wGtn2Y31aOerQEQF096ox_g/export?format=csv";
+
         public event Action OnDataSetCompleted;
 
         public IEnumerator DownloadData()
         {
             yield return null;
-            yield return LoadCSV(itemRelicsURL, SetRelics,2);
+            yield return LoadDataCSV(itemRelicsURL, SetRelics,2);
+            yield return LoadDataCSV(lootTableURL, SetLootTable, 2);
             OnDataSetCompleted?.Invoke();
         }
 
-        private IEnumerator LoadCSV(string url, Action<string[][]> onParsed, int startLine = 1)
+        private IEnumerator LoadDataCSV(string url, Action<string[][]> onParsed, int startLine = 1)
         {
             using UnityWebRequest www = UnityWebRequest.Get(url);
 
@@ -71,6 +73,27 @@ namespace JHT
                 }
             }
 
+        }
+
+        private void SetLootTable(string[][] data)
+        {
+            RelicsGachaLootTable[] parse = new RelicsGachaLootTable[ItemDataManager.Instance.lootTableList.Count];
+            for (int i = 0; i < ItemDataManager.Instance.lootTableList.Count; i++)
+            {
+                parse[i] = ItemDataManager.Instance.lootTableList[i];
+            }
+
+            foreach (var row in data)
+            {
+                int LootID = int.Parse(row[0]);
+                int rarity = int.Parse(row[1]);
+
+                RelicsGachaLootTable so = Array.Find(parse, w => w.tableNum == LootID);
+                if (so != null)
+                {
+                    so._items[rarity-1].weight = int.Parse(row[2]);
+                }
+            }
         }
 
     }

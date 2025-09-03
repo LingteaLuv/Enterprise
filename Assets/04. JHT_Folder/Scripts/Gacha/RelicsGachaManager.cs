@@ -6,12 +6,14 @@ using UnityEngine;
 
 public class RelicsGachaManager : MonoBehaviour
 {
-    public ItemRelicsSO relicsResult;
-    public ItemRarity rarityResult;
-    public int levelResult;
+    public ItemRelicsSO relicsResult { get; set; }
+    public ItemRarity rarityResult { get; set; }
+    public int levelResult { get; set; }
 
     public int relicsCouponCost;
     public float relicsSpecialCost;
+    public float relicsUpgradeCost;
+    public int relicsTablelevel { get; set; }
 
     public bool isChoose;
 
@@ -19,7 +21,8 @@ public class RelicsGachaManager : MonoBehaviour
 
 
     ItemDataManager dataManager;
-    [SerializeField] private RelicsGachaLootTable rarityTable;
+    public RelicsGachaLootTable curRarityTable;
+    public RelicsGachaTableManager relicsGachaTableManager;
     [SerializeField] private RelicsGachaLootTable levelTable;
     [SerializeField] private RelicsGachaLootTable specialTable;
 
@@ -33,6 +36,9 @@ public class RelicsGachaManager : MonoBehaviour
         dataManager = ItemDataManager.Instance;
         gachaData = new();
         dataManager.OnRelicsDataLoadFinish += DataSetting;
+
+        //dtabase사용하게되면 변경
+        relicsTablelevel = 0;
     }
 
     private void DataSetting(bool value)
@@ -47,16 +53,16 @@ public class RelicsGachaManager : MonoBehaviour
         }
     }
 
-    public void GetGachaOneRelicsData(bool value)
+    public void GetGachaOneRelicsData(int curTableLevel)
     {
-        StartCoroutine(GetData(value));
+        StartCoroutine(GetData(curTableLevel));
     }
 
-    private IEnumerator GetData(bool value)
+    private IEnumerator GetData(int curTableLevel)
     {
-        if (value)
+        if (curTableLevel >= 0)
         {
-            GetRarity();
+            GetRarity(curTableLevel);
             while (rarityResult == ItemRarity.None)
                 yield return null;
         }
@@ -86,9 +92,10 @@ public class RelicsGachaManager : MonoBehaviour
         relicsResult = so;
     }
 
-    public void GetRarity()
+    public void GetRarity(int curTableLevel)
     {
-        RelicsGacha picked = rarityTable.GetRandomRange();
+        curRarityTable = relicsGachaTableManager.relicsGachaTables[curTableLevel];
+        RelicsGacha picked = curRarityTable.GetRandomRange();
         rarityResult = picked.rarity;
     }
 
