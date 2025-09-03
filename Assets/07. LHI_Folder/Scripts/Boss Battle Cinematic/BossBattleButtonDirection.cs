@@ -1,43 +1,23 @@
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Audio;
 using TMPro;
 
 /// <summary>
 /// 보스 도전 버튼을 누른 즉시 나오는 연출
 /// </summary>
-public class BossBattleButtonEffect : MonoBehaviour
+public class BossBattleButtonDirection : MonoBehaviour
 {
-    // .Append() (연결): 이전 트윈이 끝난 후 다음 트윈을 이어서 실행합니다.
-    // .Join() (동시 실행): 이전 트윈과 동시에 다음 트윈을 실행합니다.
-    // .AppendInterval() (간격 추가): 지정한 시간만큼 대기한 후 다음 트윈을 실행합니다.
-    // .AppendCallback() (콜백 추가): 지정한 콜백 함수를 실행한 후 다음 트윈을 실행합니다.
-    // 콜백함수 : 특정 이벤트가 발생했을 때 호출되는 함수입니다. 예를 들어, 버튼 클릭, 애니메이션 완료, 타이머 종료 등이 있습니다.
-    // DOTween.Sequence() : 여러 개의 트윈을 순차적으로 또는 동시에 실행할 수 있는 시퀀스를 생성합니다.
-    // DOTween.Kill() : 현재 실행 중인 트윈이나 시퀀스를 즉시 종료합니다. 
-    // DOTween.Restart() : 일시정지된 트윈이나 시퀀스를 처음부터 다시 시작합니다.
-    // DOTween.Pause() : 현재 실행 중인 트윈이나 시퀀스를 일시정지합니다.
-    // DOTween.Play() : 일시정지된 트윈이나 시퀀스를 다시 재생합니다.
-    // DOTween.Rewind() : 트윈이나 시퀀스를 처음 상태로 되돌립니다.
-    // DOTween.Flip() : 트윈이나 시퀀스의 진행 방향을 반대로 전환합니다.
-    // DOFade () : CanvasGroup의 알파 값을 트윈합니다. ex) fadeCanvasGroup.DOFade(1f, 0.6f) // 0.6초 동안 알파 값을 1로 변경
-
-
-    [Header("Audio")]
-    public AudioSource audioSource;
+    [Header("오디오")]
     public AudioClip alertSiren;    // 경고 사이렌
-    public AudioClip b; // 임시
-    public AudioClip c; // 임시
+    private AudioSource audioSource;
 
     [Header("경고 벨트")]
     public CanvasGroup WarningBeltCanvasGroup;
-    public TextMeshProUGUI WarningBeltTMP;
+    public TextMeshProUGUI WarningBeltTMP; 
     private Vector3 WarningBeltTextPos;
 
     // DOTween 시퀀스
     private Sequence bossBattleButtonIntro;
-
-    // SeatBelt 뜻은 :
 
     private void Awake()
     {
@@ -52,7 +32,7 @@ public class BossBattleButtonEffect : MonoBehaviour
         StartBossIntroSequence();   // 시퀸스 저장
     }
 
-    // 플레이 메서드 만들어서 외부에서 호출
+    // 외부에서 호출
     [ContextMenu("OnBossChallenge")]
     public void OnBossChallenge() // 보스 도전 버튼 눌렀을 때 호출
     {
@@ -101,7 +81,7 @@ public class BossBattleButtonEffect : MonoBehaviour
         sequence.Append(WarningBeltTMP.rectTransform.DOLocalMoveX(0f, 0.5f).SetEase(Ease.OutBack))
                 .Append(WarningBeltTMP.rectTransform.DOScale(1.3f, 0.15f))
                 .Append(WarningBeltTMP.rectTransform.DOScale(1f, 0.15f).SetEase(Ease.OutBack))
-                .Join(WarningBeltTMP.rectTransform.DORotate(new Vector3(0f, 0f, 10f), 0.1f).SetLoops(2, LoopType.Yoyo));
+                .Join(WarningBeltTMP.rectTransform.DORotate(new Vector3(0f, 0f, 20f), 0.07f).SetLoops(4, LoopType.Yoyo));
 
         return sequence;
     }

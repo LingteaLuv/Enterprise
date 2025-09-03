@@ -115,6 +115,11 @@ public class BossBattleIntroManager : MonoBehaviour
         // DOTween.Clear() : 모든 트윈과 시퀀스를 메모리에서 제거합니다.
         // DOTween.Goto() : 특정 시간이나 위치로 트윈이나 시퀀스를 이동합니다.
         // DOTween.DOFade() : CanvasGroup의 알파 값을 트윈합니다. ex) fadeCanvasGroup.DOFade(1f, 0.6f) // 0.6초 동안 알파 값을 1로 변경  
+        // DOTween.DOColor() : TextMeshProUGUI의 색상을 트윈합니다. ex) fightText.DOColor(Color.red, 0.3f).SetLoops(6, LoopType.Yoyo) // 빨간색으로 변경 후 원래 색상으로 반복
+        // DOTween.AnchorPosX() : RectTransform의 X 위치를 트윈합니다. ex) orangeTextRect.DOAnchorPosX(0f, 1.5f).SetEase(Ease.OutBack) // X 위치를 0으로 변경
+        // DOTween.DOJump() : RectTransform을 점프시키는 트윈입니다. ex) readyText.rectTransform.DOJump(endPos.position, jumpHeight, 1, 1f).SetEase(Ease.OutCubic)
+        // 각 파라미터는 (목표값, 지속시간, 점프횟수, 높이)
+        // DOTween.From : 현재 값에서 목표값으로 트윈합니다. ex) fightText.transform.DOScale(Vector3.one, 0.6f).From(Vector3.zero).SetEase(Ease.OutBounce) // 스케일을 0에서 1로 변경
 
         // 기존 시퀀스가 있다면 종료
         introSequence?.Kill();
