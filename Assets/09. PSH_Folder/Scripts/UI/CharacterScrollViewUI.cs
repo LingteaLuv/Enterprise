@@ -62,11 +62,11 @@ public class CharacterScrollViewUI : UIBase
     {
         base.ResetPanel(); // 기본 ResetPanel 호출 (로그 출력 등)
 
-        // 만약 캐릭터 상세 정보 패널이 열려있다면, 닫아줍니다.
+        // 만약 캐릭터 상세 정보 패널이 열려있다면, 리셋하고 닫아줍니다.
         if (characterInfoPanel != null && characterInfoPanel.gameObject.activeSelf)
         {
-            characterInfoPanel.gameObject.SetActive(false);
-            Debug.Log("CharacterScrollViewUI가 리셋되어, 열려있던 상세 정보창을 닫습니다.");
+            characterInfoPanel.ResetPanel();
+            Debug.Log("CharacterScrollViewUI가 리셋되어, 열려있던 상세 정보창을 리셋하고 닫습니다.");
         }
 
         // 추가로, 편성 모드도 비활성화 상태로 되돌릴 수 있습니다.

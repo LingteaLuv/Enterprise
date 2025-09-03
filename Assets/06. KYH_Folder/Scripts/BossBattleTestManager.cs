@@ -8,9 +8,9 @@ public class BossBattleTestManager : MonoBehaviour
     [SerializeField] private Button _successBtn;
     [SerializeField] private Button _failBtn;
     
-    private string returnSceneName = "Game";
+    private string returnSceneName = "0828Demo";
         
-    private void Update()
+    private void Start()
     {
         _successBtn.onClick.AddListener(() =>
         {

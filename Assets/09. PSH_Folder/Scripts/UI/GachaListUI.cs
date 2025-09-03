@@ -10,7 +10,7 @@ public class GachaListUI : MonoBehaviour
     [Header("프리팹 연결")]
     [Tooltip("캐릭터 결과 아이템으로 생성할 프리팹 (CharacterPanelUI 스크립트가 있어야 함)")]
     public GameObject characterResultItemPrefab;
-    [Tooltip("장비 결과 아이템으로 생성할 프리팹 (ItemPanelPrefab 스크립트가 있어야 함)")]
+    [Tooltip("장비 결과 아이템으로 생성할 프리팹 (GachaItemPanel 스크립트가 있어야 함)")]
     public GameObject equipmentResultItemPrefab;
 
     [Header("공통 연결")]
@@ -34,24 +34,24 @@ public class GachaListUI : MonoBehaviour
             Debug.LogError("characterResultItemPrefab이 연결되지 않았습니다!");
             return;
         }
-        StartCoroutine(ShowResultsCoroutine(characterResults, characterResultItemPrefab));
+        StartCoroutine(ShowResultsCoroutine(characterResults, characterResultItemPrefab, null));
     }
 
     /// <summary>
     /// 장비 뽑기 결과를 받아 화면에 표시를 시작하는 함수입니다.
     /// </summary>
-    public void DisplayEquipmentResults(List<ItemObject> equipmentResults)
+    public void DisplayEquipmentResults(List<ItemObject> equipmentResults, Dictionary<int, int> enhancementPoints)
     {
         if (equipmentResultItemPrefab == null)
         {
             Debug.LogError("equipmentResultItemPrefab이 연결되지 않았습니다!");
             return;
         }
-        StartCoroutine(ShowResultsCoroutine(equipmentResults, equipmentResultItemPrefab));
+        StartCoroutine(ShowResultsCoroutine(equipmentResults, equipmentResultItemPrefab, enhancementPoints));
     }
 
 
-    private IEnumerator ShowResultsCoroutine<T>(List<T> results, GameObject prefabToSpawn) where T : class
+    private IEnumerator ShowResultsCoroutine<T>(List<T> results, GameObject prefabToSpawn, Dictionary<int, int> enhancementPoints) where T : class
     {
         // 기존 아이템들 삭제
         foreach (Transform child in contentParent)
@@ -65,8 +65,6 @@ public class GachaListUI : MonoBehaviour
         {
             GameObject itemGO = Instantiate(prefabToSpawn, contentParent);
 
-
-
             // 타입에 따라 적절한 UI 스크립트의 Init 함수를 호출
             if (resultData is PlayerCharacterData charData)
             {
@@ -75,8 +73,16 @@ public class GachaListUI : MonoBehaviour
             }
             else if (resultData is WeaponObject itemData)
             {
-                ItemPanelPrefab panelUI = itemGO.GetComponent<ItemPanelPrefab>();
-                if (panelUI != null) panelUI.SetUp(itemData);
+                GachaItemPanel panelUI = itemGO.GetComponent<GachaItemPanel>();
+                if (panelUI != null)
+                {
+                    int points = 0;
+                    if (enhancementPoints != null)
+                    {
+                        enhancementPoints.TryGetValue(itemData.itemNum, out points);
+                    }
+                    panelUI.SetUp(itemData, points);
+                }
             }
 
             // 등장 애니메이션 실행

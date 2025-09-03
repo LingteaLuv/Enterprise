@@ -91,7 +91,7 @@ public class EquipDataImporter
                 data.equipCategory = (EquipCategory)Enum.Parse(typeof(EquipCategory), fields[headerMap["equipCategory"]], true);
                 data.equipType = (EquipType)Enum.Parse(typeof(EquipType), fields[headerMap["equipType"]], true);
 
-                data.statType = fields[headerMap["statType"]];
+                data.statType = (Stat)Enum.Parse(typeof(Stat), fields[headerMap["statType"]], true);
 
                 // SO 에셋을 저장할 경로를 지정합니다.
                 string assetPath = $"{soSavePath}{data.itemNum}.asset";

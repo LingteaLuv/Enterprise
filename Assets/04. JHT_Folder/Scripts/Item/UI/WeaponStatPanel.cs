@@ -105,15 +105,15 @@ namespace JHT
             levelText.text = $"Lv. {curWeapon.ItemLevel}";
             switch (curWeapon.statType)
             {
-                case "attackPower":
+                case Stat.Attack:
                     statText.text = "공격력";
                     break;
 
-                case "defensePower":
+                case Stat.Defense:
                     statText.text = "방어력";
                     break;
 
-                case "health":
+                case Stat.Health:
                     statText.text = "체력";
                     break;
 

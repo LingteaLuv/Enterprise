@@ -1,6 +1,7 @@
-using UnityEngine;
+using JHT;
 using System.Collections.Generic;
 using System.Numerics;
+using UnityEngine;
 
 public enum Stat
 {
@@ -28,8 +29,8 @@ public class PlayerCharacterData
     // Key: 스탯 이름(string), Value: 현재 스탯 양 캐릭터의 레벨에 따라서 변경
     public Dictionary<Stat, float> characterStats = new Dictionary<Stat, float>();
 
-    //[Header("장비")]
-    // 장비 코드 정보만 저장
+    [Header("장비")]
+    public Dictionary<EquipCategory, WeaponObject> equippedItems = new Dictionary<EquipCategory, WeaponObject>();
 
     //[Header("유물")]
     // 적용되고 있는 유물 정보만 저장
@@ -53,6 +54,10 @@ public class PlayerCharacterData
         {
             characterStats[stat.statName] = stat.value;
         }
+
+        // 장비 딕셔너리 초기화
+        equippedItems = new Dictionary<EquipCategory, WeaponObject>();
+
         // 최초 스탯 계산. BasicStatManager가 준비되기 전에 호출될 수 있으므로 battlePower만 초기화합니다.
         battlePower = 0;
     }
@@ -86,6 +91,20 @@ public class PlayerCharacterData
         }
 
         // 3. 장비 및 유물 스탯 적용 (향후 확장)
+        foreach (var weapon in equippedItems.Values)
+        {
+            if (weapon != null)
+            {
+                ItemWeaponSO weaponSO = (ItemWeaponSO)weapon.itemSO;
+                Stat statToModify = weaponSO.statType;
+                float statBonus = InventoryManager.Instance.GetWeaponStat(weapon.itemNum) / 100f;
+
+                if (finalStats.ContainsKey(statToModify))
+                {
+                    finalStats[statToModify] = finalStats[statToModify] * (1 + statBonus);
+                }
+            }
+        }
 
         // --- 전투력 계산 시작 ---
         battlePower = (BigInteger)StatCalculator.ComputeFinalPower(this);

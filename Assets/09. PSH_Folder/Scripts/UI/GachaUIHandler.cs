@@ -32,6 +32,8 @@ public class GachaUIHandler : UIBase
     public RelicsGachaManager relicsGachaManager;
     public Button relicsSingleBtn;
     public Button specialRelicsSingleBtn;
+    public Button relicsProbabilityBtn;
+    public RelicsProbability relicsUpgradePanel;
 
     [Header("결과 UI")]
     [Tooltip("뽑기 결과 화면 UI를 연결하세요.")]
@@ -82,6 +84,7 @@ public class GachaUIHandler : UIBase
         relicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Single);
         specialRelicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Special);
         relicsPoints.Init(relicsGachaManager);
+        relicsProbabilityBtn.onClick.AddListener(ShowUpgradeGachaPanel);
     }
 
 
@@ -124,7 +127,7 @@ public class GachaUIHandler : UIBase
     {
         if (InventoryManager.Instance.relicsCoupon >= relicsGachaManager.relicsCouponCost)
         {
-            ShowSelectPopUp(relicsGachaManager, true);
+            ShowSelectPopUp(relicsGachaManager,relicsGachaManager.relicsTablelevel);
         }
         else
         {
@@ -134,13 +137,13 @@ public class GachaUIHandler : UIBase
 
     public void OnClick_RelicsGacha_Special()
     {
-        if (InventoryManager.Instance.myRelicsPoints >= relicsGachaManager.relicsSpecialCost)
+        if (InventoryManager.Instance.relicsPoints >= relicsGachaManager.relicsSpecialCost)
         {
-            ShowSelectPopUp(relicsGachaManager, false);
+            ShowSelectPopUp(relicsGachaManager, -1);
         }
         else
         {
-            UIManager.Instance.ShowToast($"{relicsGachaManager.relicsSpecialCost - InventoryManager.Instance.myRelicsPoints}만큼 유물잔해가 부족합니다!", 2f);
+            UIManager.Instance.ShowToast($"{relicsGachaManager.relicsSpecialCost - InventoryManager.Instance.relicsPoints}만큼 유물잔해가 부족합니다!", 2f);
         }
     }
     #endregion
@@ -174,31 +177,15 @@ public class GachaUIHandler : UIBase
                 {
                     Debug.Log($"UI 버튼 클릭으로 {itemType} {count}회 뽑기를 실행했습니다.");
 
-                    if (manager.LastGachaResults == null)
-                    {
-                        Debug.LogError("[GachaUIHandler] LastGachaResults 리스트가 null입니다!");
-                        return;
-                    }
-
-                    // 결과창 표시
-                    if (manager.LastGachaResults is List<PlayerCharacterData> characterResults)
-                    {
-                        gachaListPanel.gameObject.SetActive(true);
-                        gachaListPanel.DisplayCharacterResults(characterResults);
-                        QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
-                    }
-                    else if (manager.LastGachaResults is List<ItemObject> equipmentResults)
-                    {
-                        gachaListPanel.gameObject.SetActive(true);
-                        gachaListPanel.DisplayEquipmentResults(equipmentResults);
-                        QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
-                    }
-
-                    // *** 올바른 위치 ***
-                    // 캐릭터 뽑기였다면, 뽑기가 모두 끝난 이 시점에서 텍스트를 갱신합니다.
+                    // Manager가 결과 표시를 담당하므로, 여기서는 퀘스트 신호만 보냅니다.
                     if (isCharacterGacha)
                     {
+                        QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
                         UpdateCharacterPityText();
+                    }
+                    else if (itemType == "장비")
+                    {
+                        QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
                     }
                 }
                 else
@@ -213,15 +200,15 @@ public class GachaUIHandler : UIBase
         );
     }
 
-    private void ShowSelectPopUp(RelicsGachaManager manager, bool isNormal)
+    private void ShowSelectPopUp(RelicsGachaManager manager,int curTableLevel)
     {
 
-        if (isNormal)
+        if (curTableLevel >= 0)
         {
             UIManager.Instance.ShowConfirm("유물 뽑기를 진행 하시겠습니까?",
             () =>
             {
-                manager.GetGachaOneRelicsData(true);
+                manager.GetGachaOneRelicsData(curTableLevel);
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
@@ -233,18 +220,24 @@ public class GachaUIHandler : UIBase
             UIManager.Instance.ShowConfirm("스페셜 유물 뽑기를 진행 하시겠습니까?",
             () =>
             {
-                manager.GetGachaOneRelicsData(false);
+                manager.GetGachaOneRelicsData(-1);
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
-                InventoryManager.Instance.myRelicsPoints -= manager.relicsSpecialCost;
+                InventoryManager.Instance.relicsPoints -= manager.relicsSpecialCost;
             });
         }
 
     }
 
+    private void ShowUpgradeGachaPanel()
+    {
+        relicsUpgradePanel.gameObject.SetActive(true);
+        relicsUpgradePanel.Init(relicsGachaManager);
+    }
+
     //private void OnDestroy()
     //{
     //    InventoryManager.Instance.OnChangeRelicsPoints -= ShowRelicsPoint;
-    //}
+    //} 
 }

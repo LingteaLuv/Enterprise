@@ -3,22 +3,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+
+/// <summary>
+/// 전투 전체 흐름을 관리하는 매니저
+/// - 플레이어와 적 유닛의 스폰
+/// - 전투 시작 및 종료 조건 판별
+/// - 스킵 버튼 제어
+/// - 전투 패배 처리 및 리셋
+/// - BattleField 위치 관리 및 카메라 연동
+/// </summary>
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
 
     private Coroutine battleRoutine;
 
-    [SerializeField] private Button _skipBtn;
-    [SerializeField] private CameraFollow cameraFollow;
-
+    private Button _skipBtn;
+    private CameraFollow cameraFollow;
 
     [Header("스폰 프리팹")]
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
 
     [Header("전투 필드")]
-    [SerializeField] private List<BattleField> battleFields;
+    private List<BattleField> battleFields = new();             // 동적으로 필드 구성 (씬 로드시 찾아서 등록)
 
     [Header("스폰 수 설정")]
     [SerializeField] private int baseEnemyCount = 3;
@@ -28,104 +38,159 @@ public class BattleManager : MonoBehaviour
     private List<GameObject> spawnedEnemies = new();
 
     private int currentStageIndex = 0;
-
     private bool isbattleover = false;
+
+    private bool isInitialized = false;
 
     private void Awake()
     {
-        Debug.Log("BattleManager.Awake 호출됨");
-        Instance = this;
+        Instance = this;    // 싱글톤 등록
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        _skipBtn.onClick.AddListener(Skip);
-        _skipBtn.interactable = false;
+        // 씬 로드 시 초기화 연결
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 지정된 씬에서만 초기화
+        if (scene.name == "Game" && !isInitialized)
+        {
+            Debug.Log(" BattleManager: Scene Loaded → Init");
+            isInitialized = true;
+
+            InitUI();
+            InitBattleFields();
+
+            if (_skipBtn != null)
+            {
+                _skipBtn.onClick.AddListener(Skip);
+                _skipBtn.interactable = false;
+            }
+            else
+            {
+                Debug.LogWarning(" SkipButton을 찾을 수 없습니다.");
+            }
+        }
+    }
+
+    // UI 초기화 (버튼, 카메라 컴포넌트 등)
+    private void InitUI()
+    {
+        GameObject skipBtnObj = GameObject.Find("SkipButton");
+        if (skipBtnObj != null)
+        {
+            _skipBtn = skipBtnObj.GetComponent<Button>();
+        }
+
+        cameraFollow = Camera.main?.GetComponent<CameraFollow>();
+    }
+
+    // 전투 필드 리스트 초기화 (하이어라키에서 BattleFields 하위 오브젝트 검색)
+    private void InitBattleFields()
+    {
+        battleFields.Clear();
+        Transform fieldRoot = GameObject.Find("BattleFields")?.transform;
+
+        if (fieldRoot != null)
+        {
+            foreach (Transform child in fieldRoot)
+            {
+                var bf = child.GetComponent<BattleField>();
+                if (bf != null)
+                    battleFields.Add(bf);
+            }
+        }
+        else
+        {
+            Debug.LogError("BattleFields 오브젝트를 찾을 수 없습니다.");
+        }
+    }
+
+    // 스킵 버튼 클릭 시 호출
     private void Skip()
     {
-        if (isbattleover) return; // 이미 스킵됨 → 무시
+        if (isbattleover) return;
 
         isbattleover = true;
 
-        // 코루틴 중복 방지
         if (battleRoutine != null)
         {
             StopCoroutine(battleRoutine);
             battleRoutine = null;
         }
 
-        // 클리어 처리
         IslandStageManager.Instance.OnBattleComplete();
         ClearEnemies();
         ClearPlayer();
     }
 
-    /// <summary>
-    /// 외부에서 호출되는 전투 시작 메서드
-    /// </summary>
+    // 외부에서 전투 시작 요청
     public void StartBattle(int stageIndex)
     {
         isbattleover = false;
         currentStageIndex = stageIndex;
+
+        if (battleFields.Count == 0)
+        {
+            InitBattleFields(); // 재시도
+            if (battleFields.Count == 0)
+            {
+                Debug.LogError("전투 필드가 없습니다. BattleManager가 초기화되지 않았습니다.");
+                return;
+            }
+        }
+
         battleRoutine = StartCoroutine(BattleRoutine());
         Debug.Log("battleRoutine 시작됨");
-        _skipBtn.interactable = true;
+
+        if (_skipBtn != null)
+            _skipBtn.interactable = true;
     }
 
-    /// <summary>
-    /// 전투의 전체 흐름을 담당하는 메인 코루틴
-    /// </summary>
+    // 전투 흐름 코루틴
     private IEnumerator BattleRoutine()
     {
-        
-
         Debug.Log("전투 시작");
 
         var field = battleFields[currentStageIndex];
 
-        // 1. 유닛 스폰
         SpawnPlayer(field);
         SpawnEnemies(field, currentStageIndex);
 
-        yield return new WaitForSeconds(0.5f); // 연출 시간
+        yield return new WaitForSeconds(0.5f);      // 등장 연출 대기
 
-      //  // 임시 전투 종료 후 다음 섬 넘어가기위한 키 . 차후 삭제 예정
-      //  if(Keyboard.current.spaceKey.wasPressedThisFrame)
-      //  {
-      //      battleRoutine = null;
-      //      Debug.Log("스페이스 버튼으로 전투 스킵 후 다음 섬 이동.");
-      //      IslandStageManager.Instance.OnBattleComplete();
-      //  }
-
-        // 2. 전투 루프
-        while (true)
+        int safety = 0;
+        while (!AllEnemiesDefeated())
         {
-            if (AllEnemiesDefeated())
-                break;
-
-           // AutoControlUnits(); // 유닛 자동 행동 (구현 예정)
             yield return null;
+            safety++;
+            if (safety > 10000) break; // 무한 루프 방지
         }
 
-        yield return new WaitForSeconds(1f); // 종료 연출 대기
+        yield return new WaitForSeconds(1f);
 
         battleRoutine = null;
 
-        if (isbattleover == true)
-        {
+        if (isbattleover)
             yield break;
-        }
-        else
-        {
+
+        if (_skipBtn != null)
             _skipBtn.interactable = false;
-            ClearPlayer();
-            ClearEnemies(); // 혹시라도 남아있으면 같이 제거
-            IslandStageManager.Instance.OnBattleComplete();
-        }
+
+        ClearPlayer();
+        ClearEnemies();
+        IslandStageManager.Instance.OnBattleComplete();
     }
 
+    // 플레이어 생성 및 카메라 타겟 설정
     private void SpawnPlayer(BattleField field)
     {
         if (currentPlayer != null)
@@ -135,47 +200,46 @@ public class BattleManager : MonoBehaviour
 
         if (cameraFollow != null)
             cameraFollow.SetTarget(currentPlayer.transform);
+        else
+            Debug.LogWarning(" CameraFollow가 연결되지 않았습니다.");
     }
 
+    // 적 생성 (스테이지 수에 비례해 증가)
     private void SpawnEnemies(BattleField field, int stageIndex)
     {
         int count = baseEnemyCount + (stageIndex * growthPerStage);
         var spawnPoints = field.EnemySpawnPoints;
-       // count = Mathf.Min(count, spawnPoints.Count);
 
         for (int i = 0; i < count; i++)
         {
             int randIndex = Random.Range(0, spawnPoints.Count);
             var enemy = Instantiate(enemyPrefab, spawnPoints[randIndex].position, Quaternion.identity);
-            enemy.tag = "Enemy"; // 전투 종료 체크용
+            enemy.tag = "Enemy";
             spawnedEnemies.Add(enemy);
         }
     }
 
+    // 적 사망 시 호출
     public void OnEnemyDead(GameObject enemy)
     {
         if (spawnedEnemies.Contains(enemy))
             spawnedEnemies.Remove(enemy);
-        
+
         QuestSignalManager.Instance.KillEnemy(MonsterId.All, 1);
 
         if (AllEnemiesDefeated())
         {
             Debug.Log("모든 적 제거 → 전투 종료 예정");
-            // 전투 루프에서 자동 감지됨 → 따로 종료 호출 안 해도 됨
         }
     }
 
+    // 적 전멸 여부 확인
     private bool AllEnemiesDefeated()
     {
         return spawnedEnemies.Count == 0;
     }
 
-    //  private void AutoControlUnits()
-    //  {
-    //      // TODO: 추후 유닛 FSM이나 AI 구현 시 연결
-    //  }
-
+    // 플레이어 사망 시 처리
     public void OnPlayerDead()
     {
         if (isbattleover) return;
@@ -188,27 +252,28 @@ public class BattleManager : MonoBehaviour
             battleRoutine = null;
         }
 
-        _skipBtn.interactable = false;
+        if (_skipBtn != null)
+            _skipBtn.interactable = false;
 
-        ClearEnemies(); // 적 정리
-        ClearPlayer();  // 플레이어 제거
+        ClearEnemies();
+        ClearPlayer();
 
         Debug.Log("플레이어 사망 → 패배 처리 시작");
 
-        // 패배 처리 흐름 시작
         StartCoroutine(HandleDefeat());
     }
 
+    // 패배 시 연출 및 리셋 처리
     private IEnumerator HandleDefeat()
     {
         ScreenScrollEffectManager.Instance.ShowScrollEffect("패배했습니다. 첫번째 섬부터 재도전합니다.", () => { });
 
         yield return new WaitForSeconds(1f);
 
-        // TODO: 재도전, 로비 이동, 스테이지 리셋 등 원하는 처리
         IslandStageManager.Instance.ResetStageAfterDefeat();
     }
 
+    // 적 제거
     private void ClearEnemies()
     {
         foreach (var enemy in spawnedEnemies)
@@ -219,6 +284,7 @@ public class BattleManager : MonoBehaviour
         spawnedEnemies.Clear();
     }
 
+    // 플레이어 제거
     private void ClearPlayer()
     {
         if (currentPlayer != null)

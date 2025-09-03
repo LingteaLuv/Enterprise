@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using JHT;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -7,7 +9,13 @@ public class GameUIController : UIController<GameUIController.GameUIType>
 {
     [SerializeField] private Toggle _attendanceToggle;
     [SerializeField] private Toggle _toolToggle;
+    [SerializeField] private Toggle _shipToggle;
 
+    [SerializeField] private TextMeshProUGUI _goldText;
+    [SerializeField] private TextMeshProUGUI _stoneText;
+    [SerializeField] private TextMeshProUGUI _gemText;
+
+    public WeaponStatPanel StatPanel;
     
     public enum GameUIType
     {
@@ -20,7 +28,14 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         Btn5Panel,
         Btn6Panel,
         Btn7Panel,
-        Btn8Panel
+        Btn8Panel,
+        ShipPanel
+    }
+
+    private void Awake()
+    {
+        CurrencyManager.Instance.OnUpdateCurrency += UpdateText;
+        DragAndDropController.Instance.GetCanvas(GetComponent<Canvas>());
     }
     
     private void Start()
@@ -58,8 +73,31 @@ public class GameUIController : UIController<GameUIController.GameUIType>
             if (!isOn) HideUI(GameUIType.ToolPanel);
             else ShowUI(GameUIType.ToolPanel);
         });
+        _shipToggle.onValueChanged.AddListener((isOn) =>
+        {
+            if (!isOn)
+            {
+                _shipToggle.image.color = Color.white;
+                HideUI(GameUIType.ShipPanel);
+            }
+            else
+            {
+                _shipToggle.image.color = Color.gray;
+                ShowUI(GameUIType.ShipPanel);
+            }
+        });
         
         HideUI(GameUIType.AttendancePanel);
         HideUI(GameUIType.ToolPanel);
+
+        //CurrencyManager.Instance.OnUpdateCurrency += UpdateText;
+        //DragAndDropController.Instance.GetCanvas(GetComponent<Canvas>());
+    }
+
+    private void UpdateText(string s1, string s2, string s3)
+    {
+        _goldText.text = s1;
+        _stoneText.text = s2;
+        _gemText.text = s3;
     }
 }
