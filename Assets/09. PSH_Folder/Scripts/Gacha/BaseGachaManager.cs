@@ -18,8 +18,18 @@ public abstract class BaseGachaManager<T> : MonoBehaviour where T : class
     {
         if (resultPanel == null)
         {
-            Debug.Log("[BaseGachaManager] Result Panel이 할당되지 않아, 씬에서 'GachaListPanel'을 찾습니다.");
-            resultPanel = GameObject.Find("GachaListPanel");
+            Debug.Log("[BaseGachaManager] Result Panel이 할당되지 않아, 씬에서 비활성화된 오브젝트를 포함하여 'GachaListPanel'을 찾습니다.");
+
+            GachaListUI[] allPanels = Resources.FindObjectsOfTypeAll<GachaListUI>();
+            foreach (GachaListUI panel in allPanels)
+            {
+                // 씬에 있는 오브젝트만 대상으로 합니다 (프리팹 에셋 제외)
+                if (panel.gameObject.scene.isLoaded && panel.name == "GachaListPanel")
+                {
+                    resultPanel = panel.gameObject;
+                    break;
+                }
+            }
 
             if (resultPanel == null)
             {
