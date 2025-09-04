@@ -134,7 +134,8 @@ public class RelicsGachaManager : MonoBehaviour
 
         if (obj == null)
         {
-            InventoryManager.Instance.AddItem(so, rarity, level);
+            OnChooseItem?.Invoke(null, new RelicsObject(so, rarity, level));
+            //InventoryManager.Instance.AddItem(so, rarity, level);
         }
         else
         {

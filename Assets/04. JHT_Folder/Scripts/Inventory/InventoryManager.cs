@@ -254,6 +254,8 @@ namespace JHT
 
         public void DestoryRelics(RelicsObject obj)
         {
+            if (obj == null)
+                return;
             RelicsPoints += obj.itemCost;
             relicsList.RemoveAll(r => r.itemNum == obj.itemNum);
         }
