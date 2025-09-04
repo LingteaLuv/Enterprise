@@ -40,14 +40,14 @@ public class GachaListUI : MonoBehaviour
     /// <summary>
     /// 장비 뽑기 결과를 받아 화면에 표시를 시작하는 함수입니다.
     /// </summary>
-    public void DisplayEquipmentResults(List<ItemObject> equipmentResults, Dictionary<int, int> enhancementPoints)
+    public void DisplayEquipmentResults(List<ItemObject> equipmentResults, Dictionary<int, PointTier> itemTiers)
     {
         if (equipmentResultItemPrefab == null)
         {
             Debug.LogError("equipmentResultItemPrefab이 연결되지 않았습니다!");
             return;
         }
-        StartCoroutine(ShowEquipmentResultsCoroutine(equipmentResults, enhancementPoints));
+        StartCoroutine(ShowEquipmentResultsCoroutine(equipmentResults, itemTiers));
     }
 
     private IEnumerator ShowCharacterResultsCoroutine(List<PlayerCharacterData> results, List<GachaGrade> grades)
@@ -69,7 +69,7 @@ public class GachaListUI : MonoBehaviour
         }
     }
 
-    private IEnumerator ShowEquipmentResultsCoroutine(List<ItemObject> results, Dictionary<int, int> enhancementPoints)
+    private IEnumerator ShowEquipmentResultsCoroutine(List<ItemObject> results, Dictionary<int, PointTier> itemTiers)
     {
         foreach (Transform child in contentParent)
         {
@@ -85,12 +85,12 @@ public class GachaListUI : MonoBehaviour
                 GachaItemPanel panelUI = itemGO.GetComponent<GachaItemPanel>();
                 if (panelUI != null)
                 {
-                    int points = 0;
-                    if (enhancementPoints != null)
+                    PointTier tier = PointTier.Low; // 기본값
+                    if (itemTiers != null)
                     {
-                        enhancementPoints.TryGetValue(itemData.itemNum, out points);
+                        itemTiers.TryGetValue(itemData.itemNum, out tier);
                     }
-                    panelUI.SetUp(itemData, points);
+                    panelUI.SetUp(itemData, tier);
                 }
             }
 

@@ -18,15 +18,12 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
     [Header("강화 포인트 확률")]
     public List<EnhancementPointChance> enhancementPointChances;
 
-    [Header("강화 포인트 등급별 색상")]
-    [Tooltip("포인트 등급 순서대로 색상을 지정합니다. (낮은->높은 순). 예를 들어 포인트 등급이 3개면, 색상은 4개(기본색상 포함) 필요합니다.")]
-    public List<Color> enhancementTierColors;
-
+    // 강화 포인트의 등급 기준 (포인트 오름차순으로 정렬됨)
     private List<int> enhancementPointTiers;
 
     protected override void Start()
     {
-        base.Start(); // BaseGachaManager의 Start() 호출
+        base.Start();
         StartCoroutine(InitializeGachaPool());
         InitializeTiers();
     }
@@ -35,6 +32,7 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
     {
         if (enhancementPointChances != null)
         {
+            // 포인트를 기준으로 오름차순 정렬하여 등급의 기준점을 만듭니다.
             enhancementPointTiers = enhancementPointChances.Select(e => e.points).OrderBy(p => p).ToList();
         }
         else
@@ -61,11 +59,8 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
             return null;
         }
 
-        // 모든 아이템을 동일한 확률로 뽑습니다.
         ItemWeaponSO drawnWeaponSO = gachaPool[Random.Range(0, gachaPool.Count)];
-
         Debug.Log($"[EquipmentGachaManager] 뽑힌 아이템: {drawnWeaponSO.itemName}");
-
         return InventoryManager.Instance.AddItem(drawnWeaponSO);
     }
 
@@ -78,7 +73,7 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
         }
 
         LastGachaResults = new List<ItemObject>();
-        Dictionary<int, int> enhancementPointsByItem = new Dictionary<int, int>();
+        Dictionary<int, PointTier> itemTiers = new Dictionary<int, PointTier>();
 
         for (int i = 0; i < count; i++)
         {
@@ -89,8 +84,11 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
                 if (drawnItem is WeaponObject weapon)
                 {
                     int pointsToAdd = GetRandomEnhancementPoints();
-                    enhancementPointsByItem[weapon.itemNum] = pointsToAdd;
                     InventoryManager.Instance.AddEnhancementPointsToEquipment(weapon.itemNum, pointsToAdd);
+
+                    // 획득한 포인트의 등급을 결정하여 UI에 넘겨줄 정보 저장
+                    itemTiers[weapon.itemNum] = GetTierForPoints(pointsToAdd);
+
                     AutoEnhanceWeapon(weapon);
                 }
             }
@@ -104,7 +102,7 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
             GachaListUI resultUI = resultPanel.GetComponent<GachaListUI>();
             if (resultUI != null)
             {
-                resultUI.DisplayEquipmentResults(LastGachaResults, enhancementPointsByItem);
+                resultUI.DisplayEquipmentResults(LastGachaResults, itemTiers);
             }
         }
         CurrencyManager.Instance.UpdateCurrencyUI();
@@ -128,28 +126,30 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
         return 0;
     }
 
-    public Color GetColorForPoints(int points)
+    private PointTier GetTierForPoints(int points)
     {
-        if (enhancementTierColors == null || enhancementTierColors.Count == 0)
+        // enhancementPointTiers는 Inspector에 설정된 포인트를 오름차순으로 정렬한 리스트입니다. (예: [20, 50, 100])
+        // 이 리스트는 3개의 항목(Low, Mid, High)을 가지고 있다고 가정합니다.
+        if (enhancementPointTiers == null || enhancementPointTiers.Count != 3)
         {
-            return Color.white;
+            Debug.LogWarning("강화 포인트 확률(EnhancementPointChances)은 3개의 등급(Low, Mid, High)에 맞게 3개 항목으로 설정해야 합니다.");
+            // 안전 장치: 설정이 잘못되었을 경우, 가장 낮은 등급으로 처리
+            return PointTier.Low;
         }
 
-        int tierIndex = 0;
-        for (int i = 0; i < enhancementPointTiers.Count; i++)
+        // 정렬된 리스트의 값과 정확히 일치하는지 확인하여 등급을 결정합니다.
+        if (points == enhancementPointTiers[2]) // 가장 높은 포인트 값 = High
         {
-            if (points >= enhancementPointTiers[i])
-            {
-                tierIndex = i + 1;
-            }
-            else
-            {
-                break;
-            }
+            return PointTier.High;
         }
-
-        tierIndex = Mathf.Clamp(tierIndex, 0, enhancementTierColors.Count - 1);
-        return enhancementTierColors[tierIndex];
+        else if (points == enhancementPointTiers[1]) // 중간 포인트 값 = Mid
+        {
+            return PointTier.Mid;
+        }
+        else // 가장 낮은 포인트 값 = Low
+        {
+            return PointTier.Low;
+        }
     }
 
     private void AutoEnhanceWeapon(WeaponObject weapon)
