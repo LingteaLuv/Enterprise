@@ -18,9 +18,29 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
     [Header("강화 포인트 확률")]
     public List<EnhancementPointChance> enhancementPointChances;
 
-    private void Start()
+    [Header("강화 포인트 등급별 색상")]
+    [Tooltip("포인트 등급 순서대로 색상을 지정합니다. (낮은->높은 순). 예를 들어 포인트 등급이 3개면, 색상은 4개(기본색상 포함) 필요합니다.")]
+    public List<Color> enhancementTierColors;
+
+    private List<int> enhancementPointTiers;
+
+    protected override void Start()
     {
+        base.Start(); // BaseGachaManager의 Start() 호출
         StartCoroutine(InitializeGachaPool());
+        InitializeTiers();
+    }
+
+    private void InitializeTiers()
+    {
+        if (enhancementPointChances != null)
+        {
+            enhancementPointTiers = enhancementPointChances.Select(e => e.points).OrderBy(p => p).ToList();
+        }
+        else
+        {
+            enhancementPointTiers = new List<int>();
+        }
     }
 
     private System.Collections.IEnumerator InitializeGachaPool()
@@ -33,10 +53,7 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
         Debug.Log($"[EquipmentGachaManager] {gachaPool.Count}개의 무기를 뽑기 풀에 추가했습니다.");
     }
 
-    /// <summary>
-    /// BaseGachaManager로부터 특정 등급을 받아, 해당 등급의 아이템을 뽑는 실제 로직입니다。
-    /// </summary>
-    protected override ItemObject DrawItem(Rarity rarity)
+    protected override ItemObject DrawItem()
     {
         if (gachaPool.Count == 0)
         {
@@ -44,22 +61,10 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
             return null;
         }
 
-        // 선택된 등급에 해당하는 아이템만 필터링
-        List<ItemWeaponSO> filteredPool = gachaPool.Where(weapon => weapon.rarity == rarity).ToList();
+        // 모든 아이템을 동일한 확률로 뽑습니다.
+        ItemWeaponSO drawnWeaponSO = gachaPool[Random.Range(0, gachaPool.Count)];
 
-        ItemWeaponSO drawnWeaponSO;
-        if (filteredPool.Count == 0)
-        {
-            Debug.LogWarning($"[EquipmentGachaManager] {rarity} 등급의 아이템이 뽑기 풀에 없습니다. 전체 풀에서 무작위로 선택합니다.");
-            // 해당 등급의 아이템이 없을 경우, 전체 풀에서 무작위로 선택
-            drawnWeaponSO = gachaPool[Random.Range(0, gachaPool.Count)];
-        }
-        else
-        {
-            drawnWeaponSO = filteredPool[Random.Range(0, filteredPool.Count)];
-        }
-
-        Debug.Log($"[EquipmentGachaManager] 뽑힌 등급: {rarity}, 실제 뽑힌 아이템 등급: {drawnWeaponSO.rarity}, 아이템 이름: {drawnWeaponSO.itemName}");
+        Debug.Log($"[EquipmentGachaManager] 뽑힌 아이템: {drawnWeaponSO.itemName}");
 
         return InventoryManager.Instance.AddItem(drawnWeaponSO);
     }
@@ -73,41 +78,19 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
         }
 
         LastGachaResults = new List<ItemObject>();
+        Dictionary<int, int> enhancementPointsByItem = new Dictionary<int, int>();
+
         for (int i = 0; i < count; i++)
         {
-            Rarity chosenRarity = GetRandomRarity();
-            ItemObject drawnItem = DrawItem(chosenRarity);
+            ItemObject drawnItem = DrawItem();
             if (drawnItem != null)
             {
                 LastGachaResults.Add(drawnItem);
-            }
-        }
-
-        Dictionary<int, int> enhancementPointsMap = new Dictionary<int, int>();
-        float totalChance = enhancementPointChances.Sum(epc => epc.chance);
-
-        if (totalChance > 0)
-        {
-            foreach (var drawnItem in LastGachaResults)
-            {
                 if (drawnItem is WeaponObject weapon)
                 {
-                    float randomPoint = Random.Range(0, totalChance);
-                    int pointsToAdd = 0;
-                    foreach (var epc in enhancementPointChances)
-                    {
-                        if (randomPoint < epc.chance)
-                        {
-                            pointsToAdd = epc.points;
-                            break;
-                        }
-                        else
-                        {
-                            randomPoint -= epc.chance;
-                        }
-                    }
+                    int pointsToAdd = GetRandomEnhancementPoints();
+                    enhancementPointsByItem[weapon.itemNum] = pointsToAdd;
                     InventoryManager.Instance.AddEnhancementPointsToEquipment(weapon.itemNum, pointsToAdd);
-                    enhancementPointsMap[weapon.itemNum] = pointsToAdd;
                     AutoEnhanceWeapon(weapon);
                 }
             }
@@ -121,47 +104,75 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
             GachaListUI resultUI = resultPanel.GetComponent<GachaListUI>();
             if (resultUI != null)
             {
-                resultUI.DisplayEquipmentResults(LastGachaResults, enhancementPointsMap);
+                resultUI.DisplayEquipmentResults(LastGachaResults, enhancementPointsByItem);
             }
         }
         CurrencyManager.Instance.UpdateCurrencyUI();
         return true;
     }
 
+    private int GetRandomEnhancementPoints()
+    {
+        float totalChance = enhancementPointChances.Sum(epc => epc.chance);
+        if (totalChance <= 0) return 0;
+
+        float randomPoint = Random.Range(0, totalChance);
+        foreach (var epc in enhancementPointChances)
+        {
+            if (randomPoint < epc.chance)
+            {
+                return epc.points;
+            }
+            randomPoint -= epc.chance;
+        }
+        return 0;
+    }
+
+    public Color GetColorForPoints(int points)
+    {
+        if (enhancementTierColors == null || enhancementTierColors.Count == 0)
+        {
+            return Color.white;
+        }
+
+        int tierIndex = 0;
+        for (int i = 0; i < enhancementPointTiers.Count; i++)
+        {
+            if (points >= enhancementPointTiers[i])
+            {
+                tierIndex = i + 1;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        tierIndex = Mathf.Clamp(tierIndex, 0, enhancementTierColors.Count - 1);
+        return enhancementTierColors[tierIndex];
+    }
+
     private void AutoEnhanceWeapon(WeaponObject weapon)
     {
         if (weapon == null) return;
-
-        Debug.Log($"[EquipmentGachaManager] {weapon.itemName} (ID: {weapon.itemNum}) 자동 강화를 시작합니다.");
-
         const int levelUpCost = 10;
         const int maxLevel = 50;
 
-        // 강화 가능 조건: 포인트 충분, 최대 레벨 미만, 성급업 대기 상태 아님
         bool needsStarUp = weapon.ItemLevel > 0 && weapon.ItemLevel % 10 == 0 && weapon.ItemStar < (weapon.ItemLevel / 10);
         bool canLevelUp = InventoryManager.Instance.GetEnhancementPoints(weapon.itemNum) >= levelUpCost && weapon.ItemLevel < maxLevel && !needsStarUp;
 
         while (canLevelUp)
         {
-            // 레벨업 시도
             bool levelUpSuccess = InventoryManager.Instance.LevelUpEquipment(weapon.itemNum);
-
             if (levelUpSuccess)
             {
-                Debug.Log($"[EquipmentGachaManager] {weapon.itemName} 레벨업! 현재 레벨: {weapon.ItemLevel}");
-
-                // 레벨업 후 조건 다시 확인
                 needsStarUp = weapon.ItemLevel > 0 && weapon.ItemLevel % 10 == 0 && weapon.ItemStar < (weapon.ItemLevel / 10);
                 canLevelUp = InventoryManager.Instance.GetEnhancementPoints(weapon.itemNum) >= levelUpCost && weapon.ItemLevel < maxLevel && !needsStarUp;
             }
             else
             {
-                // 레벨업 실패 (포인트 부족 등) - 루프 종료
-                Debug.LogWarning($"[EquipmentGachaManager] {weapon.itemName} 레벨업 실패. 자동 강화를 중단합니다.");
                 break;
             }
         }
-
-        Debug.Log($"[EquipmentGachaManager] {weapon.itemName} 자동 강화를 종료합니다. 최종 레벨: {weapon.ItemLevel}");
     }
 }

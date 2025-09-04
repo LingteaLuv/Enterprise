@@ -27,14 +27,14 @@ public class GachaListUI : MonoBehaviour
     /// <summary>
     /// 캐릭터 뽑기 결과를 받아 화면에 표시를 시작하는 함수입니다.
     /// </summary>
-    public void DisplayCharacterResults(List<PlayerCharacterData> characterResults)
+    public void DisplayCharacterResults(List<PlayerCharacterData> characterResults, List<GachaGrade> grades)
     {
         if (characterResultItemPrefab == null)
         {
             Debug.LogError("characterResultItemPrefab이 연결되지 않았습니다!");
             return;
         }
-        StartCoroutine(ShowResultsCoroutine(characterResults, characterResultItemPrefab, null));
+        StartCoroutine(ShowCharacterResultsCoroutine(characterResults, grades));
     }
 
     /// <summary>
@@ -47,31 +47,40 @@ public class GachaListUI : MonoBehaviour
             Debug.LogError("equipmentResultItemPrefab이 연결되지 않았습니다!");
             return;
         }
-        StartCoroutine(ShowResultsCoroutine(equipmentResults, equipmentResultItemPrefab, enhancementPoints));
+        StartCoroutine(ShowEquipmentResultsCoroutine(equipmentResults, enhancementPoints));
     }
 
-
-    private IEnumerator ShowResultsCoroutine<T>(List<T> results, GameObject prefabToSpawn, Dictionary<int, int> enhancementPoints) where T : class
+    private IEnumerator ShowCharacterResultsCoroutine(List<PlayerCharacterData> results, List<GachaGrade> grades)
     {
-        // 기존 아이템들 삭제
         foreach (Transform child in contentParent)
         {
             Destroy(child.gameObject);
         }
-        yield return null; // 한 프레임 대기하여 삭제가 반영되도록 함
+        yield return null;
 
-        // 새 아이템들 생성 및 연출
+        for (int i = 0; i < results.Count; i++)
+        {
+            GameObject itemGO = Instantiate(characterResultItemPrefab, contentParent);
+            GachaCharacterPanel panelUI = itemGO.GetComponent<GachaCharacterPanel>();
+            if (panelUI != null) panelUI.Setup(results[i], grades[i]);
+
+            StartCoroutine(AnimateItemCoroutine(itemGO));
+            yield return new WaitForSeconds(delayBetweenItems);
+        }
+    }
+
+    private IEnumerator ShowEquipmentResultsCoroutine(List<ItemObject> results, Dictionary<int, int> enhancementPoints)
+    {
+        foreach (Transform child in contentParent)
+        {
+            Destroy(child.gameObject);
+        }
+        yield return null;
+
         foreach (var resultData in results)
         {
-            GameObject itemGO = Instantiate(prefabToSpawn, contentParent);
-
-            // 타입에 따라 적절한 UI 스크립트의 Init 함수를 호출
-            if (resultData is PlayerCharacterData charData)
-            {
-                GachaCharacterPanel panelUI = itemGO.GetComponent<GachaCharacterPanel>();
-                if (panelUI != null) panelUI.Setup(charData);
-            }
-            else if (resultData is WeaponObject itemData)
+            GameObject itemGO = Instantiate(equipmentResultItemPrefab, contentParent);
+            if (resultData is WeaponObject itemData)
             {
                 GachaItemPanel panelUI = itemGO.GetComponent<GachaItemPanel>();
                 if (panelUI != null)
@@ -85,9 +94,7 @@ public class GachaListUI : MonoBehaviour
                 }
             }
 
-            // 등장 애니메이션 실행
             StartCoroutine(AnimateItemCoroutine(itemGO));
-
             yield return new WaitForSeconds(delayBetweenItems);
         }
     }

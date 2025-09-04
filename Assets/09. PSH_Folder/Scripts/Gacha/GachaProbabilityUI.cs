@@ -6,7 +6,7 @@ using TMPro;
 
 public class GachaProbabilityUI : MonoBehaviour
 {
-    [Header("연결")]
+   /* [Header("연결")]
     [Tooltip("확률 정보를 가져올 캐릭터 가챠 매니저")]
     public CharacterGachaManager characterGachaManager;
     [Tooltip("확률 정보 아이템 프리팹 (ProbabilityItemUI 스크립트 필요)")]
@@ -94,5 +94,5 @@ public class GachaProbabilityUI : MonoBehaviour
         {
             itemUI.SetupAsHeader(headerText);
         }
-    }
+    }*/
 }

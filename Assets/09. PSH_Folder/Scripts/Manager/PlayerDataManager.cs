@@ -130,12 +130,34 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         if (ownedCharacters.TryGetValue(characterdata.characterID, out PlayerCharacterData existingCharData))
         {
+            // 시작 캐릭터 중복 획득 시 기본 조각 지급
+            int fragmentsGained = FRAGMENT_GAIN_1;
+            AddSoulFragments(characterdata.characterID, fragmentsGained);
+            Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
+            OnOwnedCharactersChanged?.Invoke();
+            return existingCharData;
+        }
+        else
+        {
+            PlayerCharacterData newCharData = new PlayerCharacterData(characterdata);
+            ownedCharacters.Add(characterdata.characterID, newCharData);
+            Debug.Log($"[신규] {characterdata.characterName}({newCharData.stars}성) 획득!");
+            newCharData.RecaculateStats();
+            OnOwnedCharactersChanged?.Invoke();
+            return newCharData;
+        }
+    }
+
+    public PlayerCharacterData AddCharacter(CharacterData characterdata, GachaGrade grade)
+    {
+        if (ownedCharacters.TryGetValue(characterdata.characterID, out PlayerCharacterData existingCharData))
+        {
             int fragmentsGained = 0;
-            switch (characterdata.rarity)
+            switch (grade)
             {
-                case Rarity.C: fragmentsGained = FRAGMENT_GAIN_1; break;
-                case Rarity.B: fragmentsGained = FRAGMENT_GAIN_2; break;
-                case Rarity.A: fragmentsGained = FRAGMENT_GAIN_3; break;
+                case GachaGrade.OneStar: fragmentsGained = FRAGMENT_GAIN_1; break;
+                case GachaGrade.TwoStar: fragmentsGained = FRAGMENT_GAIN_2; break;
+                case GachaGrade.ThreeStar: fragmentsGained = FRAGMENT_GAIN_3; break;
             }
             AddSoulFragments(characterdata.characterID, fragmentsGained);
             Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
@@ -144,9 +166,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
         else
         {
-            PlayerCharacterData newCharData = new PlayerCharacterData(characterdata);
+            PlayerCharacterData newCharData = new PlayerCharacterData(characterdata, grade);
             ownedCharacters.Add(characterdata.characterID, newCharData);
-            Debug.Log($"[신규] {characterdata.characterName}({characterdata.rarity}성) 획득!");
+            Debug.Log($"[신규] {characterdata.characterName}({newCharData.stars}성) 획득!");
             // 새로 추가된 캐릭터의 스탯을 즉시 계산
             newCharData.RecaculateStats();
             OnOwnedCharactersChanged?.Invoke(); // 캐릭터 목록 변경(신규 획득) 이벤트 발생
