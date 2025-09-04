@@ -152,26 +152,60 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         if (ownedCharacters.TryGetValue(characterdata.characterID, out PlayerCharacterData existingCharData))
         {
-            int fragmentsGained = 0;
-            switch (grade)
+            // 중복 캐릭터 획득
+            int newStarLevel = (int)grade;
+
+            // 새로 뽑은 등급이 기존 등급보다 높은지 확인
+            if (newStarLevel > existingCharData.stars)
             {
-                case GachaGrade.OneStar: fragmentsGained = FRAGMENT_GAIN_1; break;
-                case GachaGrade.TwoStar: fragmentsGained = FRAGMENT_GAIN_2; break;
-                case GachaGrade.ThreeStar: fragmentsGained = FRAGMENT_GAIN_3; break;
+                // [승급] 로직: 보유 캐릭터의 등급을 더 높은 등급으로 교체
+                int oldStarLevel = existingCharData.stars;
+                Debug.Log($"<color=cyan>[승급!] {existingCharData.characterdata.characterName}의 등급이 {oldStarLevel}성에서 {newStarLevel}성으로 올랐습니다!</color>");
+                existingCharData.stars = newStarLevel;
+                existingCharData.RecaculateStats(); // 스탯 재계산
+                OnCharacterDataUpdated?.Invoke(existingCharData); // 캐릭터 정보 변경 이벤트 발생
+
+                // 추가 규칙: 기존 등급에 대한 영혼 조각 보상 지급
+                int fragmentsGained = 0;
+                switch (oldStarLevel)
+                {
+                    case 1: fragmentsGained = FRAGMENT_GAIN_1; break;
+                    case 2: fragmentsGained = FRAGMENT_GAIN_2; break;
+                    case 3: fragmentsGained = FRAGMENT_GAIN_3; break;
+                        // 4성 이상은 가챠로 나오지 않으므로 보상 없음
+                }
+
+                if (fragmentsGained > 0)
+                {
+                    AddSoulFragments(characterdata.characterID, fragmentsGained);
+                    Debug.Log($"기존 등급({oldStarLevel}성)에 대한 보상으로 영혼 조각 +{fragmentsGained}개가 지급되었습니다.");
+                }
             }
-            AddSoulFragments(characterdata.characterID, fragmentsGained);
-            Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
-            OnOwnedCharactersChanged?.Invoke(); // 캐릭터 목록 변경(조각 획득) 이벤트 발생
+            else
+            {
+                // [중복] 로직: 기존 등급보다 낮거나 같으면 영혼 조각으로 변환
+                int fragmentsGained = 0;
+                switch (grade)
+                {
+                    case GachaGrade.OneStar: fragmentsGained = FRAGMENT_GAIN_1; break;
+                    case GachaGrade.TwoStar: fragmentsGained = FRAGMENT_GAIN_2; break;
+                    case GachaGrade.ThreeStar: fragmentsGained = FRAGMENT_GAIN_3; break;
+                }
+                AddSoulFragments(characterdata.characterID, fragmentsGained);
+                Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
+            }
+
+            OnOwnedCharactersChanged?.Invoke(); // 캐릭터 목록 변경(조각 또는 승급) 이벤트 발생
             return existingCharData;
         }
         else
         {
+            // 신규 캐릭터 획득
             PlayerCharacterData newCharData = new PlayerCharacterData(characterdata, grade);
             ownedCharacters.Add(characterdata.characterID, newCharData);
             Debug.Log($"[신규] {characterdata.characterName}({newCharData.stars}성) 획득!");
-            // 새로 추가된 캐릭터의 스탯을 즉시 계산
             newCharData.RecaculateStats();
-            OnOwnedCharactersChanged?.Invoke(); // 캐릭터 목록 변경(신규 획득) 이벤트 발생
+            OnOwnedCharactersChanged?.Invoke();
             return newCharData;
         }
     }
