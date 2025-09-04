@@ -10,12 +10,16 @@ public class GachaItemPanel : MonoBehaviour
     public TextMeshProUGUI nameText;
     public Image backgroundImage;
 
+    [Header("등급별 색상 설정")]
+    [Tooltip("PointTier의 Low, Mid, High 순서에 맞게 색상을 지정합니다.")]
+    public Color[] tierColors = new Color[3];
+
     /// <summary>
     /// 가챠 결과로 나온 아이템의 정보를 받아 UI를 설정합니다.
     /// </summary>
     /// <param name="weapon">표시할 아이템 데이터</param>
-    /// <param name="enhancementPoints">함께 획득한 강화 포인트</param>
-    public void SetUp(WeaponObject weapon, int enhancementPoints)
+    /// <param name="tier">함께 획득한 강화 포인트의 등급</param>
+    public void SetUp(WeaponObject weapon, PointTier tier)
     {
         if (weapon != null)
         {
@@ -24,29 +28,10 @@ public class GachaItemPanel : MonoBehaviour
             if (itemImage != null) this.itemImage.sprite = weapon.itemIcon;
         }
 
-        // 강화 포인트에 따라 배경색 설정
-        SetBackgroundColor(enhancementPoints);
-    }
-
-    /// <summary>
-    /// 강화 포인트에 따라 배경색을 변경합니다.
-    /// </summary>
-    private void SetBackgroundColor(int points)
-    {
-        if (backgroundImage == null) return;
-
-        // 강화 포인트에 따라 색상 결정 (수치는 임의로 정함, 필요시 수정)
-        if (points == 100)
+        // 강화 포인트 등급에 따라 배경색 설정
+        if (backgroundImage != null && tierColors.Length > (int)tier)
         {
-            backgroundImage.color = Color.yellow;
-        }
-        else if (points == 50)
-        {
-            backgroundImage.color = Color.blue;
-        }
-        else
-        {
-            backgroundImage.color = Color.white;
+            backgroundImage.color = tierColors[(int)tier];
         }
     }
 }

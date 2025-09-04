@@ -79,36 +79,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   resultPanel: {fileID: 0}
-  rarityChances:
-  - rarity: 3
-    chance: 10
-  - rarity: 2
-    chance: 20
-  - rarity: 1
-    chance: 70
   currencyType: 2
   singleGachaCost: 100
   gachaPityCounter: 0
   characterDataFolderPath: CharacterData
-  allCharacters:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  captainProbabilityMultiplier: 0.5
+  allCharacters: []
+  captainChance: 0.1
+  crewGradeChances:
+  - grade: 1
+    chance: 84
+  - grade: 2
+    chance: 15
+  - grade: 3
+    chance: 0.9
+  captainGradeChances:
+  - grade: 1
+    chance: 0.06
+  - grade: 2
+    chance: 0.03
+  - grade: 3
+    chance: 0.01
 --- !u!1 &8251530117622775441
 GameObject:
   m_ObjectHideFlags: 0
@@ -154,9 +144,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   resultPanel: {fileID: 0}
-  rarityChances:
-  - rarity: 1
-    chance: 100
   currencyType: 2
   singleGachaCost: 100
   enhancementPointChances:
@@ -166,6 +153,7 @@ MonoBehaviour:
     chance: 20
   - points: 100
     chance: 10
+  enhancementTierColors: []
 --- !u!1001 &7062169123919544444
 PrefabInstance:
   m_ObjectHideFlags: 0

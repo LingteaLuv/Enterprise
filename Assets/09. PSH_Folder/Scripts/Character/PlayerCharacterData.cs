@@ -43,7 +43,30 @@ public class PlayerCharacterData
     {
         characterdata = so;
         characterLevel = 1;
-        stars = (int)so.rarity; // CharacterData의 rarity는 Enum이므로 int로 캐스팅
+        stars = 1; // 기본 등급 1성으로 설정
+
+        // 아이콘
+        crewRoleIcon = GetIcon(so.crewRole);
+        factionIcon = GetIcon(so.faction);
+
+        characterStats = new Dictionary<Stat, float>();
+        foreach (var stat in so.baseStats)
+        {
+            characterStats[stat.statName] = stat.value;
+        }
+
+        // 장비 딕셔너리 초기화
+        equippedItems = new Dictionary<EquipCategory, WeaponObject>();
+
+        // 최초 스탯 계산. BasicStatManager가 준비되기 전에 호출될 수 있으므로 battlePower만 초기화합니다.
+        battlePower = 0;
+    }
+
+    public PlayerCharacterData(CharacterData so, GachaGrade grade)
+    {
+        characterdata = so;
+        characterLevel = 1;
+        stars = (int)grade; // 가챠로 뽑은 등급 설정
 
         // 아이콘
         crewRoleIcon = GetIcon(so.crewRole);
