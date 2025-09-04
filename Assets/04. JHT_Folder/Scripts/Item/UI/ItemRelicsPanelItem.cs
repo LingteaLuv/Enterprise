@@ -18,6 +18,8 @@ namespace JHT
         [Header("Current Click Item")]
         public GameObject curClickItem;
 
+        
+
         public void Init(RelicsObject item)
         {
             relicsObject = item;
@@ -33,7 +35,6 @@ namespace JHT
             {
                 relicsObject = null;
             }
-;
         }
 
         private void ShowItem()
@@ -55,8 +56,13 @@ namespace JHT
 
         private void HandleSelected(ItemObject clicked)
         {
+            if (clicked == null || clicked is WeaponObject)
+                return;
+
             bool value = ReferenceEquals(clicked, relicsObject)
                         || (clicked != null && clicked.itemNum == relicsObject.itemNum);
+
+            
             curClickItem.SetActive(value);
         }
 

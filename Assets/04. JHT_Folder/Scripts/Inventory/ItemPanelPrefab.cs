@@ -139,11 +139,6 @@ namespace JHT
         }
 
 
-        #region Relics
-
-        #endregion
-
-
         #region Weapon
 
         private void SetWeapon(WeaponObject item)
@@ -174,6 +169,9 @@ namespace JHT
         #endregion
         private void HandleSelected(ItemObject clicked)
         {
+            if (clicked == null || clicked is RelicsObject)
+                return;
+
             WeaponObject obj = (WeaponObject)itemObject;
             bool value = ReferenceEquals(clicked, obj)
                         || (clicked != null && clicked.itemNum == obj.itemNum);

@@ -32,7 +32,8 @@ namespace JHT
             {
                 curWeapon.OnChangeLevel -= OnWeaponDataChanged;
                 curWeapon.OnChangeStar -= OnWeaponDataChanged;
-                InventoryManager.Instance.OnEquipmentEnhancementPointsChanged -= OnEnhancementPointsChanged;
+                if(InventoryManager.Instance != null)
+                    InventoryManager.Instance.OnEquipmentEnhancementPointsChanged -= OnEnhancementPointsChanged;
             }
         }
 

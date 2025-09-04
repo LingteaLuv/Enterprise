@@ -28,25 +28,30 @@ public class RelicsProbability : MonoBehaviour
         curTableLevel = manager.relicsTablelevel;
         _manager = manager;
 
-        InventoryManager.Instance.OnChangeRelicsPoints += AddPoints;
 
         upgradeCostText.text = _manager.relicsUpgradeCost.ToString();
 
-        ShowProbabilityItemPanel();
+        //upgradeButton.onClick.RemoveListener(delegate { UpgradeRelicsGacha(manager); });
+        upgradeButton.onClick.AddListener(delegate { UpgradeRelicsGacha(_manager); });
 
-        upgradeButton.onClick.RemoveListener(delegate { UpgradeRelicsGacha(manager); });
-        upgradeButton.onClick.AddListener(delegate { UpgradeRelicsGacha(manager); });
-
-        closeButton.onClick.RemoveListener(() => gameObject.SetActive(false));
+        //closeButton.onClick.RemoveListener(() => gameObject.SetActive(false));
         closeButton.onClick.AddListener(() => gameObject.SetActive(false));
 
         OnUpgradeProbability += ShowProbabilityItemPanel;
+        InventoryManager.Instance.OnChangeRelicsPoints += AddPoints;
 
-        AddPoints();
+        ShowProbabilityItemPanel();
+        AddPoints(InventoryManager.Instance.RelicsPoints);
     }
 
-    private void OnDestroy()
+    private void OnEnable()
     {
+        
+    }
+
+    private void OnDisable()
+    {
+        OnUpgradeProbability -= ShowProbabilityItemPanel;
         InventoryManager.Instance.OnChangeRelicsPoints -= AddPoints;
         closeButton.onClick.RemoveListener(() => gameObject.SetActive(false));
         upgradeButton.onClick.RemoveListener(delegate { UpgradeRelicsGacha(_manager); });
@@ -57,10 +62,10 @@ public class RelicsProbability : MonoBehaviour
         if (manager == null)
             return;
 
-        if (manager.relicsUpgradeCost > InventoryManager.Instance.relicsPoints)
+        if (manager.relicsUpgradeCost > InventoryManager.Instance.RelicsPoints)
         {
             UIManager.Instance.ShowToast(
-                $"유물 재화가 {manager.relicsUpgradeCost - InventoryManager.Instance.relicsPoints}만큼 부족합니다");
+                $"유물 재화가 {manager.relicsUpgradeCost - InventoryManager.Instance.RelicsPoints}만큼 부족합니다");
 
             StartCoroutine(WaitCoroutine());
         }
@@ -70,9 +75,9 @@ public class RelicsProbability : MonoBehaviour
             "정말 업그레이드 하시겠습니까?",
             () =>
             {
-                _manager.relicsTablelevel++;
-                InventoryManager.Instance.relicsPoints -= _manager.relicsUpgradeCost;
-                InventoryManager.Instance.OnChangeRelicsPoints?.Invoke();
+                _manager.relicsTablelevel += 1;
+                curTableLevel = _manager.relicsTablelevel;
+                InventoryManager.Instance.RelicsPoints -= _manager.relicsUpgradeCost;
                 OnUpgradeProbability?.Invoke();
                 StartCoroutine(WaitCoroutine());
             });
@@ -81,7 +86,6 @@ public class RelicsProbability : MonoBehaviour
 
     private void ShowProbabilityItemPanel()
     {
-
         for (int i = 0; i < probabilityItemPanel.Length; i++)
         {
             probabilityItemPanel[i].Init(_manager, curTableLevel, i);
@@ -96,9 +100,9 @@ public class RelicsProbability : MonoBehaviour
         closeButton.interactable = true;
     }
 
-    private void AddPoints()
+    private void AddPoints(float value)
     {
-        upgradePoint = InventoryManager.Instance.relicsPoints;
+        upgradePoint = value;
         pointText.text = upgradePoint.ToString();
     }
     

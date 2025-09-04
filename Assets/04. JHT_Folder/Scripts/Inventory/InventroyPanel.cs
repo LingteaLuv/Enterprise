@@ -1,7 +1,5 @@
 using JHT;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,7 +17,7 @@ namespace JHT
         [Header("Choose_Inventory")]
         [SerializeField] private GameObject weaponInventory;
         [SerializeField] private GameObject relicsInventory;
-        [SerializeField] private GameObject soulInventory;
+        [SerializeField] private SoulFragmentScrollViewUI soulInventory;
         [SerializeField] private Button equipModeButton;
         [SerializeField] private Button relicsModeButton;
         [SerializeField] private Button soulButton;
@@ -29,9 +27,17 @@ namespace JHT
 
         [Header("DropDown")] 
         [SerializeField] private TMP_Dropdown weaponDropDown;
+        [SerializeField] private TMP_Dropdown weaponNameDropdown;
         [SerializeField] private TMP_Dropdown relicsDropDown;
+        [SerializeField] private TMP_Dropdown relicsNameDropdown;
+        [SerializeField] private TMP_Dropdown soulDropDown;
+        [SerializeField] private TMP_Dropdown soulNameDropdown;
         private List<string> weaponDropDownList;
         private List<string> relicsDropDownList;
+        private List<string> weaponNameDropdownList;
+        private List<string> relicsNameDropdownList;
+        private List<string> soulDropdownList;
+        private List<string> soulNameDropdownList;
         private InventoryMode curMode;
 
         private InventoryManager inventoryManager;
@@ -45,8 +51,8 @@ namespace JHT
             base.ResetPanel();
 
             // 열려있을 수 있는 상세 정보 패널들을 모두 닫습니다.
-            if (weaponStatPanel != null) weaponStatPanel.gameObject.SetActive(false);
-            if (relicsStatPanel != null) relicsStatPanel.gameObject.SetActive(false);
+            //if (weaponStatPanel != null) weaponStatPanel.gameObject.SetActive(false);
+            //if (relicsStatPanel != null) relicsStatPanel.gameObject.SetActive(false);
 
             // 기본 탭인 장비 인벤토리로 되돌립니다.
             ChangeWeaponMode();
@@ -79,6 +85,8 @@ namespace JHT
 
             itemEventManager.OnClickItem += ShowItemStat;
 
+            InventoryManager.Instance.isSortingDone += ReSetItemPanel;
+
             ReSetItemPanel(null);
             ReSetRelicsPanel(null);
         }
@@ -103,28 +111,73 @@ namespace JHT
 
             curMode = InventoryMode.Weapon;
             inventoryManager.currentMode = curMode;
-
-            weaponDropDownList = new();
-            relicsDropDownList = new();
-
-            weaponDropDown.ClearOptions();
-            relicsDropDown.ClearOptions();
-
-            weaponDropDownList.Add("Power");
-            weaponDropDownList.Add("Star");
-            weaponDropDownList.Add("Level");
-            weaponDropDownList.Add("Rarity");
-
-            relicsDropDownList.Add("Level");
-            relicsDropDownList.Add("Rarity");
-
-            weaponDropDown.AddOptions(weaponDropDownList);
-            relicsDropDown.AddOptions(relicsDropDownList);
-
-            weaponDropDown.onValueChanged.AddListener(delegate { ChangeWeaponMode(weaponDropDown.value); });
-            relicsDropDown.onValueChanged.AddListener(delegate { ChangeRelicsMode(relicsDropDown.value); });
+            SetWeaponDropdown();
+            SetRelicsDropdown();
+            SetSoulDropdown();
         }
         
+        private void SetWeaponDropdown()
+        {
+            weaponDropDownList = new();
+            weaponNameDropdownList = new();
+
+            weaponDropDown.ClearOptions();
+            weaponNameDropdown.ClearOptions();
+
+            weaponDropDownList.Add("전투력");
+            weaponDropDownList.Add("별 레벨");
+            weaponDropDownList.Add("레벨");
+            weaponDropDownList.Add("희귀도");
+
+            weaponNameDropdownList.Add("검");
+            weaponNameDropdownList.Add("도끼");
+            weaponNameDropdownList.Add("활");
+            weaponNameDropdownList.Add("해머");
+            weaponNameDropdownList.Add("총");
+            weaponNameDropdownList.Add("창");
+            weaponNameDropdownList.Add("스태프");
+            weaponNameDropdownList.Add("메이스");
+            weaponNameDropdownList.Add("방패");
+            weaponNameDropdownList.Add("갑옷");
+
+            weaponDropDown.AddOptions(weaponDropDownList);
+            weaponNameDropdown.AddOptions(weaponNameDropdownList);
+            weaponDropDown.onValueChanged.AddListener(delegate { ChangeWeaponMode(weaponDropDown.value); });
+            weaponNameDropdown.onValueChanged.AddListener(delegate { InventoryManager.Instance.WeaponNameSort(weaponNameDropdown.value); });
+        }
+
+        private void SetSoulDropdown()
+        {
+            soulDropdownList = new();
+            soulNameDropdownList = new();
+
+            soulDropDown.ClearOptions();
+            soulNameDropdown.ClearOptions();
+
+            soulDropdownList.Add("전투력");
+            soulDropdownList.Add("별레벨");
+            soulDropdownList.Add("레벨");
+
+            soulDropDown.AddOptions(soulDropdownList);
+            soulDropDown.onValueChanged.AddListener(delegate { soulInventory.RefreshDisplayForValue(soulDropDown.value); });
+        }
+
+        private void SetRelicsDropdown()
+        {
+            relicsDropDownList = new();
+            relicsNameDropdownList = new();
+
+            relicsDropDown.ClearOptions();
+            relicsNameDropdown.ClearOptions();
+
+            relicsDropDownList.Add("레벨");
+            relicsDropDownList.Add("희귀도");
+
+            relicsDropDown.AddOptions(relicsDropDownList);
+
+            relicsDropDown.onValueChanged.AddListener(delegate { ChangeRelicsMode(relicsDropDown.value); });
+        }
+
         private void ChangeRelicsMode(int value)
         {
             if (value == 0)
@@ -143,10 +196,12 @@ namespace JHT
                 SortByWeaponLevel();
             else if (value == 3)
                 SortByWeaponRarity();
-
         }
 
+
         #region SortUI
+
+
         private void SortByWeaponRarity()
         {
             inventoryManager.WeaponRarity();
@@ -197,6 +252,8 @@ namespace JHT
             }
         }
 
+        #region weaponPanel spawn
+        
 
         private void ReSetItemPanel(ItemObject changedItem)
         {
@@ -227,6 +284,9 @@ namespace JHT
                 currentPanel.gameObject.SetActive(true);
             }
         }
+        #endregion
+
+        #region relisc Spawn
 
         private void ReSetRelicsPanel(ItemObject changedItem)
         {
@@ -244,20 +304,29 @@ namespace JHT
                 panel.Init(inventoryManager.relicsList[i]);
             }
         }
+        #endregion
+
+        #region Soul Spawn
 
 
+        #endregion
+
+
+        #region InventoryMode
         private void ChangeWeaponMode()
         {
             inventoryManager.currentMode = InventoryMode.Weapon;
 
             if (!weaponInventory.activeSelf)
+            {
                 weaponInventory.SetActive(true);
+            }
 
             if (relicsInventory.activeSelf)
                 relicsInventory.SetActive(false);
 
-            if (soulInventory.activeSelf)
-                soulInventory.SetActive(false);
+            if (soulInventory.gameObject.activeSelf)
+                soulInventory.gameObject.SetActive(false);
         }
 
         private void ChangeRelicsMode()
@@ -270,8 +339,8 @@ namespace JHT
             if (!relicsInventory.activeSelf)
                 relicsInventory.SetActive(true);
 
-            if(soulInventory.activeSelf)
-                soulInventory.SetActive(false); 
+            if(soulInventory.gameObject.activeSelf)
+                soulInventory.gameObject.SetActive(false); 
         }
 
         private void ChangeSoulMode()
@@ -284,8 +353,9 @@ namespace JHT
             if (relicsInventory.activeSelf)
                 relicsInventory.SetActive(false);
 
-            if (!soulInventory.activeSelf)
-                soulInventory.SetActive(true);
+            if (!soulInventory.gameObject.activeSelf)
+                soulInventory.gameObject.SetActive(true);
         }
+        #endregion
     }
 }

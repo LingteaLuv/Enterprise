@@ -8,8 +8,14 @@ namespace JHT
     {
         public List<WeaponObject> weaponList;
         public List<RelicsObject> relicsList;
-        public float relicsPoints;
-        public int relicsCoupon;
+
+        [Header("유물재화")]
+        private float relicsPoints;
+        private int relicsCoupon;
+        public float RelicsPoints { get { return relicsPoints; } set { relicsPoints = value; OnChangeRelicsPoints?.Invoke(relicsPoints); } }
+        public int RelicsCoupon { get { return relicsCoupon; } set {  relicsCoupon = value; OnChangeRelicsCoupon?.Invoke(relicsCoupon); } }
+        public Action<int> OnChangeRelicsCoupon;
+        public Action<float> OnChangeRelicsPoints;
 
         public Action<ItemObject> OnAddInventory;
         public Action<ItemObject> OnRemoveInventory;
@@ -21,9 +27,8 @@ namespace JHT
 
         public Action<ItemObject> OnAddItemForEncyclopedia;
 
-        [Header("유물재화")]
-        public Action OnChangeRelicsPoints;
-        public Action<int> OnChangeRelicsCoupon;
+        public Action<ItemObject> isSortingDone;
+
 
         public InventoryMode currentMode;
 
@@ -41,7 +46,6 @@ namespace JHT
 
         private void OnEnable()
         {
-            
             OnAddInventory += AddInventroyItem;
             OnRemoveInventory += RemoveInventroyIndex;
             OnChangeItem += AddRelicsItem;
@@ -227,7 +231,6 @@ namespace JHT
             RelicsObject obj = new RelicsObject(item, rarity, level);
             OnAddInventory?.Invoke(obj);
             OnChangePanel?.Invoke(obj);
-            OnChangeRelicsCoupon?.Invoke(relicsCoupon);
         }
 
 
@@ -251,15 +254,10 @@ namespace JHT
 
         public void DestoryRelics(RelicsObject obj)
         {
-            relicsPoints += obj.itemCost;
+            RelicsPoints += obj.itemCost;
             relicsList.RemoveAll(r => r.itemNum == obj.itemNum);
-            ChangeRelicsPoints();
         }
 
-        public void ChangeRelicsPoints()
-        {
-            OnChangeRelicsPoints?.Invoke();
-        }
 
         public ItemObject GetItemData(ItemObject obj)
         {
@@ -343,6 +341,31 @@ namespace JHT
         }
 
         #region sort
+
+        public void WeaponNameSort(int value)
+        {
+            if (weaponList == null || weaponList.Count <= 1) return;
+
+
+            List<WeaponObject> front = new(weaponList.Count);
+            List<WeaponObject> back = new(weaponList.Count);
+
+            for (int i = 0; i < weaponList.Count; i++)
+            {
+                if ((int)weaponList[i].equipType == value)
+                    front.Add(weaponList[i]);
+                else
+                    back.Add(weaponList[i]);
+            }
+
+            weaponList.Clear();
+            weaponList.AddRange(front);
+            weaponList.AddRange(back);
+            isSortingDone?.Invoke(null);
+
+        }
+
+
         public void WeaponStarSort()
         {
             weaponList.Sort((b,a) => a.ItemStar.CompareTo(b.ItemStar));          
