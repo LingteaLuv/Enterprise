@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using _05._CSJ_Folder.Scripts.Quest.Definition;
+using UnityEngine;
 
 namespace _05._CSJ_Folder.Scripts.Quest
 {
@@ -24,8 +25,9 @@ namespace _05._CSJ_Folder.Scripts.Quest
         /// </summary>
         /// <param name="goalRequiredCount"> 목표까지 필요한 정도</param>
         /// <returns></returns>
-        public bool IsCompleted(int goalRequiredCount)
+        public bool IsCompleted(QuestDefinitionSO def)
         {
+            int goalRequiredCount = def.Goal.RequireCount;
             // 목표보다 현재 Count수가 작다면
             if (goalRequiredCount > CurrentGoalCount)
             {
@@ -39,6 +41,10 @@ namespace _05._CSJ_Folder.Scripts.Quest
         public void GoalCountAdjust(int count)
         {
             CurrentGoalCount = count;
+        }
+        public void GoalCountAdjust()
+        {
+            CurrentGoalCount++;
         }
         public void GoalCountInit()
         {

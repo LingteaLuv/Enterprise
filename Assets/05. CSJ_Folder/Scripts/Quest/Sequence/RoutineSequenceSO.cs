@@ -16,5 +16,10 @@ namespace _05._CSJ_Folder.Scripts.Quest.Sequence
         {
             return OddRoutine;
         }
+
+        public RoutineQuestDefinitionSO[] GetEvenRoutine()
+        {
+            return EvenRoutine;
+        }
     }
 }

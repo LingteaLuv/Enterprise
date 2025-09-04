@@ -429,5 +429,244 @@ public class DatabaseManager : Singleton<DatabaseManager>
 
     #endregion
 
+
+    #region QuestCheck (AddedByCSJ)
     
+    // reset 기준 UTC 기준 시간선; 기본인 9는 Kst인 UTC+09:00 기준입니다.
+    private const int _stdResetTime = 9;
+    private long _serverOffset = long.MinValue;
+    private long _offsetUpdatedLocal;
+
+    private const string LocalDailyKey = "DailyQuestTime";
+    private const string LocalWeeklyKey = "WeeklyQuestTime";
+    # region Daily
+    /// <summary>
+    /// 일일 퀘스트 초기화가 필요한지 체크합니다. 
+    /// </summary>
+    /// <param name="resetTime">기본 기준 시간입니다. </param>
+    /// <returns></returns>
+    public async Task<bool> DailyCheckIn(int resetTime = 6)
+    {
+        Init();
+        
+        long serverTime = await CurrentServerTime();
+        DateTimeOffset _stdNow = GetResetTime(serverTime);
+
+        var dailyBoundary = GetDailyBoundary(_stdNow, resetTime);
+
+        DateTimeOffset lastTime = await GetDailyQuestTimeToStd();
+        if (lastTime == DateTime.MinValue) return true;
+        
+        return lastTime < dailyBoundary;
+    }
+
+    private DateTime GetDailyBoundary(DateTimeOffset time,int resetTime)
+    {
+        var dailyBoundary = new DateTime(time.Year, time.Month, time.Day, resetTime, 0, 0);
+        if (time < dailyBoundary)
+        {
+            dailyBoundary = dailyBoundary.AddDays(-1);
+        }
+
+        return dailyBoundary;
+    }
+
+    /// <summary>
+    /// 현재 서버 시각을 일일 퀘스트 초기화 시간으로 저장합니다.
+    /// </summary>
+    public async Task SetDailyQuestTime()
+    {
+        Init();
+        long serverTime = await CurrentServerTime();
+        await FirebaseManager.DataReference.Child(_uid).Child("UserData")
+            .Child("DailyQuestTime").SetValueAsync(serverTime);
+        SetLocalDaily(serverTime);
+    }
+
+    /// <summary>
+    /// 마지막 일일 초기화 시각을 ms로 반환합니다.
+    /// </summary>
+    /// <returns>최종 퀘스트 초기화 시점. ms로 반환, 없으면 0으로 반환</returns>
+    private async Task<long> GetDailyQuestTime()
+    {
+        Init();
+        var snapshot = await FirebaseManager.DataReference.Child(_uid).Child("UserData")
+            .Child("DailyQuestTime").GetValueAsync();
+        if (snapshot.Exists)
+        {
+            return Convert.ToInt64(snapshot.Value);
+        }
+        return 0;
+    }
+
+    /// <summary>
+    /// 마지막 일일 퀘스트 초기화 시점을 기준 시간으로 반환합니다. 
+    /// </summary>
+    /// <returns>최종 퀘스트 초기화 시점, 없으면 DateTime.MinValue</returns>
+    private async Task<DateTime> GetDailyQuestTimeToStd()
+    {
+        long ms = await GetDailyQuestTime();
+        if (ms <= 0) return DateTime.MinValue;
+        return GetResetTime(ms);
+    }
+    #endregion
+    
+    private DateTime GetResetTime(long time)
+    {
+        return DateTimeOffset.FromUnixTimeMilliseconds(time).UtcDateTime.AddHours(_stdResetTime);
+    }
+    
+    #region Weekly
+
+    /// <summary>
+    /// 주간 퀘스트 초기화 여부를 확인합니다.
+    /// </summary>
+    /// <param name="resetDay">초기화 기준 요일입니다. 기본 값은 월요일입니다.</param>
+    /// <param name="resetTime">일일 초기화 기준 시각입니다. </param>
+    /// <returns></returns>
+    public async Task<bool> WeeklyCheckIn(DayOfWeek resetDay = DayOfWeek.Monday, int resetTime = 6)
+    {
+        Init();
+        
+        long serverTime = await CurrentServerTime();
+        DateTime _stdNow = GetResetTime(serverTime);
+        
+        DateTimeOffset boundary = GetLastWeeklyBoundary(_stdNow, resetDay, resetTime);
+        
+        long lastMs = await GetWeeklyQuestTime();
+        if (lastMs <= 0) return true;
+        
+        DateTimeOffset lastTime = GetResetTime(lastMs);
+        return lastTime < boundary;
+    }
+
+    /// <summary>
+    /// 주간 초기화 시간을 추가합니다 현재의 시간과 요일을 입력합니다
+    /// </summary>
+    public async Task SetWeeklyQuestTime()
+    {
+        Init(); 
+        
+        var userData = FirebaseManager.DataReference.Child(_uid).Child("UserData");
+        
+        var serverTime = await CurrentServerTime();
+        
+        await userData.Child("WeeklyQuestTime").SetValueAsync(serverTime);
+        DateTimeOffset _stdNow = GetResetTime(serverTime);
+        await userData.Child("WeeklyQuestDay").SetValueAsync((int)_stdNow.DayOfWeek);
+        SetLocalWeekly(serverTime);
+    }
+
+    private async Task<long> GetWeeklyQuestTime()
+    {
+        Init();
+        var snapshot = await FirebaseManager.DataReference.Child(_uid).Child("UserData")
+            .Child("WeeklyQuestTime").GetValueAsync();
+        if (snapshot.Exists)
+        {
+            return Convert.ToInt64(snapshot.Value);
+        }
+        return 0;
+    }
+
+    private async Task<DayOfWeek> GetWeeklyQuestDay()
+    {
+        Init();
+        var snapshot = await FirebaseManager.DataReference.Child(_uid).Child("UserData")
+            .Child("WeeklyQuestDay").GetValueAsync();
+        if (snapshot.Exists)
+        {
+            return (DayOfWeek)Convert.ToInt32(snapshot.Value);
+        }
+        return DayOfWeek.Monday;
+    }
+
+    private static DateTime GetLastWeeklyBoundary(DateTime now, DayOfWeek resetDay, int resetTime)
+    {
+        var BaseToday = new DateTime(now.Year, now.Month, now.Day, resetTime, 0, 0);
+        var delta = ((int)now.DayOfWeek - (int)resetDay + 7) % 7;
+        var Boundary = BaseToday.AddDays(-delta);
+        
+        if(now < Boundary)
+            Boundary = Boundary.AddDays(-7);
+        
+        return Boundary;
+    }
+    #endregion
+
+    #region Offset
+
+
+    public async Task EnsureServerOffset(int maxAge = 300)
+    {
+       long nowLocalMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        if (_serverOffset == long.MinValue || _offsetUpdatedLocal + maxAge * 1000L < nowLocalMs)
+        {
+            long serverMs = await CurrentServerTime();
+            _serverOffset = serverMs - nowLocalMs;
+            _offsetUpdatedLocal = nowLocalMs;
+        } 
+    }
+
+    public long GetApproxServerTime()
+    {
+        if(_serverOffset == long.MinValue) return 0;
+        return DateTimeOffset.Now.ToUnixTimeMilliseconds() + _serverOffset;
+    }
+
+    public void SetLocalDaily(long ms)
+    {
+        PlayerPrefs.SetString(LocalDailyKey, ms.ToString());
+        PlayerPrefs.Save();
+    }
+    
+    private void SetLocalWeekly(long ms)
+    {
+        PlayerPrefs.SetString(LocalWeeklyKey, ms.ToString());
+        PlayerPrefs.Save();
+    }
+
+    public long GetLocalDaily()
+    {
+        if (long.TryParse(PlayerPrefs.GetString(LocalDailyKey, "0"), out var v)) return v;
+        return 0;
+    }
+    public long GetLocalWeekly()
+    {
+        if (long.TryParse(PlayerPrefs.GetString(LocalWeeklyKey, "0"), out var v)) return v;
+        return 0;
+    }
+
+    public bool QuickDailyCheck(int resetTime = 6)
+    {
+        long approxMs = GetApproxServerTime();
+        if (approxMs == 0) return true;
+        
+        DateTime nowStd = GetResetTime(approxMs);
+        DateTime dailyBoundary = GetDailyBoundary(nowStd, resetTime);
+        
+        long lastMs = GetLocalDaily();
+        if (lastMs <= 0) return true;
+        DateTime lastStd = GetResetTime(lastMs);
+        return lastStd < dailyBoundary;
+    }
+
+    public bool QuickWeeklyCheck(DayOfWeek resetDay = DayOfWeek.Monday, int resetTime = 6)
+    {
+        long approxMs = GetApproxServerTime();
+        if (approxMs == 0) return true;
+        
+        DateTime nowStd = GetResetTime(approxMs);
+        DateTime boundary = GetLastWeeklyBoundary(nowStd, resetDay, resetTime);
+        
+        long lastMs = GetLocalWeekly();
+        if (lastMs <= 0) return true;
+        DateTime lastStd = GetResetTime(lastMs);
+        return lastStd < boundary;
+    }
+
+    #endregion
+    
+    
+    #endregion
 }

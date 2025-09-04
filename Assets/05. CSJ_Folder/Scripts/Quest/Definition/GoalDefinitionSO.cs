@@ -8,11 +8,15 @@ namespace _05._CSJ_Folder.Scripts.Quest.Definition
     public class GoalDefinitionSO : ScriptableObject
     {
         // 퀘스트 목표의 키 ex) "kill, GachaPull"
-        [SerializeField] private KeyFunc keyValue;
+        [Header("퀘스트의 목표 키")]
+        [SerializeField] 
+        private KeyFunc keyValue;
 
+        [Header("퀘스트 세부 항목")]
         // 퀘스트 세부 항목 : => ItemType.Relic, Monster.All, UpgradeType.Atk; 
         [SerializeField] 
         public TypedEnumKey enumKey;
+        [Header("퀘스트 목표 수치")]
         // 퀘스트 목표 처치 수
         public int RequireCount = 1;
         
