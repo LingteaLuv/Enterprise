@@ -13,7 +13,9 @@ public enum CurrencyType
 {
     Gold,
     EnhancementStone,
-    Gem
+    Gem,
+    RelicsCoupon,
+    RelicsPoint
 }
 
 /// <summary>

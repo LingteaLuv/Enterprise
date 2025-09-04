@@ -17,19 +17,26 @@ namespace JHT
     public enum PowerType
     {
         Attack,
-        Shield,
-        HealthUp,
-        Critical,
-        CriticalDamage,
-        CriticalPercent,
-        AttackSpeed,
-        FromtShieldUp,
-        AttackAmountUp,
-        FrontHealthUp,
-        CenterAttack,
-        CenterAttackSpeed,
-        LastHealthRecovery,
-        LastestAttackUp
+        Health,
+        Defense,
+        CritChance,
+        CritDamage,
+        AttackSpeed
+
+        //Attack,
+        //Shield,
+        //HealthUp,
+        //Critical,
+        //CriticalDamage,
+        //CriticalPercent,
+        //AttackSpeed,
+        //FromtShieldUp,
+        //AttackAmountUp,
+        //FrontHealthUp,
+        //CenterAttack,
+        //CenterAttackSpeed,
+        //LastHealthRecovery,
+        //LastestAttackUp
     }
 
 }
