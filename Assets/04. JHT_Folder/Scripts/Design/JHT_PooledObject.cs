@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.Rendering;
@@ -20,10 +22,18 @@ namespace JHT
             pool = objPool;
         }
 
-        public void Release()
+        public void Release(float delay = 0f)
         {
-            pool.ReturnToPool(this);
+            if (delay > 0)
+                StartCoroutine(Wait(delay));
+            else
+                pool.ReturnToPool(this);
         }
 
+        IEnumerator Wait(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            pool.ReturnToPool(this);
+        }
     }
 }
