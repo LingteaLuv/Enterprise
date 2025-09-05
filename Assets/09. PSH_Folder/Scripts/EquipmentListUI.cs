@@ -145,37 +145,10 @@ public class EquipmentListUI : MonoBehaviour
         return inventoryManager.weaponList.Where(weapon =>
         {
             bool isCorrectCategory = weapon.equipCategory == this.currentCategory;
-            bool isEquippableByRole = IsEquippableByCharacter(weapon, currentCharacter);
+            // PlayerDataManager의 메서드를 호출하도록 수정
+            bool isEquippableByRole = PlayerDataManager.Instance.IsEquippableByCharacter(weapon, currentCharacter);
             return isCorrectCategory && isEquippableByRole;
         }).ToList();
-    }
-
-    private bool IsEquippableByCharacter(WeaponObject weapon, PlayerCharacterData character)
-    {
-        if (weapon == null || character == null) return false;
-
-        if (weapon.equipCategory == EquipCategory.Armor || weapon.equipCategory == EquipCategory.Shield)
-        {
-            return true;
-        }
-
-        ItemWeaponSO weaponSO = (ItemWeaponSO)weapon.itemSO;
-        EquipType type = weaponSO.equipType;
-        CrewRole role = character.characterdata.crewRole;
-
-        switch (role)
-        {
-            case CrewRole.Captain:
-                return type == EquipType.Sword || type == EquipType.Gun;
-            case CrewRole.Cook:
-                return type == EquipType.Mace || type == EquipType.Staff;
-            case CrewRole.Sailor:
-                return type == EquipType.Bow || type == EquipType.Spear;
-            case CrewRole.Deckhand:
-                return type == EquipType.Axe || type == EquipType.Hammer;
-            default:
-                return false;
-        }
     }
 
     private List<WeaponObject> SortWeapons(List<WeaponObject> weapons)

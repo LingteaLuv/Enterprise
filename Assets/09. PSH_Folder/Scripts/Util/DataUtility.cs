@@ -39,7 +39,7 @@ public static class DataUtility
     public static string FormatNumber(float number)
     {
         if (number == 0f) return "0";
-        if (number < 1000f) return number.ToString("0.##");
+        if (number < 1000f) return number.ToString("F0");
 
         int exponent = (int)Mathf.Floor(Mathf.Log10(number));
         int suffixIndex = exponent / 3;

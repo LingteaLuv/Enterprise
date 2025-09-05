@@ -160,12 +160,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     /// <returns>소모 성공 여부</returns>
     public bool SpendCurrency(CurrencyType type, BigInteger amount)
     {
-        if (amount <= 0) return true; // 0 또는 음수 소모는 항상 성공
-
-        BigInteger currentAmount = GetCurrency(type); // 현재 보유량 가져오기
-        Debug.Log($"[CurrencyManager] {type} 소모 시도. 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
-
-        if (currentAmount >= amount)
+        if (!CanSpendCurrency(type, amount))
         {
             //currencyWallet[type] -= amount;
             DatabaseManager.Instance.SpendCurrency(type.ToString(), (int)amount);
@@ -178,6 +173,25 @@ public class CurrencyManager : Singleton<CurrencyManager>
             Debug.LogWarning($"[CurrencyManager] {type} 재화 부족! 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
             return false;
         }
+
+        currencyWallet[type] -= amount;
+        Debug.Log($"[CurrencyManager] {type} 소모 성공: -{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
+        // TODO: 재화 UI 갱신 이벤트 호출
+        return true;
+    }
+
+    /// <summary>
+    /// 재화가 소비 가능한지 체크하는 함수
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="amount"></param>
+    /// <returns></returns>
+    public bool CanSpendCurrency(CurrencyType type, BigInteger amount)
+    {
+        if (amount <= 0) return true; // 0 이하면 항상 가능
+
+        BigInteger currentAmount = GetCurrency(type);
+        return currentAmount >= amount;
     }
 
     public void UpdateCurrencyUI()
