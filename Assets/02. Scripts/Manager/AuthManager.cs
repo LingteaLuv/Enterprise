@@ -104,12 +104,12 @@ public class AuthManager : Singleton<AuthManager>
         try
         {
             GoogleSignInUser user = await GoogleSignIn.DefaultInstance.SignIn();
-            if (user != null)
+            if (user == null)
             {
-                return await GoogleSignUp(user);
+                Debug.LogWarning("구글 로그인 취소(try, user가 null인 상황");
+                return false;
             }
-
-            return false;
+            return await GoogleSignUp(user);
         }
         catch (Google.GoogleSignIn.SignInException e)
         {
@@ -141,9 +141,10 @@ public class AuthManager : Singleton<AuthManager>
             await DatabaseManager.Instance.SetNickname(user.DisplayName);
             //await user.ReloadAsync();
             LoginCompleted?.Invoke();
+            return true;
         }
         _isClicked = false;
-        return true;
+        return false;
     }
 
     public async Task<bool> PlayGamesLogin()
