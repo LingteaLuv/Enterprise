@@ -459,6 +459,117 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
     }
 
+    /// <summary>
+    /// 캐릭터의 모든 장비를 해제합니다.
+    /// </summary>
+    public void UnequipAllItems(PlayerCharacterData character)
+    {
+        if (character == null)
+        {
+            Debug.LogWarning("장비 해제를 진행할 캐릭터가 없습니다.");
+            return;
+        }
+
+        Debug.Log($"{character.characterdata.characterName}의 모든 장비 해제를 시작합니다.");
+
+        // 컬렉션 수정을 피하기 위해 카테고리 목록을 복사합니다.
+        var categories = new List<EquipCategory>(character.equippedItems.Keys);
+
+        foreach (var category in categories)
+        {
+            UnequipItem(character, category);
+        }
+
+        Debug.Log($"{character.characterdata.characterName}의 모든 장비 해제가 완료되었습니다.");
+    }
+
+    #endregion
+
+    #region 자동 장착
+    public void AutoEquipBestItems(PlayerCharacterData character)
+    {
+        if (character == null)
+        {
+            Debug.LogWarning("자동 장착을 진행할 캐릭터가 선택되지 않았습니다.");
+            return;
+        }
+
+        Debug.Log($"{character.characterdata.characterName}의 전체 장비 자동 장착을 시작합니다.");
+        bool equippedSomething = false;
+
+        // 모든 장비 카테고리를 순회합니다.
+        foreach (EquipCategory category in System.Enum.GetValues(typeof(EquipCategory)))
+        {
+            // 1. 해당 카테고리에서 현재 캐릭터가 장착 가능한 무기 목록을 찾습니다.
+            var equippableWeapons = InventoryManager.Instance.weaponList.Where(weapon =>
+                weapon.equipCategory == category && IsEquippableByCharacter(weapon, character)
+            ).ToList();
+
+            if (equippableWeapons.Count == 0) continue;
+
+            // 2. 성급 > 레벨 순으로 정렬하여 가장 좋은 무기를 찾습니다.
+            var bestWeapon = equippableWeapons
+                .OrderByDescending(w => w.ItemStar)
+                .ThenByDescending(w => w.ItemLevel)
+                .FirstOrDefault();
+
+            if (bestWeapon != null)
+            {
+                // 3. 이미 가장 좋은 무기를 끼고 있는지 확인합니다.
+                character.equippedItems.TryGetValue(category, out var currentWeapon);
+                if (currentWeapon == bestWeapon) continue;
+
+                // 4. 가장 좋은 무기를 장착합니다.
+                Debug.Log($"  - {category} 부위: {bestWeapon.itemName} 장착.");
+                EquipItem(character, bestWeapon);
+                equippedSomething = true;
+            }
+        }
+
+        if (equippedSomething)
+        {
+            Debug.Log("전체 장비 자동 장착이 완료되었습니다.");
+        }
+        else
+        {
+            Debug.Log("더 좋은 장비가 없거나, 장착할 수 있는 장비가 없습니다.");
+        }
+    }
+
+    public bool IsEquippableByCharacter(WeaponObject weapon, PlayerCharacterData character)
+    {
+        if (weapon == null || character == null) return false;
+
+        if (weapon.equipCategory == EquipCategory.Armor || weapon.equipCategory == EquipCategory.Shield)
+        {
+            return true;
+        }
+
+        ItemWeaponSO weaponSO = (ItemWeaponSO)weapon.itemSO;
+        EquipType type = weaponSO.equipType;
+        CrewRole role = character.characterdata.crewRole;
+
+        switch (role)
+        {
+            case CrewRole.Captain:
+                return true;
+            case CrewRole.Cook:
+                return type == EquipType.Mace || type == EquipType.Staff;
+            case CrewRole.Sailor:
+                if (character.characterdata.atkRangeType == AtkRangeType.Ranged_Attack)
+                {
+                    return type == EquipType.Bow || type == EquipType.Gun;
+                }
+                else
+                {
+                    return type == EquipType.Sword || type == EquipType.Spear;
+                }
+            case CrewRole.Deckhand:
+                return type == EquipType.Axe || type == EquipType.Hammer;
+            default:
+                return false;
+        }
+    }
     #endregion
 
     /// <summary>

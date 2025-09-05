@@ -54,6 +54,8 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     [SerializeField] private Button[] openEquipmentListButtons = new Button[3];
     [SerializeField] private Image[] equippedWeaponIcons = new Image[3];
     [SerializeField] private Sprite emptyWeaponSlotIcon; // 장비가 없을 때 표시할 기본 아이콘
+    [SerializeField] private Button autoEquipButton; // 자동 장착 버튼
+    [SerializeField] private Button unequipAllButton; // 전체 해제 버튼
 
     [Header("스와이프 설정")]
     public float swipeThreshold = 50f; // 스와이프로 인식할 최소 픽셀 거리
@@ -103,6 +105,40 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             openEquipmentListButtons[1].onClick.AddListener(() => OnOpenEquipmentList(EquipCategory.Shield));
             openEquipmentListButtons[2].onClick.AddListener(() => OnOpenEquipmentList(EquipCategory.Armor));
         }
+
+        // 자동 장착 버튼 이벤트 연결
+        if (autoEquipButton != null)
+        {
+            autoEquipButton.onClick.AddListener(OnAutoEquip);
+        }
+
+        // 전체 해제 버튼 이벤트 연결
+        if (unequipAllButton != null)
+        {
+            unequipAllButton.onClick.AddListener(OnUnequipAll);
+        }
+    }
+
+    private void OnAutoEquip()
+    {
+        if (currentCharacterData == null)
+        {
+            Debug.LogWarning("자동 장착을 진행할 캐릭터가 없습니다.");
+            return;
+        }
+
+        PlayerDataManager.Instance.AutoEquipBestItems(currentCharacterData);
+    }
+
+    private void OnUnequipAll()
+    {
+        if (currentCharacterData == null)
+        {
+            Debug.LogWarning("장비 해제를 진행할 캐릭터가 없습니다.");
+            return;
+        }
+
+        PlayerDataManager.Instance.UnequipAllItems(currentCharacterData);
     }
 
     /// <summary>
@@ -218,7 +254,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         levelUpCostText.text = $"비용 : {goldCost}골드 {stoneCost}강화석";
 
         // 재화가 충분한지 확인, 만렙인지 확인하여 버튼 활성화/비활성화
-        if (CurrencyManager.Instance != null 
+        if (CurrencyManager.Instance != null
             && CurrencyManager.Instance.GetCurrency(CurrencyType.EnhancementStone) >= stoneCost
             && CurrencyManager.Instance.GetCurrency(CurrencyType.Gold) >= goldCost
             && currentCharacterData.characterLevel < PlayerDataManager.MAX_CHARACTER_LEVEL)
@@ -413,6 +449,8 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             equippedWeaponIcons[iconIndex].sprite = emptyWeaponSlotIcon;
         }
     }
+
+
 
     #region 스와이프 처리
     public void OnBeginDrag(PointerEventData eventData)
