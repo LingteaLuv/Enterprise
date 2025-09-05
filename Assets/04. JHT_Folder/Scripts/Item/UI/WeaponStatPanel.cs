@@ -104,7 +104,14 @@ namespace JHT
             nameText.text = curWeapon.itemName;
             pointText.text = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum).ToString();
             needPointText.text = requiredPoints.ToString();
-            levelText.text = $"Lv. {curWeapon.ItemLevel}";
+            if (curWeapon.itemStar >= 5)
+            {
+                levelText.text = "LV. MAX";
+            }
+            else
+            {
+                levelText.text = $"Lv. {curWeapon.ItemLevel}";
+            }
             switch (curWeapon.statType)
             {
                 case Stat.Attack:
@@ -134,7 +141,7 @@ namespace JHT
 
             // 성급업 가능 여부 먼저 계산
             bool isMaxStars = curWeapon.ItemStar >= 5;
-            bool needsStarUp = curWeapon.ItemLevel > 0 && curWeapon.ItemLevel % 10 == 0 && curWeapon.ItemStar < (curWeapon.ItemLevel / 10);
+            bool needsStarUp = curWeapon.ItemLevel == 10;
             bool canStarUp = !isMaxStars && needsStarUp;
             starUpBtn.interactable = canStarUp;
 

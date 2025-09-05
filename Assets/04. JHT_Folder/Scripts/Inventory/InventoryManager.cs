@@ -62,6 +62,7 @@ namespace JHT
         // ▼▼▼ 강화 포인트 관련 코드 수정 ▼▼▼
         public Dictionary<int, int> equipmentEnhancementPoints = new Dictionary<int, int>();
         public Action<int, int> OnEquipmentEnhancementPointsChanged; // itemNum, newPoints
+        public const int MAX_EQUIPMENT_LEVEL = 10;
 
         public void AddEnhancementPointsToEquipment(int itemNum, int amount)
         {
@@ -124,6 +125,13 @@ namespace JHT
                 return false;
             }
 
+            // 5성 이상이면 레벨업 시도 자체를 막습니다.
+            if (weapon.ItemStar >= 5)
+            {
+                Debug.LogWarning($"{weapon.itemName}은(는) 최종 성급이므로 레벨업할 수 없습니다.");
+                return false;
+            }
+
             int requiredPoints = GetRequiredPointsForLevelUp(weapon);
             int currentPoints = GetEnhancementPoints(itemNum);
 
@@ -152,9 +160,22 @@ namespace JHT
                 return;
             }
 
-            // 조건 없이 성급 증가
+            // 조건 없이 성급 증가 TODO 나중에 조건 추가
             weapon.ItemStar++;
-            Debug.Log($"[InventoryManager] {weapon.itemName} 성급 증가! ({weapon.ItemStar - 1}성 -> {weapon.ItemStar}성)");
+
+            // 5성이 되었는지 확인하는 로직
+            if (weapon.ItemStar >= 5)
+            {
+                // 5성이 되면 레벨을 최대치로 설정
+                weapon.ItemLevel = MAX_EQUIPMENT_LEVEL;
+                Debug.Log($"[InventoryManager] {weapon.itemName} 최종 성급(5성) 도달! 레벨이 MAX({MAX_EQUIPMENT_LEVEL})로 고정됩니다.");
+            }
+            else
+            {
+                // 5성 미만일 때는 레벨을 0으로 초기화
+                weapon.ItemLevel = 0;
+                Debug.Log($"[InventoryManager] {weapon.itemName} 성급 증가! ({weapon.ItemStar - 1}성 -> {weapon.ItemStar}성), 레벨이 0으로 초기화되었습니다.");
+            }
 
             // 성급업 후 자동 강화 시도
             AutoEnhanceWeapon(weapon);
@@ -169,11 +190,46 @@ namespace JHT
                 return 0f;
             }
 
-            // 기본 스탯 15, 레벨당 0.1 증가
-            float baseStat = 15f;
-            float statPerLevel = 0.1f;
-            float calculatedStat = baseStat + (weapon.ItemLevel * statPerLevel);
+            // 5성일 경우, 레벨과 상관없이 고정 스탯 100을 반환합니다.
+            if (weapon.ItemStar >= 5)
+            {
+                return 100f;
+            }
 
+            float baseStat;
+            float statPerLevel;
+
+            // 성급에 따라 시작 스탯과 레벨당 증가량을 다르게 설정합니다.
+            switch (weapon.ItemStar)
+            {
+                case 0:
+                    baseStat = 15f;
+                    statPerLevel = 1f;
+                    break;
+                case 1:
+                    baseStat = 25f;
+                    statPerLevel = 1f;
+                    break;
+                case 2:
+                    baseStat = 35f;
+                    statPerLevel = 1.5f;
+                    break;
+                case 3:
+                    baseStat = 50f;
+                    statPerLevel = 2f;
+                    break;
+                case 4:
+                    baseStat = 70f;
+                    statPerLevel = 3f;
+                    break;
+                default:
+                    baseStat = 100f;
+                    statPerLevel = 0f;
+                    break;
+            }
+
+            // 새로운 계산식을 적용합니다.
+            float calculatedStat = baseStat + ((weapon.ItemLevel) * statPerLevel);
             return calculatedStat;
         }
 
@@ -183,7 +239,7 @@ namespace JHT
 
             Debug.Log($"[InventoryManager] {weapon.itemName} (ID: {weapon.itemNum}) 자동 강화를 시작합니다.");
 
-            const int maxLevel = 50;
+            const int maxLevel = MAX_EQUIPMENT_LEVEL;
 
             while (true)
             {
