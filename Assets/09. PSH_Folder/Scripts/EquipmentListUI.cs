@@ -166,11 +166,18 @@ public class EquipmentListUI : MonoBehaviour
         switch (role)
         {
             case CrewRole.Captain:
-                return type == EquipType.Sword || type == EquipType.Gun;
+                return true;
             case CrewRole.Cook:
                 return type == EquipType.Mace || type == EquipType.Staff;
             case CrewRole.Sailor:
-                return type == EquipType.Bow || type == EquipType.Spear;
+                if (character.characterdata.atkRangeType == AtkRangeType.Ranged_Attack)
+                {
+                    return type == EquipType.Bow || type == EquipType.Gun;
+                }
+                else
+                {
+                    return type == EquipType.Sword || type == EquipType.Spear;
+                }               
             case CrewRole.Deckhand:
                 return type == EquipType.Axe || type == EquipType.Hammer;
             default:
