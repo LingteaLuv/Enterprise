@@ -1,23 +1,27 @@
 using UnityEngine;
 using System.Collections;
-public class MeleeCharacter : BaseCharecterFSM
+public class MeleeCharacter : BaseCharacterFSM
 {
     public Transform target;
+
     protected override void Start()
     {
         base.Start();
-
         FindClosestEnemy();
     }
+
     protected override void HandleIdle()
     {
         if (target == null)
         {
-            FindClosestEnemy(); // 실시간 타겟 탐색
-            return; // 한 프레임 쉬고 다음 프레임부터 다시 체크
+            FindClosestEnemy();
+            return;
         }
 
-        if (Vector3.Distance(transform.position, target.position) < attackRange)
+        float attackRange = stats.GetCurrentStat(Stat.AttackRange);
+        float distance = Vector3.Distance(transform.position, target.position);
+
+        if (distance < attackRange)
             ChangeState(State.Attack);
         else
             ChangeState(State.Move);
@@ -25,9 +29,13 @@ public class MeleeCharacter : BaseCharecterFSM
 
     protected override void HandleMove()
     {
+        float moveSpeed = stats.GetCurrentStat(Stat.MoveSpeed);
+        float attackRange = stats.GetCurrentStat(Stat.AttackRange);
+        float distance = Vector3.Distance(transform.position, target.position);
+
         transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
 
-        if (Vector3.Distance(transform.position, target.position) <= attackRange)
+        if (distance <= attackRange)
         {
             ChangeState(State.Attack);
         }
@@ -49,50 +57,47 @@ public class MeleeCharacter : BaseCharecterFSM
                 yield break;
             }
 
+            float attackRange = stats.GetCurrentStat(Stat.AttackRange);
+            float attackDelay = stats.GetCurrentStat(Stat.AttackSpeed); // 공격속도 → 딜레이 계산은 별도
+
             float distance = Vector3.Distance(transform.position, target.position);
 
             if (distance > attackRange)
             {
-                ChangeState(State.Move); // 사거리 밖이면 다시 이동 상태로
-                yield break; // 코루틴 종료
+                ChangeState(State.Move);
+                yield break;
             }
 
             Debug.Log($"{gameObject.name}이(가) 근접 공격!");
 
-            // 실제 공격 처리
             var targetScript = target.GetComponent<BaseMonsterFSM>();
             if (targetScript != null)
             {
-                targetScript.TakeDamage(attack); // 데미지 전달
+                float attackPower = stats.GetCurrentStat(Stat.Attack);
+                targetScript.TakeDamage(attackPower);
             }
 
-            yield return new WaitForSeconds(attackDelay);
+            yield return new WaitForSeconds(attackDelay); // 공격 속도에 따라 딜레이
         }
     }
 
     private void FindClosestEnemy()
     {
-        GameObject[] crews = GameObject.FindGameObjectsWithTag("Enemy");
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         float minDist = float.MaxValue;
         GameObject closest = null;
 
-        foreach (GameObject crew in crews)
+        foreach (GameObject enemy in enemies)
         {
-            float dist = Vector3.Distance(transform.position, crew.transform.position);
+            float dist = Vector3.Distance(transform.position, enemy.transform.position);
             if (dist < minDist)
             {
                 minDist = dist;
-                closest = crew;
+                closest = enemy;
             }
         }
 
         if (closest != null)
             target = closest.transform;
-    }
-
-    public override void TargetFind()
-    {
-        if (target == null)
-            FindClosestEnemy();
     }
 }

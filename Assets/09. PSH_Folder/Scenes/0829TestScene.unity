@@ -2186,8 +2186,6 @@ MonoBehaviour:
   _dontDestroyOnLoad: 1
   weaponList: []
   relicsList: []
-  myRelicsPoints: 0
-  relicsCoupon: 0
   currentMode: 0
 --- !u!4 &277753486
 Transform:
@@ -2936,8 +2934,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
   weaponList: []
-  encyclopediaPanel: {fileID: 0}
   relicsList: []
+  lootTableList: []
 --- !u!4 &382032050
 Transform:
   m_ObjectHideFlags: 0
@@ -5919,7 +5917,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
-  mainCanvas: {fileID: 1343144614}
   ghostIconPrefab: {fileID: 8378661879186551060, guid: b0576e5c0b3e86b4b855dc17b76ce8c8, type: 3}
 --- !u!4 &822511763
 Transform:
@@ -7407,18 +7404,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60ca00c508ef1b7429e8f69d6522626e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  basicStatBtn: {fileID: 1910545475}
   characterListBtn: {fileID: 1631349578}
   invenBtn: {fileID: 943801401}
   gachaBtn: {fileID: 297477781}
   shopBtn: {fileID: 1772253193}
-  questBtn: {fileID: 658041632}
-  basicStatPanel: {fileID: 0}
   characterListPanel: {fileID: 2121235170}
   invenPanel: {fileID: 750980527}
   gachaPanel: {fileID: 1605323063}
   shopPanel: {fileID: 473962075}
-  questPanel: {fileID: 0}
   closeBtn: {fileID: 1257699570}
   homeBtn: {fileID: 864686006}
   blocker: {fileID: 1732599259}
@@ -8193,9 +8186,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
-  goldText: {fileID: 348044045}
-  stoneText: {fileID: 480689512}
-  gemText: {fileID: 1266485899}
   _initialGoldString: 10000000
   _initialEnhancementStoneString: 100000000
   _initialGemString: 10000000
@@ -8660,6 +8650,7 @@ GameObject:
   - component: {fileID: 1258166009}
   - component: {fileID: 1258166012}
   - component: {fileID: 1258166013}
+  - component: {fileID: 1258166015}
   m_Layer: 0
   m_Name: Char1
   m_TagString: Untagged
@@ -8777,6 +8768,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1258166015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1258166008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f197da7d771476b45b6e44063d16e602, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
 --- !u!1 &1266485897
 GameObject:
   m_ObjectHideFlags: 0
@@ -9535,6 +9539,11 @@ MonoBehaviour:
   - {fileID: 90315353}
   _attendanceToggle: {fileID: 0}
   _toolToggle: {fileID: 0}
+  _shipToggle: {fileID: 0}
+  _goldText: {fileID: 0}
+  _stoneText: {fileID: 0}
+  _gemText: {fileID: 0}
+  StatPanel: {fileID: 0}
 --- !u!1 &1365152785
 GameObject:
   m_ObjectHideFlags: 0

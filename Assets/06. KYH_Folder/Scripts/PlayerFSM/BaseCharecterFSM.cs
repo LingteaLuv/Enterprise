@@ -2,26 +2,23 @@ using LHI;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 
-public abstract class BaseCharecterFSM : LHI.Character
+public abstract class BaseCharacterFSM : MonoBehaviour
 {
     protected enum State { Idle, Move, Attack, Dead }
     protected State currentState;
 
-    [Header("공통 데이터")]
-    // public float moveSpeed;         // 이동속도
-    // public float attackRange;       // 사거리
-    // public float attackDelay;       // 공격 딜레이
-    // public int maxHP;               // 최대 체력
-    // protected int currentHP;        // 현재 체력
-    public CharacterData CharacterData;
-
-    // TODO : 이 공통 데이터들은 차후에 난이도(Level) 이나 스테이지 숫자에 따라 비례증가 할 수 있으니 그에따라 계산하는 로직 필요할 수 있음( 특히 체력이나 공격력 등 )
-
+    protected CombatCharacter stats;
+    protected HealthSystem health;
     protected Coroutine attackRoutine;
+
+    protected virtual void Awake()
+    {
+        stats = GetComponent<CombatCharacter>();
+        health = GetComponent<HealthSystem>();
+    }
 
     protected virtual void Start()
     {
-        currentHP = maxHP;
         ChangeState(State.Idle);
     }
 
@@ -29,28 +26,16 @@ public abstract class BaseCharecterFSM : LHI.Character
     {
         switch (currentState)
         {
-            case State.Idle:
-                HandleIdle();
-                break;
-            case State.Move:
-                HandleMove();
-                break;
-            case State.Attack:
-                HandleAttack();
-                break;
-            case State.Dead:
-                break;
+            case State.Idle: HandleIdle(); break;
+            case State.Move: HandleMove(); break;
+            case State.Attack: HandleAttack(); break;
+            case State.Dead: break;
         }
     }
-
-    protected abstract void HandleIdle();
-    protected abstract void HandleMove();
-    protected abstract void HandleAttack();
 
     protected virtual void ChangeState(State newState)
     {
         currentState = newState;
-
         if (newState != State.Attack && attackRoutine != null)
         {
             StopCoroutine(attackRoutine);
@@ -58,38 +43,32 @@ public abstract class BaseCharecterFSM : LHI.Character
         }
     }
 
-    public override void TakeDamage(float damage)
+    public virtual void TakeDamage(float amount)
     {
-        currentHP -= damage;
-        if (currentHP <= 0)
+        health.TakeDamage(amount);
+        if (health.currentHealth <= 0)
         {
             ChangeState(State.Dead);
             Die();
         }
     }
 
-    public override void Die()
+    public virtual void Die()
     {
         Debug.Log($"{gameObject.name} 사망");
 
-        // 플레이어라면 BattleManager에 패배 알림
         if (CompareTag("Crew"))
-        {
-            BattleManager.Instance.OnPlayerDead();
-        }
+            BattleManager.Instance?.OnPlayerDead();
 
         Destroy(gameObject);
     }
 
-    public override void Heal(float amount)
+    public virtual void Heal(float amount)
     {
-
+        health.currentHealth = Mathf.Min(health.currentHealth + amount, health.maxHealth);
     }
 
-    public override void Move()
-    {
-
-    }
-
-
+    protected abstract void HandleIdle();
+    protected abstract void HandleMove();
+    protected abstract void HandleAttack();
 }
