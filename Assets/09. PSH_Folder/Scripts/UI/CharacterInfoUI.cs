@@ -13,6 +13,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     public Image characterImage;
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI soulFragmentsText; // 캐릭터별 영혼 조각
+    public TextMeshProUGUI flavorText;
 
     [Header("닫기 버튼")]
     public Button closeButton;
@@ -137,6 +138,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             characterNameText.text = $"{currentCharacterData.characterdata.characterName}";
             characterImage.sprite = currentCharacterData.characterdata.characterSprite;
             levelText.text = $"LV {currentCharacterData.characterLevel}";
+            flavorText.text = currentCharacterData.characterdata.flavorText;
 
             UpdateSoulFragmentsUI();
             UpdateLevelUpUI();
