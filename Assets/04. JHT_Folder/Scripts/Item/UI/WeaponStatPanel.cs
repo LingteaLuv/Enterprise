@@ -96,13 +96,14 @@ namespace JHT
         private void UpdateUI()
         {
             if (curWeapon == null) return;
+            
+            int requiredPoints = InventoryManager.Instance.GetRequiredPointsForLevelUp(curWeapon);
 
             // 기본 정보 업데이트
             weaponImage.sprite = curWeapon.itemIcon;
             nameText.text = curWeapon.itemName;
             pointText.text = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum).ToString();
-            // 나중에 강화포인트 관련 확정되면 추가
-            needPointText.text = "10";
+            needPointText.text = requiredPoints.ToString();
             levelText.text = $"Lv. {curWeapon.ItemLevel}";
             switch (curWeapon.statType)
             {
@@ -138,7 +139,7 @@ namespace JHT
             starUpBtn.interactable = canStarUp;
 
             // 레벨업 버튼 활성화 로직 (성급업이 가능하지 않을 때만 활성화)
-            bool hasEnoughPoints = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum) >= 10;
+            bool hasEnoughPoints = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum) >= requiredPoints;
             bool isMaxLevel = curWeapon.ItemLevel >= 50;
             // levelUpBtn.interactable = hasEnoughPoints && !isMaxLevel && !canStarUp;
         }

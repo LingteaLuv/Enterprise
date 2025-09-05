@@ -86,6 +86,35 @@ namespace JHT
             return 0;
         }
 
+        /// <summary>
+        /// 무기 성급에 따라 레벨업에 필요한 강화 포인트를 반환합니다.
+        /// </summary>
+        /// <param name="weapon">정보를 조회할 무기</param>
+        /// <returns>필요 강화 포인트</returns>
+        public int GetRequiredPointsForLevelUp(WeaponObject weapon)
+        {
+            if (weapon == null)
+            {
+                Debug.LogError("무기 정보가 없어 필요 포인트를 계산할 수 없습니다.");
+                return int.MaxValue; // 오류 상황에서는 매우 큰 값을 반환하여 강화를 막습니다.
+            }
+
+            switch (weapon.ItemStar)
+            {
+                case 0:
+                case 1:
+                case 2:
+                    return 10;
+                case 3:
+                    return 20;
+                case 4:
+                    return 30;
+                default:
+                    // 5성 이상일 경우, 가장 높은 값인 30으로 유지합니다.
+                    return 30;
+            }
+        }
+
         public bool LevelUpEquipment(int itemNum)
         {
             WeaponObject weapon = weaponList.Find(x => x.itemNum == itemNum);
@@ -95,17 +124,14 @@ namespace JHT
                 return false;
             }
 
-            int requiredPoints = 10;
+            int requiredPoints = GetRequiredPointsForLevelUp(weapon);
             int currentPoints = GetEnhancementPoints(itemNum);
 
             if (currentPoints >= requiredPoints)
             {
-                // 강화 포인트 차감
                 AddEnhancementPointsToEquipment(itemNum, -requiredPoints);
-                // 레벨업
                 weapon.ItemLevel++;
                 QuestSignalManager.Instance.LevelUp(global::ItemType.Equipment, 1);
-                
                 Debug.Log($"[InventoryManager] {weapon.itemName} 레벨업! (Lv.{weapon.ItemLevel - 1} -> Lv.{weapon.ItemLevel})");
                 return true;
             }
@@ -157,31 +183,24 @@ namespace JHT
 
             Debug.Log($"[InventoryManager] {weapon.itemName} (ID: {weapon.itemNum}) 자동 강화를 시작합니다.");
 
-            const int levelUpCost = 10; // 레벨업 비용
-            const int maxLevel = 50; // 최대 레벨
+            const int maxLevel = 50;
 
-            // 강화 가능 조건: 포인트 충분, 최대 레벨 미만, 성급업 대기 상태 아님
-            bool needsStarUp = weapon.ItemLevel > 0 && weapon.ItemLevel % 10 == 0 && weapon.ItemStar < (weapon.ItemLevel / 10);
-            bool canLevelUp = GetEnhancementPoints(weapon.itemNum) >= levelUpCost && weapon.ItemLevel < maxLevel && !needsStarUp;
-
-            while (canLevelUp)
+            while (true)
             {
-                // 레벨업 시도
-                bool levelUpSuccess = LevelUpEquipment(weapon.itemNum);
+                int requiredPoints = GetRequiredPointsForLevelUp(weapon);
 
-                if (levelUpSuccess)
+                bool needsStarUp = weapon.ItemLevel > 0 && weapon.ItemLevel % 10 == 0 && weapon.ItemStar < (weapon.ItemLevel / 10);
+                bool canLevelUp = GetEnhancementPoints(weapon.itemNum) >= requiredPoints && weapon.ItemLevel < maxLevel && !needsStarUp;
+
+                if (!canLevelUp)
                 {
-                    Debug.Log($"[InventoryManager] {weapon.itemName} 레벨업! 현재 레벨: {weapon.ItemLevel}");
-
-                    // 레벨업 후 조건 다시 확인
-                    needsStarUp = weapon.ItemLevel > 0 && weapon.ItemLevel % 10 == 0 && weapon.ItemStar < (weapon.ItemLevel / 10);
-                    canLevelUp = GetEnhancementPoints(weapon.itemNum) >= levelUpCost && weapon.ItemLevel < maxLevel && !needsStarUp;
+                    break; // 강화 조건을 만족하지 않으면 루프 탈출
                 }
-                else
+
+                // LevelUpEquipment 함수는 내부적으로 다시 필요 포인트를 계산하므로 안전합니다.
+                if (!LevelUpEquipment(weapon.itemNum))
                 {
-                    // 레벨업 실패 (포인트 부족 등) - 루프 종료
-                    Debug.LogWarning($"[InventoryManager] {weapon.itemName} 레벨업 실패. 자동 강화를 중단합니다.");
-                    break;
+                    break; // 레벨업에 실패하면 루프 탈출
                 }
             }
 
