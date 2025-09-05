@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using JHT;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -10,7 +11,9 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     [SerializeField] private Toggle _attendanceToggle;
     [SerializeField] private Toggle _toolToggle;
     [SerializeField] private Toggle _shipToggle;
-
+    [SerializeField] private Button _bossBtn;
+    [SerializeField] private Button _dungeonBtn;
+    
     [SerializeField] private TextMeshProUGUI _goldText;
     [SerializeField] private TextMeshProUGUI _stoneText;
     [SerializeField] private TextMeshProUGUI _gemText;
@@ -35,6 +38,7 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     private void Awake()
     {
         CurrencyManager.Instance.OnUpdateCurrency += UpdateText;
+        DatabaseManager.Instance.DisplayCreditData();
         DragAndDropController.Instance.GetCanvas(GetComponent<Canvas>());
     }
     
@@ -86,16 +90,27 @@ public class GameUIController : UIController<GameUIController.GameUIType>
                 ShowUI(GameUIType.ShipPanel);
             }
         });
+        _bossBtn.onClick.AddListener(() =>
+        {
+            GlobalStageManager.Instance.bossBattleTriggered = true;
+            SceneManager.LoadScene("BossBattleScene");
+        });
+        _dungeonBtn.onClick.AddListener(()=>
+        {
+            SceneManager.LoadScene("DungeonScene");
+        });
         
         HideUI(GameUIType.AttendancePanel);
         HideUI(GameUIType.ToolPanel);
 
         //CurrencyManager.Instance.OnUpdateCurrency += UpdateText;
         //DragAndDropController.Instance.GetCanvas(GetComponent<Canvas>());
+        CurrencyManager.Instance.UpdateCurrencyUI();
     }
 
     private void UpdateText(string s1, string s2, string s3)
     {
+        Debug.Log("Text 업데이트 호출");
         _goldText.text = s1;
         _stoneText.text = s2;
         _gemText.text = s3;

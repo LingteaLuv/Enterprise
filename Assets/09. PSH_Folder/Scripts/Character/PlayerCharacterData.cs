@@ -129,6 +129,17 @@ public class PlayerCharacterData
             }
         }
 
+        RelicsObject[] relic = InventoryManager.Instance.relicsList.ToArray();
+
+        foreach (var r in relic)
+        {
+            if (r.itemPowerType == PowerType.Attack)
+                finalStats[(Stat)r.itemPowerType] += r.itemPower;
+            else
+                finalStats[(Stat)r.itemPowerType] *= r.itemPower;
+        }
+
+
         // --- 전투력 계산 시작 ---
         battlePower = (BigInteger)StatCalculator.ComputeFinalPower(this);
         // --- 전투력 계산 끝 ---
@@ -140,6 +151,7 @@ public class PlayerCharacterData
             StatEvents.RaiseCharacterBattlePowerChanged(this, oldPower, battlePower);
         }
     }
+
 
     /// <summary>
     /// 다음 레벨업에 필요한 비용을 계산하여 반환합니다.

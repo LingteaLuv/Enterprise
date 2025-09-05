@@ -16592,6 +16592,161 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1635167273}
   m_CullTransparentMesh: 1
+--- !u!1 &1644500598
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1644500606}
+  - component: {fileID: 1644500605}
+  - component: {fileID: 1644500604}
+  - component: {fileID: 1644500603}
+  - component: {fileID: 1644500602}
+  - component: {fileID: 1644500601}
+  - component: {fileID: 1644500600}
+  - component: {fileID: 1644500599}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1644500599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644500598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78850e053a9094548b1909e490e4d375, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+--- !u!114 &1644500600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644500598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57c64d1aae070be4a8bf97a9c79733a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  startingCharacters:
+  - {fileID: 11400000, guid: f4f83678a52163544a720bdc9f02e6cb, type: 2}
+  - {fileID: 11400000, guid: 0d0135364e3c1a0468cd86474654dc3a, type: 2}
+  - {fileID: 11400000, guid: de1ec51b3eb277f428b0e741ecbb8069, type: 2}
+  - {fileID: 11400000, guid: 139ca1dfc449f5d489cccf0e75aa1222, type: 2}
+  - {fileID: 11400000, guid: 1ff31b0ceff58e64794f845393318bc2, type: 2}
+  levelUpCostIncreaseRatio: 1.07
+--- !u!114 &1644500601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644500598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9af12e577e61e6343b2c7ca5e6caada1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  statDefinitions:
+  - type: 2
+    baseValue: 0
+    growthPerLevel: 50
+    baseCostString: 1001
+    costIncreaseRatio: 1.05
+  - type: 0
+    baseValue: 0
+    growthPerLevel: 10
+    baseCostString: 1000
+    costIncreaseRatio: 1.05
+  - type: 1
+    baseValue: 0
+    growthPerLevel: 1
+    baseCostString: 1000
+    costIncreaseRatio: 1.05
+--- !u!114 &1644500602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644500598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cfa6bfdcb8143c46acb724897abe7fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  weaponList: []
+  relicsList: []
+  currentMode: 0
+--- !u!114 &1644500603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644500598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dc2491920f99ca4ab75e69df0e8e2e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+--- !u!114 &1644500604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644500598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 644bbd465d1ce754b978aeb7d0db295e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+--- !u!114 &1644500605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644500598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 922b5b4beb67a894694d09cbd6a5469f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+--- !u!4 &1644500606
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644500598}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 80, y: 15, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1665893200
 GameObject:
   m_ObjectHideFlags: 0
@@ -23336,10 +23491,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 073845bc7d8dcf845a0720999f4e311f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterGachaManager: {fileID: 0}
-  probabilityItemPrefab: {fileID: 2290708525873345371, guid: 9d19ff83c0d9a4d4e9cb960088bf3598, type: 3}
-  contentParent: {fileID: 973240027404352639}
-  closeButton: {fileID: 4895187071458351306}
 --- !u!224 &422352692257469154
 RectTransform:
   m_ObjectHideFlags: 0
@@ -28771,13 +28922,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   resultPanel: {fileID: 0}
-  rarityChances:
-  - rarity: 1
-    chance: 70
-  - rarity: 2
-    chance: 20
-  - rarity: 3
-    chance: 10
   currencyType: 2
   singleGachaCost: 100
   enhancementPointChances:
@@ -51512,13 +51656,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   resultPanel: {fileID: 0}
-  rarityChances:
-  - rarity: 3
-    chance: 10
-  - rarity: 2
-    chance: 20
-  - rarity: 1
-    chance: 70
   currencyType: 2
   singleGachaCost: 100
   gachaPityCounter: 0
@@ -51541,7 +51678,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c7af75d8df9680146ad75a2382cbb3cc, type: 2}
   - {fileID: 11400000, guid: e550292a8759efc43956b82774959431, type: 2}
   - {fileID: 11400000, guid: 1ff31b0ceff58e64794f845393318bc2, type: 2}
-  captainProbabilityMultiplier: 0.5
+  captainChance: 10
+  crewGradeChances: []
+  captainGradeChances: []
 --- !u!1 &7780050112050514193
 GameObject:
   m_ObjectHideFlags: 0
@@ -58080,3 +58219,4 @@ SceneRoots:
   - {fileID: 1091363334}
   - {fileID: 382032050}
   - {fileID: 534025281}
+  - {fileID: 1644500606}

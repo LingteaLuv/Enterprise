@@ -22,13 +22,13 @@ namespace JHT
         public Action<WeaponObject> OnUpCountItem;
 
         public Action<RelicsObject,RelicsObject> OnChooseItem;
+        public Action<RelicsObject> OnChageAddItem;
         public Action<RelicsObject,RelicsObject,bool> OnChangeItem;
         public Action<RelicsObject> OnChangePanel;
 
         public Action<ItemObject> OnAddItemForEncyclopedia;
 
         public Action<ItemObject> isSortingDone;
-
 
         public InventoryMode currentMode;
 
@@ -49,6 +49,7 @@ namespace JHT
             OnAddInventory += AddInventroyItem;
             OnRemoveInventory += RemoveInventroyIndex;
             OnChangeItem += AddRelicsItem;
+            OnChageAddItem += AddRelicsSolo;
         }
 
         private void OnDisable()
@@ -56,6 +57,7 @@ namespace JHT
             OnAddInventory -= AddInventroyItem;
             OnRemoveInventory -= RemoveInventroyIndex;
             OnChangeItem -= AddRelicsItem;
+            OnChageAddItem -= AddRelicsSolo;
         }
 
         #region 수현님코드
@@ -266,6 +268,8 @@ namespace JHT
 
         #endregion
 
+
+
         public WeaponObject AddItem(ItemWeaponSO item)
         {
             if (item == null)
@@ -301,13 +305,6 @@ namespace JHT
             return null;
         }
 
-        public void AddItem(ItemRelicsSO item, ItemRarity rarity,int level = -1)
-        {
-            RelicsObject obj = new RelicsObject(item, rarity, level);
-            OnAddInventory?.Invoke(obj);
-            OnChangePanel?.Invoke(obj);
-        }
-
 
         public void AddRelicsItem(RelicsObject obj1, RelicsObject obj2, bool value)
         {
@@ -316,23 +313,40 @@ namespace JHT
                 DestoryRelics(obj2);
                 relicsList.Add(obj1);
                 OnChangePanel?.Invoke(obj1);
-                
+                PlayerDataManager.Instance.RecalculateAllCharacterStats();
             }
             else
             {
                 DestoryRelics(obj1);
                 relicsList.Add(obj2);
                 OnChangePanel?.Invoke(obj2);
+                PlayerDataManager.Instance.RecalculateAllCharacterStats();
             }
-            
         }
+
+        public void AddRelicsSolo(RelicsObject obj)
+        {
+            AddItem((ItemRelicsSO)obj.itemSO, obj.curRarity, obj.itemLevel);
+        }
+
+        public void AddItem(ItemRelicsSO item, ItemRarity rarity, int level = -1)
+        {
+            RelicsObject obj = new RelicsObject(item, rarity, level);
+            OnAddInventory?.Invoke(obj);
+            OnChangePanel?.Invoke(obj);
+        }
+
 
         public void DestoryRelics(RelicsObject obj)
         {
-            if (obj == null)
+            if(obj == null)
                 return;
-            RelicsPoints += obj.itemCost;
-            relicsList.RemoveAll(r => r.itemNum == obj.itemNum);
+
+            int removed = relicsList.RemoveAll(r => r.itemNum == obj.itemNum);
+            if (removed > 0)
+            {
+                RelicsPoints += obj.itemCost;
+            }
         }
 
 
@@ -477,6 +491,7 @@ namespace JHT
             }
         }
 #endregion
+
     }
     public enum InventoryMode
     {
