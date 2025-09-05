@@ -178,7 +178,7 @@ public class CharacterScrollViewUI : UIBase
 
             // Faction enum 값도 필요하다면 여기에 추가
             case Faction.Pirate: return "해적";
-            case Faction.Navy: return "해군";
+            case Faction.Marine: return "해군";
             case Faction.Monster: return "괴물";
 
             // --- ADD THIS ---
