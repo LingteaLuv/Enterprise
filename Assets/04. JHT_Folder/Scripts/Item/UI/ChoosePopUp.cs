@@ -145,9 +145,16 @@ public class ChoosePopUp : MonoBehaviour
     {
         UIManager.Instance.ShowConfirm("정말 이 아이템을 선택 하시겠습니까?", () =>
         {
-            InventoryManager.Instance.OnChangeItem?.Invoke(relicsObj1, relicsObj2, selectMyItem);
+            if(relicsObj1 == null)
+                InventoryManager.Instance.OnChageAddItem?.Invoke(relicsObj2);
+            else
+                InventoryManager.Instance.OnChangeItem?.Invoke(relicsObj1, relicsObj2, selectMyItem);
+
             gameObject.SetActive(false);
             relicsGachaListPanel.SetActive(false);
+
+            relicsObj1 = null;
+            relicsObj2 = null;
         });
     }
 
