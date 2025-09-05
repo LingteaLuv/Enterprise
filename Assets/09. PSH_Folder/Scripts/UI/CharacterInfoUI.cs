@@ -13,7 +13,6 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     public Image characterImage;
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI soulFragmentsText; // 캐릭터별 영혼 조각
-    public TextMeshProUGUI crewRoleFactionText;
 
     [Header("닫기 버튼")]
     public Button closeButton;
@@ -26,6 +25,10 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     [Header("성급 업그레이드 UI")]
     public TextMeshProUGUI starUpgradeCostText; // 성급 업그레이드 비용 표시
     public Button starUpgradeButton; // 성급 업그레이드 버튼
+
+    [Header("직책 소속 아이콘")]
+    public Image crewRoleIcon;
+    public Image factionIcon;
 
     [Header("스탯 표시")]
     public TextMeshProUGUI hpDisplay; // HP LvX Value 형식
@@ -134,13 +137,13 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             characterNameText.text = $"{currentCharacterData.characterdata.characterName}";
             characterImage.sprite = currentCharacterData.characterdata.characterSprite;
             levelText.text = $"LV {currentCharacterData.characterLevel}";
-            crewRoleFactionText.text = $"{currentCharacterData.characterdata.crewRole} {currentCharacterData.characterdata.faction}";
 
             UpdateSoulFragmentsUI();
             UpdateLevelUpUI();
             UpdateStarUpgradeUI();
             UpdateCharacterStatsDisplay();
             UpdateEquipmentIcons(); // 장비 아이콘 업데이트 호출
+            UpdateRoleFactionIcon(); // 직책, 소속 아이콘 업데이트
         }
         else
         {
@@ -285,9 +288,9 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Attack])}";
         hpDisplay.text = $"체력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Health])}";
         defDisplay.text = $"방어력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Defense])}";
-        criChanDisplay.text = $"치명타 확률 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritChance])}%";
-        criDmgDisplay.text = $"치명타 피해 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritDamage])}%";
-        atkSpdDisplay.text = $"공격 속도 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.AttackSpeed])}";
+        criChanDisplay.text = $"치확 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritChance])}%";
+        criDmgDisplay.text = $"치피 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritDamage])}%";
+        atkSpdDisplay.text = $"공속 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.AttackSpeed])}";
 
         battlePoint.text = $"전투력 : {DataUtility.FormatNumber(currentCharacterData.battlePower)}";
     }
@@ -372,6 +375,14 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             Debug.LogError("EquipmentListUI가 연결되지 않았습니다!");
         }
+    }
+
+    private void UpdateRoleFactionIcon()
+    {
+        if (currentCharacterData == null) return;
+
+        crewRoleIcon.sprite = currentCharacterData.crewRoleIcon;
+        factionIcon.sprite = currentCharacterData.factionIcon;
     }
 
     private void UpdateEquipmentIcons()
