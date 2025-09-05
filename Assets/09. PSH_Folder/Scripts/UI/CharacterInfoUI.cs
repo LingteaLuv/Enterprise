@@ -208,14 +208,18 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (currentCharacterData == null || levelUpCostText == null || levelUpButton == null) return;
 
         // PlayerCharacterData로부터 직접 비용을 가져옵니다. 계산 로직이 UI에서 분리되었습니다.
-        System.Numerics.BigInteger cost = currentCharacterData.GetNextLevelUpCost();
+        // System.Numerics.BigInteger cost = currentCharacterData.GetNextLevelUpCost();
 
-        CurrencyType costType = CurrencyType.EnhancementStone;
+        System.Numerics.BigInteger goldCost = PlayerDataManager.Instance.fixedLevelUpGoldCost;
+        System.Numerics.BigInteger stoneCost = PlayerDataManager.Instance.fixedLevelUpStoneCost;
 
-        levelUpCostText.text = $"비용 : {DataUtility.FormatNumber(cost)} 강화석";
+        levelUpCostText.text = $"비용 : {goldCost}골드 {stoneCost}강화석";
 
-        // 재화가 충분한지 확인하여 버튼 활성화/비활성화
-        if (CurrencyManager.Instance != null && CurrencyManager.Instance.GetCurrency(costType) >= cost)
+        // 재화가 충분한지 확인, 만렙인지 확인하여 버튼 활성화/비활성화
+        if (CurrencyManager.Instance != null 
+            && CurrencyManager.Instance.GetCurrency(CurrencyType.EnhancementStone) >= stoneCost
+            && CurrencyManager.Instance.GetCurrency(CurrencyType.Gold) >= goldCost
+            && currentCharacterData.characterLevel < PlayerDataManager.MAX_CHARACTER_LEVEL)
         {
             levelUpButton.interactable = true;
         }

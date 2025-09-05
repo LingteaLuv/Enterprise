@@ -144,12 +144,12 @@ public class PlayerCharacterData
     /// <summary>
     /// 다음 레벨업에 필요한 비용을 계산하여 반환합니다.
     /// </summary>
-    public BigInteger GetNextLevelUpCost()
+    /*public BigInteger GetNextLevelUpCost()
     {
         // PlayerDataManager의 설정값을 가져와 현재 레벨에 맞는 비용을 계산합니다.
         double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, this.characterLevel - 1);
         return (BigInteger)costDouble;
-    }
+    }*/
 
     /// <summary>
     /// 캐릭터 직업, 속성에 따라 아이콘을 업데이트합니다.
