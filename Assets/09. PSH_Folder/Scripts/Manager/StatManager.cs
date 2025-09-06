@@ -50,7 +50,7 @@ public static class StatManager
         else
         {
             // 정의되지 않은 스탯의 경우 경고를 출력하고 기본 스탯 값을 반환합니다.
-            Debug.LogWarning($"StatManager: 스탯 '{stat.statName}'에 대한 성장치가 정의되지 않았습니다. 기본 스탯 값을 반환합니다.");
+            // Debug.LogWarning($"StatManager: 스탯 '{stat.statName}'에 대한 성장치가 정의되지 않았습니다. 기본 스탯 값을 반환합니다.");
             return baseStat;
         }
     }

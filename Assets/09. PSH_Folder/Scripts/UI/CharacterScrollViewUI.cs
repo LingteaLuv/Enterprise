@@ -47,6 +47,8 @@ public class CharacterScrollViewUI : UIBase
     [Header("캐릭터 정보")]
     public CharacterInfoUI characterInfoPanel; // 캐릭터 정보 패널 참조
 
+    public TextMeshProUGUI characterCountText;
+
     [Header("버튼 색상")]
     public Color selectedColor = Color.white;
     public Color normalColor = Color.gray;
@@ -178,7 +180,7 @@ public class CharacterScrollViewUI : UIBase
 
             // Faction enum 값도 필요하다면 여기에 추가
             case Faction.Pirate: return "해적";
-            case Faction.Navy: return "해군";
+            case Faction.Marine: return "해군";
             case Faction.Monster: return "괴물";
 
             // --- ADD THIS ---
@@ -290,6 +292,15 @@ public class CharacterScrollViewUI : UIBase
     {
         // 1. 정렬된 캐릭터 목록 가져오기 및 저장
         sortedCharacterList = GetSortedCharacters();
+
+        // 보유 캐릭터 수 텍스트
+        if (characterCountText != null)
+        {
+            // PlayerDataManager에서 전체 보유 캐릭터 수를 가져옵니다.
+            int totalOwnedCount = PlayerDataManager.Instance.ownedCharacters.Count;
+            // 필터링으로 현재 표시되는 캐릭터 수와 전체 보유 수를 텍스트로 보여줍니다.
+            characterCountText.text = $"{totalOwnedCount} / 55";
+        }
 
         // 2. 필요한 만큼만 패널을 생성하여 풀(Pool)을 채웁니다.
         while (panelPool.Count < sortedCharacterList.Count)
