@@ -170,7 +170,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
         }
         else
         {
-            Debug.LogWarning($"[CurrencyManager] {type} 재화 부족! 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
+            Debug.LogWarning($"[CurrencyManager] {type} 재화 부족! 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(GetCurrency(type))}");
             return false;
         }
 
