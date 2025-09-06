@@ -5,8 +5,9 @@ using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using Google;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
+using UnityEngine.SceneManagement;
 
 public class FirebaseManager : Singleton<FirebaseManager>
 {
@@ -33,8 +34,18 @@ public class FirebaseManager : Singleton<FirebaseManager>
     private GoogleSignInConfiguration _configuration;
     public GoogleSignInConfiguration Configuration { get { return _configuration; } }
     
-    protected override void Awake()
+    [SerializeField] private bool _isTest;
+    [SerializeField] private string _sceneName;
+    
+    protected override async void Awake()
     {
+        if (_isTest)
+        {
+            OnFirebaseReady += async () =>
+            {
+                await TestLogin();
+            };
+        }
         // GoogleSignIn에 사용할 인증 설정 초기화
         _configuration = new GoogleSignInConfiguration
         {
@@ -45,16 +56,44 @@ public class FirebaseManager : Singleton<FirebaseManager>
 
         // 초기화한 설정을 GoogleSignIn.Configuration에 적용
         GoogleSignIn.Configuration = _configuration;
+        
+        if (_isTest)
+        {
+            StartCoroutine(InitFirebaseCoroutine());
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 60;
+            Time.fixedDeltaTime = 1f / 60f;
+        }
     }
 
     private void Start()
     {
-        StartCoroutine(InitFirebaseCoroutine());
-        QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 60;
-        Time.fixedDeltaTime = 1f / 60f;
+        if (!_isTest)
+        {
+            StartCoroutine(InitFirebaseCoroutine());
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 60;
+            Time.fixedDeltaTime = 1f / 60f;
+        }
     }
 
+    private async Task TestLogin()
+    {
+        string testId = "hagwhr2@naver.com";
+        string testPassword = "123456";
+        AuthResult testUser = await _auth.SignInWithEmailAndPasswordAsync(testId, testPassword);
+        _user = testUser.User;
+        if (_user != null)
+        {
+            Debug.Log("테스트 로그인 완료, 씬 전환");
+            DatabaseManager.Instance.Init();
+            await DatabaseManager.Instance.SaveFieldAsync($"{_user.UserId}/CreditData/Gold", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"{_user.UserId}/CreditData/Gem", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"{_user.UserId}/CreditData/EnhancementStone", 1000000000);
+            SceneManager.LoadScene(_sceneName);
+        }
+    }
+    
     private IEnumerator InitFirebaseCoroutine()
     {
         Task<DependencyStatus> task = Firebase.FirebaseApp.CheckAndFixDependenciesAsync();
@@ -76,7 +115,6 @@ public class FirebaseManager : Singleton<FirebaseManager>
             _database = null;
             _dataReference = null;
         }
-
         OnFirebaseReady?.Invoke();
     }
 

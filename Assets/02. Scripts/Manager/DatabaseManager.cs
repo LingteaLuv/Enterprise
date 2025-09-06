@@ -14,7 +14,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     public event Action OnChangedNickname;
     public event Action OnChangedCreditData;
     
-    private void Init()
+    public void Init()
     {
         _user = FirebaseManager.Auth.CurrentUser;
         Debug.Log($"_user : {_user}");
