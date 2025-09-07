@@ -5,7 +5,7 @@ public class CombatCharacter : MonoBehaviour
 {
     public PlayerCharacterData CharacterStats { get; private set; } // 원본 데이터 참조
 
-    [SerializeField] private string name;
+    [SerializeField] private string charName;
     // --- 전투 기본 스탯 (Initialize에서 복사) ---
     [SerializeField] private float baseAttack;
     [SerializeField] private float baseHealth;
@@ -13,6 +13,8 @@ public class CombatCharacter : MonoBehaviour
     [SerializeField] private float baseCritChance;
     [SerializeField] private float baseCritDamage;
     [SerializeField] private float baseAttackSpeed;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float attackRange;
 
     // --- 버프/디버프로 인한 추가 스탯 ---
     private float bonusAttack;
@@ -37,7 +39,7 @@ public class CombatCharacter : MonoBehaviour
     {
         this.CharacterStats = data;
 
-        name = data.characterdata.characterName;
+        charName = data.characterdata.characterName;
 
         // PlayerData의 영구 스탯을 '전투 기본 스탯' 변수들로 복사합니다.
         baseAttack = data.finalStats.GetValueOrDefault(Stat.Attack, 0);
@@ -46,6 +48,13 @@ public class CombatCharacter : MonoBehaviour
         baseCritChance = data.finalStats.GetValueOrDefault(Stat.CritChance, 0);
         baseCritDamage = data.finalStats.GetValueOrDefault(Stat.CritDamage, 0);
         baseAttackSpeed = data.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0);
+
+        // 이동 속도와 사거리 등 전투에서만 필요한 스탯들은 가져오지 않고 여기서 처리
+        moveSpeed = PartyManager.Instance.moveSpeed;// 캐릭터마다 동일 속도니까
+        // 원거리와 근거리 
+        attackRange = data.characterdata.atkRangeType == AtkRangeType.Ranged_Attack ?
+            PartyManager.Instance.attackRange : PartyManager.Instance.attackRange2;
+        
 
         // '추가 스탯'은 모두 0으로 초기화합니다.
         bonusAttack = 0;

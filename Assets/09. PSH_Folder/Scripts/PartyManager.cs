@@ -9,7 +9,11 @@ public class PartyManager : Singleton<PartyManager>
     [Tooltip("씬에 미리 배치한 5개의 캐릭터 오브젝트를 순서대로 할당하세요.")]
     public List<CombatCharacter> characterSlots;
 
-
+    [Header("전투시만 필요한 스탯")]
+    [Tooltip("굳이 PlayerCharacterData에서 가져올 필요 없는 고정된 스탯인 이동 속도와 사거리는 여기서 담당")]
+    public float moveSpeed;
+    public float attackRange;
+    public float attackRange2;
 
     private void OnEnable()
     {
