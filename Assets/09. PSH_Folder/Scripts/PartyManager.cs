@@ -9,16 +9,22 @@ public class PartyManager : Singleton<PartyManager>
     [Tooltip("씬에 미리 배치한 5개의 캐릭터 오브젝트를 순서대로 할당하세요.")]
     public List<CombatCharacter> characterSlots;
 
-    public Button btn;
+
 
     private void OnEnable()
     {
-        btn.onClick.AddListener(SetupBattleParty);
+        if (PlayerDataManager.Instance != null)
+        {
+            PlayerDataManager.Instance.OnOwnedCharactersChanged += SetupBattleParty;
+        }
     }
 
     private void OnDisable()
     {
-        btn.onClick.RemoveListener(SetupBattleParty);
+        if (PlayerDataManager.Instance != null)
+        {
+            PlayerDataManager.Instance.OnOwnedCharactersChanged -= SetupBattleParty;
+        }
     }
 
     /// <summary>
