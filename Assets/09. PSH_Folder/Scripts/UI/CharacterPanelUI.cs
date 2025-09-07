@@ -132,14 +132,25 @@ public class CharacterPanelUI : MonoBehaviour
     /// </summary>
     public void UpdateFormationVisuals()
     {
-        if (formationIndicator != null)
+        if (formationIndicator == null || ownerScrollView == null) return;
+
+        bool isInFormation;
+        // 편성 모드인지 아닌지에 따라 다른 데이터를 확인합니다.
+        if (ownerScrollView.isFormationMode)
         {
-            bool isInFormation = PlayerDataManager.Instance.IsInFormation(currentPlayerCharData);
-            formationIndicator.SetActive(isInFormation);
+            // 편성 모드일 때: FormationManager의 임시 편성 정보를 확인
+            isInFormation = FormationManager.Instance.IsInTempFormation(currentPlayerCharData);
         }
+        else
+        {
+            // 일반 모드일 때: PlayerDataManager의 실제 저장된 편성 정보를 확인
+            isInFormation = PlayerDataManager.Instance.IsInFormation(currentPlayerCharData);
+        }
+
+        formationIndicator.SetActive(isInFormation);
     }
 
-    
+
     /// <summary>
     /// 패널 버튼 클릭 시 호출됩니다.
     /// </summary>
