@@ -5,6 +5,7 @@ public class CombatCharacter : MonoBehaviour
 {
     public PlayerCharacterData CharacterStats { get; private set; } // 원본 데이터 참조
 
+    [SerializeField] private string name;
     // --- 전투 기본 스탯 (Initialize에서 복사) ---
     [SerializeField] private float baseAttack;
     [SerializeField] private float baseHealth;
@@ -35,6 +36,8 @@ public class CombatCharacter : MonoBehaviour
     public void Initialize(PlayerCharacterData data)
     {
         this.CharacterStats = data;
+
+        name = data.characterdata.characterName;
 
         // PlayerData의 영구 스탯을 '전투 기본 스탯' 변수들로 복사합니다.
         baseAttack = data.finalStats.GetValueOrDefault(Stat.Attack, 0);
