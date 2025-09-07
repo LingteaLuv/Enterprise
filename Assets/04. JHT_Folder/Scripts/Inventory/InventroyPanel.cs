@@ -63,7 +63,7 @@ namespace JHT
         private void Awake()
         {
             if (relicsPool == null)
-                relicsPool = new(itemRelicsPanelItem, relicsPanelParent, 10);
+                relicsPool = new(itemRelicsPanelItem, 10, relicsPanelParent);
 
         }
 

@@ -18746,21 +18746,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!4 &237784221182503654
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7429430498423668831}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6856039339444163565}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &251755775132571255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19366,22 +19351,6 @@ GameObject:
   - component: {fileID: 7213279066777593332}
   m_Layer: 5
   m_Name: Panel
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!1 &690272163228169215
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6856039339444163565}
-  m_Layer: 0
-  m_Name: GachaManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20418,23 +20387,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &945588603392512914
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2879101221017670126}
-  - component: {fileID: 4376515510791873615}
-  m_Layer: 0
-  m_Name: RelicsGachaManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!222 &952510459113082129
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -22542,28 +22494,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &1828690054045418772
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8251530117850411748}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 166296b4f77639841a5018162d15e677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  resultPanel: {fileID: 0}
-  currencyType: 2
-  singleGachaCost: 100
-  enhancementPointChances:
-  - points: 20
-    chance: 70
-  - points: 50
-    chance: 20
-  - points: 100
-    chance: 10
 --- !u!1 &1829432368604411595
 GameObject:
   m_ObjectHideFlags: 0
@@ -23506,11 +23436,11 @@ MonoBehaviour:
   charButton: {fileID: 7130228617931663668}
   equipButton: {fileID: 1260289777782152285}
   relicButton: {fileID: 5575406502476247746}
-  characterGachaManager: {fileID: 7768122024910619689}
+  characterGachaManager: {fileID: 0}
   charSingleBtn: {fileID: 9147831111262770910}
   charMultipleBtn: {fileID: 1510080702386116592}
   gachaPityCountText: {fileID: 3259215112578323381}
-  equipmentGachaManager: {fileID: 1828690054045418772}
+  equipmentGachaManager: {fileID: 0}
   equipSingleBtn: {fileID: 7003974400717128309}
   equipMultipleBtn: {fileID: 1239474141133337066}
   relicsGachaManager: {fileID: 4376515510791873615}
@@ -24049,21 +23979,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!4 &2879101221017670126
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 945588603392512914}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6856039339444163565}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2887106351449772379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25034,6 +24949,63 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1001 &3425384851231469328
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 690272163272376202, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_Name
+      value: GachaManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 814.86646
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 462.4955
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -5.0401707
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6856039339350220696, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
 --- !u!224 &3425690684332869977
 RectTransform:
   m_ObjectHideFlags: 0
@@ -27124,26 +27096,17 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &4376515510791873615
+--- !u!114 &4376515510791873615 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 2280098489997361636, guid: b5d709e38bf2c584ea32c2d6310d9737, type: 3}
+  m_PrefabInstance: {fileID: 3425384851231469328}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 945588603392512914}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 43f6ee7d0e552734a80a253f721aa738, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  relicsCouponCost: 0
-  relicsSpecialCost: 0
-  relicsUpgradeCost: 0
-  isChoose: 0
-  curRarityTable: {fileID: 0}
-  relicsGachaTableManager: {fileID: 11400000, guid: 75ae345f729506940b8237761a3cc860, type: 2}
-  levelTable: {fileID: 11400000, guid: 34c27d4338615ca42bdaea4e76d433e3, type: 2}
-  specialTable: {fileID: 11400000, guid: e3b913bdc05ff174dbb979aa3e29f8df, type: 2}
 --- !u!1 &4380588065208215985
 GameObject:
   m_ObjectHideFlags: 0
@@ -31096,24 +31059,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6856039339444163565
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 690272163228169215}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 814.86646, y: 462.4955, z: -5.0401707}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 237784221182503654}
-  - {fileID: 7948925332069968754}
-  - {fileID: 2879101221017670126}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6885389323512772697
 GameObject:
   m_ObjectHideFlags: 0
@@ -32107,23 +32052,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &7429430498423668831
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 237784221182503654}
-  - component: {fileID: 7768122024910619689}
-  m_Layer: 0
-  m_Name: CharacterGachaManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!222 &7435534863907651840
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -32661,44 +32589,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9147408644142583317}
   m_CullTransparentMesh: 1
---- !u!114 &7768122024910619689
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7429430498423668831}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b0cf6b0913d7154c94da0f345509136, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  resultPanel: {fileID: 0}
-  currencyType: 2
-  singleGachaCost: 100
-  gachaPityCounter: 0
-  characterDataFolderPath: CharacterData
-  allCharacters:
-  - {fileID: 11400000, guid: 18616c6770a9dd14180f81da49f7e8e4, type: 2}
-  - {fileID: 11400000, guid: 9005cbd79f0bc4841b0338a784535dd4, type: 2}
-  - {fileID: 11400000, guid: 1df18bb576a9c524daf3da46771f2334, type: 2}
-  - {fileID: 11400000, guid: 5718fafad8007fc478be5ff71ab7bc91, type: 2}
-  - {fileID: 11400000, guid: f4f83678a52163544a720bdc9f02e6cb, type: 2}
-  - {fileID: 11400000, guid: a0d6b1e3ab847814aa5d17f396f85bb4, type: 2}
-  - {fileID: 11400000, guid: e66a3d804acca43408b2b871e7af950a, type: 2}
-  - {fileID: 11400000, guid: 0d0135364e3c1a0468cd86474654dc3a, type: 2}
-  - {fileID: 11400000, guid: ce51f15c3bdee16429b82eff4b26a4f4, type: 2}
-  - {fileID: 11400000, guid: d0934cca3039e4f409bd451818c75262, type: 2}
-  - {fileID: 11400000, guid: de1ec51b3eb277f428b0e741ecbb8069, type: 2}
-  - {fileID: 11400000, guid: e43cf9f5e3e3028429ed806ab937ad12, type: 2}
-  - {fileID: 11400000, guid: 78e31957ac8830447982fe1d8168cf2f, type: 2}
-  - {fileID: 11400000, guid: 139ca1dfc449f5d489cccf0e75aa1222, type: 2}
-  - {fileID: 11400000, guid: c7af75d8df9680146ad75a2382cbb3cc, type: 2}
-  - {fileID: 11400000, guid: e550292a8759efc43956b82774959431, type: 2}
-  - {fileID: 11400000, guid: 1ff31b0ceff58e64794f845393318bc2, type: 2}
-  captainChance: 10
-  crewGradeChances: []
-  captainGradeChances: []
 --- !u!1 &7780050112050514193
 GameObject:
   m_ObjectHideFlags: 0
@@ -32947,21 +32837,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7948925332069968754
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8251530117850411748}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6856039339444163565}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7965372708276155261
 GameObject:
   m_ObjectHideFlags: 0
@@ -33597,23 +33472,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7870151615691489771}
   m_CullTransparentMesh: 1
---- !u!1 &8251530117850411748
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7948925332069968754}
-  - component: {fileID: 1828690054045418772}
-  m_Layer: 0
-  m_Name: EquipGachaManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!114 &8282032474480021110
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -35664,7 +35522,7 @@ SceneRoots:
   - {fileID: 1251464309}
   - {fileID: 2123664782}
   - {fileID: 307148520}
-  - {fileID: 6856039339444163565}
+  - {fileID: 3425384851231469328}
   - {fileID: 426728316}
   - {fileID: 1177797044}
   - {fileID: 1091363334}

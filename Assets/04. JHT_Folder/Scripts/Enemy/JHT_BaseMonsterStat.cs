@@ -16,20 +16,22 @@ namespace JHT
         public float chaseRange;
         public float moveSpeed;
         public float attackDelay;
-        public JHT_MonsterProjectile projectile;
-        public GameObject particle;
+        public Sprite projectileImage;
+        public Sprite characterImage;
 
-        public MonsterType type;
-        public MonsterRarity rarity;
+        public MonsterType monsterType;
+        public MonsterRarity monsterRarity;
 
         //애니메이션 R&D 후 추가 animator override controller OR animator
 
         public void Init(JHT_MonsterDataSO so)
         {
+            // start Setting
             curSO = so;
             maxHp = curSO.maxHp;
             curHp = maxHp;
 
+            // Stat Setting
             attackPower = curSO.upAttackPower;// * GlobalStageManager.Instance.currentStageIndex;
             defense = curSO.upDefense;// * GlobalStageManager.Instance.currentStageIndex;
             attackRange = curSO.attackRange;
@@ -37,9 +39,14 @@ namespace JHT
             moveSpeed = curSO.upMoveSpeed;
             attackDelay = curSO.attackDelay;
             attackSpeed = curSO.attackSpeed;
-            particle = curSO.particle;
-            type = curSO.monsterType;
-            rarity = curSO.monsterRarity;
+
+            // Enum
+            monsterType = curSO.monsterType;
+            monsterRarity = curSO.monsterRarity;
+
+            // Sprite
+            characterImage = curSO.enemyCharacter;
+            projectileImage = curSO.projectileSprite;
         }
 
     }
