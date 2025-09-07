@@ -206,6 +206,12 @@ public class FormationManager : Singleton<FormationManager>
 
     public bool SaveChanges(out string errorMessage)
     {
+        if (!HasUnsavedChanges)
+        {
+            errorMessage = "변경사항이 없습니다.";
+            return true;
+        }
+
         if (!ValidateFormation(out errorMessage))
         {
             return false;

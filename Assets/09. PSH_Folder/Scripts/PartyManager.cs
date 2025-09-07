@@ -19,7 +19,7 @@ public class PartyManager : Singleton<PartyManager>
     {
         if (PlayerDataManager.Instance != null)
         {
-            PlayerDataManager.Instance.OnOwnedCharactersChanged += SetupBattleParty;
+            PlayerDataManager.Instance.OnFormationSaved += SetupBattleParty;
         }
     }
 
@@ -27,7 +27,7 @@ public class PartyManager : Singleton<PartyManager>
     {
         if (PlayerDataManager.Instance != null)
         {
-            PlayerDataManager.Instance.OnOwnedCharactersChanged -= SetupBattleParty;
+            PlayerDataManager.Instance.OnFormationSaved -= SetupBattleParty;
         }
     }
 

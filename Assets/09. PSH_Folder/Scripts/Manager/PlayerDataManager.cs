@@ -35,6 +35,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
     public event System.Action OnOwnedCharactersChanged;
+    public event System.Action OnFormationSaved;
 
     private bool isBatchUpdating = false;
 
@@ -279,6 +280,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         formation = newFormation;
         RecalculateTeamBattlePower();
         OnOwnedCharactersChanged?.Invoke();
+        OnFormationSaved?.Invoke(); // 새로운 편성 저장 이벤트 발생
         Debug.Log("[PDM] 새로운 편성이 적용되었습니다.");
     }
 
