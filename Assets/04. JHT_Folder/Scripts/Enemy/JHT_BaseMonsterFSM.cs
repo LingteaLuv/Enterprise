@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace JHT
 {
-    public abstract class JHT_BaseMonsterFSM : MonoBehaviour
+    public abstract class JHT_BaseMonsterFSM : JHT_PooledObject
     {
         public enum State { Idle, Move, Attack, Chase, Dead }
         public State currentState;
@@ -16,6 +16,7 @@ namespace JHT
         public LayerMask targetLayer;
         public Transform target;
         public JHT_BaseMonsterStat monsterStat;
+        private SpriteRenderer enemyCharacter;
 
         // 테스트용 public -> 테이블에서 Pool진행 후 Init으로 몬스터 so지정
         JHT_ObservableProperty<State> OnChangeState;
@@ -26,6 +27,7 @@ namespace JHT
         {
             monsterStat = GetComponent<JHT_BaseMonsterStat>();
             animator = GetComponent<Animator>();
+            enemyCharacter = GetComponent<SpriteRenderer>();
         }
 
 
@@ -34,12 +36,19 @@ namespace JHT
         {
             ChangeState(State.Idle);
             monsterStat.Init(monsterStat.curSO);
+            target = GameObject.FindWithTag("Player").transform;
         }
 
-        //public void Init(JHT_BaseMonsterStat so)
-        //{
-        //    monsterStat = so;
-        //}
+        public virtual void Init(JHT_BaseMonsterStat so)
+        {
+            monsterStat = so;
+            enemyCharacter.sprite = monsterStat.characterImage;
+            if (monsterStat.monsterRarity == MonsterRarity.Elite)
+            {
+                gameObject.transform.localScale *= 1.3f;
+            }
+
+        }
 
 
         protected virtual void Update()
@@ -59,6 +68,7 @@ namespace JHT
                     HandleChase();
                     break;
                 case State.Dead:
+                    HandleDie();
                     break;
             }
 
@@ -115,6 +125,11 @@ namespace JHT
             //Rotate();
         }
 
+        protected virtual void HandleDie()
+        {
+            Die();
+        }
+
         private void Rotate()
         {
             Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
@@ -128,7 +143,6 @@ namespace JHT
             if (monsterStat.curHp <= 0)
             {
                 ChangeState(State.Dead);
-                Die();
             }
             else
             {
@@ -142,7 +156,7 @@ namespace JHT
             BattleManager.Instance.OnEnemyDead(gameObject);
             // 애니메이션 / 이펙트 등
             // gameObject.SetActive(false);
-            Destroy(gameObject);
+            Release(0.2f);
         }
 
 
