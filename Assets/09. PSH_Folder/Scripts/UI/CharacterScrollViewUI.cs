@@ -43,9 +43,11 @@ public class CharacterScrollViewUI : UIBase
     public Button charInfoButton;
     public Button formationButton;
     public GameObject formationPanel;
+    public Button saveButton;
+
 
     [Header("캐릭터 정보")]
-    public CharacterInfoUI characterInfoPanel; // 캐릭터 정보 패널 참조
+    public CharacterInfoUI characterInfoPanel;
 
     public TextMeshProUGUI characterCountText;
 
@@ -57,50 +59,245 @@ public class CharacterScrollViewUI : UIBase
     private CrewRoleFilterOption currentCrewRoleFilter = CrewRoleFilterOption.All;
     private FactionFilterOption currentFactionFilter = FactionFilterOption.All;
     private List<CharacterPanelUI> panelPool = new List<CharacterPanelUI>();
-    private List<PlayerCharacterData> sortedCharacterList = new List<PlayerCharacterData>(); // 정렬된 리스트 저장
+    private List<PlayerCharacterData> sortedCharacterList = new List<PlayerCharacterData>();
 
-    // 2. ResetPanel 메서드를 오버라이드하여 초기화 로직 구현
     public override void ResetPanel()
     {
-        base.ResetPanel(); // 기본 ResetPanel 호출 (로그 출력 등)
+        base.ResetPanel();
 
-        // 만약 캐릭터 상세 정보 패널이 열려있다면, 리셋하고 닫아줍니다.
         if (characterInfoPanel != null && characterInfoPanel.gameObject.activeSelf)
         {
             characterInfoPanel.ResetPanel();
-            Debug.Log("CharacterScrollViewUI가 리셋되어, 열려있던 상세 정보창을 리셋하고 닫습니다.");
         }
 
-        // 추가로, 편성 모드도 비활성화 상태로 되돌릴 수 있습니다.
         if (isFormationMode)
         {
-            isFormationMode = false;
-            UpdateFormationButtonVisuals();
-            if (formationPanel != null) formationPanel.SetActive(false);
+            if (FormationManager.Instance.HasUnsavedChanges)
+            {
+                FormationManager.Instance.RevertFormationChanges();
+            }
+            SetFormationMode(false); // 상태를 확실히 되돌립니다.
         }
     }
 
     void Start()
     {
-        // 정렬, 필터 드롭다운
         sortDropdown.onValueChanged.AddListener(OnSortDropdownChanged);
         crewRoleFilterDropdown.onValueChanged.AddListener(OnCrewRoleFilterDropdownChanged);
         factionFilterDropdown.onValueChanged.AddListener(OnFactionFilterDropdownChanged);
 
-        if (charInfoButton != null)
-        {
-            charInfoButton.onClick.AddListener(() => TryDisableFormationMode());
-        }
-        if (formationButton != null)
-        {
-            formationButton.onClick.AddListener(EnableFormationMode);
-        }
-        UpdateFormationButtonVisuals();
+        charInfoButton?.onClick.AddListener(() => TrySetFormationMode(false));
+        formationButton?.onClick.AddListener(() => TrySetFormationMode(true));
+        saveButton?.onClick.AddListener(OnSaveFormation);
 
-        // 드롭다운 옵션 초기화
+        UpdateFormationButtonVisuals();
         PopulateSortDropdown();
         PopulateCrewRoleFilterDropdown();
         PopulateFactionFilterDropdown();
+    }
+
+    private void OnEnable()
+    {
+        PlayerDataManager.Instance.OnOwnedCharactersChanged += RefreshUI;
+        PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterUpdate;
+        FormationManager.Instance.OnTempFormationChanged += RefreshUI; // 임시 편성 변경 시 UI 갱신
+        RefreshUI();
+    }
+
+    private void OnDisable()
+    {
+        if (PlayerDataManager.Instance != null) PlayerDataManager.Instance.OnOwnedCharactersChanged -= RefreshUI;
+        if (PlayerDataManager.Instance != null) PlayerDataManager.Instance.OnCharacterDataUpdated -= HandleCharacterUpdate;
+        if (FormationManager.Instance != null) FormationManager.Instance.OnTempFormationChanged -= RefreshUI;
+    }
+
+    private void HandleCharacterUpdate(PlayerCharacterData data)
+    {
+        RefreshUI();
+    }
+
+    /// <summary>
+    /// 편성 모드를 켜거나, 끄기를 '시도'합니다.
+    /// </summary>
+    public void TrySetFormationMode(bool enable)
+    {
+        if (isFormationMode == enable) return;
+
+        if (enable)
+        {
+            SetFormationMode(true);
+        }
+        else
+        {
+            TryDisableFormationMode();
+        }
+    }
+
+    /// <summary>
+    /// 편성 모드를 안전하게 비활성화하려고 시도합니다. 탭 이동 전에 호출됩니다.
+    /// </summary>
+    /// <returns>모드 전환에 성공하면 true, 팝업 등으로 인해 중단되면 false</returns>
+    public bool TryDisableFormationMode()
+    {
+        if (!isFormationMode) return true; // 이미 비활성 상태면 항상 성공
+
+        if (!FormationManager.Instance.HasUnsavedChanges)
+        {
+            SetFormationMode(false);
+            return true; // 변경사항 없으면 바로 끔
+        }
+
+        // 변경사항이 있을 경우, 유효성 검사부터 실행
+        if (!FormationManager.Instance.ValidateFormation(out string errorMessage))
+        {
+            // 유효하지 않은 편성일 경우: 경고 팝업만 띄움
+            PopManager.Instance.ShowOKPopup(errorMessage, "확인");
+            return false; // 모드 전환 실패
+        }
+        else
+        {
+            // 유효하지만 저장되지 않은 변경사항이 있을 경우: 저장 여부 묻는 팝업
+            PopManager.Instance.ShowOKCancelPopup(
+                "저장되지 않은 변경사항이 있습니다. 저장하시겠습니까?",
+                "저장",
+                () => {
+                    OnSaveFormation(); // 저장하고
+                    SetFormationMode(false); // 모드 끄기
+                },
+                "저장 안함",
+                () => {
+                    OnRevertFormation(); // 변경사항 되돌리고
+                    SetFormationMode(false); // 모드 끄기
+                }
+            );
+            return false; // 팝업이 떴으므로, 유저의 선택을 기다려야 함. 일단 모드 전환은 보류.
+        }
+    }
+
+    private void SetFormationMode(bool enable)
+    {
+        isFormationMode = enable;
+
+        if (isFormationMode)
+        {
+            FormationManager.Instance.InitializeTempFormation();
+        }
+
+        UpdateFormationButtonVisuals();
+        RefreshUI();
+        formationPanel.SetActive(isFormationMode);
+        if (saveButton) saveButton.gameObject.SetActive(isFormationMode);
+    }
+
+    private void OnSaveFormation()
+    {
+        if (FormationManager.Instance.SaveChanges(out string errorMessage))
+        {
+            PopManager.Instance.ShowOKPopup("편성이 저장되었습니다!", "확인");
+        }
+        else
+        {
+            PopManager.Instance.ShowOKPopup($"편성 저장 실패:\n{errorMessage}", "확인");
+        }
+        RefreshUI();
+    }
+
+    private void OnRevertFormation()
+    {
+        FormationManager.Instance.RevertFormationChanges();
+        PopManager.Instance.ShowOKPopup("변경사항을 되돌렸습니다.", "확인");
+        RefreshUI();
+    }
+
+    public override void RefreshUI()
+    {
+        sortedCharacterList = GetSortedCharacters();
+
+        if (characterCountText != null)
+        {
+            int totalOwnedCount = PlayerDataManager.Instance.ownedCharacters.Count;
+            characterCountText.text = $"{totalOwnedCount} / 55";
+        }
+
+        while (panelPool.Count < sortedCharacterList.Count)
+        {
+            GameObject panelGO = Instantiate(characterPanelPrefab, contentPanel);
+            panelPool.Add(panelGO.GetComponent<CharacterPanelUI>());
+        }
+
+        for (int i = 0; i < sortedCharacterList.Count; i++)
+        {
+            panelPool[i].ownerScrollView = this;
+            panelPool[i].Setup(sortedCharacterList[i]);
+            panelPool[i].gameObject.SetActive(true);
+        }
+
+        for (int i = sortedCharacterList.Count; i < panelPool.Count; i++)
+        {
+            panelPool[i].gameObject.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 캐릭터 패널이 클릭되었을 때 호출될 핸들러
+    /// </summary>
+    private void OnCharacterPanelClicked(PlayerCharacterData character)
+    {
+        if (isFormationMode)
+        {
+            FormationManager.Instance.ToggleCharacterInTempFormation(character);
+        }
+        else
+        {
+            ShowCharacterInfo(character);
+        }
+    }
+
+    public void ShowCharacterInfo(PlayerCharacterData character)
+    {
+        if (characterInfoPanel != null)
+        {
+            characterInfoPanel.Setup(character, sortedCharacterList);
+        }
+        else
+        {
+            Debug.LogError("CharacterInfoUI 패널이 CharacterScrollViewUI에 연결되지 않았습니다!");
+        }
+    }
+
+    private List<PlayerCharacterData> GetSortedCharacters()
+    {
+        var charactersQuery = PlayerDataManager.Instance.ownedCharacters.Values.AsEnumerable();
+
+        if (currentFactionFilter != FactionFilterOption.All)
+        {
+            Faction targetFaction = (Faction)System.Enum.Parse(typeof(Faction), currentFactionFilter.ToString());
+            charactersQuery = charactersQuery.Where(c => c.characterdata.faction == targetFaction);
+        }
+
+        if (currentCrewRoleFilter != CrewRoleFilterOption.All)
+        {
+            CrewRole targetRole = (CrewRole)System.Enum.Parse(typeof(CrewRole), currentCrewRoleFilter.ToString());
+            charactersQuery = charactersQuery.Where(c => c.characterdata.crewRole == targetRole);
+        }
+
+        var sortedCharacters = charactersQuery.OrderByDescending(c =>
+            isFormationMode ? FormationManager.Instance.IsInTempFormation(c) : PlayerDataManager.Instance.IsInFormation(c)
+        );
+
+        switch (currentSort)
+        {
+            case CharacterSortOption.Stars:
+                sortedCharacters = sortedCharacters.ThenByDescending(c => c.stars)
+                                                   .ThenBy(c => c.characterdata.characterName);
+                break;
+            case CharacterSortOption.Level:
+                sortedCharacters = sortedCharacters.ThenByDescending(c => c.characterLevel)
+                                                   .ThenBy(c => c.characterdata.characterName);
+                break;
+        }
+
+        return sortedCharacters.ToList();
     }
 
     private void UpdateFormationButtonVisuals()
@@ -125,38 +322,35 @@ public class CharacterScrollViewUI : UIBase
         formationButton.colors = formationButtonColors;
     }
 
-    // SortDropdown 옵션을 채우는 함수
+    #region 드롭다운 UI 관련 (코드가 길어서 생략)
     private void PopulateSortDropdown()
     {
-        sortDropdown.ClearOptions(); // 기존 옵션 제거
+        sortDropdown.ClearOptions();
         List<string> options = new List<string>();
         foreach (CharacterSortOption option in System.Enum.GetValues(typeof(CharacterSortOption)))
         {
-            options.Add(GetLocalizedEnumName(option)); // 헬퍼 함수 사용
+            options.Add(GetLocalizedEnumName(option));
         }
         sortDropdown.AddOptions(options);
     }
 
-    // 새로운 드롭다운 값 변경 시 호출될 함수
     void OnFactionFilterDropdownChanged(int index)
     {
         currentFactionFilter = (FactionFilterOption)index;
         RefreshUI();
     }
 
-    // FactionFilterDropdown 옵션을 채우는 함수
     private void PopulateFactionFilterDropdown()
     {
-        factionFilterDropdown.ClearOptions(); // 기존 옵션 제거
+        factionFilterDropdown.ClearOptions();
         List<string> options = new List<string>();
         foreach (FactionFilterOption option in System.Enum.GetValues(typeof(FactionFilterOption)))
         {
-            options.Add(GetLocalizedEnumName(option)); // 헬퍼 함수 사용
+            options.Add(GetLocalizedEnumName(option));
         }
         factionFilterDropdown.AddOptions(options);
     }
 
-    // Enum 값을 한글 문자열로 변환하는 헬퍼 함수
     private string GetLocalizedEnumName(System.Enum enumValue)
     {
         switch (enumValue)
@@ -172,214 +366,42 @@ public class CharacterScrollViewUI : UIBase
             case FactionFilterOption.Navy: return "해군";
             case FactionFilterOption.Monster: return "괴물";
 
-            // CrewRole enum 값도 필요하다면 여기에 추가
             case CrewRole.Deckhand: return "갑판원";
             case CrewRole.Sailor: return "선원";
             case CrewRole.Cook: return "요리사";
             case CrewRole.Captain: return "선장";
 
-            // Faction enum 값도 필요하다면 여기에 추가
             case Faction.Pirate: return "해적";
             case Faction.Marine: return "해군";
             case Faction.Monster: return "괴물";
 
-            // --- ADD THIS ---
             case CharacterSortOption.Stars: return "성급별";
             case CharacterSortOption.Level: return "레벨별";
-            // --- END ADDITION ---
 
-            default: return enumValue.ToString(); // 매핑되지 않은 값은 기본 영어 이름 사용
+            default: return enumValue.ToString();
         }
     }
 
-    // 새로운 드롭다운 값 변경 시 호출될 함수
     void OnCrewRoleFilterDropdownChanged(int index)
     {
         currentCrewRoleFilter = (CrewRoleFilterOption)index;
         RefreshUI();
     }
 
-    // CrewRoleFilterDropdown 옵션을 채우는 함수
     private void PopulateCrewRoleFilterDropdown()
     {
-        crewRoleFilterDropdown.ClearOptions(); // 기존 옵션 제거
+        crewRoleFilterDropdown.ClearOptions();
         List<string> options = new List<string>();
         foreach (CrewRoleFilterOption option in System.Enum.GetValues(typeof(CrewRoleFilterOption)))
         {
-            options.Add(GetLocalizedEnumName(option)); // 헬퍼 함수 사용
+            options.Add(GetLocalizedEnumName(option));
         }
         crewRoleFilterDropdown.AddOptions(options);
     }
-
-    // 이 UI 오브젝트가 활성화될 때마다 목록을 새로고침하고, 이벤트 리스너를 등록합니다.
-    private void OnEnable()
-    {
-        if (PlayerDataManager.Instance != null)
-        {
-            PlayerDataManager.Instance.OnOwnedCharactersChanged += RefreshUI;
-            PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterUpdate;
-
-            // PlayerDataManager가 준비되었을 때만 RefreshDisplay를 호출합니다.
-            RefreshUI();
-        }
-        else
-        {
-            Debug.LogWarning("CharacterScrollViewUI: PlayerDataManager.Instance가 OnEnable 시점에 null입니다. 이벤트 구독 및 초기 RefreshDisplay가 지연됩니다.");
-        }
-    }
-
-    // 비활성화될 때 이벤트 리스너를 해제하여 메모리 누수를 방지합니다.
-    private void OnDisable()
-    {
-        PlayerDataManager.Instance.OnOwnedCharactersChanged -= RefreshUI;
-        PlayerDataManager.Instance.OnCharacterDataUpdated -= HandleCharacterUpdate;
-    }
-
-    // OnCharacterDataUpdated 이벤트는 PlayerCharacterData를 전달하므로,
-    // 이를 처리하기 위한 별도의 핸들러가 필요합니다.
-    private void HandleCharacterUpdate(PlayerCharacterData data)
-    {
-        // 캐릭터 데이터가 업데이트되면 스크롤 뷰를 새로고침합니다.
-        RefreshUI();
-    }
-
     void OnSortDropdownChanged(int index)
     {
         currentSort = (CharacterSortOption)index;
         RefreshUI();
     }
-
-    public void EnableFormationMode()
-    {
-        isFormationMode = true;
-        Debug.Log("편성 모드 활성화");
-        UpdateFormationButtonVisuals();
-        RefreshUI();
-        formationPanel.SetActive(true);
-    }
-
-    public bool TryDisableFormationMode()
-    {
-        if (PlayerDataManager.Instance != null)
-        {
-            int a = PlayerDataManager.Instance.IsValidFormation();
-            if (a == 1)
-            {
-                UIManager.Instance.ShowWarning("모든 포지션에 최소 1명을 배치해야합니다.");
-                return false;
-            }
-            else if (a == 2)
-            {
-                UIManager.Instance.ShowWarning("배치 인원이 5명이 아닙니다.");
-                return false;
-            }
-        }
-        else
-        {
-            Debug.LogError("PlayerDataManager.Instance가 null입니다. 편성 유효성 검사를 수행할 수 없습니다.");
-            return false;
-        }
-
-        isFormationMode = false;
-        Debug.Log("편성 모드 비활성화");
-        UpdateFormationButtonVisuals();
-        RefreshUI();
-        if (formationPanel != null) formationPanel.SetActive(false);
-        return true;
-    }
-
-    public override void RefreshUI()
-    {
-        // 1. 정렬된 캐릭터 목록 가져오기 및 저장
-        sortedCharacterList = GetSortedCharacters();
-
-        // 보유 캐릭터 수 텍스트
-        if (characterCountText != null)
-        {
-            // PlayerDataManager에서 전체 보유 캐릭터 수를 가져옵니다.
-            int totalOwnedCount = PlayerDataManager.Instance.ownedCharacters.Count;
-            // 필터링으로 현재 표시되는 캐릭터 수와 전체 보유 수를 텍스트로 보여줍니다.
-            characterCountText.text = $"{totalOwnedCount} / 55";
-        }
-
-        // 2. 필요한 만큼만 패널을 생성하여 풀(Pool)을 채웁니다.
-        while (panelPool.Count < sortedCharacterList.Count)
-        {
-            GameObject panelGO = Instantiate(characterPanelPrefab, contentPanel);
-            panelPool.Add(panelGO.GetComponent<CharacterPanelUI>());
-        }
-
-        // 3. 풀에 있는 패널들에 데이터를 설정하고 활성화합니다.
-        for (int i = 0; i < sortedCharacterList.Count; i++)
-        {
-            panelPool[i].ownerScrollView = this;
-            panelPool[i].Setup(sortedCharacterList[i]);
-            panelPool[i].gameObject.SetActive(true);
-        }
-
-        // 4. 사용하지 않는 나머지 패널들은 비활성화합니다.
-        for (int i = sortedCharacterList.Count; i < panelPool.Count; i++)
-        {
-            panelPool[i].gameObject.SetActive(false);
-        }
-    }
-
-    /// <summary>
-    /// 캐릭터 정보 패널을 열고 데이터를 설정합니다.
-    /// </summary>
-    public void ShowCharacterInfo(PlayerCharacterData character)
-    {
-        if (characterInfoPanel != null)
-        {
-            characterInfoPanel.Setup(character, sortedCharacterList);
-        }
-        else
-        {
-            Debug.LogError("CharacterInfoUI 패널이 CharacterScrollViewUI에 연결되지 않았습니다!");
-        }
-    }
-
-    private List<PlayerCharacterData> GetSortedCharacters()
-    {
-        var charactersQuery = PlayerDataManager.Instance.ownedCharacters.Values.AsEnumerable();
-
-        // --- FACTION 필터링 로직 추가 ---
-        if (currentFactionFilter != FactionFilterOption.All)
-        {
-            // FactionFilterOption과 Faction enum의 값이 일치한다고 가정
-            Faction targetFaction = (Faction)System.Enum.Parse(typeof(Faction), currentFactionFilter.ToString());
-            charactersQuery = charactersQuery.Where(c => c.characterdata.faction == targetFaction);
-        }
-        // --- FACTION 필터링 로직 끝 ---
-
-        // --- CrewRole 필터링 로직 (기존) ---
-        if (currentCrewRoleFilter != CrewRoleFilterOption.All)
-        {
-            // CrewRoleFilterOption과 CrewRole enum의 값이 일치한다고 가정
-            CrewRole targetRole = (CrewRole)System.Enum.Parse(typeof(CrewRole), currentCrewRoleFilter.ToString());
-            charactersQuery = charactersQuery.Where(c => c.characterdata.crewRole == targetRole);
-        }
-        // --- CrewRole 필터링 로직 끝 ---
-
-        // 1. 편성에 포함된 캐릭터를 먼저 정렬 (IsInFormation이 true인 캐릭터가 먼저 오도록)
-        var sortedCharacters = charactersQuery.OrderByDescending(c => PlayerDataManager.Instance.IsInFormation(c));
-
-        // 2. 기존 정렬 기준 (성급, 레벨)을 그 다음으로 적용
-        switch (currentSort)
-        {
-            case CharacterSortOption.Stars:
-                sortedCharacters = sortedCharacters.ThenByDescending(c => c.stars)
-                                                   .ThenBy(c => c.characterdata.characterName); // 이름으로 2차 정렬
-                break;
-            case CharacterSortOption.Level:
-                sortedCharacters = sortedCharacters.ThenByDescending(c => c.characterLevel)
-                                                   .ThenBy(c => c.characterdata.characterName); // 이름으로 2차 정렬
-                break;
-            default:
-                // 기본 정렬 (편성 여부만)
-                break;
-        }
-
-        return sortedCharacters.ToList();
-    }
+    #endregion
 }

@@ -86,17 +86,8 @@ public class DraggableCharacter : MonoBehaviour, IPointerDownHandler, IPointerUp
     {
         if (characterPanel.ownerScrollView == null || !characterPanel.ownerScrollView.isFormationMode) return;
 
-        PlayerCharacterData character = characterPanel.currentPlayerCharData;
-        bool isInFormation = PlayerDataManager.Instance.IsInFormation(character);
-
-        if (isInFormation)
-        {
-            PlayerDataManager.Instance.RemoveCharacterFromFormation(character);
-        }
-        else
-        {
-            int result = PlayerDataManager.Instance.AddCharacterToFormation(character);
-        }
+        // PlayerDataManager에 직접 접근하는 대신 FormationManager를 통해 임시 편성을 변경합니다.
+        FormationManager.Instance.ToggleCharacterInTempFormation(characterPanel.currentPlayerCharData);
     }
 
     private System.Collections.IEnumerator HoldToDrag(PointerEventData eventData)
