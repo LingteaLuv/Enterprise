@@ -64,6 +64,11 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 
         StartCoroutine(InitialCalculationCoroutine());
+        // 초기 자동 편성 후 PartyManager를 명시적으로 업데이트합니다.
+        if (PartyManager.Instance != null)
+        {
+            PartyManager.Instance.SetupBattleParty();
+        }
     }
 
     private void GrantStartingCharacters()
