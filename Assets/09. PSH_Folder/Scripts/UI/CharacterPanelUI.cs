@@ -9,6 +9,7 @@ public class CharacterPanelUI : MonoBehaviour
     [Header("기본 UI 요소")]
     public Image characterImage;
     public TextMeshProUGUI levelText;
+    public TextMeshProUGUI nameText;
     public Image[] starImages; // 별 이미지 배열
     public Button button; // 캐릭터 인포 여는 버튼
 
@@ -51,6 +52,7 @@ public class CharacterPanelUI : MonoBehaviour
         // 캐릭터 기본 정보 설정
         characterImage.sprite = data.characterdata.characterSprite;
         levelText.text = $"Lv.{data.characterLevel}";
+        nameText.text = data.characterdata.characterName;
 
         // 성급(별) UI 업데이트
         UpdateStarUI(data.stars);
