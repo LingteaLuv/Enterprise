@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EquipmentListUI : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class EquipmentListUI : MonoBehaviour
     [SerializeField] private ItemEquipPanel itemEquipPanelPrefab;
     [SerializeField] private TMP_Dropdown weaponDropDown;
     [SerializeField] private EquipmentDetailPanel detailPanel;
+    [SerializeField] private Button closeButton;
 
     private List<ItemEquipPanel> itemPanelPool = new List<ItemEquipPanel>();
     private InventoryManager inventoryManager;
@@ -48,6 +50,11 @@ public class EquipmentListUI : MonoBehaviour
         {
             weaponDropDown.onValueChanged.AddListener(HandleSortChanged);
         }
+
+        if (closeButton != null)
+        {
+            closeButton.onClick.AddListener(() => gameObject.SetActive(false));
+        }
     }
 
     private void OnDisable()
@@ -66,6 +73,11 @@ public class EquipmentListUI : MonoBehaviour
         {
             weaponDropDown.onValueChanged.RemoveListener(HandleSortChanged);
         }
+
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveListener(() => gameObject.SetActive(false));
+        }
     }
 
     private void Start()
@@ -77,6 +89,7 @@ public class EquipmentListUI : MonoBehaviour
             weaponDropDown.AddOptions(weaponDropDownList);
         }
         ClearDisplay();
+        RefreshDisplay();
     }
 
     public void ResetPanel()

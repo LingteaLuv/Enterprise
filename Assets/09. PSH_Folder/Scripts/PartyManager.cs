@@ -15,6 +15,10 @@ public class PartyManager : Singleton<PartyManager>
     public float attackRange;
     public float attackRange2;
 
+    private void Start()
+    {
+        SetupBattleParty();
+    }
     private void OnEnable()
     {
         if (PlayerDataManager.Instance != null)
