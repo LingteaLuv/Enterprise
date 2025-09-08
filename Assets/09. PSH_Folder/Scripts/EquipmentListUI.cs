@@ -77,6 +77,7 @@ public class EquipmentListUI : MonoBehaviour
             weaponDropDown.AddOptions(weaponDropDownList);
         }
         ClearDisplay();
+        RefreshDisplay();
     }
 
     public void ResetPanel()
