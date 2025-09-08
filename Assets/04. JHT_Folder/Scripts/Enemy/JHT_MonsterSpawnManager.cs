@@ -12,7 +12,6 @@ namespace JHT
         [SerializeField] private JHT_BaseMonsterFSM monsterPrefab;
         [SerializeField] private JHT_MonsterProjectile monsterProjectile;
         [SerializeField] private JHT_MonsterDataTable roundTable;
-        [SerializeField] private JHT_MonsterSetManager monsterSetTransform;
 
         //[SerializeField] List<JHT_MonsterDataTable> roundList;
 
