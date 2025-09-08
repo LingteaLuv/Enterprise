@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using _05._CSJ_Folder.Scripts.Quest.Data;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
@@ -444,30 +445,43 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// 일일 퀘스트 초기화가 필요한지 체크합니다. 
     /// </summary>
     /// <param name="resetTime">기본 기준 시간입니다. </param>
-    /// <returns></returns>
+    /// <returns>일일 초기화가 필요한지 bool 값으로 반환합니다.</returns>
     public async Task<bool> DailyCheckIn(int resetTime = 6)
     {
         Init();
         
+        // server 시간을 받아와서 기준 시간대에 맞춥니다.
         long serverTime = await CurrentServerTime();
         DateTimeOffset _stdNow = GetResetTime(serverTime);
 
+        // 서버 시간을 기준으로 초기화 경계를 받아옵니다.
         var dailyBoundary = GetDailyBoundary(_stdNow, resetTime);
 
+        // 마지막으로 일일 퀘스트를 진행한 시간을 기준 시간으로 받아옵니다.
         DateTimeOffset lastTime = await GetDailyQuestTimeToStd();
+        
+        // 만약 마지막으로 진행한 기록이 없다면 ≒ 클리어 횟수가 0회인 경우 true를 반환합니다.
         if (lastTime == DateTime.MinValue) return true;
         
+        // 진행한 기록이 있다면 현재 초기화 경계가 마지막 진행한 날을 넘었는지 확인하여 값을 반환합니다.
         return lastTime < dailyBoundary;
     }
 
+    /// <summary>
+    /// 일일 초기화 경계를 받아옵니다.
+    /// </summary>
     private DateTime GetDailyBoundary(DateTimeOffset time,int resetTime)
     {
+        // 현재의 날짜까지와 시는 일일 퀘스트 초기화 기준 시로 DateTime을 생성합니다.
         var dailyBoundary = new DateTime(time.Year, time.Month, time.Day, resetTime, 0, 0);
+        
+        // 만약 현재 시간의 시가 아직 초기화 기준 시(resetTime)을 넘지 못한 경우 전날의 경계로 넘깁니다. 
         if (time < dailyBoundary)
         {
             dailyBoundary = dailyBoundary.AddDays(-1);
         }
 
+        // 경계를 반환합니다.
         return dailyBoundary;
     }
 
@@ -478,8 +492,12 @@ public class DatabaseManager : Singleton<DatabaseManager>
     {
         Init();
         long serverTime = await CurrentServerTime();
+        
+        // 유저 데이터의 DailyQuestTime에 현재의 서버 시간을 저장합니다.
         await FirebaseManager.DataReference.Child(_uid).Child("UserData")
             .Child("DailyQuestTime").SetValueAsync(serverTime);
+        
+        // 현재 Local에서도 server 시간을 저장합니다. (서버와의 통신을 줄이기 위해)
         SetLocalDaily(serverTime);
     }
 
@@ -490,8 +508,10 @@ public class DatabaseManager : Singleton<DatabaseManager>
     private async Task<long> GetDailyQuestTime()
     {
         Init();
+        // 유저 데이터의 DailyQuestTime에서 데이터를 받아옵니다.
         var snapshot = await FirebaseManager.DataReference.Child(_uid).Child("UserData")
             .Child("DailyQuestTime").GetValueAsync();
+        // 값이 존재한다면 int값으로 반환합니다.
         if (snapshot.Exists)
         {
             return Convert.ToInt64(snapshot.Value);
@@ -500,19 +520,27 @@ public class DatabaseManager : Singleton<DatabaseManager>
     }
 
     /// <summary>
-    /// 마지막 일일 퀘스트 초기화 시점을 기준 시간으로 반환합니다. 
+    /// 마지막 일일 퀘스트 초기화 시점을 UTC 초기화 기준 시간으로 반환합니다.
+    /// 기본 UTC+09
     /// </summary>
     /// <returns>최종 퀘스트 초기화 시점, 없으면 DateTime.MinValue</returns>
     private async Task<DateTime> GetDailyQuestTimeToStd()
     {
-        long ms = await GetDailyQuestTime();
-        if (ms <= 0) return DateTime.MinValue;
-        return GetResetTime(ms);
+        // 마지막 클리어 시간을 long 값으로 받습니다.
+        var ms = await GetDailyQuestTime();
+        
+        // 만약 ms의 값이 없다면 Min값을 반환하고 존재한다면 해당 시간을 기준 시간으로 반환합니다.
+        return ms <= 0 ? DateTime.MinValue : GetResetTime(ms);
     }
     #endregion
     
+    /// <summary>
+    /// long 값을 받아서 유저의 UTC 초기화 기준 시간에 맞춰 DateTime값을 반환합니다.
+    /// 기본 UTC+09
+    /// </summary>
     private DateTime GetResetTime(long time)
     {
+        // time 값을 UtcDateTime에 현재 유저의 UTC 초기화 기준 시를 더해서 DateTimeOffset으로 반환합니다. 
         return DateTimeOffset.FromUnixTimeMilliseconds(time).UtcDateTime.AddHours(_stdResetTime);
     }
     
@@ -528,15 +556,19 @@ public class DatabaseManager : Singleton<DatabaseManager>
     {
         Init();
         
-        long serverTime = await CurrentServerTime();
-        DateTime _stdNow = GetResetTime(serverTime);
+        // 서버 시간을 기준 시로 반환 받습니다.
+        var serverTime = await CurrentServerTime();
+        var _stdNow = GetResetTime(serverTime);
         
-        DateTimeOffset boundary = GetLastWeeklyBoundary(_stdNow, resetDay, resetTime);
+        // 주간 퀘스트 경계를 반환 받습니다.
+        DateTimeOffset boundary = GetWeeklyBoundary(_stdNow, resetDay, resetTime);
         
-        long lastMs = await GetWeeklyQuestTime();
-        if (lastMs <= 0) return true;
+        // 마지막 주간 퀘스트 수행 시간을 반환 받습니다.
+        var lastTime = await GetWeeklyQuestTimeToStd();
+        // 수행 기록이 없다면 초기화를 해야한다 => true로 반환합니다.
+        if (lastTime == DateTime.MinValue) return true;
         
-        DateTimeOffset lastTime = GetResetTime(lastMs);
+        // 퀘스트 초기화 경계가 마지막 수행 시간보다 큰지 반환합니다.
         return lastTime < boundary;
     }
 
@@ -548,30 +580,58 @@ public class DatabaseManager : Singleton<DatabaseManager>
         Init(); 
         
         var userData = FirebaseManager.DataReference.Child(_uid).Child("UserData");
-        
         var serverTime = await CurrentServerTime();
         
+        // WeeklyQuestTime에 현재 서버 시간을 저장합니다.
         await userData.Child("WeeklyQuestTime").SetValueAsync(serverTime);
         DateTimeOffset _stdNow = GetResetTime(serverTime);
+        
+        // WeeklyQuestDay에 현재 요일 값을 저장합니다.
         await userData.Child("WeeklyQuestDay").SetValueAsync((int)_stdNow.DayOfWeek);
+        
+        // Local에도 데이터 처리를 위해 server 시간을 저장합니다.
         SetLocalWeekly(serverTime);
     }
 
+    /// <summary>
+    /// 주간 퀘스트의 클리어 시간을 받아옵니다. 
+    /// </summary>
     private async Task<long> GetWeeklyQuestTime()
     {
         Init();
+        // 퀘스트 클리어 시간을 데이터에서 받아옵니다.
         var snapshot = await FirebaseManager.DataReference.Child(_uid).Child("UserData")
             .Child("WeeklyQuestTime").GetValueAsync();
+        // 만일 값이 존재한다면 반환합니다.
         if (snapshot.Exists)
         {
             return Convert.ToInt64(snapshot.Value);
         }
         return 0;
     }
+    
+    /// <summary>
+    /// 마지막 주간 퀘스트 초기화 시점을 UTC 초기화 기준 시간으로 반환합니다.
+    /// 기본 UTC+09
+    /// </summary>
+    /// <returns>최종 퀘스트 초기화 시점, 없으면 DateTime.MinValue</returns>
+    private async Task<DateTime> GetWeeklyQuestTimeToStd()
+    {
+        // 마지막 클리어 시간을 long 값으로 받습니다.
+        var ms = await GetWeeklyQuestTime();
+        
+        // 만약 ms의 값이 없다면 Min값을 반환하고 존재한다면 해당 시간을 기준 시간으로 반환합니다.
+        return ms <= 0 ? DateTime.MinValue : GetResetTime(ms);
+    }
 
+    /// <summary>
+    /// 마지막 퀘스트 수행 요일을 받아옵니다.
+    /// </summary>
+    //TODO : 추후 사용할 여지가 있어 만들었습니다. 현재는 미사용
     private async Task<DayOfWeek> GetWeeklyQuestDay()
     {
         Init();
+        
         var snapshot = await FirebaseManager.DataReference.Child(_uid).Child("UserData")
             .Child("WeeklyQuestDay").GetValueAsync();
         if (snapshot.Exists)
@@ -581,12 +641,19 @@ public class DatabaseManager : Singleton<DatabaseManager>
         return DayOfWeek.Monday;
     }
 
-    private static DateTime GetLastWeeklyBoundary(DateTime now, DayOfWeek resetDay, int resetTime)
+    /// <summary>
+    /// 주간 퀘스트가 초기화되는 경계를 받아옵니다. (현재 시간을 기점으로 마지막으로 초기화된 경계)
+    /// </summary>
+    private static DateTime GetWeeklyBoundary(DateTime now, DayOfWeek resetDay, int resetTime)
     {
+        // 경계 기본 값을 지정합니다.
         var BaseToday = new DateTime(now.Year, now.Month, now.Day, resetTime, 0, 0);
+      
+        // 오늘의 요일에서 초기화 요일을 빼서 초기화 요일 기준으로 경계를 지정합니다.
         var delta = ((int)now.DayOfWeek - (int)resetDay + 7) % 7;
         var Boundary = BaseToday.AddDays(-delta);
         
+        // 만일 초기화 날짜는 지났지만 시간이 지나지 못했다면 저번주의 경계로 바꿉니다. 
         if(now < Boundary)
             Boundary = Boundary.AddDays(-7);
         
@@ -597,6 +664,10 @@ public class DatabaseManager : Singleton<DatabaseManager>
     #region Offset
 
 
+    /// <summary>
+    /// 서버의 Offset을 설정합니다
+    /// </summary>
+    /// <param name="maxAge"></param>
     public async Task EnsureServerOffset(int maxAge = 300)
     {
        long nowLocalMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -657,7 +728,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         if (approxMs == 0) return true;
         
         DateTime nowStd = GetResetTime(approxMs);
-        DateTime boundary = GetLastWeeklyBoundary(nowStd, resetDay, resetTime);
+        DateTime boundary = GetWeeklyBoundary(nowStd, resetDay, resetTime);
         
         long lastMs = GetLocalWeekly();
         if (lastMs <= 0) return true;
@@ -665,6 +736,114 @@ public class DatabaseManager : Singleton<DatabaseManager>
         return lastStd < boundary;
     }
 
+    /// <summary>
+    /// {_uid}/{subPath}에 데이터를 저장합니다.
+    /// </summary>
+    public async Task SaveQuestDataAsync(string subPath, QuestData data)
+    {
+        Init();
+        var root = $"{_uid}/{subPath}";
+        var payload = new Dictionary<string, object>();
+
+        // General Quest 칸이 null이 아닌 경우, 해당 General의 내용을 딕셔너리화
+        if (data?.General != null)
+        {
+            payload[$"{root}/General/ActiveQuestId"] = data.General.ActiveQuestId ?? string.Empty;
+            payload[$"{root}/General/ActiveState"] = data.General.ActiveState;
+            payload[$"{root}/General/ActiveProgress"] = data.General.ActiveProgress;
+            
+            payload[$"{root}/General/ClearedQuestCount"] = data.General.ClearedQuestCount;
+            payload[$"{root}/General/CurrentQuestStage"] = data.General.CurrentQuestStage;
+            payload[$"{root}/General/CurrentClearedStage"] = data.General.CurrentClearedStage;
+        }
+
+        // Temporary 칸이 null이 아닌 경우 딕셔너리화
+        // Temporary는 Dictionary<string (questId), TemporaryQuestData>
+        if (data?.Temporary != null)
+        {
+            foreach (var kv in data.Temporary)
+            {
+                //questId는 해당 데이터의 key 값으로 등록
+                string questId = kv.Key ?? "";
+                var t = kv.Value;
+                if (string.IsNullOrEmpty(questId) || t == null) continue;
+
+                payload[$"{root}/Temporary/{questId}/QuestType"] = t.QuestType;
+                payload[$"{root}/Temporary/{questId}/State"] = t.State;
+                payload[$"{root}/Temporary/{questId}/Progress"] = t.Progress;
+            }
+
+        }
+        
+        // 해당 payload들을 딕셔너리로 저장
+        await SaveFieldsAsync(payload);
+    }
+    
+    /// <summary>
+    /// {_uid}/{subPath}에서 데이터를 로드합니다.
+    /// </summary>
+    public async Task<QuestData> LoadQuestDatatAsync(string subPath)
+    {
+        Init();
+        var dataRef = FirebaseManager.DataReference.Child(_uid).Child(subPath);
+        var snapshot = await dataRef.GetValueAsync();
+        if (!snapshot.Exists || snapshot.Value == null) return null;
+        
+        // 반환할 QuestData 객체 생성
+        var result = new QuestData
+        {
+            General = new GeneralQuestData(),
+            Temporary = new Dictionary<string, TemporaryQuestData>()
+        };
+
+        // 반환 받은 데이터에서 General의 자식들을 받아옴
+        var g = snapshot.Child("General");
+        // General 데이터가 존재한다면 result에 해당 값을 등록
+        if (g.Exists)
+        {
+            result.General.ActiveQuestId = g.Child("ActiveQuestId").Value?.ToString() ?? string.Empty;
+            result.General.ActiveState = ToInt(g.Child("ActiveState").Value, 0);
+            result.General.ActiveProgress = ToInt(g.Child("ActiveProgress").Value, 0);
+            
+            result.General.ClearedQuestCount = ToInt(g.Child("ClearedQuestCount").Value, 0);
+            result.General.CurrentQuestStage = ToInt(g.Child("CurrentQuestStage").Value, 1) - 1;
+            result.General.CurrentClearedStage = ToInt(g.Child("CurrentClearedStage").Value, 0);
+        }
+
+        // 반환 받은 데이터에서 Temporary의 자식들을 받아옴
+        var tNode = snapshot.Child("Temporary");
+        // 해당 데이터를 result에 등록
+        if (tNode.Exists)
+        {
+            foreach (var child in tNode.Children)
+            {
+                string questId = child.Key;
+                if (string.IsNullOrEmpty(questId)) continue;
+
+                var t = new TemporaryQuestData
+                {
+                    QuestType = ToInt(child.Child("QuestType").Value, 0),
+                    State = ToInt(child.Child("State").Value, 0),
+                    Progress = ToInt(child.Child("Progress").Value, 0),
+                };
+                result.Temporary[questId] = t;
+            }
+        }
+
+        return result;
+    }
+    
+    /// <summary>
+    /// 데이터베이스에서 받은 Object 값을 int 값으로 변환해서 반환해주는 메서드
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="defaultValue"></param>
+    /// <returns></returns>
+    private static int ToInt(object value, int defaultValue)
+    {
+        if (value == null) return defaultValue;
+        return Convert.ToInt32(value);
+    }
     #endregion
     
     
