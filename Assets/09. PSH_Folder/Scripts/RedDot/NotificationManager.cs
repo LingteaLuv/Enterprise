@@ -38,14 +38,16 @@ public class NotificationManager : Singleton<NotificationManager>
     /// </summary>
     public bool CanLevelUp(PlayerCharacterData character)
     {
+        // 코드 바꾸면서 이상해짐 나중에 수정
+        return false;
         if (character == null) return false;
 
         // 레벨업 비용 계산
-        double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, character.characterLevel - 1);
-        System.Numerics.BigInteger requiredCost = (System.Numerics.BigInteger)costDouble;
+        //double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, character.characterLevel - 1);
+        //System.Numerics.BigInteger requiredCost = (System.Numerics.BigInteger)costDouble;
 
         // 현재 보유 재화와 비교
-        return CurrencyManager.Instance.GetCurrency(CurrencyType.EnhancementStone) >= requiredCost;
+       // return CurrencyManager.Instance.GetCurrency(CurrencyType.EnhancementStone) >= requiredCost;
     }
 
     /// <summary>

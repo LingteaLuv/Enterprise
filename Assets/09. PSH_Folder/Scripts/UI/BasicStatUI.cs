@@ -117,7 +117,6 @@ public class BasicStatUI : UIBase
         if (success)
         {
             RefreshUI(); // 레벨업 성공 시 UI 갱신
-            CurrencyManager.Instance.UpdateCurrencyUI();
             UpgradeType upType;
             switch (type)
             {

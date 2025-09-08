@@ -59,7 +59,8 @@ public class CurrencyManager : Singleton<CurrencyManager>
     {
         base.Awake();
 
-        await InitializeWallet(); // 처음 시작 시 지갑 초기화
+        await InitializeWallet();
+        DatabaseManager.Instance.OnChangedCreditData += UpdateCurrencyUI;
     }
 
     private async Task InitializeWallet()
@@ -78,19 +79,19 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
             await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gold", (value) =>
             {
-                Debug.Log($"Gold DB 로드 {value}");
+                Debug.LogWarning($"Gold DB 로드 {value}");
                 _initialGoldString = value.ToString();
             });
 
             await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/EnhancementStone", (value) =>
             {
-                Debug.Log($"EnhancementStone DB 로드 {value}");
+                Debug.LogWarning($"EnhancementStone DB 로드 {value}");
                 _initialEnhancementStoneString = value.ToString();
             });
 
             await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gem", (value) =>
             {
-                Debug.Log($"Gem DB 로드 {value}");
+                Debug.LogWarning($"Gem DB 로드 {value}");
                 _initialGemString = value.ToString();
             });
         }
@@ -98,6 +99,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
         AddCurrencyFromInspectorString(CurrencyType.Gold, _initialGoldString);
         AddCurrencyFromInspectorString(CurrencyType.EnhancementStone, _initialEnhancementStoneString);
         AddCurrencyFromInspectorString(CurrencyType.Gem, _initialGemString);
+        UpdateCurrencyUI();
     }
 
     private void Start()
@@ -158,14 +160,10 @@ public class CurrencyManager : Singleton<CurrencyManager>
     /// <returns>소모 성공 여부</returns>
     public bool SpendCurrency(CurrencyType type, BigInteger amount)
     {
-        if (amount <= 0) return true; // 0 또는 음수 소모는 항상 성공
-
-        BigInteger currentAmount = GetCurrency(type); // 현재 보유량 가져오기
-        Debug.Log($"[CurrencyManager] {type} 소모 시도. 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
-
-        if (currentAmount >= amount)
+        if (!CanSpendCurrency(type, amount))
         {
-            currencyWallet[type] -= amount;
+            //currencyWallet[type] -= amount;
+            DatabaseManager.Instance.SpendCurrency(type.ToString(), (int)amount);
             Debug.Log($"[CurrencyManager] {type} 소모 성공: -{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
             // TODO: 재화 UI 갱신 이벤트 호출
             return true;
@@ -175,6 +173,25 @@ public class CurrencyManager : Singleton<CurrencyManager>
             Debug.LogWarning($"[CurrencyManager] {type} 재화 부족! 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
             return false;
         }
+
+        currencyWallet[type] -= amount;
+        Debug.Log($"[CurrencyManager] {type} 소모 성공: -{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
+        // TODO: 재화 UI 갱신 이벤트 호출
+        return true;
+    }
+
+    /// <summary>
+    /// 재화가 소비 가능한지 체크하는 함수
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="amount"></param>
+    /// <returns></returns>
+    public bool CanSpendCurrency(CurrencyType type, BigInteger amount)
+    {
+        if (amount <= 0) return true; // 0 이하면 항상 가능
+
+        BigInteger currentAmount = GetCurrency(type);
+        return currentAmount >= amount;
     }
 
     public void UpdateCurrencyUI()
@@ -182,22 +199,27 @@ public class CurrencyManager : Singleton<CurrencyManager>
         string s1 = $"gold : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gold])}";
         string s2 = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
         string s3 = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gem])}";
+        Debug.LogWarning($"[CurrencyManager] UpdateCurrencyUI {s1}");
+        Debug.LogWarning($"[CurrencyManager] UpdateCurrencyUI {s2}");
+        Debug.LogWarning($"[CurrencyManager] UpdateCurrencyUI {s3}");
         OnUpdateCurrency?.Invoke(s1,s2,s3);
     }
 
     // 인스펙터에서 값이 변경될 때 호출됩니다.
-    private void OnValidate()
+    /*private void OnValidate()
     {
         // 에디터에서만 실행되도록 합니다. (빌드된 게임에서는 호출되지 않음)
         // 그리고 게임이 실행 중일 때만 currencyWallet을 직접 업데이트합니다.
         if (Application.isPlaying) // 게임이 실행 중일 때만
         {
+            Debug.Log("CurrencyManager OnValidate 진입, 골드,젬,강화석 초기값 적용");
             UpdateCurrencyFromInspectorStrings();
         }
         else // 게임이 실행 중이 아닐 때 (에디터에서만)
         {
             // 인스펙터에서 입력된 문자열을 BigInteger로 파싱하고 다시 문자열로 변환하여 정규화합니다.
             // Gold
+            Debug.Log("CurrencyManager OnValidate else문 진입, 골드,젬,강화석 초기값 인스펙터 값 적용");
             if (BigInteger.TryParse(_initialGoldString, out BigInteger parsedGold))
             {
                 _initialGoldString = parsedGold.ToString();
@@ -227,7 +249,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
                 _initialGemString = "0";
             }
         }
-    }
+    }*/
 
     // 인스펙터 문자열에서 실제 currencyWallet을 업데이트하는 헬퍼 함수
     private void UpdateCurrencyFromInspectorStrings()
@@ -235,7 +257,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
         // currencyWallet이 초기화되지 않았을 수 있으므로 체크
         if (currencyWallet == null || currencyWallet.Count == 0)
         {
-            // Debug.LogWarning("CurrencyManager: currencyWallet이 아직 초기화되지 않았습니다. OnValidate에서 업데이트를 건너뜀.");
+            Debug.LogWarning("CurrencyManager: currencyWallet이 아직 초기화되지 않았습니다. OnValidate에서 업데이트를 건너뜀.");
             return;
         }
 

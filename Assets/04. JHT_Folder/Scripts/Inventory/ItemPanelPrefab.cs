@@ -86,7 +86,14 @@ namespace JHT
             if (weaponObject == null) return;
 
             nameText.text = weaponObject.itemName;
-            levelText.text = "Lv." + weaponObject.ItemLevel;
+            if (weaponObject.itemStar >= 5)
+            {
+                levelText.text = "Lv. MAX";
+            }
+            else
+            {
+                levelText.text = "Lv." + weaponObject.ItemLevel;
+            }
 
             if (weaponObject.itemIcon != null)
             {

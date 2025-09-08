@@ -16,6 +16,14 @@ public class InfoPanel : UIBase
 
     public Action OnGameExit;
     public Action OnGameStart;
+
+    private void Awake()
+    {
+        OnGameExit += () =>
+        {
+            _linkBtn.gameObject.SetActive(true);
+        };
+    }
     
     private void Start()
     {
@@ -42,6 +50,11 @@ public class InfoPanel : UIBase
 
     private async Task SetText()
     {
+        if (!FirebaseManager.Auth.CurrentUser.IsAnonymous)
+        {
+            _linkBtn.gameObject.SetActive(false);
+        }
+        
         await DatabaseManager.Instance.LoadNicknameAsync((nickname) =>
         {
             _welcomeText.text = $"어서오세요\n{nickname} 님";

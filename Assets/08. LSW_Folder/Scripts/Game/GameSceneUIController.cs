@@ -44,6 +44,6 @@ public class GameUISceneController : UIController<GameUISceneController.GameUITy
 
     private void SetText()
     {
-        //_gold.text = $"{DatabaseManager.Instance.PlayerData.CreditData.Gold.ToString()} Gold";
+        //CurrencyManager.Instance.UpdateCurrencyUI();
     }
 }
