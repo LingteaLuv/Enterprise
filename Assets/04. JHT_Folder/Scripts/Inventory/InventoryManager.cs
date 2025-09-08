@@ -66,18 +66,29 @@ namespace JHT
         public Action<int, int> OnEquipmentEnhancementPointsChanged; // itemNum, newPoints
         public const int MAX_EQUIPMENT_LEVEL = 10;
 
+        // 장비 조각
+        public int equipmentFragments;
+
         public void AddEnhancementPointsToEquipment(int itemNum, int amount)
         {
-            if (equipmentEnhancementPoints.ContainsKey(itemNum))
+            WeaponObject weapon = weaponList.Find(x => x.itemNum == itemNum);
+            if (weapon.itemStar >= 5)
             {
-                equipmentEnhancementPoints[itemNum] += amount;
+                equipmentFragments += amount;
             }
             else
             {
-                equipmentEnhancementPoints.Add(itemNum, amount);
+                if (equipmentEnhancementPoints.ContainsKey(itemNum))
+                {
+                    equipmentEnhancementPoints[itemNum] += amount;
+                }
+                else
+                {
+                    equipmentEnhancementPoints.Add(itemNum, amount);
+                }
+                Debug.Log($"장비 ID: {itemNum} 에 강화 포인트 {amount} 추가! (총 {equipmentEnhancementPoints[itemNum]} 포인트)");
+                OnEquipmentEnhancementPointsChanged?.Invoke(itemNum, equipmentEnhancementPoints[itemNum]);
             }
-            Debug.Log($"장비 ID: {itemNum} 에 강화 포인트 {amount} 추가! (총 {equipmentEnhancementPoints[itemNum]} 포인트)");
-            OnEquipmentEnhancementPointsChanged?.Invoke(itemNum, equipmentEnhancementPoints[itemNum]);
         }
         
         public int GetEnhancementPoints(int itemNum)
@@ -171,6 +182,10 @@ namespace JHT
                 // 5성이 되면 레벨을 최대치로 설정
                 weapon.ItemLevel = MAX_EQUIPMENT_LEVEL;
                 Debug.Log($"[InventoryManager] {weapon.itemName} 최종 성급(5성) 도달! 레벨이 MAX({MAX_EQUIPMENT_LEVEL})로 고정됩니다.");
+
+                // 남은 장비 포인트가 있다면 장비 조각으로 전환
+                equipmentFragments += GetEnhancementPoints(itemNum);
+                equipmentEnhancementPoints[itemNum] = 0;
             }
             else
             {
