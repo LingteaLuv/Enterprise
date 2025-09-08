@@ -14,11 +14,9 @@ namespace JHT
         protected override void Start()
         {
             base.Start();
-
-
         }
 
-        public override void Init(JHT_BaseMonsterStat so)
+        public override void Init(JHT_MonsterDataSO so)
         {
             base.Init(so);
         }
@@ -73,7 +71,7 @@ namespace JHT
             else //원거리 일경우
             {
                 JHT_MonsterProjectile obj = JHT_MonsterSpawnManager.Instance.projectilePool.GetPooled() as JHT_MonsterProjectile;
-                obj.Init(target.position, transform.position, monsterStat.attackSpeed, monsterStat.attackPower,monsterStat);
+                obj.Init(target.position, transform.position, monsterStat.attackSpeed, monsterStat.attackPower,monsterSO);
             }
         }
 

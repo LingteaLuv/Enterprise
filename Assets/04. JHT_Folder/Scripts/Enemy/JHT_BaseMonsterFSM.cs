@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+
 namespace JHT
 {
     public abstract class JHT_BaseMonsterFSM : JHT_PooledObject
@@ -15,19 +16,20 @@ namespace JHT
 
         public LayerMask targetLayer;
         public Transform target;
+        public JHT_MonsterDataSO monsterSO;
         public JHT_BaseMonsterStat monsterStat;
-        private SpriteRenderer enemyCharacter;
-
-        // 테스트용 public -> 테이블에서 Pool진행 후 Init으로 몬스터 so지정
-        JHT_ObservableProperty<State> OnChangeState;
+        private SpriteRenderer enemySpriteRender;
 
         Animator animator;
 
+        private bool canAttack;
+
+        // 임시용
+        Coroutine attackCor;
         protected virtual void Awake()
         {
-            monsterStat = GetComponent<JHT_BaseMonsterStat>();
             animator = GetComponent<Animator>();
-            enemyCharacter = GetComponent<SpriteRenderer>();
+            enemySpriteRender = GetComponent<SpriteRenderer>();
         }
 
 
@@ -35,19 +37,20 @@ namespace JHT
         protected virtual void Start()
         {
             ChangeState(State.Idle);
-            monsterStat.Init(monsterStat.curSO);
             target = GameObject.FindWithTag("Player").transform;
+            canAttack = true;
         }
 
-        public virtual void Init(JHT_BaseMonsterStat so)
+        public virtual void Init(JHT_MonsterDataSO so)
         {
-            monsterStat = so;
-            enemyCharacter.sprite = monsterStat.characterImage;
+            monsterSO = so;
+            monsterStat.Init(monsterSO);
+
+            enemySpriteRender.sprite = monsterSO.enemyCharacter;
             if (monsterStat.monsterRarity == MonsterRarity.Elite)
             {
                 gameObject.transform.localScale *= 1.3f;
             }
-
         }
 
 
@@ -115,26 +118,67 @@ namespace JHT
         }
         protected virtual void HandleAttack()
         {
-            AnimatorChange("Attack");
+            if (canAttack)
+            {
+                AnimatorChange("Attack");
+                canAttack = false;
+            }
+            else
+            {
+                if(attackCor == null)
+                StartCoroutine(CullTime(monsterStat.attackDelay));
+            }
         }
 
         protected virtual void HandleChase()
         {
             AnimatorChange("Chase");
             transform.position = Vector3.MoveTowards(transform.position, target.position, Time.deltaTime * monsterStat.moveSpeed);
-            //Rotate();
+            Rotate();
         }
+
 
         protected virtual void HandleDie()
         {
             Die();
         }
 
+        //private async UnitaskVoid CullTime(float cullTime)
+        //{
+        //    task =>
+        //    {
+        //        if(task.IsFault || task.IsCancled)
+        //        {
+        //            canAttack = false;
+        //            return;
+        //        }
+        //        await Unitask.WatiForSeconds(cullTime);
+        //        canAttack = true;
+        //    };
+        //    
+        //}
+
+        IEnumerator CullTime(float cullTime)
+        {
+            yield return new WaitForSeconds(cullTime);
+            canAttack = true;
+
+            if (attackCor != null)
+            {
+                StopCoroutine(attackCor);
+                attackCor = null;
+            }
+            
+        }
+        
+
         private void Rotate()
         {
-            Vector2 direction = ((Vector2)target.position - (Vector2)transform.position).normalized;
-            direction.y = 0f;
-            transform.forward = direction;
+            float direction = ((Vector2)target.position - (Vector2)transform.position).magnitude;
+            if (direction < 0)
+                enemySpriteRender.flipX = false;
+            else
+                enemySpriteRender.flipX = true;
         }
 
         public void TakeDamage(float damage)
@@ -169,9 +213,5 @@ namespace JHT
             animator.SetBool(temp, true);
         }
 
-        //IEnumerator WaitForNextState(State state, float _delay)
-        //{
-        //       
-        //}
     }
 }
