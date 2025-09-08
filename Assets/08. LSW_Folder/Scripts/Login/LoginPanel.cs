@@ -29,6 +29,7 @@ public class LoginPanel : UIBase
             OnLoginCompleted?.Invoke();
             return;
         }
+        Debug.Log("구글 로그인 실패or취소");
         OnLoginFailed?.Invoke();
     }
     

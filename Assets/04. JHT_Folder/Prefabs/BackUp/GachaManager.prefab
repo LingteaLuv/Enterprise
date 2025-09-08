@@ -1,0 +1,212 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3298982110731498246
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6949003698263088544}
+  m_Layer: 0
+  m_Name: GachaManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6949003698263088544
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3298982110731498246}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 814.86646, y: 462.4955, z: -5.0401707}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4120026653819648305}
+  - {fileID: 4476140592719560683}
+  - {fileID: 3189390381099788861}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4488381343424329473
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4120026653819648305}
+  - component: {fileID: 6867737070635174573}
+  m_Layer: 0
+  m_Name: CharacterGachaManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4120026653819648305
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4488381343424329473}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6949003698263088544}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6867737070635174573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4488381343424329473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b0cf6b0913d7154c94da0f345509136, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resultPanel: {fileID: 0}
+  currencyType: 2
+  singleGachaCost: 100
+  gachaPityCounter: 0
+  characterDataFolderPath: CharacterData
+  allCharacters:
+  - {fileID: 11400000, guid: 18616c6770a9dd14180f81da49f7e8e4, type: 2}
+  - {fileID: 11400000, guid: 9005cbd79f0bc4841b0338a784535dd4, type: 2}
+  - {fileID: 11400000, guid: 1df18bb576a9c524daf3da46771f2334, type: 2}
+  - {fileID: 11400000, guid: 5718fafad8007fc478be5ff71ab7bc91, type: 2}
+  - {fileID: 11400000, guid: f4f83678a52163544a720bdc9f02e6cb, type: 2}
+  - {fileID: 11400000, guid: a0d6b1e3ab847814aa5d17f396f85bb4, type: 2}
+  - {fileID: 11400000, guid: e66a3d804acca43408b2b871e7af950a, type: 2}
+  - {fileID: 11400000, guid: 0d0135364e3c1a0468cd86474654dc3a, type: 2}
+  - {fileID: 11400000, guid: ce51f15c3bdee16429b82eff4b26a4f4, type: 2}
+  - {fileID: 11400000, guid: d0934cca3039e4f409bd451818c75262, type: 2}
+  - {fileID: 11400000, guid: de1ec51b3eb277f428b0e741ecbb8069, type: 2}
+  - {fileID: 11400000, guid: e43cf9f5e3e3028429ed806ab937ad12, type: 2}
+  - {fileID: 11400000, guid: 78e31957ac8830447982fe1d8168cf2f, type: 2}
+  - {fileID: 11400000, guid: 139ca1dfc449f5d489cccf0e75aa1222, type: 2}
+  - {fileID: 11400000, guid: c7af75d8df9680146ad75a2382cbb3cc, type: 2}
+  - {fileID: 11400000, guid: e550292a8759efc43956b82774959431, type: 2}
+  - {fileID: 11400000, guid: 1ff31b0ceff58e64794f845393318bc2, type: 2}
+  captainChance: 10
+  crewGradeChances: []
+  captainGradeChances: []
+--- !u!1 &5345994814362302387
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4476140592719560683}
+  - component: {fileID: 392490772581732341}
+  m_Layer: 0
+  m_Name: EquipGachaManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4476140592719560683
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5345994814362302387}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6949003698263088544}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &392490772581732341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5345994814362302387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 166296b4f77639841a5018162d15e677, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resultPanel: {fileID: 0}
+  currencyType: 2
+  singleGachaCost: 100
+  enhancementPointChances:
+  - points: 20
+    chance: 70
+  - points: 50
+    chance: 20
+  - points: 100
+    chance: 10
+--- !u!1 &8653820837790780156
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3189390381099788861}
+  - component: {fileID: 8630390482014836996}
+  m_Layer: 0
+  m_Name: RelicsGachaManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3189390381099788861
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8653820837790780156}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6949003698263088544}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8630390482014836996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8653820837790780156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43f6ee7d0e552734a80a253f721aa738, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  relicsCouponCost: 0
+  relicsSpecialCost: 0
+  relicsUpgradeCost: 0
+  isChoose: 0
+  curRarityTable: {fileID: 0}
+  relicsGachaTableManager: {fileID: 11400000, guid: 75ae345f729506940b8237761a3cc860, type: 2}
+  levelTable: {fileID: 11400000, guid: 34c27d4338615ca42bdaea4e76d433e3, type: 2}
+  specialTable: {fileID: 11400000, guid: e3b913bdc05ff174dbb979aa3e29f8df, type: 2}

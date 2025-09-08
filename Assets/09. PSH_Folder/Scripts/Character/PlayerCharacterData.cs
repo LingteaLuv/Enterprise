@@ -43,7 +43,30 @@ public class PlayerCharacterData
     {
         characterdata = so;
         characterLevel = 1;
-        stars = (int)so.rarity; // CharacterData의 rarity는 Enum이므로 int로 캐스팅
+        stars = 1; // 기본 등급 1성으로 설정
+
+        // 아이콘
+        crewRoleIcon = GetIcon(so.crewRole);
+        factionIcon = GetIcon(so.faction);
+
+        characterStats = new Dictionary<Stat, float>();
+        foreach (var stat in so.baseStats)
+        {
+            characterStats[stat.statName] = stat.value;
+        }
+
+        // 장비 딕셔너리 초기화
+        equippedItems = new Dictionary<EquipCategory, WeaponObject>();
+
+        // 최초 스탯 계산. BasicStatManager가 준비되기 전에 호출될 수 있으므로 battlePower만 초기화합니다.
+        battlePower = 0;
+    }
+
+    public PlayerCharacterData(CharacterData so, GachaGrade grade)
+    {
+        characterdata = so;
+        characterLevel = 1;
+        stars = (int)grade; // 가챠로 뽑은 등급 설정
 
         // 아이콘
         crewRoleIcon = GetIcon(so.crewRole);
@@ -106,6 +129,17 @@ public class PlayerCharacterData
             }
         }
 
+        RelicsObject[] relic = InventoryManager.Instance.relicsList.ToArray();
+
+        foreach (var r in relic)
+        {
+            if (r.itemPowerType == PowerType.Attack)
+                finalStats[(Stat)r.itemPowerType] += r.itemPower;
+            else
+                finalStats[(Stat)r.itemPowerType] *= r.itemPower;
+        }
+
+
         // --- 전투력 계산 시작 ---
         battlePower = (BigInteger)StatCalculator.ComputeFinalPower(this);
         // --- 전투력 계산 끝 ---
@@ -118,15 +152,16 @@ public class PlayerCharacterData
         }
     }
 
+
     /// <summary>
     /// 다음 레벨업에 필요한 비용을 계산하여 반환합니다.
     /// </summary>
-    public BigInteger GetNextLevelUpCost()
+    /*public BigInteger GetNextLevelUpCost()
     {
         // PlayerDataManager의 설정값을 가져와 현재 레벨에 맞는 비용을 계산합니다.
         double costDouble = (double)PlayerDataManager.Instance.baseLevelUpCost * System.Math.Pow(PlayerDataManager.Instance.levelUpCostIncreaseRatio, this.characterLevel - 1);
         return (BigInteger)costDouble;
-    }
+    }*/
 
     /// <summary>
     /// 캐릭터 직업, 속성에 따라 아이콘을 업데이트합니다.

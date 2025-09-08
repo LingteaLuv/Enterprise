@@ -32,7 +32,8 @@ namespace JHT
             {
                 curWeapon.OnChangeLevel -= OnWeaponDataChanged;
                 curWeapon.OnChangeStar -= OnWeaponDataChanged;
-                InventoryManager.Instance.OnEquipmentEnhancementPointsChanged -= OnEnhancementPointsChanged;
+                if(InventoryManager.Instance != null)
+                    InventoryManager.Instance.OnEquipmentEnhancementPointsChanged -= OnEnhancementPointsChanged;
             }
         }
 
@@ -76,6 +77,7 @@ namespace JHT
         {
             if (curWeapon == null) return;
             InventoryManager.Instance.StarUpEquipment(curWeapon.itemNum);
+            UpdateUI();
         }
 
         private void OnWeaponDataChanged(int value)
@@ -95,14 +97,22 @@ namespace JHT
         private void UpdateUI()
         {
             if (curWeapon == null) return;
+            
+            int requiredPoints = InventoryManager.Instance.GetRequiredPointsForLevelUp(curWeapon);
 
             // 기본 정보 업데이트
             weaponImage.sprite = curWeapon.itemIcon;
             nameText.text = curWeapon.itemName;
             pointText.text = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum).ToString();
-            // 나중에 강화포인트 관련 확정되면 추가
-            needPointText.text = "10";
-            levelText.text = $"Lv. {curWeapon.ItemLevel}";
+            needPointText.text = requiredPoints.ToString();
+            if (curWeapon.itemStar >= 5)
+            {
+                levelText.text = "LV. MAX";
+            }
+            else
+            {
+                levelText.text = $"Lv. {curWeapon.ItemLevel}";
+            }
             switch (curWeapon.statType)
             {
                 case Stat.Attack:
@@ -132,12 +142,12 @@ namespace JHT
 
             // 성급업 가능 여부 먼저 계산
             bool isMaxStars = curWeapon.ItemStar >= 5;
-            bool needsStarUp = curWeapon.ItemLevel > 0 && curWeapon.ItemLevel % 10 == 0 && curWeapon.ItemStar < (curWeapon.ItemLevel / 10);
+            bool needsStarUp = curWeapon.ItemLevel == 10;
             bool canStarUp = !isMaxStars && needsStarUp;
             starUpBtn.interactable = canStarUp;
 
             // 레벨업 버튼 활성화 로직 (성급업이 가능하지 않을 때만 활성화)
-            bool hasEnoughPoints = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum) >= 10;
+            bool hasEnoughPoints = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum) >= requiredPoints;
             bool isMaxLevel = curWeapon.ItemLevel >= 50;
             // levelUpBtn.interactable = hasEnoughPoints && !isMaxLevel && !canStarUp;
         }

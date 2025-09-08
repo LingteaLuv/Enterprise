@@ -8,15 +8,17 @@ using UnityEngine.UI;
 
 public class ChoosePopUp : MonoBehaviour
 {
+    [SerializeField] private GameObject relicsGachaListPanel;
     [SerializeField] private Button item1Button;
     [SerializeField] private Button item2Button;
     [SerializeField] private Button selectButton;
 
     [Header("Item1 information")]
+    [SerializeField] private GameObject item1Panel;
     [SerializeField] private Image item1;
     [SerializeField] private Image item1RarityImg;
     [SerializeField] private Image item1RarityColor;
-    [SerializeField] private GameObject item1SelectOutLine;
+    [SerializeField] private Image item1SelectOutLine;
     [SerializeField] private TextMeshProUGUI item1RarityText;
     [SerializeField] private TextMeshProUGUI item1PowerTypeText;
     [SerializeField] private TextMeshProUGUI item1PowerText;
@@ -27,7 +29,7 @@ public class ChoosePopUp : MonoBehaviour
     [SerializeField] private Image item2;
     [SerializeField] private Image item2RarityImg;
     [SerializeField] private Image item2RarityColor;
-    [SerializeField] private GameObject item2SelectOutLine;
+    [SerializeField] private Image item2SelectOutLine;
     [SerializeField] private TextMeshProUGUI item2RarityText;
     [SerializeField] private TextMeshProUGUI item2PowerTypeText;
     [SerializeField] private TextMeshProUGUI item2PowerText;
@@ -47,30 +49,34 @@ public class ChoosePopUp : MonoBehaviour
     public bool SelectMyItem { get { return selectMyItem; } set { selectMyItem = value; OnSelect?.Invoke(selectMyItem); } }
     private event Action<bool> OnSelect;
 
-    //JHT_ObjectPool pool;
-    //
-    //private void Start()
-    //{
-    //    pool = new JHT_ObjectPool()
-    //}
-
+    private RectTransform choosePanelScale;
+    
+    
     public void Init(RelicsObject obj1, RelicsObject obj2)
     {
-        relicsObj1 = obj1;
+        if (obj1 != null)
+        {
+            item1Panel.SetActive(true);
+            relicsObj1 = obj1;
+            Item1Setting();
+            item1Button.onClick.AddListener(ClickButton1);
+        }
+        else
+        {
+            item1Panel.SetActive(false);
+        }
+
         relicsObj2 = obj2;
-
-        Item1Setting();
         Item2Setting();
-
-        item1Button.onClick.AddListener(ClickButton1);
         item2Button.onClick.AddListener(ClickButton2);
-        selectButton.onClick.AddListener(SelectItem);
 
+        selectButton.onClick.AddListener(SelectItem);
         OnSelect += ChooseItem;
 
         CompareObj();
         selectButton.interactable = false;
     }
+
 
     public void OnDisable()
     {
@@ -137,8 +143,19 @@ public class ChoosePopUp : MonoBehaviour
 
     private void SelectItem()
     {
-        InventoryManager.Instance.OnChangeItem?.Invoke(relicsObj1, relicsObj2, selectMyItem);
-        gameObject.SetActive(false);
+        UIManager.Instance.ShowConfirm("정말 이 아이템을 선택 하시겠습니까?", () =>
+        {
+            if(relicsObj1 == null)
+                InventoryManager.Instance.OnChageAddItem?.Invoke(relicsObj2);
+            else
+                InventoryManager.Instance.OnChangeItem?.Invoke(relicsObj1, relicsObj2, selectMyItem);
+
+            gameObject.SetActive(false);
+            relicsGachaListPanel.SetActive(false);
+
+            relicsObj1 = null;
+            relicsObj2 = null;
+        });
     }
 
     private Color SetItemRarityColor(RelicsObject obj)
@@ -163,6 +180,13 @@ public class ChoosePopUp : MonoBehaviour
 
     private void CompareObj()
     {
+
+        if (relicsObj1 == null)
+        {
+            compareText.text = "";
+            return;
+        }
+
         compare = item1Power - item2Power;
         if (compare > 0)
         {
@@ -180,12 +204,26 @@ public class ChoosePopUp : MonoBehaviour
             downImage.SetActive(false);
         }
 
-        compareText.text = $"{Mathf.Abs(compare)}";
+        if (compare == 0)
+            compareText.text = "";
+        else
+            compareText.text = $"{Mathf.Abs(compare)}";
     }
 
     private void ChooseItem(bool value)
     {
-        item1SelectOutLine.SetActive(value);
-        item2SelectOutLine.SetActive(!value);
+        if (relicsObj1 == null)
+            return;
+
+        if (value)
+        {
+            item1SelectOutLine.color = Color.yellow;
+            item2SelectOutLine.color = Color.white;
+        }
+        else
+        {
+            item2SelectOutLine.color = Color.yellow;
+            item1SelectOutLine.color = Color.white;
+        }
     }
 }

@@ -9,12 +9,16 @@ public class RelicsCoupon : MonoBehaviour
 
     private void Start()
     {
-        relicsCouponCountText.text = InventoryManager.Instance.relicsCoupon.ToString();
         InventoryManager.Instance.OnChangeRelicsCoupon += ChangeValue;
+        relicsCouponCountText.text = InventoryManager.Instance.RelicsCoupon.ToString();
+    }
+    private void OnEnable()
+    {
+        InventoryManager.Instance.OnChangeRelicsCoupon -= ChangeValue;
     }
 
     private void ChangeValue(int value)
     {
-        relicsCouponCountText.text = InventoryManager.Instance.relicsCoupon.ToString();
+        relicsCouponCountText.text = InventoryManager.Instance.RelicsCoupon.ToString();
     }
 }

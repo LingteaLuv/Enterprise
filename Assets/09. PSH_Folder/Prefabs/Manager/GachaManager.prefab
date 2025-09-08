@@ -31,7 +31,7 @@ Transform:
   m_Children:
   - {fileID: 237784221529679507}
   - {fileID: 7948925332161881863}
-  - {fileID: 2879101221075443099}
+  - {fileID: 6917339666522455013}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7429430498461584426
@@ -79,36 +79,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   resultPanel: {fileID: 0}
-  rarityChances:
-  - rarity: 3
-    chance: 10
-  - rarity: 2
-    chance: 20
-  - rarity: 1
-    chance: 70
   currencyType: 2
   singleGachaCost: 100
   gachaPityCounter: 0
   characterDataFolderPath: CharacterData
-  allCharacters:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  captainProbabilityMultiplier: 0.5
+  allCharacters: []
+  captainChance: 0.1
+  crewGradeChances:
+  - grade: 1
+    chance: 84
+  - grade: 2
+    chance: 15
+  - grade: 3
+    chance: 0.9
+  captainGradeChances:
+  - grade: 1
+    chance: 0.06
+  - grade: 2
+    chance: 0.03
+  - grade: 3
+    chance: 0.01
 --- !u!1 &8251530117622775441
 GameObject:
   m_ObjectHideFlags: 0
@@ -154,9 +144,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   resultPanel: {fileID: 0}
-  rarityChances:
-  - rarity: 1
-    chance: 100
   currencyType: 2
   singleGachaCost: 100
   enhancementPointChances:
@@ -166,65 +153,55 @@ MonoBehaviour:
     chance: 20
   - points: 100
     chance: 10
---- !u!1001 &7062169123919544444
-PrefabInstance:
+--- !u!1 &8322708805565011832
+GameObject:
   m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 6856039339350220696}
-    m_Modifications:
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8007042476270690203, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-      propertyPath: m_Name
-      value: RelicsGachaManager
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
---- !u!4 &2879101221075443099 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5041008100772716007, guid: 337f8c36024ce684c83f8d4701f1b8a5, type: 3}
-  m_PrefabInstance: {fileID: 7062169123919544444}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6917339666522455013}
+  - component: {fileID: 2280098489997361636}
+  m_Layer: 0
+  m_Name: RelicsGachaManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6917339666522455013
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8322708805565011832}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6856039339350220696}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2280098489997361636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8322708805565011832}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43f6ee7d0e552734a80a253f721aa738, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  relicsCouponCost: 0
+  relicsSpecialCost: 0
+  relicsUpgradeCost: 0
+  isChoose: 0
+  curRarityTable: {fileID: 0}
+  relicsGachaTableManager: {fileID: 11400000, guid: 75ae345f729506940b8237761a3cc860, type: 2}
+  levelTable: {fileID: 11400000, guid: 34c27d4338615ca42bdaea4e76d433e3, type: 2}
+  specialTable: {fileID: 11400000, guid: e3b913bdc05ff174dbb979aa3e29f8df, type: 2}

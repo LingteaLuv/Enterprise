@@ -13,7 +13,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     public Image characterImage;
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI soulFragmentsText; // 캐릭터별 영혼 조각
-    public TextMeshProUGUI crewRoleFactionText;
+    public TextMeshProUGUI flavorText;
 
     [Header("닫기 버튼")]
     public Button closeButton;
@@ -26,6 +26,10 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     [Header("성급 업그레이드 UI")]
     public TextMeshProUGUI starUpgradeCostText; // 성급 업그레이드 비용 표시
     public Button starUpgradeButton; // 성급 업그레이드 버튼
+
+    [Header("직책 소속 아이콘")]
+    public Image crewRoleIcon;
+    public Image factionIcon;
 
     [Header("스탯 표시")]
     public TextMeshProUGUI hpDisplay; // HP LvX Value 형식
@@ -50,6 +54,8 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     [SerializeField] private Button[] openEquipmentListButtons = new Button[3];
     [SerializeField] private Image[] equippedWeaponIcons = new Image[3];
     [SerializeField] private Sprite emptyWeaponSlotIcon; // 장비가 없을 때 표시할 기본 아이콘
+    [SerializeField] private Button autoEquipButton; // 자동 장착 버튼
+    [SerializeField] private Button unequipAllButton; // 전체 해제 버튼
 
     [Header("스와이프 설정")]
     public float swipeThreshold = 50f; // 스와이프로 인식할 최소 픽셀 거리
@@ -99,6 +105,40 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             openEquipmentListButtons[1].onClick.AddListener(() => OnOpenEquipmentList(EquipCategory.Shield));
             openEquipmentListButtons[2].onClick.AddListener(() => OnOpenEquipmentList(EquipCategory.Armor));
         }
+
+        // 자동 장착 버튼 이벤트 연결
+        if (autoEquipButton != null)
+        {
+            autoEquipButton.onClick.AddListener(OnAutoEquip);
+        }
+
+        // 전체 해제 버튼 이벤트 연결
+        if (unequipAllButton != null)
+        {
+            unequipAllButton.onClick.AddListener(OnUnequipAll);
+        }
+    }
+
+    private void OnAutoEquip()
+    {
+        if (currentCharacterData == null)
+        {
+            Debug.LogWarning("자동 장착을 진행할 캐릭터가 없습니다.");
+            return;
+        }
+
+        PlayerDataManager.Instance.AutoEquipBestItems(currentCharacterData);
+    }
+
+    private void OnUnequipAll()
+    {
+        if (currentCharacterData == null)
+        {
+            Debug.LogWarning("장비 해제를 진행할 캐릭터가 없습니다.");
+            return;
+        }
+
+        PlayerDataManager.Instance.UnequipAllItems(currentCharacterData);
     }
 
     /// <summary>
@@ -133,14 +173,22 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             characterNameText.text = $"{currentCharacterData.characterdata.characterName}";
             characterImage.sprite = currentCharacterData.characterdata.characterSprite;
-            levelText.text = $"LV {currentCharacterData.characterLevel}";
-            crewRoleFactionText.text = $"{currentCharacterData.characterdata.crewRole} {currentCharacterData.characterdata.faction}";
+            if (currentCharacterData.characterLevel == PlayerDataManager.MAX_CHARACTER_LEVEL)
+            {
+                levelText.text = $"LV MAX";
+            }
+            else
+            {
+                levelText.text = $"LV {currentCharacterData.characterLevel}";
+            }
+            flavorText.text = currentCharacterData.characterdata.flavorText;
 
             UpdateSoulFragmentsUI();
             UpdateLevelUpUI();
             UpdateStarUpgradeUI();
             UpdateCharacterStatsDisplay();
             UpdateEquipmentIcons(); // 장비 아이콘 업데이트 호출
+            UpdateRoleFactionIcon(); // 직책, 소속 아이콘 업데이트
         }
         else
         {
@@ -205,14 +253,18 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (currentCharacterData == null || levelUpCostText == null || levelUpButton == null) return;
 
         // PlayerCharacterData로부터 직접 비용을 가져옵니다. 계산 로직이 UI에서 분리되었습니다.
-        System.Numerics.BigInteger cost = currentCharacterData.GetNextLevelUpCost();
+        // System.Numerics.BigInteger cost = currentCharacterData.GetNextLevelUpCost();
 
-        CurrencyType costType = CurrencyType.EnhancementStone;
+        System.Numerics.BigInteger goldCost = PlayerDataManager.Instance.fixedLevelUpGoldCost;
+        System.Numerics.BigInteger stoneCost = PlayerDataManager.Instance.fixedLevelUpStoneCost;
 
-        levelUpCostText.text = $"비용 : {DataUtility.FormatNumber(cost)} 강화석";
+        levelUpCostText.text = $"비용 : {goldCost}골드 {stoneCost}강화석";
 
-        // 재화가 충분한지 확인하여 버튼 활성화/비활성화
-        if (CurrencyManager.Instance != null && CurrencyManager.Instance.GetCurrency(costType) >= cost)
+        // 재화가 충분한지 확인, 만렙인지 확인하여 버튼 활성화/비활성화
+        if (CurrencyManager.Instance != null
+            && CurrencyManager.Instance.GetCurrency(CurrencyType.EnhancementStone) >= stoneCost
+            && CurrencyManager.Instance.GetCurrency(CurrencyType.Gold) >= goldCost
+            && currentCharacterData.characterLevel < PlayerDataManager.MAX_CHARACTER_LEVEL)
         {
             levelUpButton.interactable = true;
         }
@@ -285,9 +337,9 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Attack])}";
         hpDisplay.text = $"체력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Health])}";
         defDisplay.text = $"방어력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Defense])}";
-        criChanDisplay.text = $"치명타 확률 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritChance])}%";
-        criDmgDisplay.text = $"치명타 피해 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritDamage])}%";
-        atkSpdDisplay.text = $"공격 속도 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.AttackSpeed])}";
+        criChanDisplay.text = $"치확 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritChance])}%";
+        criDmgDisplay.text = $"치피 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritDamage])}%";
+        atkSpdDisplay.text = $"공속 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.AttackSpeed])}";
 
         battlePoint.text = $"전투력 : {DataUtility.FormatNumber(currentCharacterData.battlePower)}";
     }
@@ -374,6 +426,14 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         }
     }
 
+    private void UpdateRoleFactionIcon()
+    {
+        if (currentCharacterData == null) return;
+
+        crewRoleIcon.sprite = currentCharacterData.crewRoleIcon;
+        factionIcon.sprite = currentCharacterData.factionIcon;
+    }
+
     private void UpdateEquipmentIcons()
     {
         if (currentCharacterData == null) return;
@@ -396,6 +456,8 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             equippedWeaponIcons[iconIndex].sprite = emptyWeaponSlotIcon;
         }
     }
+
+
 
     #region 스와이프 처리
     public void OnBeginDrag(PointerEventData eventData)

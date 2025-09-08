@@ -45,22 +45,23 @@ public class RelicsProbabilityItemPanel : MonoBehaviour
         upgradeGauge = manager.relicsGachaTableManager.relicsGachaTables[curTableLevel]._items[curIndex].weight -
                 manager.relicsGachaTableManager.relicsGachaTables[curTableLevel + 1]._items[curIndex].weight;
 
-        if (upgradeGauge < 0)
+        if (upgradeGauge > 0)
         {
             difLowImage.gameObject.SetActive(true);
             difUpImage.gameObject.SetActive(false);
-            weightDif.text = Mathf.Abs(upgradeGauge).ToString();
+            weightDif.text = upgradeGauge.ToString();
         }
-        else if (upgradeGauge > 0)
+        else if (upgradeGauge < 0)
         {
             difLowImage.gameObject.SetActive(false);
             difUpImage.gameObject.SetActive(true);
-            weightDif.text = upgradeGauge.ToString();
+            weightDif.text = Mathf.Abs(upgradeGauge).ToString();
         }
         else
         {
             difLowImage.gameObject.SetActive(false);
             difUpImage.gameObject.SetActive(false);
+            weightDif.text = "";
         }
     }
 

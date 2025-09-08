@@ -9,6 +9,7 @@ public class CharacterPanelUI : MonoBehaviour
     [Header("기본 UI 요소")]
     public Image characterImage;
     public TextMeshProUGUI levelText;
+    public TextMeshProUGUI nameText;
     public Image[] starImages; // 별 이미지 배열
     public Button button; // 캐릭터 인포 여는 버튼
 
@@ -51,6 +52,7 @@ public class CharacterPanelUI : MonoBehaviour
         // 캐릭터 기본 정보 설정
         characterImage.sprite = data.characterdata.characterSprite;
         levelText.text = $"Lv.{data.characterLevel}";
+        nameText.text = data.characterdata.characterName;
 
         // 성급(별) UI 업데이트
         UpdateStarUI(data.stars);
@@ -132,14 +134,25 @@ public class CharacterPanelUI : MonoBehaviour
     /// </summary>
     public void UpdateFormationVisuals()
     {
-        if (formationIndicator != null)
+        if (formationIndicator == null || ownerScrollView == null) return;
+
+        bool isInFormation;
+        // 편성 모드인지 아닌지에 따라 다른 데이터를 확인합니다.
+        if (ownerScrollView.isFormationMode)
         {
-            bool isInFormation = PlayerDataManager.Instance.IsInFormation(currentPlayerCharData);
-            formationIndicator.SetActive(isInFormation);
+            // 편성 모드일 때: FormationManager의 임시 편성 정보를 확인
+            isInFormation = FormationManager.Instance.IsInTempFormation(currentPlayerCharData);
         }
+        else
+        {
+            // 일반 모드일 때: PlayerDataManager의 실제 저장된 편성 정보를 확인
+            isInFormation = PlayerDataManager.Instance.IsInFormation(currentPlayerCharData);
+        }
+
+        formationIndicator.SetActive(isInFormation);
     }
 
-    
+
     /// <summary>
     /// 패널 버튼 클릭 시 호출됩니다.
     /// </summary>

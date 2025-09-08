@@ -86,7 +86,14 @@ namespace JHT
             if (weaponObject == null) return;
 
             nameText.text = weaponObject.itemName;
-            levelText.text = "Lv." + weaponObject.ItemLevel;
+            if (weaponObject.itemStar >= 5)
+            {
+                levelText.text = "Lv. MAX";
+            }
+            else
+            {
+                levelText.text = "Lv." + weaponObject.ItemLevel;
+            }
 
             if (weaponObject.itemIcon != null)
             {
@@ -139,11 +146,6 @@ namespace JHT
         }
 
 
-        #region Relics
-
-        #endregion
-
-
         #region Weapon
 
         private void SetWeapon(WeaponObject item)
@@ -174,6 +176,9 @@ namespace JHT
         #endregion
         private void HandleSelected(ItemObject clicked)
         {
+            if (clicked == null || clicked is RelicsObject)
+                return;
+
             WeaponObject obj = (WeaponObject)itemObject;
             bool value = ReferenceEquals(clicked, obj)
                         || (clicked != null && clicked.itemNum == obj.itemNum);

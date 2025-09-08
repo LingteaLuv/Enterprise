@@ -16,33 +16,28 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public const int MAX_FORMATION_SIZE = 5;
     public BigInteger teamBattlePower;
 
-    [Header("캐릭터 레벨업 비용 설정")]
-    public BigInteger baseLevelUpCost = 1000; // 기본 레벨업 비용
-    public double levelUpCostIncreaseRatio = 1.07; // 레벨업 비용 증가율
+    [Header("캐릭터 레벨업 설정")]
+    public const int MAX_CHARACTER_LEVEL = 10;
+    public BigInteger fixedLevelUpGoldCost = 1000;
+    public BigInteger fixedLevelUpStoneCost = 20;
 
-    // 보유 캐릭터 ID, 데이터
     public Dictionary<int, PlayerCharacterData> ownedCharacters = new Dictionary<int, PlayerCharacterData>();
-    // 캐릭터별 영혼조각 캐릭터ID, 개수
     public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
-    // 성급업에 필요한 영혼조각 InitializeUpgradeCosts에 있음
     private Dictionary<int, int> starUpgradeCosts;
-    // 성급업 비용 상수
     private const int STAR_UPGRADE_COST_1 = 20;
     private const int STAR_UPGRADE_COST_2 = 40;
     private const int STAR_UPGRADE_COST_3 = 120;
     private const int STAR_UPGRADE_COST_4 = 180;
-    // 중복 획득시 영혼조각
     private const int FRAGMENT_GAIN_1 = 10;
     private const int FRAGMENT_GAIN_2 = 40;
     private const int FRAGMENT_GAIN_3 = 300;
-    // 가챠 횟수
     public int GachaPityCounter { get; set; }
-
 
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
     public event System.Action OnOwnedCharactersChanged;
+    public event System.Action OnFormationSaved;
 
-    private bool isBatchUpdating = false; // 일괄 업데이트 상태 플래그
+    private bool isBatchUpdating = false;// 일괄 작업할 때 키는 불값
 
     protected override void Awake()
     {
@@ -50,10 +45,10 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
         formation = new Dictionary<CrewRole, List<PlayerCharacterData>>
         {
-            { CrewRole.Deckhand, new List<PlayerCharacterData>() }, // 전
-            { CrewRole.Sailor, new List<PlayerCharacterData>() },   // 중
-            { CrewRole.Cook, new List<PlayerCharacterData>() },     // 후
-            { CrewRole.Captain, new List<PlayerCharacterData>() }   // 최후
+            { CrewRole.Deckhand, new List<PlayerCharacterData>() },
+            { CrewRole.Sailor, new List<PlayerCharacterData>() },
+            { CrewRole.Cook, new List<PlayerCharacterData>() },
+            { CrewRole.Captain, new List<PlayerCharacterData>() }
         };
 
         InitializeUpgradeCosts();
@@ -61,13 +56,12 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     private void Start()
     {
-        // 게임 시작 시 보유 캐릭터가 없으면 기본 캐릭터 지급
         if (ownedCharacters.Count == 0)
         {
             GrantStartingCharacters();
-            // 기본 캐릭터 지급 후, 자동으로 팀을 편성합니다.
-            Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
+            // 게임 시작 시, PDM의 데이터를 직접 수정하는 자동 편성을 호출합니다.
             AutoFormTeam();
+            Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
         }
 
         StartCoroutine(InitialCalculationCoroutine());
@@ -130,26 +124,74 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         if (ownedCharacters.TryGetValue(characterdata.characterID, out PlayerCharacterData existingCharData))
         {
-            int fragmentsGained = 0;
-            switch (characterdata.rarity)
-            {
-                case Rarity.C: fragmentsGained = FRAGMENT_GAIN_1; break;
-                case Rarity.B: fragmentsGained = FRAGMENT_GAIN_2; break;
-                case Rarity.A: fragmentsGained = FRAGMENT_GAIN_3; break;
-            }
+            int fragmentsGained = FRAGMENT_GAIN_1;
             AddSoulFragments(characterdata.characterID, fragmentsGained);
             Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
-            OnOwnedCharactersChanged?.Invoke(); // 캐릭터 목록 변경(조각 획득) 이벤트 발생
+            OnOwnedCharactersChanged?.Invoke();
             return existingCharData;
         }
         else
         {
             PlayerCharacterData newCharData = new PlayerCharacterData(characterdata);
             ownedCharacters.Add(characterdata.characterID, newCharData);
-            Debug.Log($"[신규] {characterdata.characterName}({characterdata.rarity}성) 획득!");
-            // 새로 추가된 캐릭터의 스탯을 즉시 계산
+            Debug.Log($"[신규] {characterdata.characterName}({newCharData.stars}성) 획득!");
             newCharData.RecaculateStats();
-            OnOwnedCharactersChanged?.Invoke(); // 캐릭터 목록 변경(신규 획득) 이벤트 발생
+            OnOwnedCharactersChanged?.Invoke();
+            return newCharData;
+        }
+    }
+
+    public PlayerCharacterData AddCharacter(CharacterData characterdata, GachaGrade grade)
+    {
+        if (ownedCharacters.TryGetValue(characterdata.characterID, out PlayerCharacterData existingCharData))
+        {
+            int newStarLevel = (int)grade;
+
+            if (newStarLevel > existingCharData.stars)
+            {
+                int oldStarLevel = existingCharData.stars;
+                Debug.Log($"<color=cyan>[승급!] {existingCharData.characterdata.characterName}의 등급이 {oldStarLevel}성에서 {newStarLevel}성으로 올랐습니다!</color>");
+                existingCharData.stars = newStarLevel;
+                existingCharData.RecaculateStats();
+                OnCharacterDataUpdated?.Invoke(existingCharData);
+
+                int fragmentsGained = 0;
+                switch (oldStarLevel)
+                {
+                    case 1: fragmentsGained = FRAGMENT_GAIN_1; break;
+                    case 2: fragmentsGained = FRAGMENT_GAIN_2; break;
+                    case 3: fragmentsGained = FRAGMENT_GAIN_3; break;
+                }
+
+                if (fragmentsGained > 0)
+                {
+                    AddSoulFragments(characterdata.characterID, fragmentsGained);
+                    Debug.Log($"기존 등급({oldStarLevel}성)에 대한 보상으로 영혼 조각 +{fragmentsGained}개가 지급되었습니다.");
+                }
+            }
+            else
+            {
+                int fragmentsGained = 0;
+                switch (grade)
+                {
+                    case GachaGrade.OneStar: fragmentsGained = FRAGMENT_GAIN_1; break;
+                    case GachaGrade.TwoStar: fragmentsGained = FRAGMENT_GAIN_2; break;
+                    case GachaGrade.ThreeStar: fragmentsGained = FRAGMENT_GAIN_3; break;
+                }
+                AddSoulFragments(characterdata.characterID, fragmentsGained);
+                Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
+            }
+
+            OnOwnedCharactersChanged?.Invoke();
+            return existingCharData;
+        }
+        else
+        {
+            PlayerCharacterData newCharData = new PlayerCharacterData(characterdata, grade);
+            ownedCharacters.Add(characterdata.characterID, newCharData);
+            Debug.Log($"[신규] {characterdata.characterName}({newCharData.stars}성) 획득!");
+            newCharData.RecaculateStats();
+            OnOwnedCharactersChanged?.Invoke();
             return newCharData;
         }
     }
@@ -182,7 +224,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         playerCharData.stars++;
         Debug.Log($"{playerCharData.characterdata.characterName}이(가) {playerCharData.stars}성으로 승급했습니다!");
         playerCharData.RecaculateStats();
-        OnCharacterDataUpdated?.Invoke(playerCharData); // 데이터 변경 이벤트 발생
+        OnCharacterDataUpdated?.Invoke(playerCharData);
         return true;
     }
 
@@ -193,80 +235,29 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     public bool TryLevelUpCharacter(PlayerCharacterData character)
     {
-        BigInteger levelUpCost = (BigInteger)((double)baseLevelUpCost * System.Math.Pow(levelUpCostIncreaseRatio, character.characterLevel - 1));
-        if (!CurrencyManager.Instance.SpendCurrency(CurrencyType.EnhancementStone, levelUpCost)) { Debug.LogWarning("캐릭터 레벨업 실패: 재화 부족"); return false; }
+        if (character.characterLevel >= MAX_CHARACTER_LEVEL)
+        {
+            Debug.LogWarning($"{character.characterdata.characterName}은(는) 이미 최대 레벨({MAX_CHARACTER_LEVEL})입니다.");
+            return false;
+        }
+
+        if (!CurrencyManager.Instance.CanSpendCurrency(CurrencyType.Gold, fixedLevelUpGoldCost)
+         || !CurrencyManager.Instance.CanSpendCurrency(CurrencyType.EnhancementStone, fixedLevelUpStoneCost))
+        {
+            Debug.LogWarning("캐릭터 레벨업 실패: 재화 부족");
+            return false;
+        }
+
+        CurrencyManager.Instance.SpendCurrency(CurrencyType.Gold, fixedLevelUpGoldCost);
+        CurrencyManager.Instance.SpendCurrency(CurrencyType.EnhancementStone, fixedLevelUpStoneCost);
+
         character.characterLevel++;
         Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.characterLevel})");
         QuestSignalManager.Instance.LevelUp(ItemType.Character, 1);
         character.RecaculateStats();
-        OnCharacterDataUpdated?.Invoke(character); // 데이터 변경 이벤트 발생
+        OnCharacterDataUpdated?.Invoke(character);
         CurrencyManager.Instance.UpdateCurrencyUI();
         return true;
-    }
-
-    public int GetFormationCharacterCount()
-    {
-        int count = 0;
-        foreach (var list in formation.Values)
-        {
-            count += list.Count;
-        }
-        return count;
-    }
-
-    public int AddCharacterToFormation(PlayerCharacterData characterData)
-    {
-        CrewRole position = characterData.characterdata.crewRole;
-
-        // 편성이 가득 찼는지 확인
-        if (GetFormationCharacterCount() >= MAX_FORMATION_SIZE)
-        {
-            Debug.Log("편성이 가득 찼습니다.");
-            return 2;
-        }
-
-        // 캐릭터가 이미 다른 곳에 편성되어 있는지 확인
-        if (IsInFormation(characterData))
-        {
-            Debug.Log($"{characterData.characterdata.characterName}은(는) 이미 편성에 포함되어 있습니다.");
-            return 1;
-        }
-
-        // 포지션별 규칙 확인
-        List<PlayerCharacterData> positionList = formation[position];
-        if (position == CrewRole.Captain && positionList.Count >= 1)
-        {
-            Debug.Log("최후(Captain) 포지션에는 한 명만 배치할 수 있습니다.");
-            return 3; // 포지션 가득 참
-        }
-        if (position != CrewRole.Captain && positionList.Count >= 2)
-        {
-            Debug.Log($"{position} 포지션에는 두 명까지만 배치할 수 있습니다.");
-            return 4;
-        }
-
-        // 캐릭터 추가
-        positionList.Add(characterData);
-        Debug.Log($"[PDM] {characterData.characterdata.characterName}을(를) {position} 포지션에 추가했습니다.");
-        RecalculateTeamBattlePower();
-        OnOwnedCharactersChanged?.Invoke(); // 이벤트 발생
-        Debug.Log("[PDM] OnOwnedCharactersChanged 이벤트 발생!");
-        return 0; // 성공
-    }
-
-    public bool RemoveCharacterFromFormation(PlayerCharacterData characterData)
-    {
-        CrewRole position = characterData.characterdata.crewRole;
-        if (formation.ContainsKey(position) && formation[position].Remove(characterData))
-        {
-            Debug.Log($"{characterData.characterdata.characterName}을(를) {position} 포지션에서 제거했습니다.");
-            RecalculateTeamBattlePower();
-            OnOwnedCharactersChanged?.Invoke(); // 이벤트 발생
-            Debug.Log("[PDM] OnOwnedCharactersChanged 이벤트 발생!");
-            return true;
-        }
-        Debug.LogWarning($"{characterData.characterdata.characterName}을(를) 편성에서 찾을 수 없습니다.");
-        return false;
     }
 
     public bool IsInFormation(PlayerCharacterData characterData)
@@ -279,11 +270,17 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         return false;
     }
 
+    public void SetFormation(Dictionary<CrewRole, List<PlayerCharacterData>> newFormation)
+    {
+        formation = newFormation;
+        RecalculateTeamBattlePower();
+        OnOwnedCharactersChanged?.Invoke();
+        OnFormationSaved?.Invoke(); // 새로운 편성 저장 이벤트 발생
+        Debug.Log("[PDM] 새로운 편성이 적용되었습니다.");
+    }
+
     #region 아이템 관리
 
-    /// <summary>
-    /// 캐릭터에게 아이템을 장착시킵니다.
-    /// </summary>
     public bool EquipItem(PlayerCharacterData character, WeaponObject newItem)
     {
         if (character == null || newItem == null)
@@ -293,35 +290,34 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 
         PlayerCharacterData oldOwner = null;
-        // 아이템이 이미 다른 캐릭터에게 장착되어 있다면, 그 캐릭터에게서 해제합니다.
         if (!string.IsNullOrEmpty(newItem.EquippedByCharacterId))
         {
             if (int.TryParse(newItem.EquippedByCharacterId, out int ownerId) && ownedCharacters.TryGetValue(ownerId, out oldOwner))
             {
                 if (oldOwner != character)
                 {
-                    UnequipItem(oldOwner, newItem, false); // 내부 호출이므로 이벤트는 나중에 한번에 처리
+                    UnequipItem(oldOwner, newItem, false);
                 }
             }
         }
 
         EquipCategory category = newItem.equipCategory;
 
-        // 현재 캐릭터의 해당 카테고리에 이미 다른 아이템이 있다면 해제합니다.
         if (character.equippedItems.ContainsKey(category))
         {
-            UnequipItem(character, category, false); // 내부 호출이므로 이벤트는 나중에 한번에 처리
+            UnequipItem(character, category, false);
         }
 
-        // 새로운 아이템을 장착합니다.
         character.equippedItems[category] = newItem;
         newItem.EquippedByCharacterId = character.characterdata.characterID.ToString();
 
         Debug.Log($"{character.characterdata.characterName}이(가) {newItem.itemName}을(를) {category} 슬롯에 장착했습니다.");
 
-        // 스탯 재계산 및 이벤트 호출
-        character.RecaculateStats();
-        OnCharacterDataUpdated?.Invoke(character);
+        if (!isBatchUpdating)
+        {
+            character.RecaculateStats();
+            OnCharacterDataUpdated?.Invoke(character);
+        }
 
         if (oldOwner != null && oldOwner != character)
         {
@@ -332,9 +328,6 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         return true;
     }
 
-    /// <summary>
-    /// 캐릭터의 특정 카테고리 아이템 장착을 해제합니다.
-    /// </summary>
     public void UnequipItem(PlayerCharacterData character, EquipCategory category, bool triggerUpdate = true)
     {
         if (character == null || !character.equippedItems.ContainsKey(category))
@@ -356,9 +349,6 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
     }
 
-    /// <summary>
-    /// 캐릭터의 특정 아이템 장착을 해제합니다.
-    /// </summary>
     public void UnequipItem(PlayerCharacterData character, WeaponObject itemToUnequip, bool triggerUpdate = true)
     {
         if (character == null || itemToUnequip == null)
@@ -373,150 +363,124 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
     }
 
+    public void UnequipAllItems(PlayerCharacterData character)
+    {
+        if (character == null)
+        {
+            Debug.LogWarning("장비 해제를 진행할 캐릭터가 없습니다.");
+            return;
+        }
+
+        Debug.Log($"{character.characterdata.characterName}의 모든 장비 해제를 시작합니다.");
+        isBatchUpdating = true;
+
+        var categories = new List<EquipCategory>(character.equippedItems.Keys);
+
+        foreach (var category in categories)
+        {
+            UnequipItem(character, category, false);
+        }
+
+        isBatchUpdating = false;
+
+        character.RecaculateStats();
+        OnCharacterDataUpdated?.Invoke(character);
+
+        Debug.Log($"{character.characterdata.characterName}의 모든 장비 해제가 완료되었습니다.");
+    }
+
     #endregion
 
-    /// <summary>
-    /// 보유 캐릭터 중 전투력이 높은 순서대로 편성을 자동으로 구성합니다.
-    /// 편성 조건: 각 포지션(전, 중, 후, 최후)에 최소 1명씩, 총 5명.
-    /// </summary>
-    /// <returns>자동 편성 성공 여부</returns>
-    public bool AutoFormTeam()
+    #region 자동 장착
+    public void AutoEquipBestItems(PlayerCharacterData character)
     {
-        Debug.Log("[PDM] 자동 편성 시작.");
-
-        // 1. 초기화: 현재 편성 비우기 및 보유 캐릭터 목록 준비
-        // 기존 편성을 비웁니다.
-        if (formation == null)
+        if (character == null)
         {
-            Debug.LogError("[PDM] AutoFormTeam 오류: formation 딕셔너리가 null입니다! Awake에서 초기화되었는지 확인하세요.");
-            return false;
+            Debug.LogWarning("자동 장착을 진행할 캐릭터가 선택되지 않았습니다.");
+            return;
         }
-        foreach (var roleObj in System.Enum.GetValues(typeof(CrewRole)))
-        {
-            CrewRole role = (CrewRole)roleObj; // 명시적 캐스팅 추가
-            Debug.Log($"[PDM] AutoFormTeam: 현재 처리 중인 역할: {role}");
-            if (!formation.ContainsKey(role))
-            {
-                Debug.LogError($"[PDM] AutoFormTeam 오류: formation 딕셔너리에 {role} 키가 없습니다! Awake에서 모든 역할이 초기화되었는지 확인하세요.");
-                // 이 경우는 Awake에서 초기화가 제대로 안 된 경우입니다.
-                // 안전하게 빈 리스트를 추가해줍니다.
-                formation.Add(role, new List<PlayerCharacterData>());
-            }
-            formation[role].Clear(); // <--- 이 부분에서 오류가 발생했습니다。
-            Debug.Log($"[PDM] AutoFormTeam: {role} 포지션 클리어 완료.");
-        }
-        // 모든 보유 캐릭터를 임시 리스트에 복사합니다.
-        List<PlayerCharacterData> availableCharacters = new List<PlayerCharacterData>(ownedCharacters.Values);
 
-        // 2. 1단계: 필수 포지션 채우기 (각 역할별 1명)
-        // 각 역할별로 가장 전투력이 높은 캐릭터를 찾습니다.
-        foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
+        Debug.Log($"{character.characterdata.characterName}의 전체 장비 자동 장착을 시작합니다.");
+        bool equippedSomething = false;
+        isBatchUpdating = true;
+
+        foreach (EquipCategory category in System.Enum.GetValues(typeof(EquipCategory)))
         {
-            PlayerCharacterData bestCharacterForRole = availableCharacters
-                .Where(c => c.characterdata.crewRole == role)
-                .OrderByDescending(c => c.battlePower)
+            var equippableWeapons = InventoryManager.Instance.weaponList.Where(weapon =>
+                weapon.equipCategory == category && IsEquippableByCharacter(weapon, character)
+            ).ToList();
+
+            if (equippableWeapons.Count == 0) continue;
+
+            var bestWeapon = equippableWeapons
+                .OrderByDescending(w => w.ItemStar)
+                .ThenByDescending(w => w.ItemLevel)
                 .FirstOrDefault();
 
-            if (bestCharacterForRole != null)
+            if (bestWeapon != null)
             {
-                formation[role].Add(bestCharacterForRole);
-                availableCharacters.Remove(bestCharacterForRole); // 사용된 캐릭터는 목록에서 제거
-                Debug.Log($"[PDM] 자동 편성: {role} 포지션에 {bestCharacterForRole.characterdata.characterName} 배치.");
-            }
-            else
-            {
-                Debug.LogWarning($"[PDM] 자동 편성 실패: {role} 포지션에 배치할 캐릭터가 없습니다.");
-                // 편성을 초기화하고 실패를 알립니다.
-                if (formation == null) // formation 딕셔너리 null 체크 추가
-                {
-                    Debug.LogError("[PDM] AutoFormTeam 오류: formation 딕셔너리가 null입니다! (실패 초기화 중)");
-                    OnOwnedCharactersChanged?.Invoke(); // UI 갱신
-                    return false;
-                }
-                foreach (var roleToClearObj in System.Enum.GetValues(typeof(CrewRole)))
-                {
-                    CrewRole roleToClear = (CrewRole)roleToClearObj; // 명시적 캐스팅 추가
-                    if (!formation.ContainsKey(roleToClear)) // 키 존재 여부 체크 추가
-                    {
-                        Debug.LogError($"[PDM] AutoFormTeam 오류: formation 딕셔너리에 {roleToClear} 키가 없습니다! (실패 초기화 중)");
-                        formation.Add(roleToClear, new List<PlayerCharacterData>()); // 키가 없으면 추가
-                    }
-                    formation[roleToClear].Clear(); // 이 부분 수정
-                }
-                OnOwnedCharactersChanged?.Invoke(); // UI 갱신
-                return false;
+                character.equippedItems.TryGetValue(category, out var currentWeapon);
+                if (currentWeapon == bestWeapon) continue;
+
+                Debug.Log($"  - {category} 부위: {bestWeapon.itemName} 장착.");
+                EquipItem(character, bestWeapon);
+                equippedSomething = true;
             }
         }
 
-        // 3. 2단계: 5번째 캐릭터 채우기
-        // 남은 캐릭터 중 전투력이 가장 높은 캐릭터를 찾습니다.
-        // Captain 역할을 제외한 남은 캐릭터 중 전투력이 가장 높은 캐릭터를 찾습니다.
-        PlayerCharacterData fifthCharacter = availableCharacters
-            .Where(c => c.characterdata.crewRole != CrewRole.Captain) // Captain 제외 필터링 추가
-            .OrderByDescending(c => c.battlePower)
-            .FirstOrDefault();
+        isBatchUpdating = false;
 
-        if (fifthCharacter != null)
+        if (equippedSomething)
         {
-            // 5번째 캐릭터는 Captain 포지션이 아니어야 합니다. (이미 위에서 필터링했으므로 이 조건은 항상 true)
-            // 그리고 해당 포지션에 아직 2명이 배치되지 않았어야 합니다.
-            CrewRole fifthRole = fifthCharacter.characterdata.crewRole;
-            if (formation[fifthRole].Count < 2) // Captain이 아니므로 이 조건만 확인
-            {
-                formation[fifthRole].Add(fifthCharacter);
-                Debug.Log($"[PDM] 자동 편성: 5번째 캐릭터로 {fifthCharacter.characterdata.characterName} ({fifthRole}) 배치.");
-            }
-            else
-            {
-                // 이 경우는 Captain이 아닌데도 해당 포지션이 이미 2명으로 꽉 찬 경우입니다.
-                // (예: Deckhand 2명, Sailor 1명, Cook 1명, Captain 1명인 상태에서 남은 캐릭터가 Sailor인 경우)
-                Debug.LogWarning($"[PDM] 자동 편성 실패: 5번째 캐릭터({fifthCharacter.characterdata.characterName})를 배치할 적절한 포지션이 없습니다. (해당 포지션({fifthRole})이 이미 꽉 참)");
-                OnOwnedCharactersChanged?.Invoke(); // UI 갱신
-                return false;
-            }
+            Debug.Log("전체 장비 자동 장착이 완료되었습니다.");
+            character.RecaculateStats();
+            OnCharacterDataUpdated?.Invoke(character);
         }
         else
         {
-            Debug.LogWarning("[PDM] 자동 편성 실패: 5번째 캐릭터로 배치할 캐릭터가 없습니다. (Captain 제외)"); // 로그 메시지 수정
-            OnOwnedCharactersChanged?.Invoke(); // UI 갱신
-            return false;
+            Debug.Log("더 좋은 장비가 없거나, 장착할 수 있는 장비가 없습니다.");
         }
-
-        // 4. 마무리: 팀 전투력 재계산 및 UI 갱신
-        RecalculateTeamBattlePower();
-        OnOwnedCharactersChanged?.Invoke(); // UI 갱신
-        Debug.Log("[PDM] 자동 편성 완료.");
-        return true;
     }
 
-    public int IsValidFormation()
+    public bool IsEquippableByCharacter(WeaponObject weapon, PlayerCharacterData character)
     {
-        // 모든 필수 포지션에 캐릭터가 배치되었는지 확인
-        foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
+        if (weapon == null || character == null) return false;
+
+        if (weapon.equipCategory == EquipCategory.Armor || weapon.equipCategory == EquipCategory.Shield)
         {
-            if (!formation.ContainsKey(role) || formation[role].Count == 0)
-            {
-                Debug.LogWarning($"편성 오류: {role} 포지션에 캐릭터가 배치되지 않았습니다. (최소 1명 필요)");
-                return 1; // 해당 포지션에 캐릭터가 없으면 유효하지 않음
-            }
+            return true;
         }
 
-        // 2. 총 편성 인원이 MAX_FORMATION_SIZE(5명)인지 확인
-        int currentFormationCount = GetFormationCharacterCount();
-        if (currentFormationCount != MAX_FORMATION_SIZE)
-        {
-            Debug.LogWarning($"편성 오류: 총 편성 인원이 {MAX_FORMATION_SIZE}명이 아닙니다. (현재 {currentFormationCount}명)");
-            return 2; // 총 인원이 5명이 아니면 유효하지 않음
-        }
+        ItemWeaponSO weaponSO = (ItemWeaponSO)weapon.itemSO;
+        EquipType type = weaponSO.equipType;
+        CrewRole role = character.characterdata.crewRole;
 
-        // 모든 필수 포지션에 캐릭터가 배치되었고 총 인원도 5명이라면 유효함
-        Debug.Log("편성 유효성 검사 통과: 모든 필수 포지션에 캐릭터가 배치되었습니다. (총 인원 5명)");
-        return 0;
+        switch (role)
+        {
+            case CrewRole.Captain:
+                return true;
+            case CrewRole.Cook:
+                return type == EquipType.Mace || type == EquipType.Staff;
+            case CrewRole.Sailor:
+                if (character.characterdata.atkRangeType == AtkRangeType.Ranged_Attack)
+                {
+                    return type == EquipType.Bow || type == EquipType.Gun;
+                }
+                else
+                {
+                    return type == EquipType.Sword || type == EquipType.Spear;
+                }
+            case CrewRole.Deckhand:
+                return type == EquipType.Axe || type == EquipType.Hammer;
+            default:
+                return false;
+        }
     }
+    #endregion
 
     private void HandleCharacterBattlePowerChange(PlayerCharacterData character, BigInteger oldPower, BigInteger newPower)
     {
-        if (isBatchUpdating) return; // 일괄 업데이트 중에는 개별 처리를 건너뜀
+        if (isBatchUpdating) return;
 
         if (IsInFormation(character))
         {
@@ -531,7 +495,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         isBatchUpdating = true;
 
         RecalculateAllCharacterStats();
-        RecalculateTeamBattlePower(); // 모든 캐릭터 업데이트 후, 팀 전투력 최종 계산
+        RecalculateTeamBattlePower();
 
         isBatchUpdating = false;
         Debug.Log("일괄 업데이트 완료.");
@@ -562,5 +526,76 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         {
             character.RecaculateStats();
         }
+    }
+
+    /// <summary>
+    /// [게임 시작 시 전용] 소유한 캐릭터 중 가장 강력한 캐릭터들로 기본 편성을 구성합니다.
+    /// </summary>
+    public bool AutoFormTeam()
+    {
+        if (ownedCharacters.Count == 0) return false;
+
+        // 역할별 최대 인원수 정의 (임시, FormationManager와 동기화 필요)
+        var roleLimits = new Dictionary<CrewRole, int>
+        {
+            { CrewRole.Captain, 1 },
+            { CrewRole.Deckhand, 2 },
+            { CrewRole.Sailor, 2 },
+            { CrewRole.Cook, 2 }
+        };
+
+        var newFormation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
+        var addedCharacters = new HashSet<PlayerCharacterData>();
+        foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
+        {
+            newFormation[role] = new List<PlayerCharacterData>();
+        }
+
+        // 1. 역할별 에이스 1명씩 선발
+        foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
+        {
+            var bestInRole = ownedCharacters.Values
+                .Where(c => c.characterdata.crewRole == role)
+                .OrderByDescending(c => c.battlePower)
+                .FirstOrDefault();
+
+            if (bestInRole != null)
+            {
+                newFormation[role].Add(bestInRole);
+                addedCharacters.Add(bestInRole);
+            }
+        }
+
+        // 2. 남은 슬롯 충원
+        int currentTeamSize = addedCharacters.Count;
+        if (currentTeamSize < MAX_FORMATION_SIZE)
+        {
+            var remainingCandidates = ownedCharacters.Values
+                .Except(addedCharacters)
+                .Where(c => c.characterdata.crewRole != CrewRole.Captain)
+                .OrderByDescending(c => c.battlePower)
+                .ToList();
+
+            foreach (var candidate in remainingCandidates)
+            {
+                if (currentTeamSize >= MAX_FORMATION_SIZE) break;
+
+                CrewRole role = candidate.characterdata.crewRole;
+                if (newFormation[role].Count < roleLimits[role])
+                {
+                    newFormation[role].Add(candidate);
+                    addedCharacters.Add(candidate);
+                    currentTeamSize++;
+                }
+            }
+        }
+
+        // 3. 실제 편성에 적용
+        formation = newFormation;
+        RecalculateTeamBattlePower();
+        OnOwnedCharactersChanged?.Invoke();
+
+        Debug.Log("초기 자동 편성이 완료되었습니다.");
+        return true;
     }
 }

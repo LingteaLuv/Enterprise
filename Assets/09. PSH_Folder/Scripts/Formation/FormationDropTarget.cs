@@ -60,12 +60,14 @@ public class FormationDropTarget : MonoBehaviour, IDropHandler
 
         if (draggedData.characterdata.crewRole == formationSlot.assignedPosition)
         {
-            PlayerDataManager.Instance.AddCharacterToFormation(draggedData);
+            // PlayerDataManager에 직접 접근하는 대신 FormationManager를 통해 임시 편성을 변경합니다.
+            FormationManager.Instance.ToggleCharacterInTempFormation(draggedData);
         }
         else
         {
             string message = $"{draggedData.characterdata.characterName}은(는) {formationSlot.assignedPosition} 포지션이 아닙니다.";
-            UIManager.Instance.ShowToast(message);
+            // UIManager가 없을 수 있으므로 PopManager로 대체합니다.
+            PopManager.Instance.ShowOKPopup(message);
         }
     }
 }

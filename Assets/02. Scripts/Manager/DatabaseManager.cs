@@ -15,7 +15,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     public event Action OnChangedNickname;
     public event Action OnChangedCreditData;
     
-    private void Init()
+    public void Init()
     {
         _user = FirebaseManager.Auth.CurrentUser;
         Debug.Log($"_user : {_user}");
@@ -94,13 +94,20 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <summary>
     /// Firebase RTDB에서 단일 데이터를 불러오는 메서드
     /// </summary>
-    public async Task LoadFieldAsync<T>(string path, Action<T> callback)
+    public async Task LoadFieldAsync<T>(string path, Action<T> callback, bool init = false, T value = default)
     {
         DatabaseReference dataRef = FirebaseManager.DataReference.Child(path);
         DataSnapshot snapshot = await dataRef.GetValueAsync();
 
         if (!snapshot.Exists || snapshot.Value == null)
         {
+            if (init)
+            {
+                await dataRef.SetValueAsync(value);
+                DataSnapshot newSnapshot = await dataRef.GetValueAsync();
+                T newData = (T)Convert.ChangeType(newSnapshot.Value, typeof(T));
+                callback(newData);
+            }
             return;
         }
         
@@ -355,6 +362,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
                 int currentGold = Convert.ToInt32(data.Value);
                 if (currentGold >= value)
                 {
+                    Debug.LogWarning($"[DataBaseManager] : SpendCurrency 재화 소모 진입, 소모 재화 : {value}");
                     data.Value = currentGold - value;
                 }
                 else

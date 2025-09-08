@@ -32,11 +32,11 @@ public static class GoogleSheetImporter
         Debug.Log("모든 CSV 다운로드 완료!");
         AssetDatabase.Refresh();
 
-        // 각 CSV별로 파싱 함수 호출
-        CharacterDataImporter.ImportData(); // 캐릭터
-        EquipDataImporter.ImportData();    // 무기
-        // 필요하면 다른 CSV 파서도 호출
-        Debug.Log("모든 데이터 파싱 완료!");
+        //// 각 CSV별로 파싱 함수 호출
+        //CharacterDataImporter.ImportData(); // 캐릭터
+        //EquipDataImporter.ImportData();    // 무기
+        //// 필요하면 다른 CSV 파서도 호출
+        //Debug.Log("모든 데이터 파싱 완료!");
     }
 
     private static async Task DownloadSingleCsv(string url, string path)

@@ -7,16 +7,15 @@ using UnityEngine.UI;
 
 public class RelicsGachaListUI : MonoBehaviour
 {
-    [Header("Panel")]
-    [SerializeField] private RelicsGachaItemPanel relicsPanelItem;
-    [SerializeField] private GameObject backPanel;
-    [SerializeField] private Transform relicsItemParent;
+    //[Header("Panel")]
+    //[SerializeField] private RelicsGachaItemPanel relicsPanelItem;
+    //[SerializeField] private Transform relicsItemParent;
 
     [Header("PopUp")]
     [SerializeField] private ChoosePopUp choosePopup;
 
-    [Header("Button")]
-    [SerializeField] private Button closeButton;
+    //[Header("Button")]
+    //[SerializeField] private Button closeButton;
 
 
 
@@ -24,39 +23,40 @@ public class RelicsGachaListUI : MonoBehaviour
     {
         relicsGachaManager.OnChooseItem -= ShowChooseItem;
         relicsGachaManager.OnChooseItem += ShowChooseItem;
-        closeButton.onClick.AddListener(ClosePanel);
+        //closeButton.onClick.AddListener(ClosePanel);
 
-        ClearChildren(relicsItemParent);
+        //ClearChildren(relicsItemParent);
 
-        StartCoroutine(DisplayPanel(relicsGachaManager));
+        //StartCoroutine(DisplayPanel(relicsGachaManager));
     }
 
-    private IEnumerator DisplayPanel(RelicsGachaManager relicsGachaManager)
-    {
-        yield return new WaitUntil(() =>
-        relicsGachaManager.relicsResult != null &&
-        relicsGachaManager.rarityResult != ItemRarity.None &&
-        relicsGachaManager.levelResult > 0);
+    //private IEnumerator DisplayPanel(RelicsGachaManager relicsGachaManager)
+    //{
+    //    yield return new WaitUntil(() =>
+    //    relicsGachaManager.relicsResult != null &&
+    //    relicsGachaManager.rarityResult != ItemRarity.None &&
+    //    relicsGachaManager.levelResult > 0);
+    //
+    //    choosePopup.gameObject.SetActive(true);
+    //    choosePopup.Init(relicsGachaManager)
+    //
+    //    //RelicsGachaItemPanel panel = Instantiate(relicsPanelItem);
+    //    //panel.transform.SetParent(relicsItemParent);
+    //    //panel.Init(relicsGachaManager);
+    //    
+    //}
 
-        backPanel.SetActive(true);
-
-        RelicsGachaItemPanel panel = Instantiate(relicsPanelItem);
-        panel.transform.SetParent(relicsItemParent);
-        panel.Init(relicsGachaManager);
-        
-    }
-
-    private void ClosePanel()
-    {
-        if(this.gameObject.activeSelf)
-        {
-            if(backPanel.activeSelf)
-                backPanel.SetActive(false);
-
-            closeButton.onClick.RemoveListener(ClosePanel);
-            gameObject.SetActive(false);
-        }
-    }
+    //private void ClosePanel()
+    //{
+    //    if(this.gameObject.activeSelf)
+    //    {
+    //        if(choosePopup.gameObject.activeSelf)
+    //            choosePopup.gameObject.SetActive(false);
+    //
+    //        closeButton.onClick.RemoveListener(ClosePanel);
+    //        gameObject.SetActive(false);
+    //    }
+    //}
 
     private void ClearChildren(Transform parent)
     {

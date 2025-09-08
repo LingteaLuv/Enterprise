@@ -36,9 +36,48 @@ namespace JHT
             itemNum = so.itemNum;
             itemName = so.itemName;
 
-            itemPower = so.startPower[(int)curRarity - 1] + so.upPower[(int)curRarity - 1] * level;
+            itemPower = SetPower(so,level); 
+
+
+
             itemCost = so.cost[(int)curRarity - 1] * level;
             itemRarityImage = so.rarityImage[(int)curRarity - 1];
+        }
+
+        private float SetPower(ItemRelicsSO so,int level)
+        {
+            float amount = 0;
+            if (itemPowerType == PowerType.Attack)
+            {
+                amount = so.startPower[(int)curRarity - 1] + so.upPower[(int)curRarity - 1] * level;
+            }
+            else
+            {
+                amount = 1 + so.startPower[(int)curRarity - 1] + so.upPower[(int)curRarity - 1] * level;
+            }
+            return amount;
+
+            //switch (itemPowerType)
+            //{
+            //    case PowerType.Attack:
+            //        amount = so.startPower[(int)curRarity - 1] + so.upPower[(int)curRarity - 1] * level;
+            //        break;
+            //    case PowerType.Health:
+            //        amount = 1 + so.startPower[(int)curRarity - 1] + so.upPower[(int)curRarity - 1] * level;
+            //        break;
+            //    case PowerType.Defense:
+            //
+            //        break;
+            //    case PowerType.CritChance:
+            //
+            //        break;
+            //    case PowerType.CritDamage:
+            //
+            //        break;
+            //    case PowerType.AttackSpeed:
+            //
+            //        break;
+            //}
         }
     }
 }
