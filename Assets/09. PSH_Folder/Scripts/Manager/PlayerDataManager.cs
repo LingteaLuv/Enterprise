@@ -37,7 +37,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public event System.Action OnOwnedCharactersChanged;
     public event System.Action OnFormationSaved;
 
-    private bool isBatchUpdating = false;
+    private bool isBatchUpdating = false;// 일괄 작업할 때 키는 불값
 
     protected override void Awake()
     {
@@ -313,8 +313,11 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
         Debug.Log($"{character.characterdata.characterName}이(가) {newItem.itemName}을(를) {category} 슬롯에 장착했습니다.");
 
-        character.RecaculateStats();
-        OnCharacterDataUpdated?.Invoke(character);
+        if (!isBatchUpdating)
+        {
+            character.RecaculateStats();
+            OnCharacterDataUpdated?.Invoke(character);
+        }
 
         if (oldOwner != null && oldOwner != character)
         {
@@ -369,13 +372,19 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 
         Debug.Log($"{character.characterdata.characterName}의 모든 장비 해제를 시작합니다.");
+        isBatchUpdating = true;
 
         var categories = new List<EquipCategory>(character.equippedItems.Keys);
 
         foreach (var category in categories)
         {
-            UnequipItem(character, category);
+            UnequipItem(character, category, false);
         }
+
+        isBatchUpdating = false;
+
+        character.RecaculateStats();
+        OnCharacterDataUpdated?.Invoke(character);
 
         Debug.Log($"{character.characterdata.characterName}의 모든 장비 해제가 완료되었습니다.");
     }
@@ -393,6 +402,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
         Debug.Log($"{character.characterdata.characterName}의 전체 장비 자동 장착을 시작합니다.");
         bool equippedSomething = false;
+        isBatchUpdating = true;
 
         foreach (EquipCategory category in System.Enum.GetValues(typeof(EquipCategory)))
         {
@@ -418,9 +428,13 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             }
         }
 
+        isBatchUpdating = false;
+
         if (equippedSomething)
         {
             Debug.Log("전체 장비 자동 장착이 완료되었습니다.");
+            character.RecaculateStats();
+            OnCharacterDataUpdated?.Invoke(character);
         }
         else
         {
