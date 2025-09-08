@@ -15,7 +15,9 @@ public enum CurrencyType
     EnhancementStone,
     Gem,
     RelicsCoupon,
-    RelicsPoint
+    RelicsPoint,
+    CrewDrawTicket,
+    EquipDrawTicket
 }
 
 /// <summary>
