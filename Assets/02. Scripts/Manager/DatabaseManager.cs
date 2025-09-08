@@ -164,14 +164,13 @@ public class DatabaseManager : Singleton<DatabaseManager>
     {
         _uid = FirebaseManager.Auth.CurrentUser.UserId;
         DatabaseReference nicknameRef = FirebaseManager.DataReference.Child(_uid).Child("PublicData").Child("Nickname");
-
+        Debug.Log($"{_uid}");    
         DataSnapshot snapshot = await nicknameRef.GetValueAsync();
-        string nickname = snapshot.Value.ToString();
-        Debug.Log($"LoadNickname 닉네임 : {nickname}");
+        //string nickname = snapshot.Value.ToString();
 
         if (snapshot.Exists)
         {
-            //string nickname = snapshot.Value.ToString();
+            string nickname = snapshot.Value.ToString();
             Debug.Log($"닉네임 로드 성공 : {nickname}");
             callback(nickname);
         }

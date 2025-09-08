@@ -81,19 +81,19 @@ public class CurrencyManager : Singleton<CurrencyManager>
 
             await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gold", (value) =>
             {
-                Debug.LogWarning($"Gold DB 로드 {value}");
+                //Debug.LogWarning($"Gold DB 로드 {value}");
                 _initialGoldString = value.ToString();
             });
 
             await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/EnhancementStone", (value) =>
             {
-                Debug.LogWarning($"EnhancementStone DB 로드 {value}");
+                //Debug.LogWarning($"EnhancementStone DB 로드 {value}");
                 _initialEnhancementStoneString = value.ToString();
             });
 
             await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/Gem", (value) =>
             {
-                Debug.LogWarning($"Gem DB 로드 {value}");
+                //Debug.LogWarning($"Gem DB 로드 {value}");
                 _initialGemString = value.ToString();
             });
         }
@@ -209,9 +209,6 @@ public class CurrencyManager : Singleton<CurrencyManager>
         string s1 = $"gold : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gold])}";
         string s2 = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
         string s3 = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gem])}";
-        Debug.LogWarning($"[CurrencyManager] UpdateCurrencyUI {s1}");
-        Debug.LogWarning($"[CurrencyManager] UpdateCurrencyUI {s2}");
-        Debug.LogWarning($"[CurrencyManager] UpdateCurrencyUI {s3}");
         OnUpdateCurrency?.Invoke(s1, s2, s3);
     }
 

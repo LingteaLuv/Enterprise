@@ -39,6 +39,8 @@ public class FirebaseManager : Singleton<FirebaseManager>
     
     protected override async void Awake()
     {
+        OnFirebaseReady = null;
+        
         if (_isTest)
         {
             OnFirebaseReady += async () =>
