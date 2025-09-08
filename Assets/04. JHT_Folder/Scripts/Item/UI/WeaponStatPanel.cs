@@ -77,6 +77,7 @@ namespace JHT
         {
             if (curWeapon == null) return;
             InventoryManager.Instance.StarUpEquipment(curWeapon.itemNum);
+            UpdateUI();
         }
 
         private void OnWeaponDataChanged(int value)

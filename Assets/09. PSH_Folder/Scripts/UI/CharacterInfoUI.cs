@@ -173,7 +173,14 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             characterNameText.text = $"{currentCharacterData.characterdata.characterName}";
             characterImage.sprite = currentCharacterData.characterdata.characterSprite;
-            levelText.text = $"LV {currentCharacterData.characterLevel}";
+            if (currentCharacterData.characterLevel == PlayerDataManager.MAX_CHARACTER_LEVEL)
+            {
+                levelText.text = $"LV MAX";
+            }
+            else
+            {
+                levelText.text = $"LV {currentCharacterData.characterLevel}";
+            }
             flavorText.text = currentCharacterData.characterdata.flavorText;
 
             UpdateSoulFragmentsUI();

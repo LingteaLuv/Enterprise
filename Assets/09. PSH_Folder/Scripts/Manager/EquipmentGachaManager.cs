@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using JHT;
+using System;
 
 [System.Serializable]
 public class EnhancementPointChance
@@ -18,7 +19,6 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
     [Header("강화 포인트 확률")]
     public List<EnhancementPointChance> enhancementPointChances;
 
-    // 강화 포인트의 등급 기준 (포인트 오름차순으로 정렬됨)
     private List<int> enhancementPointTiers;
 
     protected override void Start()
@@ -32,7 +32,6 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
     {
         if (enhancementPointChances != null)
         {
-            // 포인트를 기준으로 오름차순 정렬하여 등급의 기준점을 만듭니다.
             enhancementPointTiers = enhancementPointChances.Select(e => e.points).OrderBy(p => p).ToList();
         }
         else
@@ -59,19 +58,65 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
             return null;
         }
 
-        ItemWeaponSO drawnWeaponSO = gachaPool[Random.Range(0, gachaPool.Count)];
+        ItemWeaponSO drawnWeaponSO = gachaPool[UnityEngine.Random.Range(0, gachaPool.Count)];
         Debug.Log($"[EquipmentGachaManager] 뽑힌 아이템: {drawnWeaponSO.itemName}");
         return InventoryManager.Instance.AddItem(drawnWeaponSO);
     }
 
     public override bool PerformMultipleGacha(int count)
     {
-        if (!CurrencyManager.Instance.SpendCurrency(currencyType, singleGachaCost * count))
-        {
-            Debug.Log($"가챠 실패: 재화({currencyType})가 부족합니다.");
-            return false;
-        }
+        CurrencyType ticketType = CurrencyType.EquipDrawTicket;
+        CurrencyType gemType = CurrencyType.Gem;
+        int ticketCostPerGacha = 1;
+        int gemCostPerTicket = 100; // 보석 교환비는 캐릭터와 동일하다고 가정
 
+        System.Numerics.BigInteger requiredTickets = count * ticketCostPerGacha;
+
+        if (CurrencyManager.Instance.CanSpendCurrency(ticketType, requiredTickets))
+        {
+            CurrencyManager.Instance.SpendCurrency(ticketType, requiredTickets);
+            ExecuteGachaDraw(count);
+            return true;
+        }
+        else
+        {
+            System.Numerics.BigInteger currentTickets = CurrencyManager.Instance.GetCurrency(ticketType);
+            System.Numerics.BigInteger neededTickets = requiredTickets - currentTickets;
+            System.Numerics.BigInteger requiredGems = neededTickets * gemCostPerTicket;
+
+            if (CurrencyManager.Instance.CanSpendCurrency(gemType, requiredGems))
+            {
+                Action onConfirm = () =>
+                {
+                    if (currentTickets > 0)
+                    {
+                        CurrencyManager.Instance.SpendCurrency(ticketType, currentTickets);
+                    }
+                    if (CurrencyManager.Instance.SpendCurrency(gemType, requiredGems))
+                    {
+                        Debug.Log($"성공적으로 {requiredGems} 보석을 사용해 부족한 {neededTickets}개의 뽑기 횟수를 대체했습니다.");
+                        ExecuteGachaDraw(count);
+                    }
+                    else
+                    {
+                        Debug.LogError("알 수 없는 오류로 보석 소모에 실패했습니다. 가챠를 중단합니다.");
+                    }
+                };
+
+                string message = $"{neededTickets}개의 티켓이 부족합니다.\n{requiredGems}개의 보석으로 구매하시겠습니까?";
+                PopManager.Instance.ShowOKCancelPopup(message, "구매", onConfirm, "취소");
+                return true;
+            }
+            else
+            {
+                PopManager.Instance.ShowOKPopup($"재화가 부족합니다.\n티켓과 보석을 확인해주세요.");
+                return false;
+            }
+        }
+    }
+
+    private void ExecuteGachaDraw(int count)
+    {
         LastGachaResults = new List<ItemObject>();
         Dictionary<int, PointTier> itemTiers = new Dictionary<int, PointTier>();
 
@@ -85,10 +130,7 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
                 {
                     int pointsToAdd = GetRandomEnhancementPoints();
                     InventoryManager.Instance.AddEnhancementPointsToEquipment(weapon.itemNum, pointsToAdd);
-
-                    // 획득한 포인트의 등급을 결정하여 UI에 넘겨줄 정보 저장
                     itemTiers[weapon.itemNum] = GetTierForPoints(pointsToAdd);
-
                     AutoEnhanceWeapon(weapon);
                 }
             }
@@ -106,7 +148,6 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
             }
         }
         CurrencyManager.Instance.UpdateCurrencyUI();
-        return true;
     }
 
     private int GetRandomEnhancementPoints()
@@ -114,7 +155,7 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
         float totalChance = enhancementPointChances.Sum(epc => epc.chance);
         if (totalChance <= 0) return 0;
 
-        float randomPoint = Random.Range(0, totalChance);
+        float randomPoint = UnityEngine.Random.Range(0, totalChance);
         foreach (var epc in enhancementPointChances)
         {
             if (randomPoint < epc.chance)
@@ -128,25 +169,21 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
 
     private PointTier GetTierForPoints(int points)
     {
-        // enhancementPointTiers는 Inspector에 설정된 포인트를 오름차순으로 정렬한 리스트입니다. (예: [20, 50, 100])
-        // 이 리스트는 3개의 항목(Low, Mid, High)을 가지고 있다고 가정합니다.
         if (enhancementPointTiers == null || enhancementPointTiers.Count != 3)
         {
             Debug.LogWarning("강화 포인트 확률(EnhancementPointChances)은 3개의 등급(Low, Mid, High)에 맞게 3개 항목으로 설정해야 합니다.");
-            // 안전 장치: 설정이 잘못되었을 경우, 가장 낮은 등급으로 처리
             return PointTier.Low;
         }
 
-        // 정렬된 리스트의 값과 정확히 일치하는지 확인하여 등급을 결정합니다.
-        if (points == enhancementPointTiers[2]) // 가장 높은 포인트 값 = High
+        if (points == enhancementPointTiers[2])
         {
             return PointTier.High;
         }
-        else if (points == enhancementPointTiers[1]) // 중간 포인트 값 = Mid
+        else if (points == enhancementPointTiers[1])
         {
             return PointTier.Mid;
         }
-        else // 가장 낮은 포인트 값 = Low
+        else
         {
             return PointTier.Low;
         }
