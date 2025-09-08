@@ -38,12 +38,13 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     private void Awake()
     {
         CurrencyManager.Instance.OnUpdateCurrency += UpdateText;
-        DatabaseManager.Instance.DisplayCreditData();
+        
         DragAndDropController.Instance.GetCanvas(GetComponent<Canvas>());
     }
     
     private void Start()
     {
+        DatabaseManager.Instance.DisplayCreditData();
         foreach (var ui in _uiList)
         {
             if (ui is AttendancePanel attendancePanel)

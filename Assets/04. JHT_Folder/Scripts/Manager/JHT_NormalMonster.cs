@@ -1,84 +1,91 @@
 using JHT;
 using UnityEngine;
 
-public class JHT_NormalMonster : JHT_BaseMonsterFSM
+namespace JHT
 {
-
-    [SerializeField] private JHT_MonsterProjectile poolPrefab;
-    JHT_ObjectPool pool;
-    protected override void Awake()
+    public class JHT_NormalMonster : JHT_BaseMonsterFSM
     {
-        base.Awake();
-    }
 
-    protected override void Start()
-    {
-        base.Start();
-
-
-        if (monsterStat.type == MonsterType.open)
+        protected override void Awake()
         {
-            poolPrefab = monsterStat.curSO.projectile;
-            GameObject parent = new GameObject($"{poolPrefab.name} Pool_Parent");
-            parent.transform.SetParent(this.transform);
-
-            pool = new(poolPrefab, parent.transform, 10);
+            base.Awake();
         }
-        //JHT_PoolManager.Instance.PoolInit(monsterStat.curSO.particle, 10); // 풀 -> T로
-    }
 
-    protected override void Update()
-    {
-        base.Update();
-    }
-
-    protected override void HandleAttack()
-    {
-        //애니메이션 실행(이벤트 사용할거임)
-        NormalMonsterAttack();
-    }
-
-    protected override void HandleChase()
-    {
-        base.HandleChase();
-    }
-
-    protected override void HandleIdle()
-    {
-        
-    }
-
-    protected override void HandleMove()
-    {
-        
-    }
-
-    // Attack애니메이션 이벤트로 실행할 함수
-    public void NormalMonsterAttack()
-    {
-        // 근접 공격일경우
-        if(monsterStat.type == MonsterType.close)
+        protected override void Start()
         {
-            //if (monsterStat.attackAngle == 0)
-            //    return;
-            Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, monsterStat.attackRange, targetLayer);
+            base.Start();
 
-            foreach (var c in cols)
+
+        }
+
+        public override void Init(JHT_BaseMonsterStat so)
+        {
+            base.Init(so);
+        }
+        protected override void Update()
+        {
+            base.Update();
+        }
+
+        protected override void HandleAttack()
+        {
+            //애니메이션 실행(이벤트 사용할거임)
+            NormalMonsterAttack();
+        }
+
+        protected override void HandleChase()
+        {
+            base.HandleChase();
+        }
+
+        protected override void HandleIdle()
+        {
+
+        }
+
+        protected override void HandleMove()
+        {
+
+        }
+
+        // Attack애니메이션 이벤트로 실행할 함수
+        public void NormalMonsterAttack()
+        {
+            // 근접 공격일경우
+            if (monsterStat.monsterType == MonsterType.close)
             {
-                //일단은 일방적인 플레이어 스크립트
-                BaseCharecterFSM target = c.GetComponent<BaseCharecterFSM>();
+                //if (monsterStat.attackAngle == 0)
+                //    return;
+                Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, monsterStat.attackRange, targetLayer);
 
-                if (target != null)
+                foreach (var c in cols)
                 {
-                    //Pool 파티클 사용
-                    target.TakeDamage(monsterStat.attackPower);
+                    //일단은 일방적인 플레이어 스크립트
+                    BaseCharecterFSM target = c.GetComponent<BaseCharecterFSM>();
+
+                    if (target != null)
+                    {
+                        //Pool 파티클 사용
+                        target.TakeDamage(monsterStat.attackPower);
+                    }
                 }
             }
+            else //원거리 일경우
+            {
+                JHT_MonsterProjectile obj = JHT_MonsterSpawnManager.Instance.projectilePool.GetPooled() as JHT_MonsterProjectile;
+                obj.Init(target.position, transform.position, monsterStat.attackSpeed, monsterStat.attackPower,monsterStat);
+            }
         }
-        else //원거리 일경우
+
+        private void OnDrawGizmosSelected()
         {
-            JHT_MonsterProjectile obj = pool.GetPooled() as JHT_MonsterProjectile;
-            obj.Init(target.position, transform.position, monsterStat.attackSpeed, monsterStat.attackPower);
+            if (monsterStat != null)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(transform.position, monsterStat.attackRange);
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireSphere(transform.position, monsterStat.chaseRange);
+            }
         }
     }
 }

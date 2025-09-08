@@ -106,7 +106,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     {
         UpdateCurrencyUI();
     }
-    
+
     // 헬퍼 함수: 문자열에서 재화를 추가
     public void AddCurrencyFromInspectorString(CurrencyType type, string amountString)
     {
@@ -140,18 +140,25 @@ public class CurrencyManager : Singleton<CurrencyManager>
     {
         if (amount <= 0) return;
 
+        // 로컬 지갑에 재화를 추가합니다.
         if (currencyWallet.ContainsKey(type))
         {
-            //currencyWallet[type] += amount;
-            DatabaseManager.Instance.AddCurrency(type.ToString(), (int)amount);
+            currencyWallet[type] += amount;
         }
         else
         {
-            //currencyWallet.Add(type, amount);
-            DatabaseManager.Instance.AddCurrency(type.ToString(), (int)amount);
+            // InitializeWallet에서 모든 키를 초기화하므로 이 경우는 거의 없지만, 안전을 위해 추가합니다.
+            currencyWallet.Add(type, amount);
         }
+
+        // 데이터베이스에 변경사항을 저장합니다.
+        // 참고: amount가 int 범위를 초과하면 문제가 될 수 있습니다.
+        DatabaseManager.Instance.AddCurrency(type.ToString(), (int)amount);
+
         Debug.Log($"[CurrencyManager] {type} 획득: +{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
-        // TODO: 재화 UI 갱신 이벤트 호출
+
+        // 로컬 지갑이 변경되었으니 UI를 바로 갱신해주는 것이 좋습니다.
+        UpdateCurrencyUI();
     }
 
     /// <summary>
@@ -160,23 +167,24 @@ public class CurrencyManager : Singleton<CurrencyManager>
     /// <returns>소모 성공 여부</returns>
     public bool SpendCurrency(CurrencyType type, BigInteger amount)
     {
+        // 재화가 충분한지 먼저 확인합니다.
         if (!CanSpendCurrency(type, amount))
         {
-            //currencyWallet[type] -= amount;
-            DatabaseManager.Instance.SpendCurrency(type.ToString(), (int)amount);
-            Debug.Log($"[CurrencyManager] {type} 소모 성공: -{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
-            // TODO: 재화 UI 갱신 이벤트 호출
-            return true;
-        }
-        else
-        {
-            Debug.LogWarning($"[CurrencyManager] {type} 재화 부족! 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(currentAmount)}");
+            Debug.LogWarning($"[CurrencyManager] {type} 재화 부족! 필요: {DataUtility.FormatNumber(amount)}, 보유: {DataUtility.FormatNumber(GetCurrency(type))}");
             return false;
         }
 
+        // 로컬 지갑에서 재화를 소모합니다.
         currencyWallet[type] -= amount;
+
+        // 데이터베이스에 변경사항을 저장합니다.
+        // 참고: amount가 int 범위를 초과하면 문제가 될 수 있습니다.
+        DatabaseManager.Instance.SpendCurrency(type.ToString(), (int)amount);
+
         Debug.Log($"[CurrencyManager] {type} 소모 성공: -{DataUtility.FormatNumber(amount)}. 현재 보유량: {DataUtility.FormatNumber(currencyWallet[type])}");
-        // TODO: 재화 UI 갱신 이벤트 호출
+
+        // 로컬 지갑이 변경되었으니 UI를 바로 갱신해주는 것이 좋습니다.
+        UpdateCurrencyUI();
         return true;
     }
 
@@ -202,7 +210,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
         Debug.LogWarning($"[CurrencyManager] UpdateCurrencyUI {s1}");
         Debug.LogWarning($"[CurrencyManager] UpdateCurrencyUI {s2}");
         Debug.LogWarning($"[CurrencyManager] UpdateCurrencyUI {s3}");
-        OnUpdateCurrency?.Invoke(s1,s2,s3);
+        OnUpdateCurrency?.Invoke(s1, s2, s3);
     }
 
     // 인스펙터에서 값이 변경될 때 호출됩니다.
