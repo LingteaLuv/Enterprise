@@ -11,23 +11,22 @@ public class MonsterSpawnDemo : MonoBehaviour
     int stage = -1;
     int round = -1;
 
-    //void Start()
-    //{
-    //    changeStage.onClick.AddListener(ChangeStage);
-    //    changeRound.onClick.AddListener(ChangeRound);
-    //}
-    //
-    //
-    //public void ChangeStage()
-    //{
-    //    stage += 1;
-    //    JHT_MonsterSpawnManager.Instance.ChangeStage(stage);
-    //}
-    //
-    //public void ChangeRound()
-    //{
-    //    JHT_MonsterSpawnManager.Instance.roundIndex += 1;
-    //    JHT_MonsterSpawnManager.Instance.ChangeRound(JHT_MonsterSpawnManager.Instance.roundIndex);
-    //}
+    void Start()
+    {
+        changeStage.onClick.AddListener(ChangeStage);
+        changeRound.onClick.AddListener(ChangeRound);
+    }
+    
+    
+    public void ChangeStage()
+    {
+        JHT_MonsterSpawnManager.Instance.ChangeStage();
+    }
+    
+    public void ChangeRound()
+    {
+        JHT_MonsterSpawnManager.Instance.roundIndex += 1;
+        JHT_MonsterSpawnManager.Instance.SpawnMonster(JHT_MonsterSpawnManager.Instance.roundIndex);
+    }
 
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ namespace JHT
         // int : 스테이지,  JHT_MonsterDataTable은 몬스터의 정보를 stirng(int로 변경해도 됨)을 가져와서 해당 데이터의 정보를 로드할거임
         // => 데이터 정보를 가져오는건 미리 addressable에서 로드한 모든 몬스터 데이터를 매 스테이지시 로드하는 걸로 하는게 좋아보임(fade in,out이 스테이지당 하는거같음)
         Dictionary<int, JHT_MonsterDataTable> stageDic;
+        public List<JHT_MonsterSetManager> posList;
 
         // Demo
         [SerializeField] private JHT_MonsterDataTable sampleDataList1;
@@ -29,7 +31,6 @@ namespace JHT
         public int stageIndex;
         public int roundIndex;
         public int curTotalCount;
-        public int curSpawnIndex;
 
         public Func<int,List<JHT_MonsterDataSO>> OnAddMonster;
         protected override void Awake()
@@ -49,6 +50,7 @@ namespace JHT
         private void Start()
         {
             stageDic = new();
+            posList = new();
             Init();
         }
 
@@ -63,7 +65,6 @@ namespace JHT
 
             stageIndex = -1;
             roundIndex = 0;
-            curSpawnIndex = 0;
 
             OnAddMonster += SetSpawnRound;
         }
@@ -81,53 +82,91 @@ namespace JHT
             if (stageIndex < 0)
                return;
 
+            if(posList.Count > 0)
+                posList.Clear();
+
             roundTable = stageDic[stageIndex];
+            for (int i = 0; i < roundTable.roundCount; i++)
+            {
+                int rand = UnityEngine.Random.Range(0, roundTable.monsterPosData.Count);
+                posList.Add(roundTable.monsterPosData[rand]);
+
+                if (i != 0 && posList[i] == posList[i - 1])
+                {
+                    posList.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            curTotalCount = roundTable.totalCost;
             SpawnMonster(stageIndex);
         }
 
+        // curStageIndex를 ++을 통해 round를 구별해줄거임
         public void SpawnMonster(int curStageIndex)
         {
             List<JHT_MonsterDataSO> dataList = OnAddMonster?.Invoke(curStageIndex);
 
+            // 이쪽 메모리 생각 destroy를 할지 아니면 재활용할지
+            if(posList[curStageIndex].checkList != null)
+                posList[curStageIndex].checkList.Clear();
+
+            posList[curStageIndex].checkList = new();
+
             for (int i = 0; i < dataList.Count; i++)
             {
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
-                obj.Init(roundTable.monsterData[i]);
+                obj.Init(dataList[i]);
+                obj.transform.position = posList[curStageIndex].SetPos(dataList[i]).position;
             }
         }
 
 
+        // 비동기식으로 다음 라운드의 적 미리 생성해두면 빠를듯
         // 현재 라운드의 totalCost를 통해 랜덤으로 몬스터 가져오기
         public List<JHT_MonsterDataSO> SetSpawnRound(int curRoundIndex)
         {
-            curSpawnIndex = curRoundIndex;
             int count = 0;
             List<JHT_MonsterDataSO> dataList = new();
+            Dictionary<CrewRole, int> crewRoleCounter = new();
 
-            while (count < curTotalCount)
+            while (count != curTotalCount)
             {
                 int rand = UnityEngine.Random.Range(0, roundTable.monsterData.Count);
                 count += roundTable.monsterData[rand].cost;
+
                 if (count > curTotalCount)
                 {
                     count -= roundTable.monsterData[rand].cost;
                     continue;
                 }
-                else if (count == curTotalCount)
-                {
-                    dataList.Add(roundTable.monsterData[rand]);
-                    break;
-                }
                 else
                 {
+                    if (crewRoleCounter.TryGetValue(roundTable.monsterData[rand].monsterCrewRole, out int value))
+                    {
+                        if (value > 2)
+                        {
+                            count -= roundTable.monsterData[rand].cost;
+                            continue;
+                        }
+                        else
+                        {
+                            value++;
+                        }
+                    }
+                    else
+                    {
+                        crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = 1;
+                    }
+
                     dataList.Add(roundTable.monsterData[rand]);
                 }
-            }
 
+                //여기에서 enum값이 두개이상인 캐릭터는 continue
+            }
             return dataList;
         }
 
-        
 
         //public JHT_MonsterDataSO SetSO()
         //{
