@@ -65,7 +65,7 @@ public class BattleManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // 지정된 씬에서만 초기화
-        if (scene.name == "0909Demo" && !isInitialized)
+        if (scene.name == "Game" && !isInitialized)
         {
             Debug.Log(" BattleManager: Scene Loaded → Init");
             isInitialized = true;
