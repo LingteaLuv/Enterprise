@@ -1,4 +1,24 @@
+
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+
+/// <summary>
+/// 지속 시간을 가지는 버프 정보를 저장하는 클래스입니다.
+/// </summary>
+public class Buff
+{
+    public Stat Stat { get; private set; }
+    public float Value { get; private set; }
+    public float Duration { get; set; }
+
+    public Buff(Stat stat, float value, float duration)
+    {
+        this.Stat = stat;
+        this.Value = value;
+        this.Duration = duration;
+    }
+}
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class CombatCharacter : MonoBehaviour
@@ -16,13 +36,11 @@ public class CombatCharacter : MonoBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float attackRange;
 
-    // --- 버프/디버프로 인한 추가 스탯 ---
-    private float bonusAttack;
-    private float bonusHealth;
-    private float bonusDefense;
-    private float bonusCritChance;
-    private float bonusCritDamage;
-    private float bonusAttackSpeed;
+    // --- 현재 적용중인 버프 리스트 ---
+    [SerializeField] private List<Buff> activeBuffs = new List<Buff>();
+
+    [Header("보유 스킬")]
+    public List<SkillSO> skills = new List<SkillSO>();
 
     // --- 컴포넌트 참조 ---
     private HealthSystem healthSystem;
@@ -31,17 +49,21 @@ public class CombatCharacter : MonoBehaviour
     void Awake()
     {
         healthSystem = GetComponent<HealthSystem>();
-        // 자기 자신의 SpriteRenderer 컴포넌트를 미리 찾아둡니다.
         spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    void Update()
+    {
+        // 버프 지속시간 처리
+        ProcessBuffs();
     }
 
     public void Initialize(PlayerCharacterData data)
     {
         this.CharacterStats = data;
-
         charName = data.characterdata.characterName;
 
-        // PlayerData의 영구 스탯을 '전투 기본 스탯' 변수들로 복사합니다.
+        // 영구 스탯을 기본 스탯으로 복사
         baseAttack = data.finalStats.GetValueOrDefault(Stat.Attack, 0);
         baseHealth = data.finalStats.GetValueOrDefault(Stat.Health, 0);
         baseDefense = data.finalStats.GetValueOrDefault(Stat.Defense, 0);
@@ -49,27 +71,19 @@ public class CombatCharacter : MonoBehaviour
         baseCritDamage = data.finalStats.GetValueOrDefault(Stat.CritDamage, 0);
         baseAttackSpeed = data.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0);
 
-        // 이동 속도와 사거리 등 전투에서만 필요한 스탯들은 가져오지 않고 여기서 처리
-        moveSpeed = PartyManager.Instance.moveSpeed;// 캐릭터마다 동일 속도니까
-        // 원거리와 근거리 
+        moveSpeed = PartyManager.Instance.moveSpeed;
         attackRange = data.characterdata.atkRangeType == AtkRangeType.Ranged_Attack ?
             PartyManager.Instance.attackRange : PartyManager.Instance.attackRange2;
-        
 
-        // '추가 스탯'은 모두 0으로 초기화합니다.
-        bonusAttack = 0;
-        bonusHealth = 0;
-        bonusDefense = 0;
-        bonusCritChance = 0;
-        bonusCritDamage = 0;
-        bonusAttackSpeed = 0;
+        // 버프 리스트 초기화
+        activeBuffs.Clear();
 
         if (spriteRenderer != null && data.characterdata != null)
         {
             spriteRenderer.sprite = data.characterdata.characterSprite;
         }
 
-        Debug.Log($"'{CharacterStats.characterdata.characterName}' 데이터 적용 완료.");
+        Debug.Log($"'{charName}' 데이터 적용 완료.");
 
         if (healthSystem != null)
         {
@@ -79,36 +93,72 @@ public class CombatCharacter : MonoBehaviour
 
     /// <summary>
     /// 전투 중 실제 스탯이 필요할 때 이 함수를 호출합니다.
+    /// 기본 스탯과 모든 활성화된 버프의 합을 반환합니다.
     /// </summary>
     public float GetCurrentStat(Stat stat)
     {
+        float bonusValue = activeBuffs.Where(b => b.Stat == stat).Sum(b => b.Value);
+        float finalValue = 0; // 최종 스탯 값을 저장할 변수
+
         switch (stat)
         {
-            case Stat.Attack: return baseAttack + bonusAttack;
-            case Stat.Health: return baseHealth + bonusHealth;
-            case Stat.Defense: return baseDefense + bonusDefense;
-            case Stat.CritChance: return baseCritChance + bonusCritChance;
-            case Stat.CritDamage: return baseCritDamage + bonusCritDamage;
-            case Stat.AttackSpeed: return baseAttackSpeed + bonusAttackSpeed;
-            default: return 0;
+            case Stat.Attack: finalValue = baseAttack + bonusValue; break;
+            case Stat.Health: finalValue = baseHealth + bonusValue; break;
+            case Stat.Defense: finalValue = baseDefense + bonusValue; break;
+            case Stat.CritChance: finalValue = baseCritChance + bonusValue; break;
+            case Stat.CritDamage: finalValue = baseCritDamage + bonusValue; break;
+            case Stat.AttackSpeed: finalValue = baseAttackSpeed + bonusValue; break;
+            default: finalValue = 0; break; // 정의되지 않은 스탯은 0으로 처리
+        }
+
+        Debug.Log($"[CombatCharacter] {charName}의 {stat} 최종 스탯: {finalValue}"); // 최종 스탯 로그 출력
+        return finalValue;
+    }
+
+    /// <summary>
+    /// 새로운 버프를 캐릭터에게 적용합니다.
+    /// </summary>
+    public void ApplyBuff(Stat stat, float value, float duration)
+    {
+        Buff newBuff = new Buff(stat, value, duration);
+        activeBuffs.Add(newBuff);
+        Debug.Log($"'{charName}'에게 버프 적용: {stat}, 수치: {value}, 지속시간: {duration}초");
+
+        // 체력 버프는 즉시 HealthSystem에 반영
+        if (stat == Stat.Health)
+        {
+            healthSystem?.OnStatUpdate();
         }
     }
 
     /// <summary>
-    /// (예시) 버프 등으로 일시적인 스탯 보너스를 적용합니다.
+    /// 매 프레임 버프의 지속시간을 감소시키고 만료된 버프를 제거합니다.
     /// </summary>
-    public void ApplyStatBonus(Stat stat, float amount)
+    private void ProcessBuffs()
     {
-        switch (stat)
+        if (activeBuffs.Count == 0) return;
+
+        bool healthBuffRemoved = false;
+
+        // 뒤에서부터 순회해야 안전하게 리스트 아이템을 삭제할 수 있습니다.
+        for (int i = activeBuffs.Count - 1; i >= 0; i--)
         {
-            case Stat.Attack: bonusAttack += amount; break;
-            case Stat.Health: bonusHealth += amount; break;
-            case Stat.Defense: bonusDefense += amount; break;
-            case Stat.CritChance: bonusCritChance += amount; break;
-            case Stat.CritDamage: bonusCritDamage += amount; break;
-            case Stat.AttackSpeed: bonusAttackSpeed += amount; break;
+            Buff buff = activeBuffs[i];
+            buff.Duration -= Time.deltaTime;
+
+            if (buff.Duration <= 0)
+            {
+                Debug.Log($"'{charName}'의 {buff.Stat} 버프 만료.");
+                if (buff.Stat == Stat.Health) healthBuffRemoved = true;
+                activeBuffs.RemoveAt(i);
+            }
         }
-        Debug.Log($"{CharacterStats.characterdata.characterName} {stat} 스탯 보너스 적용: +{amount}");
+
+        // 체력 버프가 제거되었다면 HealthSystem을 업데이트합니다.
+        if (healthBuffRemoved)
+        {
+            healthSystem?.OnStatUpdate();
+        }
     }
 
     void OnEnable()
@@ -125,8 +175,7 @@ public class CombatCharacter : MonoBehaviour
     {
         if (this.CharacterStats == updatedData)
         {
-            Debug.Log($"전투 중인 '{CharacterStats.characterdata.characterName}'의 영구 스탯 변경 감지.");
-            // 영구 스탯이 변경되었으므로, 전투 기본 스탯을 새로 복사합니다.
+            Debug.Log($"전투 중인 '{charName}'의 영구 스탯 변경 감지.");
             baseAttack = updatedData.finalStats.GetValueOrDefault(Stat.Attack, 0);
             baseHealth = updatedData.finalStats.GetValueOrDefault(Stat.Health, 0);
             baseDefense = updatedData.finalStats.GetValueOrDefault(Stat.Defense, 0);
@@ -134,10 +183,28 @@ public class CombatCharacter : MonoBehaviour
             baseCritDamage = updatedData.finalStats.GetValueOrDefault(Stat.CritDamage, 0);
             baseAttackSpeed = updatedData.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0);
 
-            if (healthSystem != null)
-            {
-                healthSystem.OnStatUpdate();
-            }
+            healthSystem?.OnStatUpdate();
+        }
+    }
+
+    /// <summary>
+    /// 지정된 인덱스의 스킬을 대상에게 사용합니다.
+    /// </summary>
+    /// <param name="skillIndex">사용할 스킬의 리스트 인덱스</param>
+    /// <param name="target">스킬 대상 캐릭터</param>
+    public void UseSkill(int skillIndex, CombatCharacter target)
+    {
+        if (skillIndex < 0 || skillIndex >= skills.Count)
+        {
+            Debug.LogError($"잘못된 스킬 인덱스: {skillIndex}");
+            return;
+        }
+
+        SkillSO skillToUse = skills[skillIndex];
+        if (skillToUse != null)
+        {
+            // TODO: 여기에 쿨다운, 마나 비용 체크 로직 추가 가능
+            skillToUse.Use(this, target);
         }
     }
 }
