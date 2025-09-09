@@ -1,7 +1,7 @@
 
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// 단일 캐릭터의 체력바 UI를 관리합니다.
@@ -12,7 +12,7 @@ public class HealthBarDisplay : MonoBehaviour
     [Header("UI 컴포넌트")]
     [SerializeField] private Image characterIcon;
     [SerializeField] private Slider healthSlider;
-    [SerializeField] private TextMeshProUGUI healthText;
+    [SerializeField] private TextMeshProUGUI healthText; // 체력 숫자를 표시할 텍스트
 
     private HealthSystem healthSystem;
 
@@ -58,7 +58,12 @@ public class HealthBarDisplay : MonoBehaviour
         {
             // max가 0일 경우의 나눗셈 오류 방지
             healthSlider.value = (max > 0) ? (current / max) : 0;
-            healthText.text = DataUtility.FormatNumber(current);
+        }
+
+        // 체력 숫자 텍스트 업데이트
+        if (healthText != null)
+        {
+            healthText.text = $"{DataUtility.FormatNumber(current)} / {DataUtility.FormatNumber(max)}";
         }
     }
 
