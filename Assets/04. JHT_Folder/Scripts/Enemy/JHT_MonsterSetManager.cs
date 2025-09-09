@@ -19,19 +19,20 @@ namespace JHT
 
         public Transform SetPos(JHT_MonsterDataSO so)
         {
+            int idx = SetPosIndex(so);
+
             if (so == null)
             {
                 Debug.LogError("[SetPos] : so없음");
                 return null;
             }
 
-            if (SetPosIndex(so) == -1)
+            if (idx == -1)
             {
                 Debug.LogError("[SetPos] : index값 없음");
                 return null;
             }
-
-            Transform pos = setTransform[SetPosIndex(so)];
+            Transform pos = setTransform[idx];
             return pos;
         }
 
@@ -41,11 +42,11 @@ namespace JHT
             if (monsterCrewCountDic.TryGetValue(so.monsterCrewRole, out int value))
             {
                 if (checkList.Contains(so.monsterCrewRole))
-                    index = monsterCrewCountDic[so.monsterCrewRole] + 1;
+                    index = value + 1;
                 else
                 {
                     checkList.Add(so.monsterCrewRole);
-                    index = monsterCrewCountDic[so.monsterCrewRole];
+                    index = value;
                 }
             }
             else

@@ -7,7 +7,7 @@ public class JHT_MonsterDataSO : ScriptableObject
     [field: SerializeField] public MonsterType monsterType { get; private set; }
     [field: SerializeField] public MonsterRarity monsterRarity { get; private set; }
     [field: SerializeField] public CrewRole monsterCrewRole { get; private set; }
-    [field: SerializeField] public Sprite enemyCharacter { get; private set; }
+    [field: SerializeField] public GameObject enemyCharacter { get; private set; }
     [field: SerializeField] public Sprite enemyIcon { get; private set; }
     [field: SerializeField] public float maxHp { get; private set; }
     [field: SerializeField] public float attackPower { get; private set; }

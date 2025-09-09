@@ -8,6 +8,7 @@ public class JHT_MonsterDataTable : ScriptableObject
 {
     public List<JHT_MonsterDataSO> monsterData;
     public List<JHT_MonsterSetManager> monsterPosData;
+    public List<Vector2> monsterGroupPos;
     public int roundCount;
     public int totalCost;
 }

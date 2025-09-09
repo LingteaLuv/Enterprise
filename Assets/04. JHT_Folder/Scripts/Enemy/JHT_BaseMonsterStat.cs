@@ -7,7 +7,7 @@ namespace JHT
     {
         public JHT_MonsterDataSO curSO;
 
-        public float curHp;
+
         public float maxHp;
         public float attackPower;
         public float defense;
@@ -23,12 +23,15 @@ namespace JHT
         public AnimatorOverrideController animatorOverride;
         //애니메이션 R&D 후 추가 animator override controller OR animator
 
+        private float curHp;
+        public float CurHp { get { return curHp; } set { curHp = value; OnChangeHp?.Invoke(curHp); } }
+        public Action<float> OnChangeHp;
+
         public void Init(JHT_MonsterDataSO so)
         {
             // start Setting
             curSO = so;
             maxHp = curSO.maxHp;
-            curHp = maxHp;
 
             // Stat Setting
             attackPower = curSO.attackPower;// * GlobalStageManager.Instance.currentStageIndex;
@@ -44,8 +47,10 @@ namespace JHT
             monsterRarity = curSO.monsterRarity;
             monsterCrewRole = curSO.monsterCrewRole;
 
-            if (curSO.animatorOverrideController != null) 
+            if (curSO.animatorOverrideController != null)
+            {
                 animatorOverride = curSO.animatorOverrideController;
+            }
         }
 
     }

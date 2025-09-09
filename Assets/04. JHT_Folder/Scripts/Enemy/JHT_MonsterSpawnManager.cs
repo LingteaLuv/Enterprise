@@ -8,10 +8,13 @@ namespace JHT
     public class JHT_MonsterSpawnManager : Singleton<JHT_MonsterSpawnManager>
     {
         public JHT_ObjectPool projectilePool;
-        JHT_ObjectPool monsterPool;
+        private JHT_ObjectPool monsterPool;
+        public JHT_ObjectPool damageTextPool;
 
         [SerializeField] private JHT_BaseMonsterFSM monsterPrefab;
         [SerializeField] private JHT_MonsterProjectile monsterProjectile;
+        [SerializeField] private JHT_DamageBox damageTextPrefab;
+
         [SerializeField] private JHT_MonsterDataTable roundTable;
 
         //[SerializeField] List<JHT_MonsterDataTable> roundList;
@@ -43,8 +46,12 @@ namespace JHT
             GameObject monsterPoolParent = new GameObject($"{monsterPrefab.name} Pool_Parent");
             monsterPoolParent.transform.SetParent(transform);
 
+            GameObject damageTextPoolParent = new GameObject($"{damageTextPrefab.name} Pool_Parent");
+            damageTextPoolParent.transform.SetParent(transform);
+
             monsterPool = new JHT_ObjectPool(monsterPrefab, 10, monsterPoolParent.transform);
             projectilePool = new JHT_ObjectPool(monsterProjectile, 20, projectilePoolParent.transform);
+            damageTextPool = new JHT_ObjectPool(damageTextPrefab, 20, damageTextPoolParent.transform);
         }
 
         private void Start()
@@ -64,7 +71,6 @@ namespace JHT
             stageDic.Add(4, sampleDataList5);
 
             stageIndex = -1;
-            roundIndex = 0;
 
             OnAddMonster += SetSpawnRound;
         }
@@ -78,7 +84,7 @@ namespace JHT
         public void ChangeStage()
         {
             stageIndex++;
-
+            roundIndex = 0;
             if (stageIndex < 0)
                return;
 
@@ -86,6 +92,13 @@ namespace JHT
                 posList.Clear();
 
             roundTable = stageDic[stageIndex];
+
+
+            for (int i = 0; i < roundTable.monsterGroupPos.Count; i++)
+            {
+                roundTable.monsterPosData[i].transform.position = roundTable.monsterGroupPos[i];
+            }
+
             for (int i = 0; i < roundTable.roundCount; i++)
             {
                 int rand = UnityEngine.Random.Range(0, roundTable.monsterPosData.Count);
@@ -99,19 +112,22 @@ namespace JHT
             }
 
             curTotalCount = roundTable.totalCost;
-            SpawnMonster(stageIndex);
+            SpawnMonster(0);
         }
 
         // curStageIndex를 ++을 통해 round를 구별해줄거임
         public void SpawnMonster(int curStageIndex)
         {
+            if (posList.Count < curStageIndex)
+            {
+                Debug.LogError("현재 라운드 최대를 넘었음");
+                return;
+            }
+
             List<JHT_MonsterDataSO> dataList = OnAddMonster?.Invoke(curStageIndex);
 
-            // 이쪽 메모리 생각 destroy를 할지 아니면 재활용할지
-            if(posList[curStageIndex].checkList != null)
-                posList[curStageIndex].checkList.Clear();
-
             posList[curStageIndex].checkList = new();
+
 
             for (int i = 0; i < dataList.Count; i++)
             {
@@ -130,29 +146,44 @@ namespace JHT
             List<JHT_MonsterDataSO> dataList = new();
             Dictionary<CrewRole, int> crewRoleCounter = new();
 
+            float roundStart = Time.realtimeSinceStartup;
+
+            // 다음 스테이지나 씬으로 연결
+            if (curRoundIndex > roundTable.roundCount)
+            {
+                Debug.LogError("라운드 넘어감");
+                return null;
+            }
+
             while (count != curTotalCount)
             {
                 int rand = UnityEngine.Random.Range(0, roundTable.monsterData.Count);
                 count += roundTable.monsterData[rand].cost;
 
+                if (Time.realtimeSinceStartup - roundStart > 2f)
+                {
+                    Debug.LogError($"[SetSpawnRound] 시간초과");
+                    break;
+                }
+
                 if (count > curTotalCount)
                 {
                     count -= roundTable.monsterData[rand].cost;
+                    count -= dataList[dataList.Count - 1].cost;
+                    dataList.RemoveAt(dataList.Count - 1);
                     continue;
                 }
                 else
                 {
                     if (crewRoleCounter.TryGetValue(roundTable.monsterData[rand].monsterCrewRole, out int value))
                     {
-                        if (value > 2)
+                        if (value >= 2)
                         {
+                            //여기서 중복된 CrewRole이 2개보다 많을 때 다른애를 뽑기위해 진행
                             count -= roundTable.monsterData[rand].cost;
                             continue;
                         }
-                        else
-                        {
-                            value++;
-                        }
+                        crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = value + 1;
                     }
                     else
                     {
@@ -162,21 +193,10 @@ namespace JHT
                     dataList.Add(roundTable.monsterData[rand]);
                 }
 
-                //여기에서 enum값이 두개이상인 캐릭터는 continue
             }
             return dataList;
         }
 
-
-        //public JHT_MonsterDataSO SetSO()
-        //{
-        //    foreach (var d in roundList)
-        //    {
-        //
-        //    }
-        //
-        //    return
-        //}
 
 
         #region 이전 버전
