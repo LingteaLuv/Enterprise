@@ -1,6 +1,6 @@
 using DG.Tweening;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 /// <summary>
 /// 보스 도전 버튼을 누른 즉시 나오는 연출
@@ -92,5 +92,11 @@ public class BossBattleButtonDirection : MonoBehaviour
         {
             audioSource.PlayOneShot(clip);
         }
+    }
+
+    private void OnDisable()
+    {
+        bossBattleButtonIntro?.Kill();
+        bossBattleButtonIntro = null;
     }
 }

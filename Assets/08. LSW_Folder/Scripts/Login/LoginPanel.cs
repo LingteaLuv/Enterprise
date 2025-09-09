@@ -8,6 +8,7 @@ public class LoginPanel : UIBase
     [SerializeField] private Button _googleLoginBtn;
     [SerializeField] private Button _guestLoginBtn;
     [SerializeField] private Button _playGamesLoginBtn;
+    [SerializeField] private Button _testLoginBtn;
 
     public Action OnLoginCompleted;
     public Action OnLoginTried;
@@ -18,6 +19,7 @@ public class LoginPanel : UIBase
         _googleLoginBtn.onClick.AddListener(async () => await OnTouchGoogleLoginBtn());
         _guestLoginBtn.onClick.AddListener(async () => await OnTouchGuestLoginBtn());
         _playGamesLoginBtn.onClick.AddListener(async () => await OnTouchPlayGamesLoginBtn());
+        _testLoginBtn.onClick.AddListener(async () => await OnTouchTestLoginBtn());
     }
 
     private async Task OnTouchGoogleLoginBtn()
@@ -55,5 +57,11 @@ public class LoginPanel : UIBase
             return;
         }
         OnLoginFailed?.Invoke();
+    }
+    
+    private async Task OnTouchTestLoginBtn()
+    {
+        //OnLoginTried?.Invoke();
+        await FirebaseManager.Instance.TestLogin();
     }
 }
