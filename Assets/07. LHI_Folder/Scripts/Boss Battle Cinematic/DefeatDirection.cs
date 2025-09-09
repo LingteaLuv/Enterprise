@@ -73,7 +73,7 @@ public class DefeatDirection : MonoBehaviour
         treasureChest.position = treasureChestPos;
         playerShip.position = playerShipPos;
         enemyShip.position = enemyShipPos;
-        enemyShip.rotation = Quaternion.identity;
+        playerShip.rotation = Quaternion.identity;
 
         plankTransform.position = plankPos;
         plankTransform.rotation = Quaternion.identity;
@@ -97,12 +97,12 @@ public class DefeatDirection : MonoBehaviour
 
                        .Join(treasureChest.DOMoveY(treasureChest.position.y - 6f, 1.5f).SetEase(Ease.OutBounce))
 
-                       .Join(enemyShip.DORotate(new Vector3(0, 0, -90), 2f).SetEase(Ease.InOutSine))
-                       .Join(enemyShip.DOMoveY(enemyShip.position.y - 1f, 2f).SetEase(Ease.InOutSine))
+                       .Join(playerShip.DORotate(new Vector3(0, 0, -90), 1.5f).SetEase(Ease.InOutSine))
+                       .Join(playerShip.DOMoveY(playerShip.position.y - 1f, 1.5f).SetEase(Ease.InOutSine))
 
-                       .Join(plankTransform.DORotate(new Vector3(0, 0, -90), 2f).SetEase(Ease.InOutSine))
-                       .Join(plankTransform.DOMoveY(plankTransform.position.y - 1f, 2f).SetEase(Ease.InOutSine))
-                       .Join(plankTransform.DOMoveX(plankTransform.position.x + 2f, 2f).SetEase(Ease.InOutSine))
+                       .Join(plankTransform.DORotate(new Vector3(0, 0, 90), 1.5f).SetEase(Ease.InOutSine))
+                       .Join(plankTransform.DOMoveY(plankTransform.position.y - 1f, 1.5f).SetEase(Ease.InOutSine))
+                       .Join(plankTransform.DOMoveX(plankTransform.position.x - 2f, 1.5f).SetEase(Ease.InOutSine))
 
                        .AppendInterval(1f)
                        .AppendCallback(() => PlaySound(sparkle));
@@ -118,7 +118,7 @@ public class DefeatDirection : MonoBehaviour
         cameraZoomTween = DOTween.Sequence();
 
         cameraZoomTween.Append(mainCam.DOOrthoSize(3f, 1f).SetEase(Ease.InOutSine)) // 줌인
-            .Join(mainCam.transform.DOMove(new Vector3(playerShip.position.x, playerShip.position.y, mainCam.transform.position.z), 1f).SetEase(Ease.InOutSine));
+            .Join(mainCam.transform.DOMove(new Vector3(enemyShip.position.x, enemyShip.position.y, mainCam.transform.position.z), 1f).SetEase(Ease.InOutSine));
     }
 
     private void PlaySound(AudioClip clip)

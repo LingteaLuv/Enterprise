@@ -107,12 +107,12 @@ public class VictoryDirection : MonoBehaviour
 
                        .Join(treasureChest.DOMoveY(treasureChest.position.y -6f, 1.5f).SetEase(Ease.OutBounce))
                        
-                       .Join(enemyShip.DORotate(new Vector3(0, 0, -90), 2f).SetEase(Ease.InOutSine))
-                       .Join(enemyShip.DOMoveY(enemyShip.position.y - 1f, 2f).SetEase(Ease.InOutSine))
+                       .Join(enemyShip.DORotate(new Vector3(0, 0, -90), 1.5f).SetEase(Ease.InOutSine))
+                       .Join(enemyShip.DOMoveY(enemyShip.position.y - 1f, 1.5f).SetEase(Ease.InOutSine))
 
-                       .Join(plankTransform.DORotate(new Vector3(0, 0, -90), 2f).SetEase(Ease.InOutSine))
-                       .Join(plankTransform.DOMoveY(plankTransform.position.y - 1f, 2f).SetEase(Ease.InOutSine))
-                       .Join(plankTransform.DOMoveX(plankTransform.position.x + 2f, 2f).SetEase(Ease.InOutSine))
+                       .Join(plankTransform.DORotate(new Vector3(0, 0, -90), 1.5f).SetEase(Ease.InOutSine))
+                       .Join(plankTransform.DOMoveY(plankTransform.position.y - 1f, 1.5f).SetEase(Ease.InOutSine))
+                       .Join(plankTransform.DOMoveX(plankTransform.position.x + 2f, 1.5f).SetEase(Ease.InOutSine))
 
                        .AppendInterval(1f)
                        .AppendCallback(() => PlaySound(sparkle));
