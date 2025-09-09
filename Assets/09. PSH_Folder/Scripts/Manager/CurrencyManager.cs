@@ -56,6 +56,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
     [SerializeField] private string _initialGemString;
 
     public Action<string, string, string> OnUpdateCurrency;
+    public Action OnCurrencyChanged;
     public bool IsFireBase;
     protected async override void Awake()
     {
@@ -210,6 +211,7 @@ public class CurrencyManager : Singleton<CurrencyManager>
         string s2 = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
         string s3 = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gem])}";
         OnUpdateCurrency?.Invoke(s1, s2, s3);
+        OnCurrencyChanged?.Invoke();
     }
 
     // 인스펙터에서 값이 변경될 때 호출됩니다.
