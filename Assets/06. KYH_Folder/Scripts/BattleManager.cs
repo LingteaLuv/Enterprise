@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using GooglePlayGames.BasicApi;
 
 
 /// <summary>
@@ -23,6 +24,8 @@ public class BattleManager : MonoBehaviour
     private Button _skipBtn;
     private CameraFollow cameraFollow;
 
+    protected PartyManager partymanager;
+
     [Header("스폰 프리팹")]
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject enemyPrefab;
@@ -34,7 +37,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private int baseEnemyCount = 3;
     [SerializeField] private int growthPerStage = 1;
 
-    private GameObject currentPlayer;
+    private List<GameObject> currentPlayers = new();  // 기존 currentPlayer 대신 여러 명
+
     private List<GameObject> spawnedEnemies = new();
 
     private int currentStageIndex = 0;
@@ -61,7 +65,7 @@ public class BattleManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // 지정된 씬에서만 초기화
-        if (scene.name == "Game" && !isInitialized)
+        if (scene.name == "0909Demo" && !isInitialized)
         {
             Debug.Log(" BattleManager: Scene Loaded → Init");
             isInitialized = true;
@@ -129,7 +133,7 @@ public class BattleManager : MonoBehaviour
 
         IslandStageManager.Instance.OnBattleComplete();
         ClearEnemies();
-        ClearPlayer();
+        ClearPlayers();
     }
 
     // 외부에서 전투 시작 요청
@@ -158,12 +162,14 @@ public class BattleManager : MonoBehaviour
     // 전투 흐름 코루틴
     private IEnumerator BattleRoutine()
     {
+
         Debug.Log("전투 시작");
 
         var field = battleFields[currentStageIndex];
 
-        SpawnPlayer(field);
         SpawnEnemies(field, currentStageIndex);
+        SpawnPlayers(field);
+        
 
         yield return new WaitForSeconds(0.5f);      // 등장 연출 대기
 
@@ -185,23 +191,38 @@ public class BattleManager : MonoBehaviour
         if (_skipBtn != null)
             _skipBtn.interactable = false;
 
-        ClearPlayer();
+        ClearPlayers();
         ClearEnemies();
         IslandStageManager.Instance.OnBattleComplete();
     }
 
     // 플레이어 생성 및 카메라 타겟 설정
-    private void SpawnPlayer(BattleField field)
+    private void SpawnPlayers(BattleField field)
     {
-        if (currentPlayer != null)
-            Destroy(currentPlayer);
+        ClearPlayers();
 
-        currentPlayer = Instantiate(playerPrefab, field.PlayerSpawnPoint.position, Quaternion.identity);
+        var party = PartyManager.Instance.GetAllPartyMembers(); // 전체 반환
 
-        if (cameraFollow != null)
-            cameraFollow.SetTarget(currentPlayer.transform);
-        else
-            Debug.LogWarning(" CameraFollow가 연결되지 않았습니다.");
+        for (int i = 0; i < party.Count; i++)
+        {
+            var character = party[i];
+            character.transform.SetParent(null);
+            character.transform.position = field.PlayerSpawnPoint.position + new Vector3(i * 1.5f, 0, 0);
+            character.gameObject.SetActive(true);
+
+            // FSM 활성화 보장
+            var fsm = character.GetComponent<BaseCharacterFSM>();
+            if (fsm != null)
+            {
+                fsm.enabled = true;
+                fsm.ChangeStateIdleForce();
+            }
+
+            currentPlayers.Add(character.gameObject);
+        }
+
+        if (cameraFollow != null && currentPlayers.Count > 0)
+            cameraFollow.SetTarget(currentPlayers[0].transform);
     }
 
     // 적 생성 (스테이지 수에 비례해 증가)
@@ -240,27 +261,33 @@ public class BattleManager : MonoBehaviour
     }
 
     // 플레이어 사망 시 처리
-    public void OnPlayerDead()
+    public void OnPlayerDead(GameObject deadPlayer)
     {
-        if (isbattleover) return;
+        if (currentPlayers.Contains(deadPlayer))
+            currentPlayers.Remove(deadPlayer);
 
-        isbattleover = true;
+        Debug.Log($"{deadPlayer.name} 사망 → 남은 플레이어 수: {currentPlayers.Count}");
 
-        if (battleRoutine != null)
+        if (currentPlayers.Count == 0)
         {
-            StopCoroutine(battleRoutine);
-            battleRoutine = null;
+            Debug.Log("모든 플레이어 사망 → 패배 처리 시작");
+
+            isbattleover = true;
+
+            if (battleRoutine != null)
+            {
+                StopCoroutine(battleRoutine);
+                battleRoutine = null;
+            }
+
+            if (_skipBtn != null)
+                _skipBtn.interactable = false;
+
+            ClearEnemies();
+            ClearPlayers();
+
+            StartCoroutine(HandleDefeat());
         }
-
-        if (_skipBtn != null)
-            _skipBtn.interactable = false;
-
-        ClearEnemies();
-        ClearPlayer();
-
-        Debug.Log("플레이어 사망 → 패배 처리 시작");
-
-        StartCoroutine(HandleDefeat());
     }
 
     // 패배 시 연출 및 리셋 처리
@@ -285,12 +312,16 @@ public class BattleManager : MonoBehaviour
     }
 
     // 플레이어 제거
-    private void ClearPlayer()
+    private void ClearPlayers()
     {
-        if (currentPlayer != null)
+        foreach (var player in currentPlayers)
         {
-            Destroy(currentPlayer);
-            currentPlayer = null;
+            if (player != null)
+            {
+                player.SetActive(false);
+                player.transform.SetParent(PartyManager.Instance.transform); // 다시 파티매니저로 귀환
+            }
         }
+        currentPlayers.Clear();
     }
 }

@@ -50,7 +50,7 @@ public class TravelUIController : MonoBehaviour
     // 씬 로드 완료 시 참조 초기화 수행
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "Game" && !isInitialized)
+        if (scene.name == "0909Demo" && !isInitialized)
         {
             Debug.Log("🚢 TravelUIController: Scene Loaded → InitReferences");
             isInitialized = true;

@@ -53,7 +53,7 @@ public class IslandStageManager : MonoBehaviour
     // 씬이 로드되면 자동으로 섬 데이터 초기화 및 스테이지 시작
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "Game")
+        if (scene.name == "0909Demo")
         {
             Debug.Log("IslandStageManager: Scene Loaded → InitReferences + StartStage");
             InitReferences();
