@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using JHT;
 using TMPro;
@@ -94,7 +95,7 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         _bossBtn.onClick.AddListener(() =>
         {
             GlobalStageManager.Instance.bossBattleTriggered = true;
-            SceneManager.LoadScene("BossBattleScene");
+            StartCoroutine(Delay());
         });
         _dungeonBtn.onClick.AddListener(()=>
         {
@@ -115,5 +116,11 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         _goldText.text = s1;
         _stoneText.text = s2;
         _gemText.text = s3;
+    }
+
+    private IEnumerator Delay()
+    {
+        yield return new WaitForSeconds(5f);
+        SceneManager.LoadScene("BossBattleScene");
     }
 }
