@@ -188,10 +188,6 @@ public class GachaUIHandler : UIBase
                         QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
                     }
                 }
-                else
-                {
-                    UIManager.Instance.ShowWarning("재화가 부족합니다.");
-                }
             },
             onCancel: () =>
             {

@@ -10,7 +10,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         // 퀘스트 고유 번호
         public string QuestId;
         // 퀘스트 상태
-        public QuestState_Enum QuestState = QuestState_Enum.Active;
+        public QuestState_Enum QuestState = QuestState_Enum.BeforeActive;
         // 현재 퀘스트 목표 달성 정도
         public int CurrentGoalCount { get; private set; }
         // 현재 일반 퀘스트가 몇번째 퀘스트인지 
@@ -31,10 +31,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 목표보다 현재 Count수가 작다면
             if (goalRequiredCount > CurrentGoalCount)
             {
-                QuestState = QuestState_Enum.Active;
                 return false;
             }
-            QuestState = QuestState_Enum.Completed;
             return true;
         }
 

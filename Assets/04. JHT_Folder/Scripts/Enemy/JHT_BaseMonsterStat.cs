@@ -16,12 +16,11 @@ namespace JHT
         public float chaseRange;
         public float moveSpeed;
         public float attackDelay;
-        public Sprite projectileImage;
-        public Sprite characterImage;
 
         public MonsterType monsterType;
         public MonsterRarity monsterRarity;
-
+        public CrewRole monsterCrewRole;
+        public AnimatorOverrideController animatorOverride;
         //애니메이션 R&D 후 추가 animator override controller OR animator
 
         public void Init(JHT_MonsterDataSO so)
@@ -32,21 +31,21 @@ namespace JHT
             curHp = maxHp;
 
             // Stat Setting
-            attackPower = curSO.upAttackPower;// * GlobalStageManager.Instance.currentStageIndex;
-            defense = curSO.upDefense;// * GlobalStageManager.Instance.currentStageIndex;
+            attackPower = curSO.attackPower;// * GlobalStageManager.Instance.currentStageIndex;
+            defense = curSO.defense;// * GlobalStageManager.Instance.currentStageIndex;
             attackRange = curSO.attackRange;
             chaseRange = curSO.chaseRange;
-            moveSpeed = curSO.upMoveSpeed;
+            moveSpeed = curSO.moveSpeed;
             attackDelay = curSO.attackDelay;
             attackSpeed = curSO.attackSpeed;
 
             // Enum
             monsterType = curSO.monsterType;
             monsterRarity = curSO.monsterRarity;
+            monsterCrewRole = curSO.monsterCrewRole;
 
-            // Sprite
-            characterImage = curSO.enemyCharacter;
-            projectileImage = curSO.projectileSprite;
+            if (curSO.animatorOverrideController != null) 
+                animatorOverride = curSO.animatorOverrideController;
         }
 
     }

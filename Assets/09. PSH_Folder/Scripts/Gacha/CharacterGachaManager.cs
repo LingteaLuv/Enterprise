@@ -2,6 +2,7 @@ using JHT;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System;
 
 public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
 {
@@ -53,13 +54,58 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
 
     public override bool PerformMultipleGacha(int count)
     {
-        System.Numerics.BigInteger totalCost = singleGachaCost * count;
-        if (!CurrencyManager.Instance.SpendCurrency(currencyType, totalCost))
-        {
-            Debug.Log($"가챠 실패: 재화({currencyType})가 부족합니다.");
-            return false;
-        }
+        CurrencyType ticketType = CurrencyType.CrewDrawTicket;
+        CurrencyType gemType = CurrencyType.Gem;
+        int ticketCostPerGacha = 1;
+        int gemCostPerTicket = 100;
 
+        System.Numerics.BigInteger requiredTickets = count * ticketCostPerGacha;
+
+        if (CurrencyManager.Instance.CanSpendCurrency(ticketType, requiredTickets))
+        {
+            CurrencyManager.Instance.SpendCurrency(ticketType, requiredTickets);
+            ExecuteGachaDraw(count);
+            return true;
+        }
+        else
+        {
+            System.Numerics.BigInteger currentTickets = CurrencyManager.Instance.GetCurrency(ticketType);
+            System.Numerics.BigInteger neededTickets = requiredTickets - currentTickets;
+            System.Numerics.BigInteger requiredGems = neededTickets * gemCostPerTicket;
+
+            if (CurrencyManager.Instance.CanSpendCurrency(gemType, requiredGems))
+            {
+                Action onConfirm = () =>
+                {
+                    if (currentTickets > 0)
+                    {
+                        CurrencyManager.Instance.SpendCurrency(ticketType, currentTickets);
+                    }
+                    if (CurrencyManager.Instance.SpendCurrency(gemType, requiredGems))
+                    {
+                        Debug.Log($"성공적으로 {requiredGems} 보석을 사용해 부족한 {neededTickets}개의 뽑기 횟수를 대체했습니다.");
+                        ExecuteGachaDraw(count);
+                    }
+                    else
+                    {
+                        Debug.LogError("알 수 없는 오류로 보석 소모에 실패했습니다. 가챠를 중단합니다.");
+                    }
+                };
+
+                string message = $"{neededTickets}개의 티켓이 부족합니다.\n{requiredGems}개의 보석으로 구매하시겠습니까?";
+                PopManager.Instance.ShowOKCancelPopup(message, "구매", onConfirm, "취소");
+                return true;
+            }
+            else
+            {
+                PopManager.Instance.ShowOKPopup($"재화가 부족합니다.\n티켓과 보석을 확인해주세요.");
+                return false;
+            }
+        }
+    }
+
+    private void ExecuteGachaDraw(int count)
+    {
         LastGachaResults = new List<PlayerCharacterData>();
         List<GachaGrade> resultGrades = new List<GachaGrade>();
 
@@ -73,13 +119,13 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
             if (gachaPityCounter >= GACHA_CEILING_COUNT)
             {
                 Debug.Log($"<color=yellow>천장 시스템 발동! 3성 캐릭터를 확정적으로 뽑습니다. (카운트: {gachaPityCounter})</color>");
-                grade = GachaGrade.ThreeStar; // 천장: 등급만 3성으로 고정
-                isCaptain = Random.Range(0, 100f) < captainChance; // 선장 여부는 일반 확률 따름
+                grade = GachaGrade.ThreeStar;
+                isCaptain = UnityEngine.Random.Range(0, 100f) < captainChance;
                 gachaPityCounter = 0;
             }
             else
             {
-                isCaptain = Random.Range(0, 100f) < captainChance;
+                isCaptain = UnityEngine.Random.Range(0, 100f) < captainChance;
                 List<GradeChance> gradeChances = isCaptain ? captainGradeChances : crewGradeChances;
                 grade = GetRandomGrade(gradeChances);
             }
@@ -106,8 +152,6 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         CurrencyManager.Instance.UpdateCurrencyUI();
 
         PlayerDataManager.Instance.GachaPityCounter = gachaPityCounter;
-
-        return true;
     }
 
     private PlayerCharacterData GetCharacterFromPool(bool isCaptain, GachaGrade grade)
@@ -119,7 +163,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
             return null;
         }
 
-        CharacterData drawnCharacterSO = characterPool[Random.Range(0, characterPool.Count)];
+        CharacterData drawnCharacterSO = characterPool[UnityEngine.Random.Range(0, characterPool.Count)];
         PlayerCharacterData newCharacterInstance = PlayerDataManager.Instance.AddCharacter(drawnCharacterSO, grade);
 
         Debug.Log($"캐릭터 뽑기 결과: [{(isCaptain ? "선장" : "선원")}, {grade}] {newCharacterInstance.characterdata.characterName}");
@@ -135,7 +179,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
             return chances.FirstOrDefault()?.grade ?? GachaGrade.OneStar;
         }
 
-        float randomPoint = Random.Range(0, totalChance);
+        float randomPoint = UnityEngine.Random.Range(0, totalChance);
 
         foreach (var gradeInfo in chances)
         {
@@ -148,10 +192,9 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
                 randomPoint -= gradeInfo.chance;
             }
         }
-        return chances.Last().grade; // 예외 상황 방지
+        return chances.Last().grade;
     }
 
-    // BaseGachaManager의 DrawItem은 이제 사용되지 않으므로, 빈 구현을 제공합니다.
     protected override PlayerCharacterData DrawItem()
     {
         return null;
