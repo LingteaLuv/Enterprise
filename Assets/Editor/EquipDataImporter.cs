@@ -87,7 +87,6 @@ public class EquipDataImporter
 
                 // Enum 파싱
                 // Rarity는 CharacterData.cs에 정의된 Enum을 사용합니다.
-                data.rarity = (Rarity)Enum.Parse(typeof(Rarity), fields[headerMap["rarity"]], true); // 대소문자 무시
                 data.equipCategory = (EquipCategory)Enum.Parse(typeof(EquipCategory), fields[headerMap["equipCategory"]], true);
                 data.equipType = (EquipType)Enum.Parse(typeof(EquipType), fields[headerMap["equipType"]], true);
 
