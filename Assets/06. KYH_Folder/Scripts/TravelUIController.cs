@@ -52,7 +52,7 @@ public class TravelUIController : MonoBehaviour
     {
         if (scene.name == "Game" && !isInitialized)
         {
-            Debug.Log("🚢 TravelUIController: Scene Loaded → InitReferences");
+            Debug.Log(" TravelUIController: Scene Loaded → InitReferences");
             isInitialized = true;
             InitReferences();
         }

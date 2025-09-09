@@ -50,7 +50,7 @@ namespace JHT
                 foreach (var c in cols)
                 {
                     //일단은 일방적인 플레이어 스크립트
-                    BaseCharecterFSM target = c.GetComponent<BaseCharecterFSM>();
+                    BaseCharacterFSM target = c.GetComponent<BaseCharacterFSM>();
 
                     if (target != null)
                     {

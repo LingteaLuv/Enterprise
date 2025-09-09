@@ -1,23 +1,37 @@
 using UnityEngine;
 using System.Collections;
-public class MeleeCharacter : BaseCharecterFSM
+public class MeleeCharacter : BaseCharacterFSM
 {
-    public Transform target;
+    private Transform target;
+    private Coroutine findTargetRoutine;
+
     protected override void Start()
     {
         base.Start();
-
-        FindClosestEnemy();
+        StartFindTargetLoop();
     }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        StartFindTargetLoop();
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        StopFindTargetLoop();
+    }
+
     protected override void HandleIdle()
     {
-        if (target == null)
-        {
-            FindClosestEnemy(); // 실시간 타겟 탐색
-            return; // 한 프레임 쉬고 다음 프레임부터 다시 체크
-        }
+        if (!IsTargetValid())
+            return; // 타겟 탐색은 코루틴에서 자동 실행 중
 
-        if (Vector3.Distance(transform.position, target.position) < attackRange)
+        float attackRange = PartyManager.Instance.attackRange;
+        float distance = Vector3.Distance(transform.position, target.position);
+
+        if (distance < attackRange)
             ChangeState(State.Attack);
         else
             ChangeState(State.Move);
@@ -25,9 +39,19 @@ public class MeleeCharacter : BaseCharecterFSM
 
     protected override void HandleMove()
     {
+        if (!IsTargetValid())
+        {
+            ChangeState(State.Idle);
+            return;
+        }
+
+        float moveSpeed = PartyManager.Instance.moveSpeed;
+        float attackRange = PartyManager.Instance.attackRange;
+        float distance = Vector3.Distance(transform.position, target.position);
+
         transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
 
-        if (Vector3.Distance(transform.position, target.position) <= attackRange)
+        if (distance <= attackRange)
         {
             ChangeState(State.Attack);
         }
@@ -43,56 +67,99 @@ public class MeleeCharacter : BaseCharecterFSM
     {
         while (true)
         {
-            if (target == null)
+            if (!IsTargetValid())
             {
                 ChangeState(State.Idle);
                 yield break;
             }
 
+            float attackRange = PartyManager.Instance.attackRange;
+            float attackDelay = stats.GetCurrentStat(Stat.AttackSpeed);
             float distance = Vector3.Distance(transform.position, target.position);
 
             if (distance > attackRange)
             {
-                ChangeState(State.Move); // 사거리 밖이면 다시 이동 상태로
-                yield break; // 코루틴 종료
+                ChangeState(State.Move);
+                yield break;
             }
 
             Debug.Log($"{gameObject.name}이(가) 근접 공격!");
 
-            // 실제 공격 처리
             var targetScript = target.GetComponent<BaseMonsterFSM>();
             if (targetScript != null)
             {
-                targetScript.TakeDamage(attack); // 데미지 전달
+                float attackPower = stats.GetCurrentStat(Stat.Attack);
+                targetScript.TakeDamage(attackPower);
             }
 
-            yield return new WaitForSeconds(attackDelay);
+            yield return new WaitForSeconds(5f);
+        }
+    }
+
+    // 🟡 타겟 감시 루프 (null되면 다시 탐색)
+    private void StartFindTargetLoop()
+    {
+        if (findTargetRoutine != null)
+            StopCoroutine(findTargetRoutine);
+
+        findTargetRoutine = StartCoroutine(FindTargetLoop());
+    }
+
+    private void StopFindTargetLoop()
+    {
+        if (findTargetRoutine != null)
+        {
+            StopCoroutine(findTargetRoutine);
+            findTargetRoutine = null;
+        }
+    }
+
+    private IEnumerator FindTargetLoop()
+    {
+        WaitForSeconds wait = new WaitForSeconds(0.5f);
+
+        while (true)
+        {
+            if (!IsTargetValid())
+                FindClosestEnemy();
+
+            yield return wait;
         }
     }
 
     private void FindClosestEnemy()
     {
-        GameObject[] crews = GameObject.FindGameObjectsWithTag("Enemy");
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        if (enemies.Length == 0)
+        {
+            return;
+        }
+
         float minDist = float.MaxValue;
         GameObject closest = null;
 
-        foreach (GameObject crew in crews)
+        foreach (GameObject enemy in enemies)
         {
-            float dist = Vector3.Distance(transform.position, crew.transform.position);
+            if (enemy == null) continue;
+
+            float dist = Vector3.Distance(transform.position, enemy.transform.position);
             if (dist < minDist)
             {
                 minDist = dist;
-                closest = crew;
+                closest = enemy;
             }
         }
 
         if (closest != null)
+        {
             target = closest.transform;
+            Debug.Log($"[FindClosestEnemy] 타겟 설정됨: {target.name}");
+        }
     }
 
-    public override void TargetFind()
+    private bool IsTargetValid()
     {
-        if (target == null)
-            FindClosestEnemy();
+        return target != null && target.gameObject != null && !target.Equals(null);
     }
 }

@@ -1,9 +1,13 @@
+using System;
 using UnityEngine;
 
 public class HealthSystem : MonoBehaviour
 {
     public float currentHealth;
     public float maxHealth;
+
+    // 체력이 변경될 때 호출되는 이벤트입니다. (현재 체력, 최대 체력)
+    public event Action<float, float> OnHealthChanged;
 
     private CombatCharacter combatCharacter;
 
@@ -20,6 +24,7 @@ public class HealthSystem : MonoBehaviour
         // GetCurrentStat을 사용하여 최대 체력을 가져와 설정합니다.
         this.maxHealth = combatCharacter.GetCurrentStat(Stat.Health);
         this.currentHealth = this.maxHealth;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
         Debug.Log($"'{combatCharacter.name}' 체력 초기화: {currentHealth}/{maxHealth}");
     }
 
@@ -43,6 +48,8 @@ public class HealthSystem : MonoBehaviour
         // 현재 체력이 새로운 최대 체력을 넘지 않도록 보정합니다.
         this.currentHealth = Mathf.Min(this.currentHealth, this.maxHealth);
 
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+
         Debug.Log($"'{combatCharacter.name}' 체력 스탯 변경 적용. 현재 체력: {currentHealth}/{maxHealth}");
     }
 
@@ -54,5 +61,6 @@ public class HealthSystem : MonoBehaviour
             currentHealth = 0;
             // TODO: 사망 처리 로직 호출
         }
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 }

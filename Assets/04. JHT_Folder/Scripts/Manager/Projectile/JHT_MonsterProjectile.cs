@@ -44,7 +44,7 @@ public class JHT_MonsterProjectile : JHT_PooledObject
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            BaseCharecterFSM target = collision.GetComponent<BaseCharecterFSM>();
+            BaseCharacterFSM target = collision.GetComponent<BaseCharacterFSM>();
 
             if (target != null)
             {

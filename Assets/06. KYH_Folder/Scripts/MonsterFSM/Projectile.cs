@@ -29,7 +29,7 @@ public class Projectile : MonoBehaviour
     {
         if (other.CompareTag("Crew"))
         {
-            var target = other.GetComponent<LHI.Character>();
+            var target = other.GetComponent<HealthSystem>();
             if (target != null)
             {
                 target.TakeDamage(damage); // 충돌 대상에게 데미지 전달
