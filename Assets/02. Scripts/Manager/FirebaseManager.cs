@@ -79,7 +79,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
         }
     }
 
-    private async Task TestLogin()
+    public async Task TestLogin()
     {
         string testId = "hagwhr2@naver.com";
         string testPassword = "123456";
