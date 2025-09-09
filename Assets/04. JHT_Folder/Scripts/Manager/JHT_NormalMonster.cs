@@ -6,11 +6,6 @@ namespace JHT
     public class JHT_NormalMonster : JHT_BaseMonsterFSM
     {
 
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
         protected override void Start()
         {
             base.Start();
@@ -28,27 +23,23 @@ namespace JHT
         protected override void HandleAttack()
         {
             //애니메이션 실행(이벤트 사용할거임)
-            NormalMonsterAttack();
-        }
-
-        protected override void HandleChase()
-        {
-            base.HandleChase();
-        }
-
-        protected override void HandleIdle()
-        {
-
+            base.HandleAttack();
         }
 
         protected override void HandleMove()
         {
+            base.HandleMove();
+        }
 
+        protected override void HandleIdle()
+        {
+            base.HandleIdle();
         }
 
         // Attack애니메이션 이벤트로 실행할 함수
         public void NormalMonsterAttack()
         {
+            Debug.LogError("Attack!");
             // 근접 공격일경우
             if (monsterStat.monsterType == MonsterType.close)
             {
