@@ -10,9 +10,7 @@ public enum Stat
     Defense,
     CritChance,
     CritDamage,
-    AttackSpeed,
-    AttackRange,
-    MoveSpeed
+    AttackSpeed
 }
 
 

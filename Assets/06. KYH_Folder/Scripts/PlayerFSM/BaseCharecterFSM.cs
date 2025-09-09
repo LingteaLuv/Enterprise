@@ -10,6 +10,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
     protected CombatCharacter stats;
     protected HealthSystem health;
     protected Coroutine attackRoutine;
+    protected PartyManager partyManager;
 
     protected virtual void Awake()
     {
@@ -22,6 +23,15 @@ public abstract class BaseCharacterFSM : MonoBehaviour
         ChangeState(State.Idle);
     }
 
+    protected virtual void OnEnable()
+    {
+        // 자식 클래스에서 override 가능하게 열어줌
+    }
+
+    protected virtual void OnDisable()
+    {
+
+    }
     protected virtual void Update()
     {
         switch (currentState)
@@ -35,6 +45,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
 
     protected virtual void ChangeState(State newState)
     {
+        Debug.Log($"[FSM] {gameObject.name} 상태 전환: {currentState} → {newState}");
         currentState = newState;
         if (newState != State.Attack && attackRoutine != null)
         {
@@ -58,7 +69,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
         Debug.Log($"{gameObject.name} 사망");
 
         if (CompareTag("Crew"))
-            BattleManager.Instance?.OnPlayerDead();
+            BattleManager.Instance?.OnPlayerDead(gameObject);
 
         Destroy(gameObject);
     }
@@ -71,4 +82,10 @@ public abstract class BaseCharacterFSM : MonoBehaviour
     protected abstract void HandleIdle();
     protected abstract void HandleMove();
     protected abstract void HandleAttack();
+
+    public void ChangeStateIdleForce()
+    {
+        currentState = State.Idle;
+        Debug.Log($"[FSM] {gameObject.name} 상태 강제 리셋: Idle");
+    }
 }
