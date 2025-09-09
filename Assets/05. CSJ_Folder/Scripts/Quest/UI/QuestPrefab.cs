@@ -23,7 +23,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
         private Color CompleteColor = new Color(20, 20, 20, 150);
         private Color ActiveColor = new Color(152, 152,152, 150);
 
-        public void CardSet(QuestDefinitionSO  def, QuestInstance inst)
+        public void CardSet(TemporaryInstance inst)
         {
             if (objectImg == null) objectImg = gameObject.GetComponent<Image>();
 
@@ -51,13 +51,13 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                     break;
             }
 
-            _progress.maxValue = def.Goal.RequireCount;
+            _progress.maxValue = inst.DemandedGoalCount;
             _progress.value = inst.CurrentGoalCount;
-            _progressContent.text = $"{inst.CurrentGoalCount} / {def.Goal.RequireCount}";
-            _questContent.text = def.questName;
+            _progressContent.text = $"{inst.CurrentGoalCount} / {inst.DemandedGoalCount}";
+            _questContent.text = inst.temporaryQuestContent;
             //TODO : RewardImage
             
-            QuestId = def.questId;
+            QuestId = inst.TemporaryQuestId;
             _CompleteButton.onClick.RemoveAllListeners();
             _CompleteButton.onClick.AddListener(() => QuestSignalManager.Instance.OnCompleteQuest(QuestId));
         }

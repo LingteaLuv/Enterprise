@@ -19,8 +19,8 @@ public class QuestUIController : MonoBehaviour
 
     
     public int QuestNumber;
-    public QuestInstance QuestInst;
-    public QuestDefinitionSO QuestDef;
+    public GeneralQuestInstance QuestInst;
+    public GeneralQuestDefinitionSO QuestDef;
     public int QuestGoalCount;
     
     private GoalDefinitionSO QuestGoal;
@@ -48,7 +48,7 @@ public class QuestUIController : MonoBehaviour
         // TODO : 우당탕탕 처럼 완료되지 않은 퀘스트 클릭시 수행 위치로 이동?
     }
 
-    public void UpdateQuest(QuestDefinitionSO definition, QuestInstance instance )
+    public void UpdateQuest(GeneralQuestDefinitionSO definition, GeneralQuestInstance instance )
     {
         QuestDef = definition;
         QuestInst = instance;
@@ -59,7 +59,7 @@ public class QuestUIController : MonoBehaviour
         
         _questNumberText.text = QuestNumber.ToString();
         _questGoalText.text = QuestDef.questName;
-        if (QuestDef.GeneralType == GeneralType_Enum.StageClear)
+        if (QuestDef is GeneralQuestDefinitionSO { GeneralType: GeneralType_Enum.StageClear })
         {
             _questGoalText.text = QuestInst.stageClearMission;
         }

@@ -11,33 +11,33 @@ public class QuestListController : MonoBehaviour
     [SerializeField] private RectTransform content;
     [SerializeField] private QuestPrefab questPrefab;
 
-    private Dictionary<TemporaryQuestDefinitionSO, QuestPrefab> questDic;
+    private Dictionary<TemporaryInstance, QuestPrefab> questDic;
 
     private void Awake()
     {
-        questDic = new Dictionary<TemporaryQuestDefinitionSO, QuestPrefab>();
+        questDic = new Dictionary<TemporaryInstance, QuestPrefab>();
     }
 
-    public void RebuildList(IEnumerable<(TemporaryQuestDefinitionSO def, TemporaryInstance inst)> quests)
+    public void RebuildList(IEnumerable<TemporaryInstance> quests)
     {
         for(int i = content.childCount - 1; i >= 0; i--)
             Destroy(content.GetChild(i).gameObject);
         questDic.Clear();
         
-        foreach ((TemporaryQuestDefinitionSO def, TemporaryInstance inst) in quests)
+        foreach (var inst in quests)
         {
             var card = Instantiate(questPrefab, content);
-            card.CardSet(def, inst);
-            questDic.Add(def, card);
+            card.CardSet(inst);
+            questDic.Add(inst, card);
         }
         
         LayoutRebuilder.ForceRebuildLayoutImmediate(content);
     }
 
-    public void Refresh(TemporaryQuestDefinitionSO quest, TemporaryInstance inst)
+    public void Refresh(TemporaryInstance inst)
     {
         if (questDic == null) return;
-        if(questDic.TryGetValue(quest,out var card))
-            card.CardSet(quest, inst);
+        if (questDic.TryGetValue(inst, out var card))
+            card.CardSet(inst);
     }
 }

@@ -11,7 +11,7 @@
             switch (keyFunc)
             {
                 case KeyFunc.StageClear:
-                    return key.ToString();
+                    return stageClearkey;
                 default:
                     return sb.Append(keyFunc.ToString()).Append(":").Append(key.ToKeyString()).ToString();
                 
@@ -24,13 +24,14 @@
         public static string GachaPull(ItemType gachaId) => $"GachaPull:{gachaId}";
         public static string LevelUp(ItemType LevelId) => $"LevelUP:{LevelId}";
         public static string Upgrade(UpgradeType UpgradeId) => $"Upgrade:{UpgradeId}";
+        public static string Active(ActiveType activeType) => $"Active:{activeType}";
         public static string Achieve(string achieveType) => $"Achieve:{achieveType}";
         public static string StageClear() => stageClearkey;
     }
 
     public enum KeyFunc
     {
-        Kill, Collect, GachaPull, LevelUp, Upgrade, Achieve, StageClear
+        Kill, Collect, GachaPull, LevelUp, Upgrade, Active, Achieve, StageClear
     }
 
     public enum MonsterId
@@ -53,8 +54,13 @@
         Atk, Def, Hp
     }
 
+    public enum ActiveType
+    {
+        Skill, AutoCombat
+    }
+
     
-    public enum KeyKind { Monster, Money, ItemType, UpgradeType, Achieve }
+    public enum KeyKind { Monster, Money, ItemType, UpgradeType, Active, Achieve }
 
     [Serializable]
     public struct TypedEnumKey
@@ -65,6 +71,7 @@
         public MoneyId money;
         public ItemType itemType;
         public UpgradeType upgrade;
+        public ActiveType active;
 
         [TextArea(2, 4)] public string achieveText;
         
@@ -76,6 +83,7 @@
                 case KeyKind.Money: return money.ToString();
                 case KeyKind.ItemType: return itemType.ToString();
                 case KeyKind.UpgradeType: return upgrade.ToString();
+                case KeyKind.Active: return active.ToString();
                 case KeyKind.Achieve: return achieveText.Trim();
                 default: return string.Empty;
             }

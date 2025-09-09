@@ -77,6 +77,12 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
         SendSignal(key, count, general, daily, weekly);
     }
 
+    public void Active(ActiveType ActiveId, int count = 1, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.Active(ActiveId);
+        SendSignal(key, count, general, daily, weekly);
+    }
+
     /// <summary>
     /// 기타 사항 달성시 보내는 메일
     /// </summary>

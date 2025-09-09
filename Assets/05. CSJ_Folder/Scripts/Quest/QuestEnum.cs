@@ -29,4 +29,9 @@
     {
         BeforeActive, Completed, Active, Received
     }
+
+    public enum QuestDifficult_Enum
+    {
+        Easy, Normal, Hard,
+    }
 }

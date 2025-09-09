@@ -23,8 +23,8 @@ public class TemporaryQuestController : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI TypeText;
 
-    private Dictionary<TemporaryQuestDefinitionSO, TemporaryInstance> _dailyQuests;
-    private Dictionary<TemporaryQuestDefinitionSO, TemporaryInstance> _weeklyQuests;
+    private List<TemporaryInstance> _dailyQuests;
+    private List<TemporaryInstance> _weeklyQuests;
 
     private bool isReady = false;
     public bool isStarted = false;
@@ -70,7 +70,7 @@ public class TemporaryQuestController : MonoBehaviour
             TypeText.text = "일일 퀘스트";
             _dailyButton.interactable = false;
             _weeklyButton.interactable = true;
-            _questListController.RebuildList(_dailyQuests.Select(kv => (kv.Key, kv.Value)));
+            _questListController.RebuildList(_dailyQuests);
         }
         
         else if (questType == QuestType_Enum.Weekly)
@@ -81,34 +81,31 @@ public class TemporaryQuestController : MonoBehaviour
             TypeText.text = "주간 퀘스트";
             _weeklyButton.interactable = false;
             _dailyButton.interactable = true;
-            _questListController.RebuildList(_weeklyQuests.Select(kv => (kv.Key, kv.Value)));
+            _questListController.RebuildList(_weeklyQuests);
         }
     }
 
-    public void UpdateQuest(TemporaryQuestDefinitionSO def, TemporaryInstance inst)
+    public void UpdateQuest(TemporaryInstance inst)
     {
-        _questListController.Refresh(def, inst);
+        _questListController.Refresh(inst);
     }
 
     public void QuestInit(TemporaryQuestListSO temporaryQuests, Dictionary<string, TemporaryInstance> temporaryInstances)
     {
-        _dailyQuests = new Dictionary<TemporaryQuestDefinitionSO, TemporaryInstance>();
-        _weeklyQuests = new Dictionary<TemporaryQuestDefinitionSO, TemporaryInstance>();
-        foreach (var quest in temporaryQuests.DailyQuests)
-        {
-            if (temporaryInstances.TryGetValue(quest.questId, out var inst))
-            {
-                _dailyQuests[quest] = inst;
-            }
-        }
+        _dailyQuests = new List<TemporaryInstance>();
+        _weeklyQuests = new List<TemporaryInstance>();
 
-        foreach (var quest in temporaryQuests.WeeklyQuests)
+        foreach (var quest in temporaryQuests.GetSequence())
         {
-            if (temporaryInstances.TryGetValue(quest.questId, out var inst))
+            for (int i = 0; i < quest.QuestCount; i++)
             {
-                _weeklyQuests[quest] = inst;
+                var id = (quest.GetQuestKeyByType(quest.isDaily(i) ? QuestType_Enum.Daily : QuestType_Enum.Weekly)+ i).ToString();
+                if (temporaryInstances.TryGetValue( id, out var inst))
+                {
+                    var list = inst.IsDaily ? _dailyQuests : _weeklyQuests;
+                    list.Add(inst);
+                }
             }
         }
-        
     }
 }
