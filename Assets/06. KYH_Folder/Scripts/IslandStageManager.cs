@@ -250,7 +250,8 @@ public class IslandStageManager : MonoBehaviour
 
         SetBattleField(index);
 
-        BattleManager.Instance?.StartBattle(currentIndex);
+        //BattleManager.Instance?.StartBattle(currentIndex);
+        BattleManager.Instance?.StartBattle(index);
         Debug.Log($"[MoveToAndEnter] StartBattle 호출 이후 정상 종료 index={index}");
 
         StopCoroutine(moveToAndEnter);

@@ -22,7 +22,7 @@ namespace JHT
         public Action<WeaponObject> OnUpCountItem;
 
         public Action<RelicsObject,RelicsObject> OnChooseItem;
-        public Action<RelicsObject> OnChageAddItem;
+        public Action<RelicsObject> OnChangeAddItem;
         public Action<RelicsObject,RelicsObject,bool> OnChangeItem;
         public Action<RelicsObject> OnChangePanel;
 
@@ -47,17 +47,17 @@ namespace JHT
         private void OnEnable()
         {
             OnAddInventory += AddInventoryItem;
-            OnRemoveInventory += RemoveInventroyIndex;
+            OnRemoveInventory += RemoveInventoryIndex;
             OnChangeItem += AddRelicsItem;
-            OnChageAddItem += AddRelicsSolo;
+            OnChangeAddItem += AddRelicsSolo;
         }
 
         private void OnDisable()
         {
             OnAddInventory -= AddInventoryItem;
-            OnRemoveInventory -= RemoveInventroyIndex;
+            OnRemoveInventory -= RemoveInventoryIndex;
             OnChangeItem -= AddRelicsItem;
-            OnChageAddItem -= AddRelicsSolo;
+            OnChangeAddItem -= AddRelicsSolo;
         }
 
         #region 수현님코드
@@ -434,7 +434,7 @@ namespace JHT
             }
         }
 
-        private void RemoveInventroyIndex(ItemObject item)
+        private void RemoveInventoryIndex(ItemObject item)
         {
             if (item.itemSO.itemType == ItemType.Equip)
             {

@@ -64,15 +64,13 @@ namespace JHT
         {
             if (relicsPool == null)
                 relicsPool = new(itemRelicsPanelItem, 10, relicsPanelParent);
-
-        }
-
-        private void OnEnable()
-        {
             
             inventoryManager = InventoryManager.Instance;
             itemEventManager = ItemEventManager.Instance;
-
+        }
+        
+        private void OnEnable()
+        {
             inventoryManager.OnAddInventory += ReSetItemPanel;
             inventoryManager.OnRemoveInventory += ReSetItemPanel;
 
@@ -108,7 +106,6 @@ namespace JHT
 
         private void Start()
         {
-
             curMode = InventoryMode.Weapon;
             inventoryManager.currentMode = curMode;
             SetWeaponDropdown();
@@ -286,7 +283,7 @@ namespace JHT
         }
         #endregion
 
-        #region relisc Spawn
+        #region relics Spawn
 
         private void ReSetRelicsPanel(ItemObject changedItem)
         {
@@ -315,6 +312,11 @@ namespace JHT
         #region InventoryMode
         private void ChangeWeaponMode()
         {
+            if (inventoryManager == null)
+            {
+                inventoryManager = InventoryManager.Instance;
+            }
+
             inventoryManager.currentMode = InventoryMode.Weapon;
 
             if (!weaponInventory.activeSelf)
