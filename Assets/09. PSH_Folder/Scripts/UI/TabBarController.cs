@@ -92,6 +92,7 @@ public class TabBarController : MonoBehaviour
 
     private void OnTabSelected(Button tabBtn, UIBase panel)
     {
+        panel.ResetPanel();
         bool isFirstOpen = currentOpenPanel == null;
         bool isDifferentTab = currentOpenPanel != panel;
 
@@ -180,7 +181,6 @@ public class TabBarController : MonoBehaviour
         panel.transform.DOLocalMove(endPos, animationDuration).SetEase(Ease.InBack).OnComplete(() =>
         {
             panel.SetHide(); // SetActive(false) 호출
-            panel.ResetPanel(); // ★★★ 상태 초기화 메서드 호출! ★★★
         });
     }
     #endregion
