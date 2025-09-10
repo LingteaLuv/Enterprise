@@ -4,8 +4,8 @@ using UnityEngine.TextCore.Text;
 
 public abstract class BaseCharacterFSM : MonoBehaviour
 {
-    protected enum State { Idle, Move, Attack, Dead }
-    protected State currentState;
+    public enum State { Idle, Move, Attack, Dead }
+    public State currentState;
 
     protected CombatCharacter stats;
     protected HealthSystem health;

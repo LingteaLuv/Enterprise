@@ -11,9 +11,32 @@ namespace JHT
             base.Start();
         }
 
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+        }
+
         public override void Init(JHT_MonsterDataSO so)
         {
             base.Init(so);
+
+
+            if (monsterStat.monsterRarity == MonsterRarity.Elite)
+            {
+                gameObject.transform.localScale = new Vector3(1.3f, 1.3f, 1);
+                monsterPrefab.transform.localScale = gameObject.transform.localScale;
+            }
+            else
+            {
+                gameObject.transform.localScale = Vector3.one;
+                monsterPrefab.transform.localScale = gameObject.transform.localScale;
+            }
+
         }
         protected override void Update()
         {
@@ -39,30 +62,32 @@ namespace JHT
         // Attack애니메이션 이벤트로 실행할 함수
         public void NormalMonsterAttack()
         {
-            Debug.LogError("Attack!");
             // 근접 공격일경우
             if (monsterStat.monsterType == MonsterType.close)
             {
                 //if (monsterStat.attackAngle == 0)
                 //    return;
                 Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, monsterStat.attackRange, targetLayer);
+                
 
                 foreach (var c in cols)
                 {
                     //일단은 일방적인 플레이어 스크립트
-                    BaseCharacterFSM target = c.GetComponent<BaseCharacterFSM>();
+                    HealthSystem hs = c.GetComponent<HealthSystem>();
 
-                    if (target != null)
+                    if (hs != null)
                     {
                         //Pool 파티클 사용
-                        target.TakeDamage(monsterStat.attackPower);
+                        hs.TakeDamage(monsterStat.attackPower);
                     }
+
                 }
             }
             else //원거리 일경우
             {
                 JHT_MonsterProjectile obj = JHT_MonsterSpawnManager.Instance.projectilePool.GetPooled() as JHT_MonsterProjectile;
-                obj.Init(target.position, transform.position, monsterStat.attackSpeed, monsterStat.attackPower,monsterSO);
+
+                obj.Init(target.transform.position, transform.position, monsterStat.attackPower, monsterStat.attackPower,this);
             }
         }
 

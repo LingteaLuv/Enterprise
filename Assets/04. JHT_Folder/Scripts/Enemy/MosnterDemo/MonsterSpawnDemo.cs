@@ -36,13 +36,13 @@ public class MonsterSpawnDemo : MonoBehaviour
 
     public void ChangeStage()
     {
-        JHT_MonsterSpawnManager.Instance.ChangeStage();
+        //JHT_MonsterSpawnManager.Instance.ChangeStage();
     }
     
     public void ChangeRound()
     {
         JHT_MonsterSpawnManager.Instance.roundIndex += 1;
-        JHT_MonsterSpawnManager.Instance.SpawnMonster(JHT_MonsterSpawnManager.Instance.roundIndex);
+        JHT_MonsterSpawnManager.Instance.ChangeRound(JHT_MonsterSpawnManager.Instance.roundIndex);
     }
 
 }

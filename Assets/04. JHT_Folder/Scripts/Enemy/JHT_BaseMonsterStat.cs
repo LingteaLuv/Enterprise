@@ -11,11 +11,11 @@ namespace JHT
         public float maxHp;
         public float attackPower;
         public float defense;
-        public float attackRange;
         public float attackSpeed;
+
+        public float attackRange;
         public float chaseRange;
         public float moveSpeed;
-        public float attackDelay;
 
         public MonsterType monsterType;
         public MonsterRarity monsterRarity;
@@ -39,7 +39,6 @@ namespace JHT
             attackRange = curSO.attackRange;
             chaseRange = curSO.chaseRange;
             moveSpeed = curSO.moveSpeed;
-            attackDelay = curSO.attackDelay;
             attackSpeed = curSO.attackSpeed;
 
             // Enum
