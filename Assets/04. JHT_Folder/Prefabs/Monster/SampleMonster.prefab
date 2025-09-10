@@ -350,7 +350,7 @@ GameObject:
   - component: {fileID: 6753825981913469969}
   - component: {fileID: 1572445644008787276}
   - component: {fileID: 7746037899818873035}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SampleMonster
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -393,6 +393,7 @@ MonoBehaviour:
   monsterSO: {fileID: 0}
   monsterStat: {fileID: 7746037899818873035}
   monsterUI: {fileID: 6171492079286050433}
+  monsterPrefab: {fileID: 0}
   damageTextPos: {fileID: 6803831390064297184}
   curHP: 0
 --- !u!114 &7746037899818873035
@@ -411,11 +412,10 @@ MonoBehaviour:
   maxHp: 0
   attackPower: 0
   defense: 0
-  attackRange: 0
   attackSpeed: 0
+  attackRange: 0
   chaseRange: 0
   moveSpeed: 0
-  attackDelay: 0
   monsterType: 0
   monsterRarity: 0
   monsterCrewRole: 0

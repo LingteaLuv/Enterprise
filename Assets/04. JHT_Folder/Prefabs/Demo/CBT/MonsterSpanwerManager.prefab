@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6957918676404660216
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7820466950977711987}
+  - component: {fileID: 5030569884126022605}
+  m_Layer: 0
+  m_Name: MonsterSpanwerManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7820466950977711987
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6957918676404660216}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5030569884126022605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6957918676404660216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a32fd915b4aed74b8c28939e3387c8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  monsterPrefab: {fileID: 1572445644008787276, guid: be6490dc46f6d424fb7618745bcb5971, type: 3}
+  monsterProjectile: {fileID: 7539646750932027383, guid: a156f98da8b1a3643bf5f64c92baf340, type: 3}
+  damageTextPrefab: {fileID: 3370237717323256287, guid: 530877e356151ce40b5138a56a9a57d1, type: 3}
+  roundTable: {fileID: 0}
+  posList: []
+  sampleDataList1: {fileID: 11400000, guid: 7465e8a821446c0478a6503846783474, type: 2}
+  sampleDataList2: {fileID: 11400000, guid: 4fc3125cf23bd32448803421ceec2491, type: 2}
+  sampleDataList3: {fileID: 11400000, guid: d34a6edd9f26c4d48b9105122b2627ae, type: 2}
+  sampleDataList4: {fileID: 11400000, guid: 5bf9aa234237ba746806150539a6b387, type: 2}
+  sampleDataList5: {fileID: 11400000, guid: 61ca263ccd974c540ba637e1ec045ea2, type: 2}
+  stageIndex: 0
+  roundIndex: 0
+  curTotalCount: 0

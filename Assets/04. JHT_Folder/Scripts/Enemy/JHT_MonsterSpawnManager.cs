@@ -15,14 +15,14 @@ namespace JHT
         [SerializeField] private JHT_MonsterProjectile monsterProjectile;
         [SerializeField] private JHT_DamageBox damageTextPrefab;
 
-        [SerializeField] private JHT_MonsterDataTable roundTable;
-
+        public JHT_MonsterDataTable roundTable;
         //[SerializeField] List<JHT_MonsterDataTable> roundList;
 
         // int : 스테이지,  JHT_MonsterDataTable은 몬스터의 정보를 stirng(int로 변경해도 됨)을 가져와서 해당 데이터의 정보를 로드할거임
         // => 데이터 정보를 가져오는건 미리 addressable에서 로드한 모든 몬스터 데이터를 매 스테이지시 로드하는 걸로 하는게 좋아보임(fade in,out이 스테이지당 하는거같음)
         Dictionary<int, JHT_MonsterDataTable> stageDic;
         public List<JHT_MonsterSetManager> posList;
+        public List<JHT_MonsterDataSO> curMonsterCountList;
 
         // Demo
         [SerializeField] private JHT_MonsterDataTable sampleDataList1;
@@ -70,8 +70,6 @@ namespace JHT
             stageDic.Add(3, sampleDataList4);
             stageDic.Add(4, sampleDataList5);
 
-            stageIndex = -1;
-
             OnAddMonster += SetSpawnRound;
         }
 
@@ -81,22 +79,23 @@ namespace JHT
             base.OnDestroy();
         }
 
-        public void ChangeStage()
+        public void ChangeStage(BattleField field,int _stageIndex)
         {
-            stageIndex++;
             roundIndex = 0;
-            if (stageIndex < 0)
+            if (_stageIndex < 0)
                return;
 
             if(posList.Count > 0)
                 posList.Clear();
 
-            roundTable = stageDic[stageIndex];
+            stageIndex = _stageIndex;
+            roundTable = stageDic[_stageIndex];
 
 
             for (int i = 0; i < roundTable.monsterGroupPos.Count; i++)
             {
-                roundTable.monsterPosData[i].transform.position = roundTable.monsterGroupPos[i];
+                roundTable.monsterGroupPos[i] = field.EnemySpawnPoints[i].position; //다시봐야함
+                roundTable.monsterPosData[i].transform.position = roundTable.monsterGroupPos[i];//EnemySpawnPoints[i].position;
             }
 
             for (int i = 0; i < roundTable.roundCount; i++)
@@ -112,11 +111,10 @@ namespace JHT
             }
 
             curTotalCount = roundTable.totalCost;
-            SpawnMonster(0);
         }
 
         // curStageIndex를 ++을 통해 round를 구별해줄거임
-        public void SpawnMonster(int curStageIndex)
+        public void ChangeRound(int curStageIndex)
         {
             if (posList.Count < curStageIndex)
             {
@@ -124,16 +122,21 @@ namespace JHT
                 return;
             }
 
-            List<JHT_MonsterDataSO> dataList = OnAddMonster?.Invoke(curStageIndex);
+            if (curMonsterCountList.Count > 0)
+                curMonsterCountList.Clear();
+
+            curMonsterCountList = new();
+            curMonsterCountList = OnAddMonster?.Invoke(curStageIndex);
 
             posList[curStageIndex].checkList = new();
 
 
-            for (int i = 0; i < dataList.Count; i++)
+            for (int i = 0; i < curMonsterCountList.Count; i++)
             {
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
-                obj.Init(dataList[i]);
-                obj.transform.position = posList[curStageIndex].SetPos(dataList[i]).position;
+                obj.Init(curMonsterCountList[i]);
+                obj.transform.position = new Vector3(0, 0, -9.850784f);
+                obj.transform.position += posList[curStageIndex].SetPos(curMonsterCountList[i]).position;
             }
         }
 

@@ -11,12 +11,12 @@ public class JHT_MonsterProjectile : JHT_PooledObject
     [SerializeField] private Rigidbody2D rigid;
 
     Coroutine startCor;
-    public void Init(Vector2 _targetPos, Vector2 monsterPos,float projectileSpeed, float power, JHT_MonsterDataSO so)
+    public void Init(Vector2 _targetPos, Vector2 monsterPos,float projectileSpeed, float power, JHT_BaseMonsterFSM baseMonster)
     {
         gameObject.transform.position = monsterPos;
         totalPower = power;
-        rigid.linearVelocity = (_targetPos - (Vector2)transform.position).normalized* projectileSpeed;
-        projectileImg.sprite = so.projectileSprite;
+        rigid.linearVelocity = (_targetPos - (Vector2)transform.position).normalized * projectileSpeed;
+        projectileImg.sprite = baseMonster.monsterSO.projectileSprite;
 
         if(startCor == null)
         {
@@ -42,16 +42,18 @@ public class JHT_MonsterProjectile : JHT_PooledObject
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Crew"))
         {
-            BaseCharacterFSM target = collision.GetComponent<BaseCharacterFSM>();
+            HealthSystem target = collision.GetComponent<HealthSystem>();
 
             if (target != null)
             {
                 //Pool 파티클 사용
                 target.TakeDamage(totalPower);
             }
+
             Release();
+
             if (startCor != null)
             {
                 StopCoroutine(startCor);
