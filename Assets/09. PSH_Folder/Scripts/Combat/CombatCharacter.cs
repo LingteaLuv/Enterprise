@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +20,8 @@ public class Buff
 }
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class CombatCharacter : MonoBehaviour, IAttacker
+[RequireComponent(typeof(HealthSystem))]
+public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
 {
     public PlayerCharacterData CharacterStats { get; private set; } // 원본 데이터 참조
 
@@ -67,9 +67,9 @@ public class CombatCharacter : MonoBehaviour, IAttacker
         baseAttack = data.finalStats.GetValueOrDefault(Stat.Attack, 0);
         baseHealth = data.finalStats.GetValueOrDefault(Stat.Health, 0);
         baseDefense = data.finalStats.GetValueOrDefault(Stat.Defense, 0);
-        baseCritChance = data.finalStats.GetValueOrDefault(Stat.CritChance, 0);
-        baseCritDamage = data.finalStats.GetValueOrDefault(Stat.CritDamage, 0);
-        baseAttackSpeed = data.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0);
+        baseCritChance = data.finalStats.GetValueOrDefault(Stat.CritChance, 0) / 100;
+        baseCritDamage = data.finalStats.GetValueOrDefault(Stat.CritDamage, 0) / 100;
+        baseAttackSpeed = data.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0) / 100;
 
         moveSpeed = PartyManager.Instance.moveSpeed;
         attackRange = data.characterdata.atkRangeType == AtkRangeType.Ranged_Attack ?
@@ -91,10 +91,12 @@ public class CombatCharacter : MonoBehaviour, IAttacker
         }
     }
 
-    /// <summary>
-    /// 전투 중 실제 스탯이 필요할 때 이 함수를 호출합니다.
-    /// 기본 스탯과 모든 활성화된 버프의 합을 반환합니다.
-    /// </summary>
+    // IDamageable 인터페이스 구현
+    public void TakeDamage(IAttacker attacker)
+    {
+        healthSystem.CalculateAndApplyDamage(attacker);
+    }
+
     public float GetCurrentStat(Stat stat)
     {
         float bonusValue = activeBuffs.Where(b => b.Stat == stat).Sum(b => b.Value);
@@ -203,7 +205,8 @@ public class CombatCharacter : MonoBehaviour, IAttacker
         SkillSO skillToUse = skills[skillIndex];
         if (skillToUse != null)
         {
-            // TODO: 여기에 쿨다운, 마나 비용 체크 로직 추가 가능
+            // 공격자는 자기 자신(this)이고, 대상(target)은 IDamageable이어야 합니다.
+            // target이 CombatCharacter이므로 IDamageable을 구현하고 있어 문제가 없습니다.
             skillToUse.Use(this, target);
         }
     }
