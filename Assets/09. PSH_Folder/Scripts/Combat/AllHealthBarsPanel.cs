@@ -1,50 +1,58 @@
-
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
-/// 씬에 있는 모든 CombatCharacter의 체력바를 생성하고 관리하는 패널입니다.
+/// PartyManager로부터 파티 준비 완료 신호를 받아 체력바를 초기화합니다.
 /// </summary>
 public class AllHealthBarsPanel : MonoBehaviour
 {
     [Header("UI 설정")]
-    [SerializeField] private GameObject healthBarPrefab; // HealthBarDisplay 스크립트를 가진 프리팹
-    [SerializeField] private Transform container;      // 프리팹이 생성될 부모 컨테이너
+    [Tooltip("씬에 미리 배치한 HealthBarDisplay 오브젝트들을 여기에 등록하세요.")]
+    [SerializeField] private List<HealthBarDisplay> healthBars = new List<HealthBarDisplay>();
 
-    void Start()
+    private void OnEnable()
     {
-        InitializePanel();
+        // 파티가 준비되었다는 신호를 받으면 SetupHealthBars 함수를 호출하도록 등록합니다.
+        PartyManager.OnPartyReady += SetupHealthBars;
+        Debug.Log("[AllHealthBarsPanel] PartyManager의 OnPartyReady 신호를 기다립니다.");
+
+        // 만약 이 패널이 활성화되기 전에 PartyManager가 이미 준비를 마쳤다면,
+        // 놓친 신호를 보충하기 위해 직접 파티 목록을 가져와 체력바를 설정합니다.
+        if (PartyManager.Instance != null && PartyManager.Instance.IsPartyReady)
+        {
+            Debug.Log("[AllHealthBarsPanel] PartyManager가 이미 준비 완료 상태입니다. 직접 체력바를 설정합니다.");
+            SetupHealthBars(PartyManager.Instance.ActiveParty);
+        }
+    }
+
+    private void OnDisable()
+    {
+        // 오브젝트가 사라질 때 신호 수신을 중단합니다. (메모리 누수 방지)
+        PartyManager.OnPartyReady -= SetupHealthBars;
     }
 
     /// <summary>
-    /// 씬의 모든 전투 캐릭터를 찾아 체력바를 생성합니다.
+    /// PartyManager로부터 캐릭터 리스트를 받아 체력바를 설정합니다.
     /// </summary>
-    private void InitializePanel()
+    private void SetupHealthBars(List<CombatCharacter> partyCharacters)
     {
-        if (healthBarPrefab == null || container == null)
+        Debug.Log("[AllHealthBarsPanel] OnPartyReady 신호 수신! 체력바 설정을 시작합니다.");
+
+        // 등록된 체력바 개수만큼 반복합니다.
+        for (int i = 0; i < healthBars.Count; i++)
         {
-            Debug.LogError("[AllHealthBarsPanel] 체력바 프리팹 또는 컨테이너가 설정되지 않았습니다.");
-            return;
-        }
-
-        // 참고: FindObjectsOfType은 씬이 크거나 캐릭터가 많을 경우 성능에 부담을 줄 수 있습니다.
-        // 더 좋은 방법은 CombatCharacter가 생성될 때마다 리스트에 등록하는 중앙 관리자를 두는 것입니다.
-        CombatCharacter[] allCharacters = FindObjectsOfType<CombatCharacter>();
-
-        Debug.Log($"{allCharacters.Length}개의 전투 캐릭터를 찾았습니다. 체력바를 생성합니다.");
-
-        foreach (CombatCharacter character in allCharacters)
-        {
-            GameObject healthBarObject = Instantiate(healthBarPrefab, container);
-            HealthBarDisplay display = healthBarObject.GetComponent<HealthBarDisplay>();
-
-            if (display != null)
+            // 연결할 캐릭터가 파티 목록에 있는지, 그리고 해당 캐릭터가 활성화 상태인지 확인합니다.
+            if (i < partyCharacters.Count && partyCharacters[i].gameObject.activeInHierarchy)
             {
-                display.Initialize(character);
+                // 체력바를 활성화하고, 해당 캐릭터를 연결해줍니다.
+                healthBars[i].gameObject.SetActive(true);
+                healthBars[i].Initialize(partyCharacters[i]);
+                Debug.Log($"체력바 {i}번에 '{partyCharacters[i].name}' 캐릭터를 연결했습니다.");
             }
             else
             {
-                Debug.LogError($"{healthBarPrefab.name} 프리팹에 HealthBarDisplay 스크립트가 없습니다.");
-                Destroy(healthBarObject); // 스크립트가 없으면 오브젝트 삭제
+                // 연결할 캐릭터가 없거나 비활성 상태이면, 해당 체력바를 보이지 않게 끕니다.
+                healthBars[i].gameObject.SetActive(false);
             }
         }
     }

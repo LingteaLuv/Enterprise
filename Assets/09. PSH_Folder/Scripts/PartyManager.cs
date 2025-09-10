@@ -1,27 +1,38 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine.UI;
+using System;
 
 public class PartyManager : Singleton<PartyManager>
 {
-    [Header("미리 배치된 캐릭터 슬롯")]
-    [Tooltip("씬에 미리 배치한 5개의 캐릭터 오브젝트를 순서대로 할당하세요.")]
-    public List<CombatCharacter> characterSlots;
-    public List<CombatCharacter> GetAllPartyMembers()
-    {
-        return characterSlots.Where(c => c != null).ToList(); // SetActive 여부 상관없이 전부 줌
-    }
+    [Header("캐릭터 생성 설정")]
+    [SerializeField] private GameObject characterPrefab; // 캐릭터로 사용할 프리팹
+    [SerializeField] private Transform characterParent; // 생성된 캐릭터들이 위치할 부모 트랜스폼
+
     [Header("전투시만 필요한 스탯")]
-    [Tooltip("굳이 PlayerCharacterData에서 가져올 필요 없는 고정된 스탯인 이동 속도와 사거리는 여기서 담당")]
     public float moveSpeed;
     public float attackRange;
     public float attackRange2;
+
+    // 생성된 파티원들을 관리하는 리스트
+    private readonly List<CombatCharacter> activeParty = new List<CombatCharacter>();
+    public List<CombatCharacter> ActiveParty => activeParty; // 외부에서 읽을 수 있도록 공개
+
+    /// <summary> 파티 설정이 완료되었는지 나타내는 플래그입니다. </summary>
+    public bool IsPartyReady { get; private set; } = false;
+
+    /// <summary> 파티 설정이 완료되었을 때 호출되는 이벤트입니다. </summary>
+    public static event Action<List<CombatCharacter>> OnPartyReady;
+
+    public List<CombatCharacter> GetAllPartyMembers()
+    {
+        return activeParty;
+    }
 
     private void Start()
     {
         SetupBattleParty();
     }
+
     private void OnEnable()
     {
         if (PlayerDataManager.Instance != null)
@@ -38,50 +49,53 @@ public class PartyManager : Singleton<PartyManager>
         }
     }
 
-    /// <summary>
-    /// PlayerDataManager의 편성 정보를 가져와 씬에 있는 캐릭터들에게 적용합니다.
-    /// </summary>
     public void SetupBattleParty()
     {
-        // 1. PlayerDataManager에서 현재 편성된 파티원 리스트를 가져옵니다.
-        //    (순서를 보장하기 위해 CrewRole Enum 순서대로 리스트를 만듭니다)
+        IsPartyReady = false; // 파티 설정을 다시 시작하므로 플래그를 내립니다.
+
+        // 1. 기존에 생성된 캐릭터가 있다면 모두 파괴
+        foreach (CombatCharacter oldChar in activeParty)
+        {
+            if (oldChar != null) Destroy(oldChar.gameObject);
+        }
+        activeParty.Clear();
+
+        // 2. PlayerDataManager에서 현재 편성된 파티원 리스트를 가져옵니다.
         if (PlayerDataManager.Instance == null)
         {
             Debug.LogError("PlayerDataManager가 씬에 없습니다!");
             return;
         }
-        List<PlayerCharacterData> currentParty = new List<PlayerCharacterData>();
-
-        // CrewRole Enum에 정의된 순서대로 딕셔너리에 접근합니다.
+        List<PlayerCharacterData> currentPartyData = new List<PlayerCharacterData>();
         foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
         {
-            // 해당 역할에 편성된 캐릭터 리스트가 있다면
             if (PlayerDataManager.Instance.formation.TryGetValue(role, out List<PlayerCharacterData> charactersInRole))
             {
-                // 리스트에 추가합니다.
-                currentParty.AddRange(charactersInRole);
+                currentPartyData.AddRange(charactersInRole);
             }
         }
 
-        Debug.Log($"현재 편성된 파티원 수: {currentParty.Count}명 (순서 보장됨)");
-
-        // 2. 씬에 배치된 캐릭터 슬롯(CombatCharacter)들에 파티원 데이터를 주입합니다.
-        for (int i = 0; i < characterSlots.Count; i++)
+        // 3. 편성 정보에 따라 프리팹으로부터 캐릭터를 생성합니다.
+        if (characterPrefab == null)
         {
-            // 할당할 파티원이 리스트에 남아있다면
-            if (i < currentParty.Count)
+            Debug.LogError("Character Prefab이 PartyManager에 할당되지 않았습니다!");
+            return;
+        }
+
+        foreach (PlayerCharacterData data in currentPartyData)
+        {
+            GameObject charObject = Instantiate(characterPrefab, characterParent);
+            CombatCharacter combatChar = charObject.GetComponent<CombatCharacter>();
+            if (combatChar != null)
             {
-                // 해당 슬롯을 활성화하고, 파티원의 데이터로 초기화합니다.
-                characterSlots[i].gameObject.SetActive(true);
-                characterSlots[i].Initialize(currentParty[i]);
-                Debug.Log($"{i}번 슬롯에 '{currentParty[i].characterdata.characterName}' 캐릭터 데이터 적용 완료.");
-            }
-            else
-            {
-                // 할당할 파티원이 없다면, 남는 슬롯은 비활성화합니다.
-                characterSlots[i].gameObject.SetActive(false);
-                Debug.Log($"{i}번 슬롯은 사용하지 않으므로 비활성화합니다.");
+                combatChar.Initialize(data);
+                activeParty.Add(combatChar);
             }
         }
+
+        // 4. 모든 설정이 끝난 후, 파티가 준비되었다고 알립니다.
+        IsPartyReady = true;
+        OnPartyReady?.Invoke(activeParty);
+        Debug.Log("[PartyManager] 파티 생성 완료! OnPartyReady 신호를 보냅니다.");
     }
 }
