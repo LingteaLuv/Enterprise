@@ -22,8 +22,8 @@ public class QuestListController : MonoBehaviour
     {
         for(int i = content.childCount - 1; i >= 0; i--)
             Destroy(content.GetChild(i).gameObject);
+        if (questDic == null) return;
         questDic.Clear();
-        
         foreach (var inst in quests)
         {
             var card = Instantiate(questPrefab, content);

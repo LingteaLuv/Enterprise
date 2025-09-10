@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 3414623555867636521}
   - component: {fileID: 4997080597747607661}
   - component: {fileID: 4655398051407419997}
+  - component: {fileID: 5117368590764302865}
+  - component: {fileID: 8034374073215820797}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -93,6 +95,7 @@ MonoBehaviour:
   weaponList: []
   relicsList: []
   currentMode: 0
+  equipmentFragments: 0
 --- !u!114 &3414623555867636521
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,7 +144,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: de1ec51b3eb277f428b0e741ecbb8069, type: 2}
   - {fileID: 11400000, guid: 139ca1dfc449f5d489cccf0e75aa1222, type: 2}
   - {fileID: 11400000, guid: 1ff31b0ceff58e64794f845393318bc2, type: 2}
-  levelUpCostIncreaseRatio: 1.07
 --- !u!114 &4655398051407419997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,3 +157,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+--- !u!114 &5117368590764302865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624125741546029507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce0e86f3d654cc74f96b3be2626948ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  _signal: {fileID: 11400000, guid: c231c101f2103d84da16538b75e4ef7f, type: 2}
+--- !u!114 &8034374073215820797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624125741546029507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75294f2daf161aa43906b287b3db330e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  _signal: {fileID: 11400000, guid: c231c101f2103d84da16538b75e4ef7f, type: 2}
+  _stageClearTemplate: {fileID: 11400000, guid: b5c7c0acc3a6cbc4cb9cf19eba3f3ce7, type: 2}
+  _tutorialSequence: {fileID: 11400000, guid: ddb13c502b804d144b074c7dc42943c6, type: 2}
+  _routineSequence: {fileID: 11400000, guid: 4e28331580c7d0d4981facf21c9af6e0, type: 2}
+  _temporaryQuest: {fileID: 11400000, guid: 382ae89cc57b74a4f849a465a866cb7b, type: 2}
+  isSetted: 0

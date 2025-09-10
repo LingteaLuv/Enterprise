@@ -8,7 +8,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TemporaryQuestController : MonoBehaviour
+public class TemporaryQuestController : UIBase
 {
     
     [SerializeField] private QuestListController _questListController;
@@ -21,11 +21,15 @@ public class TemporaryQuestController : MonoBehaviour
     [SerializeField] private Button _weeklyButton;
     [SerializeField] private GameObject _weeklyPanel;
 
-    [SerializeField] private TextMeshProUGUI TypeText;
-
     private List<TemporaryInstance> _dailyQuests;
     private List<TemporaryInstance> _weeklyQuests;
     
+    public Action OnTouchedExitBtn;
+    
+    private void Start()
+    {
+        gameObject.SetActive(false);
+    }
     
     private void OnEnable()
     {
@@ -49,8 +53,10 @@ public class TemporaryQuestController : MonoBehaviour
 
     private void CloseQuestTab()
     {  
+        OnTouchedExitBtn?.Invoke();
         gameObject.SetActive(false);
     }
+    
     private void ChangeQuestType(QuestType_Enum questType)
     {
         if (questType == QuestType_Enum.Daily)
@@ -58,7 +64,7 @@ public class TemporaryQuestController : MonoBehaviour
             Debug.Log("daily");
             _dailyPanel.SetActive(true);
             _weeklyPanel.SetActive(false);
-            TypeText.text = "일일 퀘스트";
+
             _dailyButton.interactable = false;
             _weeklyButton.interactable = true;
             _questListController.RebuildList(_dailyQuests);
@@ -69,7 +75,7 @@ public class TemporaryQuestController : MonoBehaviour
             Debug.Log("weekly");
             _dailyPanel.SetActive(false);
             _weeklyPanel.SetActive(true);
-            TypeText.text = "주간 퀘스트";
+
             _weeklyButton.interactable = false;
             _dailyButton.interactable = true;
             _questListController.RebuildList(_weeklyQuests);

@@ -21,7 +21,6 @@ public class SettingPanel : UIBase
             OnTouchedExitBtn?.Invoke();
             gameObject.SetActive(false);
         });
-        gameObject.SetActive(false);
         
         _bugReportButton.onClick.AddListener(() =>
         {
@@ -35,5 +34,7 @@ public class SettingPanel : UIBase
 
         _musicSlider.value = SettingManager.Instance.BGM.Value;
         _effectSlider.value = SettingManager.Instance.SFX.Value;
+        
+        gameObject.SetActive(false);
     }
 }
