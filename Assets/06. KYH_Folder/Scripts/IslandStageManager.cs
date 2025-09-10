@@ -19,6 +19,7 @@ public class IslandStageManager : MonoBehaviour
     [SerializeField] private TravelUIController travelUI;               // UI상에서 배 위치 이동 처리
     [SerializeField] private GameObject chestPrefab;                    // (예정) 보물상자 프리팹
     [SerializeField] private GameObject flagPrefab;                     // 섬 클리어 시 표시할 깃발 프리팹
+    [SerializeField] private BossBattleButtonDirection _bossDirection;
 
     private List<GameObject> islandSets = new();                        // 하이어라키에 있는 IslandMaker 세트
     private List<Transform> shipPositions = new();                      // 각 섬 앞에 배가 도달 할 위치
@@ -205,7 +206,8 @@ public class IslandStageManager : MonoBehaviour
             {
                 Debug.Log("→ 보스전 자동 진입 조건 만족 (처음 클리어)");
                 GlobalStageManager.Instance.bossBattleTriggered = true;
-
+                _bossDirection.OnBossChallenge();
+                yield return new WaitForSeconds(5f);
                 SceneManager.LoadScene("BossBattleScene");
                 yield break;
             }

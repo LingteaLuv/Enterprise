@@ -46,7 +46,7 @@ namespace JHT
 
         private void OnEnable()
         {
-            OnAddInventory += AddInventroyItem;
+            OnAddInventory += AddInventoryItem;
             OnRemoveInventory += RemoveInventroyIndex;
             OnChangeItem += AddRelicsItem;
             OnChageAddItem += AddRelicsSolo;
@@ -54,7 +54,7 @@ namespace JHT
 
         private void OnDisable()
         {
-            OnAddInventory -= AddInventroyItem;
+            OnAddInventory -= AddInventoryItem;
             OnRemoveInventory -= RemoveInventroyIndex;
             OnChangeItem -= AddRelicsItem;
             OnChageAddItem -= AddRelicsSolo;
@@ -415,12 +415,12 @@ namespace JHT
             
         }
 
-        public void WeaponCleanInventroy()
+        public void WeaponCleanInventory()
         {
             weaponList.Clear();
         }
 
-        private void AddInventroyItem(ItemObject item)
+        private void AddInventoryItem(ItemObject item)
         {
             if (item.itemSO.itemType == ItemType.Equip)
             {

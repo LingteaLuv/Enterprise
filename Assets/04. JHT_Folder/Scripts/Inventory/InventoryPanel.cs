@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace JHT
 {
-    public class InventroyPanel : UIBase
+    public class InventoryPanel : UIBase
     {
         [Header("Spawn_ItemPanel")]
         [SerializeField] private Transform weaponPanelParent;

@@ -22,7 +22,7 @@ public class BossBattleButtonDirection : MonoBehaviour
     private void Awake()
     {
         if (!audioSource)
-        audioSource = GetComponent<AudioSource>();
+            audioSource = GetComponent<AudioSource>();
         WarningBeltTextPos = WarningBeltTMP.rectTransform.localPosition;
     }
 
