@@ -6,11 +6,6 @@ namespace JHT
     public class JHT_NormalMonster : JHT_BaseMonsterFSM
     {
 
-        protected override void Start()
-        {
-            base.Start();
-        }
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -85,9 +80,22 @@ namespace JHT
             }
             else //원거리 일경우
             {
+                if (target == null) return;
+
+                HealthSystem hs = target.GetComponent<HealthSystem>();
+                if (hs == null || hs.currentHealth <= 0) 
+                    return;
+
                 JHT_MonsterProjectile obj = JHT_MonsterSpawnManager.Instance.projectilePool.GetPooled() as JHT_MonsterProjectile;
 
-                obj.Init(target.transform.position, transform.position, monsterStat.attackPower, monsterStat.attackPower,this);
+                if (JHT_MonsterSpawnManager.Instance.projectilePool == null || obj == null)
+                    return;
+
+                Vector2 startPos = transform.position;
+                Vector2 targetPos = (Vector2)target.transform.position;
+
+                if (this != null)
+                    obj.Init(targetPos, startPos, monsterStat.attackPower, monsterStat.attackPower,monsterStat.projectileSprite);
             }
         }
 

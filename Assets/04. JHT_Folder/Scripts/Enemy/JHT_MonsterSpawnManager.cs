@@ -31,11 +31,12 @@ namespace JHT
         [SerializeField] private JHT_MonsterDataTable sampleDataList4;
         [SerializeField] private JHT_MonsterDataTable sampleDataList5;
 
-        public int stageIndex;
+        public int islandIndex;
         public int roundIndex;
         public int curTotalCount;
 
         public Func<int,List<JHT_MonsterDataSO>> OnAddMonster;
+
         protected override void Awake()
         {
             base.Awake();
@@ -79,17 +80,17 @@ namespace JHT
             base.OnDestroy();
         }
 
-        public void ChangeStage(BattleField field,int _stageIndex)
+        public void ChangeIsland(BattleField field,int _islaneIndex)
         {
             roundIndex = 0;
-            if (_stageIndex < 0)
+            if (_islaneIndex < 0)
                return;
 
             if(posList.Count > 0)
                 posList.Clear();
 
-            stageIndex = _stageIndex;
-            roundTable = stageDic[_stageIndex];
+            islandIndex = _islaneIndex - 1;
+            roundTable = stageDic[_islaneIndex - 1];
 
 
             for (int i = 0; i < roundTable.monsterGroupPos.Count; i++)
@@ -201,6 +202,10 @@ namespace JHT
         }
 
 
+        private bool StageEndEvent(bool value)
+        {
+            return value;
+        }
 
         #region 이전 버전
         // globalManager?에서 currentIndex++시 이벤트 - 데이터 넣기

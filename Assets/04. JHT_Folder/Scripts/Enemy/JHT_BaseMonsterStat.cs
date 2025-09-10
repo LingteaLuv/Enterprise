@@ -17,6 +17,8 @@ namespace JHT
         public float chaseRange;
         public float moveSpeed;
 
+        public Sprite projectileSprite;
+
         public MonsterType monsterType;
         public MonsterRarity monsterRarity;
         public CrewRole monsterCrewRole;
@@ -40,6 +42,9 @@ namespace JHT
             chaseRange = curSO.chaseRange;
             moveSpeed = curSO.moveSpeed;
             attackSpeed = curSO.attackSpeed;
+
+            //sprite
+            projectileSprite = curSO.projectileSprite;
 
             // Enum
             monsterType = curSO.monsterType;

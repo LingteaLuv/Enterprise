@@ -26,6 +26,7 @@ namespace JHT
         public GameObject monsterPrefab;
 
         private int curAnim;
+        private bool isDead;
 
         // 임시용
         Coroutine attackCor;
@@ -34,7 +35,6 @@ namespace JHT
         // test용
         public float curHP;
 
-        private bool isDead;
         #region Animator
 
         Animator animator;
@@ -47,24 +47,16 @@ namespace JHT
         #endregion
 
 
-        protected virtual void Start()
-        {
-            ChangeState(State.Idle);
-        }
-
         public virtual void Init(JHT_MonsterDataSO so)
         {
-            if (!IsValidTarget(target))
-            {
-                StartSetting(so);
-            }
+            StartSetting(so);
         }
 
         private void StartSetting(JHT_MonsterDataSO so)
         {
             isDead = false;
-
-            TryAcquireNextTarget();
+            target = null;
+            ChangeState(State.Idle);
 
             monsterSO = so;
             monsterStat.Init(monsterSO);
@@ -99,6 +91,9 @@ namespace JHT
 
         protected virtual void Update()
         {
+            if (isDead)
+                return;
+
             if (!IsValidTarget(target))
             {
                 TryAcquireNextTarget();
@@ -125,10 +120,7 @@ namespace JHT
         protected void ChangeState(State newState)
         {
             if (isDead)
-            {
-                currentState = State.Idle;
                 return;
-            }
 
             currentState = newState;
 
@@ -140,11 +132,8 @@ namespace JHT
         }
 
         protected void CheckDistance()
-        {
-            if (isDead)
-                return;
-
-            if (target == null)
+        { 
+            if (target == null || isDead)
                 return;
 
             float distance = (target.transform.position - transform.position).magnitude;
@@ -273,18 +262,18 @@ namespace JHT
         private void Die()
         {
             BattleManager.Instance.OnEnemyDead(monsterSO);
+            
             Outit();
         }
 
         public void Outit()
         {
             isDead = true;
+            monsterSO = null;
 
-            if (monsterUI != null)
-            {
-                monsterUI.ReleaseMonsterHP();
-                monsterUI.gameObject.SetActive(false);
-            }
+            monsterUI.ReleaseMonsterHP();
+            monsterUI.gameObject.SetActive(false);
+            
 
             if (monsterPrefab != null)
                 Destroy(monsterPrefab, 0.2f);
@@ -293,8 +282,6 @@ namespace JHT
 
             Release(0.2f);
 
-            monsterSO = null;
-            target = null;
         }
 
         private void AnimatorChange(int temp)

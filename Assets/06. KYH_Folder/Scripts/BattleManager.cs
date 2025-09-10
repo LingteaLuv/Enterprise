@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using GooglePlayGames.BasicApi;
 using JHT;
+using System;
 
 
 /// <summary>
@@ -41,11 +42,20 @@ public class BattleManager : MonoBehaviour
 
     public List<JHT_MonsterDataSO> spawnedEnemies = new(); // GameObject -> JHT_MOnsterDataSO
 
-    private int currentStageIndex = 0;
+    public int currentRoundIndex = 0;
     private bool isbattleover = false;
 
     private bool isInitialized = false;
 
+    #region JHT
+    private bool goNextStage = false;
+
+    private bool isStageEnd;
+    public bool IsStageEnd { get { return isStageEnd; } set { isStageEnd = value; OnStageEnd?.Invoke(isStageEnd); } }
+    public Action<bool> OnStageEnd;
+
+    private Coroutine enemySpawnDelay;
+    #endregion
     private void Awake()
     {
         Instance = this;    // 싱글톤 등록
@@ -55,11 +65,13 @@ public class BattleManager : MonoBehaviour
     {
         // 씬 로드 시 초기화 연결
         SceneManager.sceneLoaded += OnSceneLoaded;
+        OnStageEnd += SetBattleStop;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        OnStageEnd -= SetBattleStop;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -137,10 +149,10 @@ public class BattleManager : MonoBehaviour
     }
 
     // 외부에서 전투 시작 요청
-    public void StartBattle(int stageIndex)
+    public void StartBattle(int roundIndex)
     {
         isbattleover = false;
-        currentStageIndex = stageIndex;
+        currentRoundIndex = roundIndex;
 
         if (battleFields.Count == 0)
         {
@@ -151,7 +163,10 @@ public class BattleManager : MonoBehaviour
                 return;
             }
         }
-        JHT_MonsterSpawnManager.Instance.ChangeStage(battleFields[stageIndex],stageIndex); // Add, 이게 맞나..?battleField쪽 다시봐야함
+        JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[GlobalStageManager.Instance.currentStageIndex],
+            GlobalStageManager.Instance.currentStageIndex);
+
+        IsStageEnd = false;
 
         battleRoutine = StartCoroutine(BattleRoutine());
         Debug.Log("battleRoutine 시작됨");
@@ -166,16 +181,17 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log("전투 시작");
 
-        var field = battleFields[currentStageIndex];
+        var field = battleFields[currentRoundIndex];
 
-        SpawnEnemies(field, currentStageIndex);
+        SpawnEnemies(currentRoundIndex);
         SpawnPlayers(field);
         
 
         yield return new WaitForSeconds(0.5f);      // 등장 연출 대기
 
+        // 몬스터 수가 0이 될떄까지 반복
         int safety = 0;
-        while (!AllEnemiesDefeated())
+        while (!goNextStage)
         {
             yield return null;
             safety++;
@@ -194,6 +210,7 @@ public class BattleManager : MonoBehaviour
 
         ClearPlayers();
         ClearEnemies();
+        currentRoundIndex = 0; // 이게 필요 없을수도 있음 -> 다음 island를 위해 설정하는부분
         IslandStageManager.Instance.OnBattleComplete();
     }
 
@@ -227,24 +244,36 @@ public class BattleManager : MonoBehaviour
     }
 
     // 적 생성 (스테이지 수에 비례해 증가)
-    private void SpawnEnemies(BattleField field, int stageIndex)
+    private void SpawnEnemies(int stageIndex)
     {
-        //int count = baseEnemyCount + (stageIndex * growthPerStage);
-        //var spawnPoints = field.EnemySpawnPoints;
-        //
-        //for (int i = 0; i < count; i++)
-        //{
-        //    int randIndex = Random.Range(0, spawnPoints.Count);
-        //    var enemy = Instantiate(enemyPrefab, spawnPoints[randIndex].position, Quaternion.identity);
-        //    enemy.tag = "Enemy";
-        //    spawnedEnemies.Add(enemy);
-        //}
+        if (stageIndex >= JHT_MonsterSpawnManager.Instance.roundTable.roundCount)
+        {
+            Debug.LogError($"BattleManager IslandClear : Change Next Island");
+            GlobalStageManager.Instance.currentStageIndex++; //임시 : 보스 나오기전
+            IsStageEnd = true;
+            return;
+        }
+
+        if (enemySpawnDelay == null)
+            enemySpawnDelay = StartCoroutine(SpawnDelay(stageIndex));
+    }
+
+    IEnumerator SpawnDelay(int stageIndex)
+    {
+        yield return new WaitForSeconds(1f);
 
         JHT_MonsterSpawnManager.Instance.ChangeRound(stageIndex);
         // 몬스터 데이터 넣기
         for (int i = 0; i < JHT_MonsterSpawnManager.Instance.curMonsterCountList.Count; i++)
         {
             spawnedEnemies.Add(JHT_MonsterSpawnManager.Instance.curMonsterCountList[i]);
+        }
+
+
+        if (enemySpawnDelay != null)
+        {
+            StopCoroutine(enemySpawnDelay);
+            enemySpawnDelay = null;
         }
     }
 
@@ -258,7 +287,8 @@ public class BattleManager : MonoBehaviour
 
         if (AllEnemiesDefeated())
         {
-            Debug.Log("모든 적 제거 → 전투 종료 예정");
+            currentRoundIndex++;
+            SpawnEnemies(currentRoundIndex);
         }
     }
 
@@ -266,6 +296,11 @@ public class BattleManager : MonoBehaviour
     private bool AllEnemiesDefeated()
     {
         return spawnedEnemies.Count == 0;
+    }
+
+    private void SetBattleStop(bool value)
+    {
+        goNextStage = value;
     }
 
     // 플레이어 사망 시 처리
@@ -332,4 +367,5 @@ public class BattleManager : MonoBehaviour
         }
         currentPlayers.Clear();
     }
+
 }
