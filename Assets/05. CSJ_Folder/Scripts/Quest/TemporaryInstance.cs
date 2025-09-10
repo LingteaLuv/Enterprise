@@ -23,7 +23,11 @@ namespace _05._CSJ_Folder.Scripts.Quest
             TemporaryQuestId = (_def.GetQuestKeyByType(QuestType) + _questIndex).ToString();
             QuestDifficult = _def.DifficultByIndex(_questIndex);
             DemandedGoalCount = _def.GetQuestDemand(_questIndex);
-            temporaryQuestContent = _sb.AppendJoin(_def.questName, DemandedGoalCount, _def.TempoQuestContent).ToString();
+
+            _sb.Append(_def.questName);
+            _sb.Append(DemandedGoalCount.ToString());
+            _sb.Append(_def.TempoQuestContent);
+            temporaryQuestContent = _sb.ToString();
         }
 
         public override bool IsCompleted()

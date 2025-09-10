@@ -25,19 +25,10 @@ public class TemporaryQuestController : MonoBehaviour
 
     private List<TemporaryInstance> _dailyQuests;
     private List<TemporaryInstance> _weeklyQuests;
-
-    private bool isReady = false;
-    public bool isStarted = false;
+    
     
     private void OnEnable()
     {
-        if (!isReady && !isStarted)
-        {
-            Debug.Log("Disable");
-            gameObject.SetActive(false);
-            isStarted = true;
-            return;
-        } 
         Debug.Log("Enable");
         OpenQuestTab();
         _closeButton.onClick.AddListener(CloseQuestTab);

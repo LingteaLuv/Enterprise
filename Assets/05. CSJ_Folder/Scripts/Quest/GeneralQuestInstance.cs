@@ -4,13 +4,13 @@ namespace _05._CSJ_Folder.Scripts.Quest
 {
     public class GeneralQuestInstance : QuestInstance
     {
-        public string GeneralQuestId;
+        public readonly string GeneralQuestId;
         
         private GeneralQuestDefinitionSO _def;
 
         public GeneralQuestInstance(string questId, GeneralQuestDefinitionSO def)
         {
-            GeneralQuestId = QuestId;
+            GeneralQuestId = questId;
             _def = def;
         }
         
