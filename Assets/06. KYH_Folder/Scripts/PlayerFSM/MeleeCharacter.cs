@@ -93,8 +93,8 @@ public class MeleeCharacter : BaseCharacterFSM
                 targetScript.TakeDamage(attackPower);
                 Debug.Log($"MeleeCharacter AttackRoutine : {targetScript.monsterSO.name}");
             }
-
-            yield return new WaitForSeconds(5f);
+            // todo : Attack Delay에 따라 () 내부 시간 연산, 대입
+            yield return new WaitForSeconds(2f);
         }
     }
 
