@@ -33,6 +33,7 @@ public class TypedEnumKeyDrawer : PropertyDrawer
         var MoneyProp    = property.FindPropertyRelative("Money");
         var itemTypeProp= property.FindPropertyRelative("itemType");
         var upgradeProp = property.FindPropertyRelative("upgrade");
+        var activeProp  = property.FindPropertyRelative("active");
         var achieveProp = property.FindPropertyRelative("achieveText");
 
         Rect baseRect = EditorGUI.IndentedRect(position);
@@ -53,6 +54,7 @@ public class TypedEnumKeyDrawer : PropertyDrawer
             case KeyKind.Money:       EditorGUI.PropertyField(valueRect, MoneyProp,   GUIContent.none); break;
             case KeyKind.ItemType:    EditorGUI.PropertyField(valueRect, itemTypeProp,GUIContent.none); break;
             case KeyKind.UpgradeType: EditorGUI.PropertyField(valueRect, upgradeProp, GUIContent.none); break;
+            case KeyKind.Active:      EditorGUI.PropertyField(valueRect, activeProp,  GUIContent.none); break;
             case KeyKind.Achieve:     valueRect.height = EditorGUI.GetPropertyHeight(achieveProp, true);
                                       EditorGUI.PropertyField(valueRect, achieveProp, GUIContent.none, true);
                                       break;

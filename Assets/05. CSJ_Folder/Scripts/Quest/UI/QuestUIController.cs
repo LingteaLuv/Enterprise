@@ -19,8 +19,8 @@ public class QuestUIController : MonoBehaviour
 
     
     public int QuestNumber;
-    public QuestInstance QuestInst;
-    public QuestDefinitionSO QuestDef;
+    [SerializeField] public GeneralQuestInstance QuestInst;
+    [SerializeField] public GeneralQuestDefinitionSO QuestDef;
     public int QuestGoalCount;
     
     private GoalDefinitionSO QuestGoal;
@@ -48,7 +48,7 @@ public class QuestUIController : MonoBehaviour
         // TODO : 우당탕탕 처럼 완료되지 않은 퀘스트 클릭시 수행 위치로 이동?
     }
 
-    public void UpdateQuest(QuestDefinitionSO definition, QuestInstance instance )
+    public void UpdateQuest(GeneralQuestDefinitionSO definition, GeneralQuestInstance instance )
     {
         QuestDef = definition;
         QuestInst = instance;
@@ -58,26 +58,38 @@ public class QuestUIController : MonoBehaviour
         QuestGoalCount = QuestInst.CurrentGoalCount;
         
         _questNumberText.text = QuestNumber.ToString();
-        _questGoalText.text = QuestDef.questName;
+
         if (QuestDef.GeneralType == GeneralType_Enum.StageClear)
         {
             _questGoalText.text = QuestInst.stageClearMission;
-        }
-        if (QuestGoalCount < QuestGoal.RequireCount)
-        {
-            _questGoalCountText.text = $"{QuestGoalCount} / {QuestGoal.RequireCount}";
-            _questButton.image.canvasRenderer.SetAlpha(0.3f);
-            ColorBlock buttonColor = _questButton.colors;
-            buttonColor.normalColor = Color.black;
+            if (QuestInst.needToClearStage <= QuestManager.Instance.CurrentClearedStage)
+            {
+                _questGoalCountText.text = "클리어";
+            }
+            else
+            {
+                _questGoalCountText.text = $"{QuestManager.Instance.CurrentClearedStage} / {QuestInst.needToClearStage}";
+            }
         }
         else
         {
-            _questGoalCountText.text = "클리어";
-            _questButton.image.canvasRenderer.SetAlpha(0.7f);
-            ColorBlock buttonColor = _questButton.colors;
-            buttonColor.normalColor = Color.white;
+            _questGoalText.text = QuestDef.questName;
+            if (QuestGoalCount < QuestGoal.RequireCount)
+            {
+                _questGoalCountText.text = $"{QuestGoalCount} / {QuestGoal.RequireCount}";
+                _questButton.image.canvasRenderer.SetAlpha(0.3f);
+                ColorBlock buttonColor = _questButton.colors;
+                buttonColor.normalColor = Color.black;
+            }
+            else
+            {
+                _questGoalCountText.text = "클리어";
+                _questButton.image.canvasRenderer.SetAlpha(0.7f);
+                ColorBlock buttonColor = _questButton.colors;
+                buttonColor.normalColor = Color.white;
+            }
         }
-        
+
         //_questCurrentGoalImage.sprite = QuestReward.Reward.RewardIcon;
     }
     
@@ -94,11 +106,16 @@ public class QuestUIController : MonoBehaviour
     
     private void SubmitButton()
     {
-        _CheatButton.onClick.AddListener(OnClickCheatButton);
-        //KillButton.onClick.AddListener(OnClickKillButton);
-        //GachaButton.onClick.AddListener(OnClickGachaButton);
-        //LevelUpButton.onClick.AddListener(OnClickLevelUpButton);
-        //UpgradeButton.onClick.AddListener(OnClickUpgradeButton);
+        if (_CheatButton !=null)
+            _CheatButton.onClick.AddListener(OnClickCheatButton);
+        if (KillButton !=null)
+            KillButton.onClick.AddListener(OnClickKillButton);
+        if (GachaButton !=null)
+            GachaButton.onClick.AddListener(OnClickGachaButton);
+        if (LevelUpButton !=null)
+            LevelUpButton.onClick.AddListener(OnClickLevelUpButton);
+        if (UpgradeButton !=null)
+            UpgradeButton.onClick.AddListener(OnClickUpgradeButton);
     }
 
     private void OnClickKillButton()
