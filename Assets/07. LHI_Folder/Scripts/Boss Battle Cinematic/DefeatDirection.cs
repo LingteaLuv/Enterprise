@@ -28,7 +28,7 @@ public class DefeatDirection : MonoBehaviour
     private Vector3 playerShipPos;
     private Vector3 enemyShipPos;
     private Vector3 plankPos;
-    private Vector3 victoryTextScale = Vector3.one * 5;
+    private Vector3 defeatTextScale = Vector3.one * 5;
 
     // DOTween 시퀀스
     private Sequence defeatSequence;
@@ -58,7 +58,7 @@ public class DefeatDirection : MonoBehaviour
     [ContextMenu("패배 연출 실행")]
     public void PlayDefeatDirection()
     {
-        defeatSequence.Play();
+        defeatSequence.Restart();
     }
 
     [ContextMenu("초기화")]
@@ -78,7 +78,7 @@ public class DefeatDirection : MonoBehaviour
         plankTransform.position = plankPos;
         plankTransform.rotation = Quaternion.identity;
 
-        defeatText.rectTransform.localScale = victoryTextScale;
+        defeatText.rectTransform.localScale = defeatTextScale;
         defeatText.alpha = 0f;
 
         mainCam.orthographicSize = defaultOrthoSize;
