@@ -70,7 +70,7 @@ public abstract class BaseMonsterFSM : LHI.Character
     public override void Die()
     {
         Debug.Log($"{gameObject.name} 사망");
-        BattleManager.Instance.OnEnemyDead(gameObject);
+        //BattleManager.Instance.OnEnemyDead(gameObject);
         // 애니메이션 / 이펙트 등
         // gameObject.SetActive(false);
         Destroy(gameObject);

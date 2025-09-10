@@ -21,13 +21,21 @@ namespace JHT
             curSO = so;
         }
 
+
         public void ChangeHP(float value)
         {
-            if (!hpGuageImage) return;
-            if (curSO == null || curSO.maxHp <= 0f) return;
+            if (!hpGuageImage) 
+                return;
+
+            if (curSO == null || curSO.maxHp <= 0f) 
+                return;
 
             hpGuageImage.DOFillAmount(value,1f);
         }
 
+        public void ReleaseMonsterHP()
+        {
+            hpGuageImage.fillAmount = 1f;
+        }
     }
 }

@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using GooglePlayGames.BasicApi;
+using JHT;
 
 
 /// <summary>
@@ -34,12 +35,11 @@ public class BattleManager : MonoBehaviour
     private List<BattleField> battleFields = new();             // 동적으로 필드 구성 (씬 로드시 찾아서 등록)
 
     [Header("스폰 수 설정")]
-    [SerializeField] private int baseEnemyCount = 3;
     [SerializeField] private int growthPerStage = 1;
 
     private List<GameObject> currentPlayers = new();  // 기존 currentPlayer 대신 여러 명
 
-    private List<GameObject> spawnedEnemies = new();
+    public List<JHT_MonsterDataSO> spawnedEnemies = new(); // GameObject -> JHT_MOnsterDataSO
 
     private int currentStageIndex = 0;
     private bool isbattleover = false;
@@ -151,6 +151,7 @@ public class BattleManager : MonoBehaviour
                 return;
             }
         }
+        JHT_MonsterSpawnManager.Instance.ChangeStage(battleFields[stageIndex],stageIndex); // Add, 이게 맞나..?battleField쪽 다시봐야함
 
         battleRoutine = StartCoroutine(BattleRoutine());
         Debug.Log("battleRoutine 시작됨");
@@ -228,20 +229,27 @@ public class BattleManager : MonoBehaviour
     // 적 생성 (스테이지 수에 비례해 증가)
     private void SpawnEnemies(BattleField field, int stageIndex)
     {
-        int count = baseEnemyCount + (stageIndex * growthPerStage);
-        var spawnPoints = field.EnemySpawnPoints;
+        //int count = baseEnemyCount + (stageIndex * growthPerStage);
+        //var spawnPoints = field.EnemySpawnPoints;
+        //
+        //for (int i = 0; i < count; i++)
+        //{
+        //    int randIndex = Random.Range(0, spawnPoints.Count);
+        //    var enemy = Instantiate(enemyPrefab, spawnPoints[randIndex].position, Quaternion.identity);
+        //    enemy.tag = "Enemy";
+        //    spawnedEnemies.Add(enemy);
+        //}
 
-        for (int i = 0; i < count; i++)
+        JHT_MonsterSpawnManager.Instance.ChangeRound(stageIndex);
+        // 몬스터 데이터 넣기
+        for (int i = 0; i < JHT_MonsterSpawnManager.Instance.curMonsterCountList.Count; i++)
         {
-            int randIndex = Random.Range(0, spawnPoints.Count);
-            var enemy = Instantiate(enemyPrefab, spawnPoints[randIndex].position, Quaternion.identity);
-            enemy.tag = "Enemy";
-            spawnedEnemies.Add(enemy);
+            spawnedEnemies.Add(JHT_MonsterSpawnManager.Instance.curMonsterCountList[i]);
         }
     }
 
     // 적 사망 시 호출
-    public void OnEnemyDead(GameObject enemy)
+    public void OnEnemyDead(JHT_MonsterDataSO enemy) //GameObject -> JHT_MonsterDataSO
     {
         if (spawnedEnemies.Contains(enemy))
             spawnedEnemies.Remove(enemy);

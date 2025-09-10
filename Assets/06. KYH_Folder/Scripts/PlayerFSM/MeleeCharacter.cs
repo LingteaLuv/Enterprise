@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using JHT;
 public class MeleeCharacter : BaseCharacterFSM
 {
     private Transform target;
@@ -82,14 +83,15 @@ public class MeleeCharacter : BaseCharacterFSM
                 ChangeState(State.Move);
                 yield break;
             }
-
             Debug.Log($"{gameObject.name}이(가) 근접 공격!");
 
-            var targetScript = target.GetComponent<BaseMonsterFSM>();
+            var targetScript = target.GetComponent<JHT_BaseMonsterFSM>();
+
             if (targetScript != null)
             {
                 float attackPower = stats.GetCurrentStat(Stat.Attack);
                 targetScript.TakeDamage(attackPower);
+                Debug.Log($"MeleeCharacter AttackRoutine : {targetScript.monsterSO.name}");
             }
 
             yield return new WaitForSeconds(5f);
@@ -160,6 +162,6 @@ public class MeleeCharacter : BaseCharacterFSM
 
     private bool IsTargetValid()
     {
-        return target != null && target.gameObject != null && !target.Equals(null);
+        return target != null && !target.Equals(null) && target.GetComponent<JHT_BaseMonsterFSM>().curHP > 0;
     }
 }

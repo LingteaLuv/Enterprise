@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,22 +19,22 @@ namespace JHT
         protected Coroutine attackRoutine;
 
         public LayerMask targetLayer;
-        public Transform target;
+        public GameObject target;
         public JHT_MonsterDataSO monsterSO;
         public JHT_BaseMonsterStat monsterStat;
         public JHT_UIMonster monsterUI;
+        public GameObject monsterPrefab;
 
-        private bool canAttack;
         private int curAnim;
-        private bool isHurt;
+
         // 임시용
         Coroutine attackCor;
 
         [SerializeField] private Transform damageTextPos;
-
         // test용
         public float curHP;
 
+        private bool isDead;
         #region Animator
 
         Animator animator;
@@ -41,44 +42,43 @@ namespace JHT
         public readonly int IDLE = Animator.StringToHash("IDLE");
         public readonly int MOVE = Animator.StringToHash("MOVE");
         public readonly int ATTACK = Animator.StringToHash("ATTACK");
+        public readonly int DEATH = Animator.StringToHash("DEATH");
 
         #endregion
-
 
 
         protected virtual void Start()
         {
             ChangeState(State.Idle);
-            target = GameObject.FindWithTag("Crew").transform;
-            canAttack = true;
         }
 
         public virtual void Init(JHT_MonsterDataSO so)
         {
+            if (!IsValidTarget(target))
+            {
+                StartSetting(so);
+            }
+        }
+
+        private void StartSetting(JHT_MonsterDataSO so)
+        {
+            isDead = false;
+
+            TryAcquireNextTarget();
+
             monsterSO = so;
             monsterStat.Init(monsterSO);
 
-            GameObject spawnedVisual = Instantiate(so.enemyCharacter,transform);
-            spawnedVisual.transform.localPosition = Vector3.zero;
-            spawnedVisual.transform.localRotation = Quaternion.identity;
-            spawnedVisual.transform.localScale = Vector3.one;
+            monsterPrefab = Instantiate(so.enemyCharacter, transform);
+            monsterPrefab.transform.localPosition = Vector3.zero;
+            monsterPrefab.transform.localRotation = Quaternion.identity;
+            monsterPrefab.transform.localScale = Vector3.one;
 
             monsterStat.CurHp = so.maxHp;
 
-            if (monsterStat.monsterRarity == MonsterRarity.Elite)
-            {
-                gameObject.transform.localScale *= 1.3f;
-                spawnedVisual.transform.localScale = gameObject.transform.localScale;
-            }
-            else
-            {
-                gameObject.transform.localScale = Vector3.one;
-                spawnedVisual.transform.localScale = gameObject.transform.localScale;
-            }
-
             animator = GetComponentInChildren<Animator>();
 
-            if (so.animatorOverrideController != null) 
+            if (so.animatorOverrideController != null)
             {
                 animator.runtimeAnimatorController = monsterStat.animatorOverride;
                 animator.SetFloat("AttackSpeed", monsterStat.attackSpeed);
@@ -87,17 +87,23 @@ namespace JHT
 
         protected virtual void OnEnable()
         {
-            monsterStat.OnChangeHp += ShowMonsterUI;
+            if (monsterStat != null)
+                monsterStat.OnChangeHp += ShowMonsterUI;
         }
 
         protected virtual void OnDisable()
         {
-            monsterStat.OnChangeHp += ShowMonsterUI;
+            if (monsterStat != null)
+                monsterStat.OnChangeHp -= ShowMonsterUI;
         }
 
         protected virtual void Update()
         {
-            
+            if (!IsValidTarget(target))
+            {
+                TryAcquireNextTarget();
+            }
+
             switch (currentState)
             {
                 case State.Idle:
@@ -113,18 +119,15 @@ namespace JHT
                     HandleDie();
                     break;
             }
-            
             CheckDistance();
         }
 
         protected void ChangeState(State newState)
         {
-            if (isHurt)
+            if (isDead)
             {
-                if (newState == State.Idle)
-                {
-                    return;
-                }
+                currentState = State.Idle;
+                return;
             }
 
             currentState = newState;
@@ -134,24 +137,80 @@ namespace JHT
                 StopCoroutine(attackRoutine);
                 attackRoutine = null;
             }
-
         }
 
         protected void CheckDistance()
         {
-            float distance = Vector2.Distance(transform.position, target.position);
+            if (isDead)
+                return;
+
+            if (target == null)
+                return;
+
+            float distance = (target.transform.position - transform.position).magnitude;
 
             if (distance < monsterStat.attackRange)
             {
                 ChangeState(State.Attack);
             }
-            else if (distance < monsterStat.chaseRange)
-            {
-                ChangeState(State.Move);
-            }
-            else
+            else if (distance > monsterStat.chaseRange)
             {
                 ChangeState(State.Idle);
+            }
+            
+        }
+        protected bool IsValidTarget(GameObject target)
+        {
+            if (target == null)
+            {
+                ChangeState(State.Idle);
+                return false;
+            }
+
+            HealthSystem hs = target.GetComponent<HealthSystem>();
+
+            if (hs == null)
+            {
+                ChangeState(State.Idle);
+                return false;
+            }
+
+            if (hs.currentHealth <= 0)
+            {
+                target = null;
+                ChangeState(State.Idle);
+                return false;
+            }
+
+
+            return true;
+        }
+
+        // 진짜 for쓰기 싫은데...
+        protected void TryAcquireNextTarget()
+        {
+            if (isDead)
+                return;
+
+            Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, monsterStat.chaseRange, targetLayer);
+
+            foreach (var c in cols)
+            {
+                if (c.gameObject.GetComponent<HealthSystem>().currentHealth <= 0)
+                {
+                    continue;
+                }
+
+                if (c != null)
+                {
+                    float d = (c.gameObject.transform.position - transform.position).magnitude;
+                    if (d < monsterStat.chaseRange)
+                    {
+                        target = c.gameObject;
+                        ChangeState(State.Move);
+                        break;
+                    }
+                }
             }
         }
 
@@ -163,12 +222,16 @@ namespace JHT
         protected virtual void HandleAttack()
         {
             AnimatorChange(ATTACK);
+            if (target == null)
+            {
+                ChangeState(State.Idle);
+            }
         }
 
         protected virtual void HandleMove()
         {
             AnimatorChange(MOVE);
-            transform.position = Vector3.MoveTowards(transform.position, target.position, Time.deltaTime * monsterStat.moveSpeed);
+            transform.position = Vector3.MoveTowards(transform.position, target.transform.position, Time.deltaTime * monsterStat.moveSpeed);
             //Rotate();
         }
 
@@ -185,7 +248,7 @@ namespace JHT
             if (target == null)
                 return;
 
-            float direction = target.position.x - transform.position.x;
+            //float direction = target.transform.position.x - transform.position.x;
         }
 
         public void TakeDamage(float damage)
@@ -204,22 +267,41 @@ namespace JHT
                 obj.ShowDamageText(damage);
                 obj.transform.position = damageTextPos.position;
                 ChangeState(State.Move);
-                isHurt = true;
             }
         }
 
-        public void Die()
+        private void Die()
         {
-            Debug.Log($"{gameObject.name} 사망");
-            BattleManager.Instance.OnEnemyDead(gameObject);
-            // 애니메이션 / 이펙트 등
-            // gameObject.SetActive(false);
-            Release(0.2f);
+            BattleManager.Instance.OnEnemyDead(monsterSO);
+            Outit();
         }
 
+        public void Outit()
+        {
+            isDead = true;
+
+            if (monsterUI != null)
+            {
+                monsterUI.ReleaseMonsterHP();
+                monsterUI.gameObject.SetActive(false);
+            }
+
+            if (monsterPrefab != null)
+                Destroy(monsterPrefab, 0.2f);
+
+            AnimatorChange(DEATH);
+
+            Release(0.2f);
+
+            monsterSO = null;
+            target = null;
+        }
 
         private void AnimatorChange(int temp)
         {
+            if (curAnim == temp && temp != ATTACK || animator == null)
+                return;
+
             animator.Play(temp);
             curAnim = temp;
         }
