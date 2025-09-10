@@ -71,6 +71,7 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
         baseCritDamage = data.finalStats.GetValueOrDefault(Stat.CritDamage, 0) / 100;
         baseAttackSpeed = data.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0) / 100;
 
+        Debug.LogError($"{PartyManager.Instance.moveSpeed}");
         moveSpeed = PartyManager.Instance.moveSpeed;
         attackRange = data.characterdata.atkRangeType == AtkRangeType.Ranged_Attack ?
             PartyManager.Instance.attackRange : PartyManager.Instance.attackRange2;
