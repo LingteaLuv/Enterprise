@@ -21,7 +21,7 @@ public class Buff
 }
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class CombatCharacter : MonoBehaviour, IAttacker
+public class CombatCharacter : MonoBehaviour, IAttacker, IHealthOwner
 {
     public PlayerCharacterData CharacterStats { get; private set; } // 원본 데이터 참조
 
