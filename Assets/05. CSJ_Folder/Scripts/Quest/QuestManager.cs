@@ -1044,7 +1044,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                     }
                     catch (NullReferenceException nre)
                     {
-                        Debug.LogError($"nre 발생 {attempt}번 시도");
+                        //Debug.LogError($"nre 발생 {attempt}번 시도");
                         await Task.Delay(500);
                         continue;
                     }

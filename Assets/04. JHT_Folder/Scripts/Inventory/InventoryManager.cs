@@ -325,14 +325,14 @@ namespace JHT
         {
             if (value)
             {
-                DestoryRelics(obj2);
+                DestroyRelics(obj2);
                 relicsList.Add(obj1);
                 OnChangePanel?.Invoke(obj1);
                 PlayerDataManager.Instance.RecalculateAllCharacterStats();
             }
             else
             {
-                DestoryRelics(obj1);
+                DestroyRelics(obj1);
                 relicsList.Add(obj2);
                 OnChangePanel?.Invoke(obj2);
                 PlayerDataManager.Instance.RecalculateAllCharacterStats();
@@ -352,7 +352,7 @@ namespace JHT
         }
 
 
-        public void DestoryRelics(RelicsObject obj)
+        public void DestroyRelics(RelicsObject obj)
         {
             if(obj == null)
                 return;

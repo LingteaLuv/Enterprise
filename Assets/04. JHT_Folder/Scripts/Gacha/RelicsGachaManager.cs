@@ -39,6 +39,7 @@ public class RelicsGachaManager : MonoBehaviour
 
         //dtabase사용하게되면 변경
         relicsTablelevel = 0;
+        DataSetting(true);
     }
 
     private void DataSetting(bool value)
@@ -86,6 +87,11 @@ public class RelicsGachaManager : MonoBehaviour
 
     public void GetSO()
     {
+        if (gachaData.Count == 0)
+        {
+            Debug.Log($"[GetSO] : gachaData 데이터 없음");
+        }
+        Debug.Log($"[GetSO] : {gachaData.Count}");
         int randIndex = UnityEngine.Random.Range(0, gachaData.Count);
         ItemRelicsSO so = gachaData[randIndex];
 
