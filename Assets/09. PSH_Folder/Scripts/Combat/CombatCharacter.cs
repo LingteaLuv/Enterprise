@@ -67,9 +67,9 @@ public class CombatCharacter : MonoBehaviour, IAttacker
         baseAttack = data.finalStats.GetValueOrDefault(Stat.Attack, 0);
         baseHealth = data.finalStats.GetValueOrDefault(Stat.Health, 0);
         baseDefense = data.finalStats.GetValueOrDefault(Stat.Defense, 0);
-        baseCritChance = data.finalStats.GetValueOrDefault(Stat.CritChance, 0);
-        baseCritDamage = data.finalStats.GetValueOrDefault(Stat.CritDamage, 0);
-        baseAttackSpeed = data.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0);
+        baseCritChance = data.finalStats.GetValueOrDefault(Stat.CritChance, 0) / 100;
+        baseCritDamage = data.finalStats.GetValueOrDefault(Stat.CritDamage, 0) / 100;
+        baseAttackSpeed = data.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0) / 100;
 
         moveSpeed = PartyManager.Instance.moveSpeed;
         attackRange = data.characterdata.atkRangeType == AtkRangeType.Ranged_Attack ?
