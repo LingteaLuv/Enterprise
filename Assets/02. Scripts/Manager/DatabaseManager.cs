@@ -459,13 +459,13 @@ public class DatabaseManager : Singleton<DatabaseManager>
         
         // server 시간을 받아와서 기준 시간대에 맞춥니다.
         long serverTime = await CurrentServerTime();
-        DateTimeOffset _stdNow = GetResetTime(serverTime);
+        DateTime _stdNow = GetResetTime(serverTime);
 
         // 서버 시간을 기준으로 초기화 경계를 받아옵니다.
         var dailyBoundary = GetDailyBoundary(_stdNow, resetTime);
 
         // 마지막으로 일일 퀘스트를 진행한 시간을 기준 시간으로 받아옵니다.
-        DateTimeOffset lastTime = await GetDailyQuestTimeToStd();
+        DateTime lastTime = await GetDailyQuestTimeToStd();
         
         // 만약 마지막으로 진행한 기록이 없다면 ≒ 클리어 횟수가 0회인 경우 true를 반환합니다.
         if (lastTime == DateTime.MinValue) return true;
@@ -477,10 +477,10 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <summary>
     /// 일일 초기화 경계를 받아옵니다.
     /// </summary>
-    private DateTime GetDailyBoundary(DateTimeOffset time,int resetTime)
+    private DateTime GetDailyBoundary(DateTime time,int resetTime)
     {
         // 현재의 날짜까지와 시는 일일 퀘스트 초기화 기준 시로 DateTime을 생성합니다.
-        var dailyBoundary = new DateTime(time.Year, time.Month, time.Day, resetTime, 0, 0);
+        var dailyBoundary = new DateTime(time.Year, time.Month, time.Day, resetTime, 0, 0, DateTimeKind.Utc);
         
         // 만약 현재 시간의 시가 아직 초기화 기준 시(resetTime)을 넘지 못한 경우 전날의 경계로 넘깁니다. 
         if (time < dailyBoundary)
@@ -568,7 +568,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         var _stdNow = GetResetTime(serverTime);
         
         // 주간 퀘스트 경계를 반환 받습니다.
-        DateTimeOffset boundary = GetWeeklyBoundary(_stdNow, resetDay, resetTime);
+        DateTime boundary = GetWeeklyBoundary(_stdNow, resetDay, resetTime);
         
         // 마지막 주간 퀘스트 수행 시간을 반환 받습니다.
         var lastTime = await GetWeeklyQuestTimeToStd();
@@ -591,7 +591,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         
         // WeeklyQuestTime에 현재 서버 시간을 저장합니다.
         await userData.Child("WeeklyQuestTime").SetValueAsync(serverTime);
-        DateTimeOffset _stdNow = GetResetTime(serverTime);
+        DateTime _stdNow = GetResetTime(serverTime);
         
         // WeeklyQuestDay에 현재 요일 값을 저장합니다.
         await userData.Child("WeeklyQuestDay").SetValueAsync((int)_stdNow.DayOfWeek);
@@ -654,7 +654,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     private static DateTime GetWeeklyBoundary(DateTime now, DayOfWeek resetDay, int resetTime)
     {
         // 경계 기본 값을 지정합니다.
-        var BaseToday = new DateTime(now.Year, now.Month, now.Day, resetTime, 0, 0);
+        var BaseToday = new DateTime(now.Year, now.Month, now.Day, resetTime, 0, 0, DateTimeKind.Utc);;
       
         // 오늘의 요일에서 초기화 요일을 빼서 초기화 요일 기준으로 경계를 지정합니다.
         var delta = ((int)now.DayOfWeek - (int)resetDay + 7) % 7;
@@ -813,7 +813,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             result.General.ActiveProgress = ToInt(g.Child("ActiveProgress").Value, 0);
             
             result.General.ClearedQuestCount = ToInt(g.Child("ClearedQuestCount").Value, 0);
-            result.General.CurrentQuestStage = ToInt(g.Child("CurrentQuestStage").Value, 1) - 1;
+            result.General.CurrentQuestStage = ToInt(g.Child("CurrentQuestStage").Value, 1);
             result.General.CurrentClearedStage = ToInt(g.Child("CurrentClearedStage").Value, 0);
         }
 

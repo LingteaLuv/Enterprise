@@ -52,15 +52,52 @@ public class HealthSystem : MonoBehaviour
 
         Debug.Log($"'{combatCharacter.name}' 체력 스탯 변경 적용. 현재 체력: {currentHealth}/{maxHealth}");
     }
-
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
         if (currentHealth <= 0)
         {
             currentHealth = 0;
+            Debug.Log($"💀 {combatCharacter.name}이(가) 쓰러졌습니다.");
             // TODO: 사망 처리 로직 호출
         }
+
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+    public void TakeDamage(IAttacker attacker)
+    {
+        // 1. 공격자와 방어자의 스탯 가져오기
+        float attackerAttack = attacker.GetCurrentStat(Stat.Attack);
+        float attackerCritChance = attacker.GetCurrentStat(Stat.CritChance);
+        float attackerCritDamage = attacker.GetCurrentStat(Stat.CritDamage);
+        float defenderDefense = combatCharacter.GetCurrentStat(Stat.Defense);
+
+        // 2. 데미지 계산
+        // 기본 데미지 = 공격력 * (100 / (100 + 방어력))
+        float baseDamage = attackerAttack * (100f / (100f + defenderDefense));
+
+        // 치명타 계산 (치명타 확률은 0과 1 사이의 값으로 가정)
+        bool isCritical = UnityEngine.Random.value < attackerCritChance;
+        float finalDamage = baseDamage;
+
+        if (isCritical)
+        {
+            // 치명타 피해는 배율(예: 1.5)로 가정
+            finalDamage *= attackerCritDamage;
+            Debug.Log("✨ 치명타 발생! ✨");
+        }
+
+        // 3. 최종 데미지 적용
+        currentHealth -= finalDamage;
+        Debug.Log($"💥 {attacker.name}이(가) {combatCharacter.name}에게 {finalDamage:F1}의 데미지를 입혔습니다! (기본: {baseDamage:F1})");
+
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+            Debug.Log($"💀 {combatCharacter.name}이(가) 쓰러졌습니다.");
+            // TODO: 사망 처리 로직 호출
+        }
+
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 }
