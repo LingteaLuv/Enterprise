@@ -202,25 +202,33 @@ public class GachaUIHandler : UIBase
         if (curTableLevel >= 0)
         {
             UIManager.Instance.ShowConfirm("유물 뽑기를 진행 하시겠습니까?",
-            () =>
+            onConfirm: () =>
             {
                 manager.GetGachaOneRelicsData(curTableLevel);
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
                 InventoryManager.Instance.RelicsCoupon -= manager.relicsCouponCost;
+            },
+            onCancel: () =>
+            {
+                Debug.Log($"유물 뽑기 취소됨");
             });
         }
         else
         {
             UIManager.Instance.ShowConfirm("스페셜 유물 뽑기를 진행 하시겠습니까?",
-            () =>
+            onConfirm: () =>
             {
                 manager.GetGachaOneRelicsData(-1);
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
                 InventoryManager.Instance.RelicsPoints -= manager.relicsSpecialCost;
+            },
+            onCancel: () =>
+            {
+                Debug.Log($"스페셜 유물 뽑기 취소됨");
             });
         }
 

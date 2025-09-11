@@ -18,9 +18,14 @@ public class RelicsPoints : MonoBehaviour
     public void Init(RelicsGachaManager manager)
     {
         gachaManager = manager;
-        relicsMaxPointText.text = manager.relicsSpecialCost.ToString(); 
+        relicsMaxPointText.text = manager.relicsSpecialCost.ToString();
+
+        InventoryManager.Instance.OnChangeRelicsPoints -= ShowRelicsPoint;
         InventoryManager.Instance.OnChangeRelicsPoints += ShowRelicsPoint;
+
         ShowRelicsPoint(InventoryManager.Instance.RelicsPoints);
+
+        OnChangeValue -= ChangeRelicsPoint;
         OnChangeValue += ChangeRelicsPoint;
     }
 

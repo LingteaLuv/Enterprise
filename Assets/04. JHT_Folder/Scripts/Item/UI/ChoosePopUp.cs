@@ -59,6 +59,7 @@ public class ChoosePopUp : MonoBehaviour
             item1Panel.SetActive(true);
             relicsObj1 = obj1;
             Item1Setting();
+
             item1Button.onClick.AddListener(ClickButton1);
         }
         else
@@ -68,8 +69,8 @@ public class ChoosePopUp : MonoBehaviour
 
         relicsObj2 = obj2;
         Item2Setting();
-        item2Button.onClick.AddListener(ClickButton2);
 
+        item2Button.onClick.AddListener(ClickButton2);
         selectButton.onClick.AddListener(SelectItem);
         OnSelect += ChooseItem;
 
@@ -77,12 +78,20 @@ public class ChoosePopUp : MonoBehaviour
         selectButton.interactable = false;
     }
 
-
-    public void OnDisable()
+    private void OnDisable()
     {
+        if (item1Panel.activeSelf)
+            item1SelectOutLine.color = Color.white;
+
+        item2SelectOutLine.color = Color.white;
+
+        OnSelect -= ChooseItem;
         item1Button.onClick.RemoveListener(ClickButton1);
         item2Button.onClick.RemoveListener(ClickButton2);
+        selectButton.onClick.RemoveListener(SelectItem);
+
     }
+
 
     // 아이템 1 세팅
     private void Item1Setting()
@@ -143,19 +152,27 @@ public class ChoosePopUp : MonoBehaviour
 
     private void SelectItem()
     {
-        UIManager.Instance.ShowConfirm("정말 이 아이템을 선택 하시겠습니까?", () =>
+        if (relicsObj1 != null)
         {
-            if(relicsObj1 == null)
-                InventoryManager.Instance.OnChangeAddItem?.Invoke(relicsObj2);
-            else
+            UIManager.Instance.ShowConfirm("정말 이 아이템을 선택 하시겠습니까?", () =>
+            {
                 InventoryManager.Instance.OnChangeItem?.Invoke(relicsObj1, relicsObj2, selectMyItem);
+
+                gameObject.SetActive(false);
+                relicsGachaListPanel.SetActive(false);
+
+                relicsObj1 = null;
+                relicsObj2 = null;
+            });
+        }
+        else
+        {
+            InventoryManager.Instance.OnChangeAddItem?.Invoke(relicsObj2);
 
             gameObject.SetActive(false);
             relicsGachaListPanel.SetActive(false);
-
-            relicsObj1 = null;
             relicsObj2 = null;
-        });
+        }
     }
 
     private Color SetItemRarityColor(RelicsObject obj)
@@ -183,6 +200,8 @@ public class ChoosePopUp : MonoBehaviour
 
         if (relicsObj1 == null)
         {
+            downImage.SetActive(false);
+            upImage.SetActive(false);
             compareText.text = "";
             return;
         }
@@ -213,7 +232,7 @@ public class ChoosePopUp : MonoBehaviour
     private void ChooseItem(bool value)
     {
         if (relicsObj1 == null)
-            return;
+            value = false;
 
         if (value)
         {
