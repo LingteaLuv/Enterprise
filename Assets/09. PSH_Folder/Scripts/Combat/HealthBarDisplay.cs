@@ -13,6 +13,7 @@ public class HealthBarDisplay : MonoBehaviour
     [SerializeField] private Image characterIcon;
     [SerializeField] private Slider healthSlider;
     [SerializeField] private TextMeshProUGUI healthText; // 체력 숫자를 표시할 텍스트
+    [SerializeField] private TextMeshProUGUI nameText; // 캐릭 이름을 표시할 텍스트
 
     private HealthSystem healthSystem;
 
@@ -32,6 +33,12 @@ public class HealthBarDisplay : MonoBehaviour
         if (characterIcon != null && character.CharacterStats?.characterdata?.characterSprite != null)
         {
             characterIcon.sprite = character.CharacterStats.characterdata.characterSprite;
+        }
+
+        // 이름 설정
+        if (nameText != null && character.CharacterStats?.characterdata?.characterName != null)
+        {
+            nameText.text = character.CharacterStats.characterdata.characterName;
         }
 
         // HealthSystem 참조 및 이벤트 구독
