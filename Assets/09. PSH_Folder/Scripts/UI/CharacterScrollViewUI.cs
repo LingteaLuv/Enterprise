@@ -25,7 +25,7 @@ public enum FactionFilterOption
 {
     All, // 전체
     Pirate,
-    Navy,
+    Marine,
     Monster
 }
 
@@ -363,7 +363,7 @@ public class CharacterScrollViewUI : UIBase
 
             case FactionFilterOption.All: return "전체";
             case FactionFilterOption.Pirate: return "해적";
-            case FactionFilterOption.Navy: return "해군";
+            case FactionFilterOption.Marine: return "해군";
             case FactionFilterOption.Monster: return "괴물";
 
             case CrewRole.Deckhand: return "갑판원";

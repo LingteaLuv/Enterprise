@@ -6,6 +6,7 @@ using System;
 
 public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
 {
+    public static event System.Action OnGachaPityChanged;
     public const int GACHA_CEILING_COUNT = 20; // 천장 횟수
     public int gachaPityCounter = 0;
 
@@ -50,6 +51,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
 
         gachaPityCounter = PlayerDataManager.Instance.GachaPityCounter;
         Debug.Log($"[CharacterGachaManager] 현재 천장 카운트: {gachaPityCounter}");
+        OnGachaPityChanged?.Invoke();
     }
 
     public override bool PerformMultipleGacha(int count)
@@ -152,6 +154,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         CurrencyManager.Instance.UpdateCurrencyUI();
 
         PlayerDataManager.Instance.GachaPityCounter = gachaPityCounter;
+        OnGachaPityChanged?.Invoke();
     }
 
     private PlayerCharacterData GetCharacterFromPool(bool isCaptain, GachaGrade grade)
