@@ -10,6 +10,11 @@ public class AllHealthBarsPanel : MonoBehaviour
     [Tooltip("씬에 미리 배치한 HealthBarDisplay 오브젝트들을 여기에 등록하세요.")]
     [SerializeField] private List<HealthBarDisplay> healthBars = new List<HealthBarDisplay>();
 
+    private void Start()
+    {
+        gameObject.SetActive(false);
+    }
+
     private void OnEnable()
     {
         // 파티가 준비되었다는 신호를 받으면 SetupHealthBars 함수를 호출하도록 등록합니다.
