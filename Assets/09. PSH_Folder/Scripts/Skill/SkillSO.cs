@@ -20,19 +20,27 @@ public class SkillSO : ScriptableObject
     // 하지만 유니티 버전에 따라 UI가 불편할 수 있으므로, 여기서는 직접 List에 SO를 넣는 방식을 사용합니다.
     public List<SkillEffectSO> effects = new List<SkillEffectSO>();
 
-    /// <summary>
-    /// 이 스킬에 포함된 모든 효과를 대상에게 적용합니다.
-    /// </summary>
     /// <param name="caster">스킬 시전자</param>
-    /// <param name="target">스킬 대상</param>
-    public void Use(CombatCharacter caster, CombatCharacter target)
+    /// <param name="targets">스킬 대상 리스트</param>
+    public void Use(IAttacker caster, List<IDamageable> targets)
     {
-        Debug.Log($"'{caster.name}'이(가) '{skillName}' 스킬을 '{target.name}'에게 사용!");
-        foreach (var effect in effects)
+        // IAttacker를 CombatCharacter로 캐스팅 시도
+        CombatCharacter casterCharacter = caster as CombatCharacter;
+        if (casterCharacter == null)
         {
-            if (effect != null)
+            Debug.LogError("스킬 시전자가 CombatCharacter가 아닙니다!");
+            return;
+        }
+
+        Debug.Log($"'{casterCharacter.name}'이(가) '{skillName}' 스킬을 사용!");
+        foreach (var target in targets)
+        {
+            foreach (var effect in effects)
             {
-                effect.ApplyEffect(caster, target);
+                if (effect != null)
+                {
+                    effect.ApplyEffect(caster, target);
+                }
             }
         }
     }
