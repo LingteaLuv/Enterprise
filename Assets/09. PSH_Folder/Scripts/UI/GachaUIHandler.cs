@@ -1,5 +1,4 @@
 using JHT;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -85,6 +84,15 @@ public class GachaUIHandler : UIBase
         specialRelicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Special);
         relicsPoints.Init(relicsGachaManager);
         relicsProbabilityBtn.onClick.AddListener(ShowUpgradeGachaPanel);
+
+        // 천장 카운트 UI 갱신 이벤트 구독
+        CharacterGachaManager.OnGachaPityChanged += UpdateCharacterPityText;
+    }
+
+    private void OnDestroy()
+    {
+        // 천장 카운트 UI 갱신 이벤트 구독 해제
+        CharacterGachaManager.OnGachaPityChanged -= UpdateCharacterPityText;
     }
 
 
@@ -127,7 +135,7 @@ public class GachaUIHandler : UIBase
     {
         if (InventoryManager.Instance.RelicsCoupon >= relicsGachaManager.relicsCouponCost)
         {
-            ShowSelectPopUp(relicsGachaManager,relicsGachaManager.relicsTablelevel);
+            ShowSelectPopUp(relicsGachaManager, relicsGachaManager.relicsTablelevel);
         }
         else
         {
@@ -169,8 +177,10 @@ public class GachaUIHandler : UIBase
         }
         else if (typeof(T) == typeof(ItemObject)) itemType = "장비";
 
+        string currencyName = GetCurrencyNameInKorean(manager.currencyType);
+
         UIManager.Instance.ShowConfirm(
-            $"{totalCost}{manager.currencyType}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?",
+            $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?",
             onConfirm: () =>
             {
                 if (manager.PerformMultipleGacha(count))
@@ -181,7 +191,6 @@ public class GachaUIHandler : UIBase
                     if (isCharacterGacha)
                     {
                         QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
-                        UpdateCharacterPityText();
                     }
                     else if (itemType == "장비")
                     {
@@ -196,7 +205,22 @@ public class GachaUIHandler : UIBase
         );
     }
 
-    private void ShowSelectPopUp(RelicsGachaManager manager,int curTableLevel)
+    private string GetCurrencyNameInKorean(CurrencyType currencyType)
+    {
+        switch (currencyType)
+        {
+            case CurrencyType.CrewDrawTicket:
+                return "캐릭터 뽑기권";
+            case CurrencyType.EquipDrawTicket:
+                return "장비 뽑기권";
+            case CurrencyType.Gem:
+                return "보석";
+            default:
+                return currencyType.ToString();
+        }
+    }
+
+    private void ShowSelectPopUp(RelicsGachaManager manager, int curTableLevel)
     {
 
         if (curTableLevel >= 0)

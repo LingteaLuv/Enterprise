@@ -6,13 +6,13 @@ using DG.Tweening;
 public class TabBarController : MonoBehaviour
 {
     [Header("하단 버튼")]
-    [SerializeField] Button characterListBtn;
+    [SerializeField] public Button characterListBtn;
     [SerializeField] Button invenBtn;
     [SerializeField] Button gachaBtn;
     [SerializeField] Button shopBtn;
 
     [Header("버튼에 연결된 UI (UIBase를 상속받아야 함)")]
-    [SerializeField] UIBase characterListPanel;
+    [SerializeField] public UIBase characterListPanel;
     [SerializeField] UIBase invenPanel;
     [SerializeField] UIBase gachaPanel;
     [SerializeField] UIBase shopPanel;
@@ -90,7 +90,7 @@ public class TabBarController : MonoBehaviour
         blocker.onClick.AddListener(ClosePanelAndAnimateButtonOut);
     }
 
-    private void OnTabSelected(Button tabBtn, UIBase panel)
+    public void OnTabSelected(Button tabBtn, UIBase panel)
     {
         panel.ResetPanel();
         bool isFirstOpen = currentOpenPanel == null;
