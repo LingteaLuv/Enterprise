@@ -21,8 +21,10 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public BigInteger fixedLevelUpGoldCost = 1000;
     public BigInteger fixedLevelUpStoneCost = 20;
 
+    //todo석원 : DB 연동 - 레벨 성급, 장착 무기, 영혼 조각 개수
     public Dictionary<int, PlayerCharacterData> ownedCharacters = new Dictionary<int, PlayerCharacterData>();
     public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
+    
     private Dictionary<int, int> starUpgradeCosts;
     private const int STAR_UPGRADE_COST_1 = 20;
     private const int STAR_UPGRADE_COST_2 = 40;
