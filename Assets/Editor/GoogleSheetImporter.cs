@@ -17,6 +17,10 @@ public static class GoogleSheetImporter
             "https://docs.google.com/spreadsheets/d/1bkHFHadz8Dh2NA0E9lrFMsCoei2Ae3_MMPfBAfyrXhs/export?format=csv&gid=923429344",
             "Assets/CSVData/EquipData.csv"
         ),
+        (
+            "https://docs.google.com/spreadsheets/d/1bkHFHadz8Dh2NA0E9lrFMsCoei2Ae3_MMPfBAfyrXhs/export?format=csv&gid=291995308",
+            "Assets/CSVData/EquipData.csv"
+        ),
         // 필요하면 더 추가 가능
     };
 
