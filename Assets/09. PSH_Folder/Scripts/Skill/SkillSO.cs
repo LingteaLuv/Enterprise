@@ -10,6 +10,7 @@ using System.Collections.Generic;
 public class SkillSO : ScriptableObject
 {
     [Header("스킬 정보")]
+    public int SkillID;
     public string skillName;
     [TextArea] public string skillDescription;
     public Sprite skillIcon;
