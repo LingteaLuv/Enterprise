@@ -6,7 +6,9 @@ namespace JHT
 {
     public class InventoryManager : Singleton<InventoryManager>
     {
+        // todo석원 : DB연동 - 장비(key : itemNum, weaponList - 레벨, 성급) 
         public List<WeaponObject> weaponList;
+        // todo석원 : DB연동 - 유물(key : itemNum, RelicsList - 레어도, 레벨) 
         public List<RelicsObject> relicsList;
 
         [Header("유물재화")]
@@ -62,6 +64,7 @@ namespace JHT
 
         #region 수현님코드
         // ▼▼▼ 강화 포인트 관련 코드 수정 ▼▼▼
+        // todo석원 : 장비 DB 연동 - 강화 포인트
         public Dictionary<int, int> equipmentEnhancementPoints = new Dictionary<int, int>();
         public Action<int, int> OnEquipmentEnhancementPointsChanged; // itemNum, newPoints
         public const int MAX_EQUIPMENT_LEVEL = 10;
