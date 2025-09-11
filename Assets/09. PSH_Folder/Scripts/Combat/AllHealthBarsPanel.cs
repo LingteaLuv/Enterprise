@@ -42,7 +42,7 @@ public class AllHealthBarsPanel : MonoBehaviour
         for (int i = 0; i < healthBars.Count; i++)
         {
             // 연결할 캐릭터가 파티 목록에 있는지, 그리고 해당 캐릭터가 활성화 상태인지 확인합니다.
-            if (i < partyCharacters.Count && partyCharacters[i].gameObject.activeInHierarchy)
+            if (i < partyCharacters.Count)
             {
                 // 체력바를 활성화하고, 해당 캐릭터를 연결해줍니다.
                 healthBars[i].gameObject.SetActive(true);
@@ -51,7 +51,6 @@ public class AllHealthBarsPanel : MonoBehaviour
             }
             else
             {
-                // 연결할 캐릭터가 없거나 비활성 상태이면, 해당 체력바를 보이지 않게 끕니다.
                 healthBars[i].gameObject.SetActive(false);
             }
         }
