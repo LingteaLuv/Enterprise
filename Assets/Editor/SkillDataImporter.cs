@@ -105,6 +105,6 @@ public class SkillDataImporter
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log("장비 데이터 임포트 완료!");
+        Debug.Log("스킬 데이터 임포트 완료!");
     }
 }
