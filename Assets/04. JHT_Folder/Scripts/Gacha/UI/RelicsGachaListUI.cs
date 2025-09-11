@@ -64,7 +64,8 @@ public class RelicsGachaListUI : MonoBehaviour
         for (int i = parent.childCount - 1; i >= 0; i--)
         {
             var child = parent.GetChild(i);
-            if (child != null) Destroy(child.gameObject);
+            if (child != null) 
+                Destroy(child.gameObject);
         }
     }
 
