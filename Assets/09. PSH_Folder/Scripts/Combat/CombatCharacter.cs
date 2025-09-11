@@ -92,6 +92,9 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
         {
             healthSystem.Initialize();
         }
+
+        // 스킬 등록
+        RegisterSkills(data);
     }
 
     // IDamageable 인터페이스 구현
@@ -191,7 +194,29 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
             baseAttackSpeed = updatedData.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0);
 
             healthSystem?.OnStatUpdate();
+            RegisterSkills(updatedData); // 스킬 정보도 갱신
         }
+    }
+
+    /// <summary>
+    /// 캐릭터 데이터에 명시된 스킬 ID를 기반으로 스킬 리스트를 설정합니다.
+    /// </summary>
+    private void RegisterSkills(PlayerCharacterData data)
+    {
+        skills.Clear();
+
+        // 패시브 스킬 등록
+        if (data.characterdata.skillPassiveID != 0)
+        {
+            SkillSO passiveSkill = SkillDatabase.GetSkillByID(data.characterdata.skillPassiveID);
+            if (passiveSkill != null)
+            {
+                skills.Add(passiveSkill);
+                Debug.Log($"'{charName}'에게 패시브 스킬 '{passiveSkill.skillName}'을(를) 등록했습니다.");
+            }
+        }
+
+        // TODO: 액티브 스킬 등 다른 스킬 ID가 있다면 여기에 추가로 등록하는 로직을 구현할 수 있습니다.
     }
 
     /// <param name="skillIndex">사용할 스킬의 리스트 인덱스</param>
