@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using _05._CSJ_Folder.Scripts.Quest.Data;
 using Firebase.Auth;
@@ -781,6 +783,11 @@ public class DatabaseManager : Singleton<DatabaseManager>
             }
 
         }
+
+        if (data?.Tutorial is not null)
+        {
+            payload[$"{root}/Tutorial/Cleared"] = data.Tutorial.ClearedTutorialQuestIds;
+        }
         
         // 해당 payload들을 딕셔너리로 저장
         await SaveFieldsAsync(payload);
@@ -800,7 +807,8 @@ public class DatabaseManager : Singleton<DatabaseManager>
         var result = new QuestData
         {
             General = new GeneralQuestData(),
-            Temporary = new Dictionary<string, TemporaryQuestData>()
+            Temporary = new Dictionary<string, TemporaryQuestData>(),
+            Tutorial = new TutorialQuestData(),
         };
 
         // 반환 받은 데이터에서 General의 자식들을 받아옴
@@ -836,6 +844,18 @@ public class DatabaseManager : Singleton<DatabaseManager>
                 result.Temporary[questId] = t;
             }
         }
+        
+        var TutoNode = snapshot.Child("Tutorial");
+        if (TutoNode.Exists)
+        {
+            var clearedNode = TutoNode.Child("Cleared");
+            result.Tutorial.ClearedTutorialQuestIds = ReadStringListFromSnapshot(clearedNode);
+        }
+        else
+        {
+            result.Tutorial.ClearedTutorialQuestIds = new List<string>();
+        }
+
 
         return result;
     }
@@ -850,6 +870,49 @@ public class DatabaseManager : Singleton<DatabaseManager>
     {
         if (value == null) return defaultValue;
         return Convert.ToInt32(value);
+    }
+
+    private static List<string> ReadStringListFromSnapshot(DataSnapshot snapshot)
+    {
+        var result = new List<string>();
+        if (snapshot is null || !snapshot.Exists) return result;
+
+        if (snapshot.Value is IList list)
+        {
+            foreach (var item in list)
+            {
+                var s = item as string ?? item?.ToString();
+                if (!string.IsNullOrEmpty(s))
+                    result.Add(s);
+            }
+
+            return result;
+        }
+
+        var indexs = new List<(int idx, string val)>();
+        foreach (var child in snapshot.Children)
+        {
+            if (int.TryParse(child.Key, out var idx))
+            {
+                var s = child.Value as string ?? child.Value?.ToString();
+                if (!string.IsNullOrEmpty(s))
+                    indexs.Add((idx, s));
+            }
+        }
+        if (indexs.Count > 0)
+        {
+            indexs.Sort((a, b) => a.idx.CompareTo(b.idx));
+            result.AddRange(indexs.Select(p => p.val));
+            return result;
+        }
+
+        foreach (var child in snapshot.Children)
+        {
+            var s = child.Value as string ?? child.Value?.ToString();
+            if (!string.IsNullOrEmpty(s))
+                result.Add(s);
+        }
+        return result;
     }
     #endregion
     
