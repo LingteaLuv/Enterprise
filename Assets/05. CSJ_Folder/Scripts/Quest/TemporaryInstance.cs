@@ -40,6 +40,11 @@ namespace _05._CSJ_Folder.Scripts.Quest
             return true;
         }
 
+        public override bool IsOnce()
+        {
+            return false;
+        }
+
 
     }
 }

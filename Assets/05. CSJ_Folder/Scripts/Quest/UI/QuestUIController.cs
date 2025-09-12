@@ -16,12 +16,13 @@ public class QuestUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _questGoalCountText;    
     [SerializeField] private Button _CheatButton;
     [SerializeField] private Image _questCurrentGoalImage;
+    [SerializeField] private Button _InitButton;
 
     
-    public int QuestNumber;
-    [SerializeField] public GeneralQuestInstance QuestInst;
-    [SerializeField] public GeneralQuestDefinitionSO QuestDef;
-    public int QuestGoalCount;
+    [NonSerialized] public int QuestNumber;
+    public GeneralQuestInstance QuestInst;
+    [NonSerialized] public GeneralQuestDefinitionSO QuestDef;
+    private int QuestGoalCount;
     
     private GoalDefinitionSO QuestGoal;
     private QuestRewardSO QuestReward;
@@ -78,23 +79,21 @@ public class QuestUIController : MonoBehaviour
             {
                 _questGoalCountText.text = $"{QuestGoalCount} / {QuestGoal.RequireCount}";
                 _questButton.image.canvasRenderer.SetAlpha(0.3f);
-                ColorBlock buttonColor = _questButton.colors;
-                buttonColor.normalColor = Color.black;
             }
             else
             {
                 _questGoalCountText.text = "클리어";
-                _questButton.image.canvasRenderer.SetAlpha(0.7f);
-                ColorBlock buttonColor = _questButton.colors;
-                buttonColor.normalColor = Color.white;
             }
         }
+        _questButton.image.canvasRenderer.SetAlpha(
+            QuestInst.QuestState == QuestState_Enum.Completed ? 0.7f : 0.3f);
 
         //_questCurrentGoalImage.sprite = QuestReward.Reward.RewardIcon;
     }
     
     
     public Action OnForceClear;
+    public Action OnForceInit;
     [SerializeField] private Button KillButton;
     [SerializeField] private Button GachaButton;
     [SerializeField] private Button LevelUpButton;
@@ -102,6 +101,11 @@ public class QuestUIController : MonoBehaviour
     private void OnClickCheatButton()
     {
         OnForceClear?.Invoke();
+    }
+
+    private void OnClickInitButton()
+    {
+        OnForceInit?.Invoke();
     }
     
     private void SubmitButton()
@@ -116,6 +120,8 @@ public class QuestUIController : MonoBehaviour
             LevelUpButton.onClick.AddListener(OnClickLevelUpButton);
         if (UpgradeButton !=null)
             UpgradeButton.onClick.AddListener(OnClickUpgradeButton);
+        if (_InitButton is not null)
+            _InitButton.onClick.AddListener(OnClickInitButton);
     }
 
     private void OnClickKillButton()
@@ -143,4 +149,5 @@ public class QuestUIController : MonoBehaviour
         QuestSignalManager.Instance.Upgrade(UpgradeType.Def,5);
         QuestSignalManager.Instance.Upgrade(UpgradeType.Hp, 5);
     }
+    
 }
