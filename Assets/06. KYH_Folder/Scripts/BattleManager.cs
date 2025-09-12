@@ -47,6 +47,8 @@ public class BattleManager : MonoBehaviour
 
     private bool isInitialized = false;
 
+    [SerializeField] private AllHealthBarsPanel allHealthBarsPanel;
+
     #region JHT
     private bool goNextStage = false;
 
@@ -219,11 +221,18 @@ public class BattleManager : MonoBehaviour
     {
         ClearPlayers();
 
+        // 체력바 추가
+        if (allHealthBarsPanel != null)
+        {
+            allHealthBarsPanel.gameObject.SetActive(true);
+        }
+
         var party = PartyManager.Instance.GetAllPartyMembers(); // 전체 반환
 
         for (int i = 0; i < party.Count; i++)
         {
             var character = party[i];
+            character.Initialize(character.CharacterStats); // 캐릭터 스탯 초기화
             character.transform.SetParent(null);
             character.transform.position = field.PlayerSpawnPoint.position + new Vector3(i * 1.5f, 0, 0);
             character.gameObject.SetActive(true);
