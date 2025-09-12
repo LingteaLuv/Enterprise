@@ -12,7 +12,19 @@ namespace JHT
     {
         [Header("UI")]
         [SerializeField] private Image hpGuageImage;
+        private void OnEnable()
+        {
+            if (!hpGuageImage) 
+                return;
 
+            hpGuageImage.DOKill();
+            hpGuageImage.fillAmount = 1f;
+        }
+        private void OnDisable()
+        {
+            hpGuageImage.fillAmount = 0f;
+            if (hpGuageImage) hpGuageImage.DOKill();
+        }
 
         public void ChangeHP(float value)
         {
@@ -22,9 +34,5 @@ namespace JHT
             hpGuageImage.DOFillAmount(value, 0.5f);
         }
 
-        public void ReleaseMonsterHP()
-        {
-            hpGuageImage.fillAmount = 1f;
-        }
     }
 }

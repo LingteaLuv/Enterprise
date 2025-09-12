@@ -13,34 +13,34 @@ namespace JHT
     public abstract class JHT_BaseMonsterFSM : JHT_PooledObject
     {
         public enum State { Idle, Move, Attack, Dead }
-        public State currentState;
 
+        [Header("State")]
+        public State currentState;
         public JHT_StateMachine stateMachine;
 
+        [Header("Target")]
         public LayerMask targetLayer;
         public GameObject target;
-        SpriteRenderer head;
 
+        [Header("Monster Setting")]
         public JHT_MonsterDataSO monsterSO;
         public JHT_BaseMonsterStat monsterStat;
         public GameObject monsterPrefab;
-        public JHT_UIMonster monsterUI;
-
-
-        private bool canAttack;
-        public bool CanAttack { get { return canAttack; } set { canAttack = value; OnChangeAttack?.Invoke(canAttack); } }
-        public Action<bool> OnChangeAttack;
+        public Canvas monsterUI;
+        SpriteRenderer head;
+        public float curHP;
+        [SerializeField] private Transform damageTextPos;
 
         private Coroutine takeDamageCor;
         private Coroutine attackCor;
         private WaitForSeconds attackDelayCount;
 
-        [SerializeField] private Transform damageTextPos;
-        // test용
-        public float curHP;
-
+        private bool canAttack;
+        public bool CanAttack { get { return canAttack; } set { canAttack = value; OnChangeAttack?.Invoke(canAttack); } }
+        public Action<bool> OnChangeAttack;
         #region Animator
 
+        [Header("Anim")]
         public Animator animator;
 
         public readonly int IDLE = Animator.StringToHash("IDLE");
@@ -86,7 +86,6 @@ namespace JHT
 
             animator = monsterPrefab.GetComponentInChildren<Animator>(true);
 
-            //Vector3 worldPos = (uiPos ? uiPos.position : monsterPrefab.transform.position) + new Vector3(0f, 0.8f, 0f);
 
             if (so.animatorOverrideController != null)
             {
@@ -179,7 +178,9 @@ namespace JHT
                 return;
 
             currentState = State.Move;
-            transform.position = Vector3.MoveTowards(transform.position, target.transform.position, Time.deltaTime * monsterStat.moveSpeed);
+            transform.position = Vector3.MoveTowards(transform.position, target.transform.position, 
+                Time.deltaTime * monsterStat.moveSpeed);
+
             
             Rotate();
         }
@@ -222,18 +223,22 @@ namespace JHT
 
         public void Rotate()
         {
-            if (target == null)
+            if (target == null || monsterUI == null)
                 return;
 
+
             float direction = target.transform.position.x - transform.position.x;
+            RectTransform ui = monsterUI.GetComponent<RectTransform>();
+
             if (direction < 0)
             {
-                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, transform.position.y, transform.position.z);
-                
+                //gameObject.transform.localEulerAngles = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+                ui.transform.localScale = new Vector3(1, 1, 1);
             }
             else
             {
-                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
+                //gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
+                ui.transform.localScale = new Vector3(-1, 1, 1);
             }
         }
 
@@ -293,7 +298,6 @@ namespace JHT
         {
             monsterSO = null;
 
-            monsterUI.ReleaseMonsterHP();
             monsterUI.gameObject.SetActive(false);
 
             if (attackCor != null)
@@ -320,7 +324,7 @@ namespace JHT
             curHP = value;
 
             float percent = curHP / (float)monsterStat.maxHp;
-            monsterUI.ChangeHP(percent);
+            monsterUI.GetComponentInChildren<JHT_UIMonster>().ChangeHP(percent);
         }
     }
 }

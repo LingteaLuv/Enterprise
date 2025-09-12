@@ -16,7 +16,6 @@ public class BossBattleDirection : MonoBehaviour
     [Header("패배 연출 컴포넌트")]
     [SerializeField] private TextMeshProUGUI defeatText;
     private Vector3 defeatTextScale = Vector3.one * 5;
-    private Vector3 defeatPos;
 
     [Header("공통 컴포넌트")]
     [SerializeField] private Transform plankTransform; // 판자 오브젝트
@@ -237,7 +236,7 @@ public class BossBattleDirection : MonoBehaviour
 
                        .AppendCallback(() => ZoomInLeft2D(playerShip))
 
-                       .Join(playerTreasureChest.DOMoveY(playerTreasureChest.position.y - 7.5f, 1.5f).SetEase(Ease.OutBounce))
+                       .Join(playerTreasureChest.DOMoveY(playerShip.position.y, 1.5f).SetEase(Ease.OutBounce))
 
                        .Join(enemyShip.DORotate(new Vector3(0, 0, -90), 1.5f).SetEase(Ease.InOutSine))
                        .Join(enemyShip.DOMoveY(enemyShip.position.y - 1f, 1.5f).SetEase(Ease.InOutSine))
@@ -275,7 +274,7 @@ public class BossBattleDirection : MonoBehaviour
 
                        .AppendCallback(() => ZoomInLeft2D(enemyShip))
 
-                       .Join(enemyTreasureChest.DOMoveY(enemyTreasureChest.position.y - 7.5f, 1.5f).SetEase(Ease.OutBounce))
+                       .Join(enemyTreasureChest.DOMoveY(enemyShip.position.y, 1.5f).SetEase(Ease.OutBounce))
 
                        .Join(playerShip.DORotate(new Vector3(0, 0, -90), 1.5f).SetEase(Ease.InOutSine))
                        .Join(playerShip.DOMoveY(playerShip.position.y - 1f, 1.5f).SetEase(Ease.InOutSine))
