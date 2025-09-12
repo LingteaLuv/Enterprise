@@ -8,6 +8,7 @@ public class SettingPanel : UIBase
 {
     [SerializeField] private Button _exitBtn;
     [SerializeField] private Button _bugReportButton;
+    [SerializeField] private Button _quitButton;
     
     [SerializeField] private Slider _musicSlider;
     [SerializeField] private Slider _effectSlider;
@@ -25,6 +26,14 @@ public class SettingPanel : UIBase
         _bugReportButton.onClick.AddListener(() =>
         {
             Application.OpenURL("https://forms.gle/nyEfTEzds2rUKATs7");
+        });
+        
+        _quitButton.onClick.AddListener(() =>
+        {
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            #endif
+            Application.Quit();
         });
         _musicSlider.onValueChanged.AddListener((volume) => SettingManager.Instance.SetBGM(volume));
         _effectSlider.onValueChanged.AddListener((volume) => SettingManager.Instance.SetSFX(volume));

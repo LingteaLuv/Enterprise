@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using GooglePlayGames.BasicApi;
 using JHT;
+using System.Linq;
 using System;
 
 
@@ -248,32 +249,34 @@ public class BattleManager : MonoBehaviour
             currentPlayers.Add(character.gameObject);
         }
 
-        if (cameraFollow != null && currentPlayers.Count > 0)
-            cameraFollow.SetTarget(currentPlayers[0].transform);
+        List<Transform> playerTransforms = currentPlayers.Select(p => p.transform).ToList();
+
+        if (cameraFollow != null)
+            cameraFollow.SetTargets(playerTransforms);
     }
 
     // 적 생성 (스테이지 수에 비례해 증가)
-    private void SpawnEnemies(int stageIndex)
+    private void SpawnEnemies(int roundIndex)
     {
-        if (stageIndex >= JHT_MonsterSpawnManager.Instance.roundTable.roundCount)
+        if (roundIndex >= JHT_MonsterSpawnManager.Instance.roundTable.roundCount)
         {
             Debug.LogError($"BattleManager IslandClear : Change Next Island");
             Debug.LogError($"{JHT_MonsterSpawnManager.Instance.roundTable.roundCount}");
-            Debug.LogError($"{stageIndex}");
+            Debug.LogError($"{roundIndex}");
             //GlobalStageManager.Instance.currentStageIndex++; // todo 임시 : 보스 나오기전
             IsStageEnd = true;
             return;
         }
 
         if (enemySpawnDelay == null)
-            enemySpawnDelay = StartCoroutine(SpawnDelay(stageIndex));
+            enemySpawnDelay = StartCoroutine(SpawnDelay(roundIndex));
     }
 
-    IEnumerator SpawnDelay(int stageIndex)
+    IEnumerator SpawnDelay(int roundIndex)
     {
         yield return new WaitForSeconds(1f);
 
-        JHT_MonsterSpawnManager.Instance.ChangeRound(stageIndex);
+        JHT_MonsterSpawnManager.Instance.ChangeRound(roundIndex);
         // 몬스터 데이터 넣기
         for (int i = 0; i < JHT_MonsterSpawnManager.Instance.curMonsterCountList.Count; i++)
         {

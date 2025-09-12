@@ -8,5 +8,6 @@ namespace _05._CSJ_Folder.Scripts.Quest.Data
     {
         public GeneralQuestData General;
         public Dictionary<string,TemporaryQuestData> Temporary;
+        public TutorialQuestData Tutorial;
     }
 }

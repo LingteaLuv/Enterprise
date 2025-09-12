@@ -25,6 +25,7 @@ public class FormationManager : Singleton<FormationManager>
 
     public bool HasUnsavedChanges { get; private set; }
     public event System.Action OnTempFormationChanged;
+    public event System.Action OnAutoFormation;
 
     protected override void Awake()
     {
@@ -201,6 +202,7 @@ public class FormationManager : Singleton<FormationManager>
         tempFormation = newFormation;
         CheckForUnsavedChanges();
         OnTempFormationChanged?.Invoke();
+        OnAutoFormation?.Invoke();
         Debug.Log("새로운 자동 편성이 완료되었습니다.");
     }
 

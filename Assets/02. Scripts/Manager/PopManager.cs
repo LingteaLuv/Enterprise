@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PopManager : Singleton<PopManager>
 {
@@ -9,6 +10,14 @@ public class PopManager : Singleton<PopManager>
     [SerializeField] private AccountPanel _accountPanel;*/
     
     public string CurrentPassword { get; set; } = string.Empty;
+
+    private void Start()
+    {
+        SceneManager.sceneUnloaded += (scene) =>
+        {
+            HidePopup();
+        };
+    }
     
     /// <summary>
     /// 확인 취소 버튼 두개가 있는 팝업을 보여줍니다.

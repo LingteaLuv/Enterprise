@@ -20,36 +20,47 @@ namespace JHT
         {
             base.Init(so);
 
-
-            if (monsterStat.monsterRarity == MonsterRarity.Elite)
+            if (monsterUI != null)
             {
-                gameObject.transform.localScale = new Vector3(1.3f, 1.3f, 1);
-                monsterPrefab.transform.localScale = gameObject.transform.localScale;
-            }
-            else
-            {
-                gameObject.transform.localScale = Vector3.one;
-                monsterPrefab.transform.localScale = gameObject.transform.localScale;
+                monsterUI.gameObject.SetActive(true);
             }
 
+            switch (monsterStat.monsterRarity)
+            {
+                case MonsterRarity.Elite:
+                    gameObject.transform.localScale = new Vector3(1.3f, 1.3f, 1);
+                    monsterPrefab.transform.localScale = gameObject.transform.localScale;
+                    monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.2f, 0);
+                    break;
+                case MonsterRarity.Normal:
+                    gameObject.transform.localScale = Vector3.one;
+                    monsterPrefab.transform.localScale = gameObject.transform.localScale;
+                    monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.15f, 0);
+                    break;
+                case MonsterRarity.Boss:
+                    gameObject.transform.localScale = new Vector3(1.5f, 1.5f, 1);
+                    monsterPrefab.transform.localScale = gameObject.transform.localScale;
+                    monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.3f, 0);
+                    break;
+            }
         }
         protected override void Update()
         {
             base.Update();
         }
 
-        protected override void HandleAttack()
+        public override void HandleAttack()
         {
             //애니메이션 실행(이벤트 사용할거임)
             base.HandleAttack();
         }
 
-        protected override void HandleMove()
+        public override void HandleMove()
         {
             base.HandleMove();
         }
 
-        protected override void HandleIdle()
+        public override void HandleIdle()
         {
             base.HandleIdle();
         }
@@ -60,11 +71,8 @@ namespace JHT
             // 근접 공격일경우
             if (monsterStat.monsterType == MonsterType.close)
             {
-                //if (monsterStat.attackAngle == 0)
-                //    return;
                 Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, monsterStat.attackRange, targetLayer);
                 
-
                 foreach (var c in cols)
                 {
                     //일단은 일방적인 플레이어 스크립트
