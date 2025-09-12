@@ -98,15 +98,7 @@ public class CharacterDataImporter
                     }
                 }
 
-                string illustPath = fields[headerMap["Char_Illust"]];
-                if (!string.IsNullOrEmpty(illustPath))
-                {
-                    data.characterSprite2 = Resources.Load<Sprite>(illustPath);
-                    if (data.characterSprite2 == null)
-                    {
-                        Debug.LogWarning($"스탠딩 일러스트를 로드할 수 없습니다: {illustPath} (ID: {data.characterID})");
-                    }
-                }
+          
 
                 // Enum 파싱
                 data.crewRole = (CrewRole)Enum.Parse(typeof(CrewRole), fields[headerMap["Crew_Role"]], true);
