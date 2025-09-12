@@ -38,18 +38,18 @@ namespace JHT
             base.Update();
         }
 
-        protected override void HandleAttack()
+        public override void HandleAttack()
         {
             //애니메이션 실행(이벤트 사용할거임)
             base.HandleAttack();
         }
 
-        protected override void HandleMove()
+        public override void HandleMove()
         {
             base.HandleMove();
         }
 
-        protected override void HandleIdle()
+        public override void HandleIdle()
         {
             base.HandleIdle();
         }

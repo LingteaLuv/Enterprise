@@ -115,9 +115,9 @@ namespace JHT
         }
 
         // curStageIndex를 ++을 통해 round를 구별해줄거임
-        public void ChangeRound(int curStageIndex)
+        public void ChangeRound(int curRoundIndex)
         {
-            if (posList.Count < curStageIndex)
+            if (posList.Count < curRoundIndex)
             {
                 Debug.LogError("현재 라운드 최대를 넘었음");
                 return;
@@ -127,9 +127,9 @@ namespace JHT
                 curMonsterCountList.Clear();
 
             curMonsterCountList = new();
-            curMonsterCountList = OnAddMonster?.Invoke(curStageIndex);
+            curMonsterCountList = OnAddMonster?.Invoke(curRoundIndex);
 
-            posList[curStageIndex].checkList = new();
+            posList[curRoundIndex].checkList = new();
 
 
             for (int i = 0; i < curMonsterCountList.Count; i++)
@@ -137,7 +137,12 @@ namespace JHT
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
                 obj.Init(curMonsterCountList[i]);
                 obj.transform.position = new Vector3(0, 0, -9.850784f);
-                obj.transform.position += posList[curStageIndex].SetPos(curMonsterCountList[i]).position;
+                obj.transform.position += posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
+                if (curRoundIndex / 2 != 0)
+                {
+                    obj.transform.localEulerAngles =
+                        new Vector3(obj.transform.localEulerAngles.x, 180, obj.transform.localEulerAngles.x);
+                }
             }
         }
 

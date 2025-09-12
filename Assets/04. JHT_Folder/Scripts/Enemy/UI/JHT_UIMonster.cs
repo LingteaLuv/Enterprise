@@ -14,23 +14,12 @@ namespace JHT
         [SerializeField] private Image hpGuageImage;
 
 
-        private JHT_BaseMonsterStat curSO; 
-        
-        public void Init(JHT_BaseMonsterStat so)
-        {
-            curSO = so;
-        }
-
-
         public void ChangeHP(float value)
         {
             if (!hpGuageImage) 
                 return;
 
-            if (curSO == null || curSO.maxHp <= 0f) 
-                return;
-
-            hpGuageImage.DOFillAmount(value,1f);
+            hpGuageImage.DOFillAmount(value, 0.5f);
         }
 
         public void ReleaseMonsterHP()

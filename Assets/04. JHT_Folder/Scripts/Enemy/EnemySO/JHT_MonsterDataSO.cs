@@ -14,6 +14,7 @@ public class JHT_MonsterDataSO : ScriptableObject
     [field: SerializeField] public float defense { get; private set; }
     [field: SerializeField] public float attackRange { get; private set; }
     [field: SerializeField] public float attackSpeed { get; private set; } = 0;
+    [field: SerializeField] public float attackDelay { get; private set; } = 0;
     [field: SerializeField] public float chaseRange { get; private set; }
     [field: SerializeField] public float moveSpeed { get; private set; }
     [field: SerializeField] public int cost { get; private set; }
