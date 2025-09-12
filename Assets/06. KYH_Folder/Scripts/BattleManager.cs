@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using GooglePlayGames.BasicApi;
 using JHT;
+using System.Linq;
 using System;
 
 
@@ -248,8 +249,10 @@ public class BattleManager : MonoBehaviour
             currentPlayers.Add(character.gameObject);
         }
 
-        if (cameraFollow != null && currentPlayers.Count > 0)
-            cameraFollow.SetTarget(currentPlayers[0].transform);
+        List<Transform> playerTransforms = currentPlayers.Select(p => p.transform).ToList();
+
+        if (cameraFollow != null)
+            cameraFollow.SetTargets(playerTransforms);
     }
 
     // 적 생성 (스테이지 수에 비례해 증가)
