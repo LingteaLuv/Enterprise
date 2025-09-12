@@ -232,13 +232,13 @@ namespace JHT
 
             if (direction < 0)
             {
-                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, transform.position.y, transform.position.z);
-                ui.localScale = new Vector3(1, 1, 1);
+                //gameObject.transform.localEulerAngles = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+                ui.transform.localScale = new Vector3(1, 1, 1);
             }
             else
             {
-                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
-                ui.localScale = new Vector3(-1, 1, 1);
+                //gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
+                ui.transform.localScale = new Vector3(-1, 1, 1);
             }
         }
 
