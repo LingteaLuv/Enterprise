@@ -296,6 +296,8 @@ namespace JHT
 
         public void Outit()
         {
+            currentState = State.Dead;
+            
             monsterSO = null;
 
             monsterUI.gameObject.SetActive(false);
