@@ -88,7 +88,6 @@ public class CharacterDataImporter
 
                 // Sprite 로드 (Resources 폴더 내에 스프라이트가 있어야 함)
                 string spritePath = fields[headerMap["Char_Sprite"]];
-                data.characterSprite = Resources.Load<Sprite>(spritePath);
                 if (!string.IsNullOrEmpty(spritePath))
                 {
                     data.characterSprite = Resources.Load<Sprite>(spritePath);
@@ -98,7 +97,16 @@ public class CharacterDataImporter
                     }
                 }
 
-          
+                // 프리팹 경로로 프리팹을 로드하여 직접 연결
+                string prefabPath = fields[headerMap["Prefab_Path"]];
+                if (!string.IsNullOrEmpty(prefabPath))
+                {
+                    data.characterPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    if (data.characterPrefab == null)
+                    {
+                        Debug.LogWarning($"캐릭터 프리팹을 로드할 수 없습니다: {prefabPath} (ID: {data.characterID})");
+                    }
+                }
 
                 // Enum 파싱
                 data.crewRole = (CrewRole)Enum.Parse(typeof(CrewRole), fields[headerMap["Crew_Role"]], true);
@@ -111,14 +119,14 @@ public class CharacterDataImporter
 
                 // --- 스탯 정보 파싱 (CSV 헤더와 Stat Enum 매핑) ---
                 var statHeaderMapping = new Dictionary<string, Stat>
-                  {
-                      { "Attack", Stat.Attack },
-                      { "Health", Stat.Health },
-                      { "Defence", Stat.Defense },
-                      { "Critical_Prob", Stat.CritChance },
-                      { "Critical_Dmg", Stat.CritDamage },
-                      { "AtkSpeed", Stat.AttackSpeed }
-                  };
+                {
+                    { "Attack", Stat.Attack },
+                    { "Health", Stat.Health },
+                    { "Defence", Stat.Defense },
+                    { "Critical_Prob", Stat.CritChance },
+                    { "Critical_Dmg", Stat.CritDamage },
+                    { "AtkSpeed", Stat.AttackSpeed }
+                };
 
                 foreach (var mapping in statHeaderMapping)
                 {
@@ -163,19 +171,11 @@ public class CharacterDataImporter
                 AssetDatabase.DeleteAsset(assetPath);
                 AssetDatabase.CreateAsset(data, assetPath);
             }
-            catch (FormatException e)
-            {
-                Debug.LogError($"CSV 데이터 형식 오류 (줄 {i + 1}, ID: {fields[headerMap["characterID"]] ?? "N/A"}): 숫자/Enum 파싱 실패. 에러: {e.Message}");
-                continue;
-            }
-            catch (KeyNotFoundException e)
-            {
-                Debug.LogError($"CSV 헤더 오류 (줄 {i + 1}, ID: {fields[headerMap["characterID"]] ?? "N/A"}): 필수 헤더를 찾을 수 없습니다. 에러: {e.Message}");
-                continue;
-            }
             catch (Exception e)
             {
-                Debug.LogError($"CSV 파싱 중 알 수 없는 오류 (줄 {i + 1}, ID: {fields[headerMap["characterID"]] ?? "N/A"}): 에러: {e.Message}");
+                // 에러 메시지를 더 상세하게 수정
+                string idInfo = headerMap.ContainsKey("Char_ID") ? fields[headerMap["Char_ID"]] : "(ID 없음)";
+                Debug.LogError($"CSV 파싱 중 오류 (줄 {i + 1}, ID: {idInfo}): {e.GetType()} - {e.Message}");
                 continue;
             }
         }
