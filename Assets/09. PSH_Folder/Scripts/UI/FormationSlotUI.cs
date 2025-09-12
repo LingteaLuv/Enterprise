@@ -1,73 +1,115 @@
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FormationSlotUI : MonoBehaviour
 {
-    public CrewRole assignedPosition; // 이 슬롯이 담당하는 포지션 (Deckhand, Sailor 등)
-    public Image[] characterImages; // 캐릭터 이미지를 표시할 Image 컴포넌트 배열 (최대 2개)
-    public RectTransform[] characterImageRects; // 캐릭터 이미지의 RectTransform 배열 (위치 조정을 위해)
+    [Header("슬롯 정보")]
+    public CrewRole assignedPosition;
+
+    [System.Serializable]
+    public class CharacterDisplaySet
+    {
+        public RawImage DisplayImage;
+        public string CameraName; // 카메라 이름을 입력할 필드
+        [HideInInspector] public Camera RenderCamera; // 스크립트 내부에서 사용할 카메라 참조
+        [HideInInspector] public GameObject SpawnedCharacter;
+        [HideInInspector] public RectTransform DisplayRect;
+    }
+
+    [Header("캐릭터 표시 세트 (2명)")]
+    public CharacterDisplaySet[] displaySets = new CharacterDisplaySet[2];
 
     void Awake()
     {
-        // characterImages 배열의 크기에 맞춰 characterImageRects 배열을 초기화합니다.
-        characterImageRects = new RectTransform[characterImages.Length];
-        for (int i = 0; i < characterImages.Length; i++)
+        foreach (var set in displaySets)
         {
-            if (characterImages[i] != null)
+            // RawImage의 RectTransform을 미리 찾아둡니다.
+            if (set.DisplayImage != null)
             {
-                characterImageRects[i] = characterImages[i].GetComponent<RectTransform>();
+                set.DisplayRect = set.DisplayImage.GetComponent<RectTransform>();
+            }
+
+            // 카메라 이름으로 오브젝트를 찾아 자동으로 연결합니다.
+            if (!string.IsNullOrEmpty(set.CameraName))
+            {
+                GameObject camObj = GameObject.Find(set.CameraName);
+                if (camObj != null)
+                {
+                    set.RenderCamera = camObj.GetComponent<Camera>();
+                    if (set.RenderCamera == null)
+                    {
+                        Debug.LogError($"'{set.CameraName}' 오브젝트에서 Camera 컴포넌트를 찾을 수 없습니다!", this.gameObject);
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"'{set.CameraName}' 이름의 카메라 오브젝트를 씬에서 찾을 수 없습니다!", this.gameObject);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("CameraName이 설정되지 않은 DisplaySet이 있습니다.", this.gameObject);
             }
         }
     }
 
-    /// <summary>
-    /// 이 슬롯에 캐릭터 데이터를 설정하여 UI를 갱신합니다.
-    /// </summary>
-    /// <param name="charactersInSlot">이 포지션에 배치된 캐릭터 리스트</param>
     public void Setup(List<PlayerCharacterData> charactersInSlot)
     {
-        Debug.Log($"[FSU] Setup 호출됨 (포지션: {assignedPosition}, 캐릭터 수: {charactersInSlot.Count})");
-        // 모든 이미지와 텍스트를 초기화 (비활성화)
-        foreach (var img in characterImages)
+        // 1. 모든 세트를 초기화합니다. (이전 캐릭터 삭제, 이미지 숨김)
+        foreach (var set in displaySets)
         {
-            img.gameObject.SetActive(false);
-        }
-
-        // 캐릭터 수에 따라 UI 업데이트
-        for (int i = 0; i < charactersInSlot.Count; i++)
-        {
-            if (i < characterImages.Length)
+            if (set.SpawnedCharacter != null)
             {
-                characterImages[i].sprite = charactersInSlot[i].characterdata.characterSprite;
-                characterImages[i].gameObject.SetActive(true);
+                Destroy(set.SpawnedCharacter);
+            }
+            if (set.DisplayImage != null)
+            {
+                set.DisplayImage.gameObject.SetActive(false);
             }
         }
 
-        // 시각적 배치 조정
+        if (charactersInSlot == null || charactersInSlot.Count == 0) return;
+
+        // 2. 캐릭터 수에 맞춰 프리팹을 생성하고 활성화합니다.
+        for (int i = 0; i < charactersInSlot.Count; i++)
+        {
+            if (i >= displaySets.Length) break; // 2명까지만 처리
+
+            var set = displaySets[i];
+            var characterToDisplay = charactersInSlot[i];
+            var prefabToInstantiate = characterToDisplay.characterdata.characterPrefab;
+
+            if (prefabToInstantiate != null && set.DisplayImage != null && set.RenderCamera != null)
+            {
+                set.DisplayImage.gameObject.SetActive(true);
+
+                // 카메라 위치를 기준으로 스폰 위치를 계산합니다. (카메라 앞 10유닛)
+                Vector3 spawnPos = set.RenderCamera.transform.position + set.RenderCamera.transform.forward * 10f;
+
+                // 계산된 위치에 캐릭터를 생성하고, 정리를 위해 카메라의 자식으로 만듭니다.
+                set.SpawnedCharacter = Instantiate(prefabToInstantiate, spawnPos, set.RenderCamera.transform.rotation, set.RenderCamera.transform);
+            }
+        }
+
+        // 3. 캐릭터 수에 따라 위치를 조정합니다.
         if (charactersInSlot.Count == 1)
         {
-            // 1명일 때: 첫 번째 캐릭터를 중앙에 배치
-            if (characterImageRects.Length > 0)
+            // 1명일 때: 첫 번째 세트를 중앙에 배치
+            if (displaySets.Length > 0 && displaySets[0].DisplayRect != null)
             {
-                characterImageRects[0].anchoredPosition = Vector2.zero; // 중앙 (0,0)으로 설정
-                // 필요하다면 크기 조정
-                // characterImageRects[0].sizeDelta = new Vector2(originalWidth, originalHeight);
+                displaySets[0].DisplayRect.anchoredPosition = Vector2.zero;
             }
         }
         else if (charactersInSlot.Count == 2)
         {
-            // 2명일 때: 두 캐릭터를 나란히 배치 (예시: 왼쪽, 오른쪽으로 이동)
-            // 이 위치 값은 UI 디자인에 따라 조절해야 합니다.
-            if (characterImageRects.Length >= 2)
+            // 2명일 때: 두 세트를 나란히 배치
+            if (displaySets.Length >= 2 && displaySets[0].DisplayRect != null && displaySets[1].DisplayRect != null)
             {
-                characterImageRects[0].anchoredPosition = new Vector2(-25f, 50f);
-                characterImageRects[1].anchoredPosition = new Vector2(25f, -50f);
-                // 필요하다면 크기 조정
-                // characterImageRects[0].sizeDelta = new Vector2(smallerWidth, smallerHeight);
-                // characterImageRects[1].sizeDelta = new Vector2(smallerWidth, smallerHeight);
+                displaySets[0].DisplayRect.anchoredPosition = new Vector2(-25f, 50f);
+                displaySets[1].DisplayRect.anchoredPosition = new Vector2(25f, -50f);
             }
         }
     }
 }
+
