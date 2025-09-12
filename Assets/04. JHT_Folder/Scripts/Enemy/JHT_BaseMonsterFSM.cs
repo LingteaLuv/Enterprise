@@ -1,9 +1,6 @@
-
-using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,25 +8,32 @@ using UnityEngine.UI;
 
 namespace JHT
 {
+    // 상태 통일
+    
     public abstract class JHT_BaseMonsterFSM : JHT_PooledObject
     {
         public enum State { Idle, Move, Attack, Dead }
         public State currentState;
 
-        protected Coroutine attackRoutine;
+        public JHT_StateMachine stateMachine;
 
         public LayerMask targetLayer;
         public GameObject target;
+        SpriteRenderer head;
+
         public JHT_MonsterDataSO monsterSO;
         public JHT_BaseMonsterStat monsterStat;
-        public JHT_UIMonster monsterUI;
         public GameObject monsterPrefab;
+        public JHT_UIMonster monsterUI;
 
-        private int curAnim;
-        private bool isDead;
 
-        // 임시용
-        Coroutine attackCor;
+        private bool canAttack;
+        public bool CanAttack { get { return canAttack; } set { canAttack = value; OnChangeAttack?.Invoke(canAttack); } }
+        public Action<bool> OnChangeAttack;
+
+        private Coroutine takeDamageCor;
+        private Coroutine attackCor;
+        private WaitForSeconds attackDelayCount;
 
         [SerializeField] private Transform damageTextPos;
         // test용
@@ -37,7 +41,7 @@ namespace JHT
 
         #region Animator
 
-        Animator animator;
+        public Animator animator;
 
         public readonly int IDLE = Animator.StringToHash("IDLE");
         public readonly int MOVE = Animator.StringToHash("MOVE");
@@ -54,190 +58,183 @@ namespace JHT
 
         private void StartSetting(JHT_MonsterDataSO so)
         {
-            isDead = false;
             target = null;
-            ChangeState(State.Idle);
+            canAttack = false;
 
             monsterSO = so;
             monsterStat.Init(monsterSO);
 
-            monsterPrefab = Instantiate(so.enemyCharacter, transform);
+            if (attackCor != null)
+            {
+                StopCoroutine(attackCor);
+                attackCor = null;
+            }
+
+            if (takeDamageCor != null)
+            {
+                StopCoroutine(takeDamageCor);
+                takeDamageCor = null;
+            }
+
+            monsterPrefab = Instantiate(monsterStat.enemyCharacter, transform);
             monsterPrefab.transform.localPosition = Vector3.zero;
             monsterPrefab.transform.localRotation = Quaternion.identity;
             monsterPrefab.transform.localScale = Vector3.one;
 
-            monsterStat.CurHp = so.maxHp;
+            monsterStat.CurHp = monsterStat.maxHp;
+            attackDelayCount = new WaitForSeconds(monsterStat.attackDelay);
 
-            animator = GetComponentInChildren<Animator>();
+            animator = monsterPrefab.GetComponentInChildren<Animator>(true);
+
+            //Vector3 worldPos = (uiPos ? uiPos.position : monsterPrefab.transform.position) + new Vector3(0f, 0.8f, 0f);
 
             if (so.animatorOverrideController != null)
             {
                 animator.runtimeAnimatorController = monsterStat.animatorOverride;
-                animator.SetFloat("AttackSpeed", monsterStat.attackSpeed);
+                //animator.SetFloat("AttackSpeed", monsterStat.attackSpeed);
             }
+            StateMachineInit();
+
+            head = monsterPrefab.transform.Find("Root/BodySet/P_Body/HeadSet/P_Head/P_Head/5_Head")?.GetComponent<SpriteRenderer>();
+        }
+
+        private void StateMachineInit()
+        {
+            stateMachine = new JHT_StateMachine();
+            stateMachine.stateDic.Add(State.Idle,new Monster_Idle(this));
+            stateMachine.stateDic.Add(State.Move, new Monster_Move(this));
+            stateMachine.stateDic.Add(State.Attack, new Monster_Attack(this));
+            stateMachine.stateDic.Add(State.Dead, new Monster_Die(this));
+            
+            stateMachine.curState = stateMachine.stateDic[State.Idle];
+            currentState = State.Idle;
         }
 
         protected virtual void OnEnable()
         {
             if (monsterStat != null)
                 monsterStat.OnChangeHp += ShowMonsterUI;
+
+            OnChangeAttack += CanAttackCor;
         }
 
         protected virtual void OnDisable()
         {
             if (monsterStat != null)
                 monsterStat.OnChangeHp -= ShowMonsterUI;
+
+            canAttack = false;
+            OnChangeAttack -= CanAttackCor;
         }
 
         protected virtual void Update()
         {
-            if (isDead)
+            if (currentState == State.Dead)
                 return;
 
-            if (!IsValidTarget(target))
-            {
-                TryAcquireNextTarget();
-            }
-
-            switch (currentState)
-            {
-                case State.Idle:
-                    HandleIdle();
-                    break;
-                case State.Attack:
-                    HandleAttack();
-                    break;
-                case State.Move:
-                    HandleMove();
-                    break;
-                case State.Dead:
-                    HandleDie();
-                    break;
-            }
-            CheckDistance();
+            stateMachine.Update();
         }
 
-        protected void ChangeState(State newState)
+        public void TryAcquireNextTarget()
         {
-            if (isDead)
-                return;
-
-            currentState = newState;
-
-            if (newState != State.Attack && attackRoutine != null)
-            {
-                StopCoroutine(attackRoutine);
-                attackRoutine = null;
-            }
-        }
-
-        protected void CheckDistance()
-        { 
-            if (target == null || isDead)
-                return;
-
-            float distance = (target.transform.position - transform.position).magnitude;
-
-            if (distance < monsterStat.attackRange)
-            {
-                ChangeState(State.Attack);
-            }
-            else if (distance > monsterStat.chaseRange)
-            {
-                ChangeState(State.Idle);
-            }
-            
-        }
-        protected bool IsValidTarget(GameObject target)
-        {
-            if (target == null)
-            {
-                ChangeState(State.Idle);
-                return false;
-            }
-
-            HealthSystem hs = target.GetComponent<HealthSystem>();
-
-            if (hs == null)
-            {
-                ChangeState(State.Idle);
-                return false;
-            }
-
-            if (hs.currentHealth <= 0)
-            {
-                target = null;
-                ChangeState(State.Idle);
-                return false;
-            }
-
-
-            return true;
-        }
-
-        // 진짜 for쓰기 싫은데...
-        protected void TryAcquireNextTarget()
-        {
-            if (isDead)
-                return;
-
             Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, monsterStat.chaseRange, targetLayer);
 
             foreach (var c in cols)
             {
-                if (c.gameObject.GetComponent<HealthSystem>().currentHealth <= 0)
-                {
-                    continue;
-                }
-
                 if (c != null)
                 {
-                    float d = (c.gameObject.transform.position - transform.position).magnitude;
+                    if (c.gameObject.GetComponent<HealthSystem>().currentHealth <= 0)
+                    {
+                        continue;
+                    }
+
+                    float d = Mathf.Abs(Vector2.Distance(c.gameObject.transform.position ,transform.position));
+                    
                     if (d < monsterStat.chaseRange)
                     {
                         target = c.gameObject;
-                        ChangeState(State.Move);
                         break;
                     }
                 }
             }
         }
 
-        protected virtual void HandleIdle()
+        public virtual void HandleIdle()
         {
-            //애니메이션 설정만
-            AnimatorChange(IDLE);
-        }
-        protected virtual void HandleAttack()
-        {
-            AnimatorChange(ATTACK);
-            if (target == null)
-            {
-                ChangeState(State.Idle);
-            }
+            currentState = State.Idle;
         }
 
-        protected virtual void HandleMove()
-        {
-            AnimatorChange(MOVE);
-            transform.position = Vector3.MoveTowards(transform.position, target.transform.position, Time.deltaTime * monsterStat.moveSpeed);
-            //Rotate();
-        }
-
-
-        protected virtual void HandleDie()
-        {
-            Die();
-        }
-
-
-        //다시
-        private void Rotate()
+        public virtual void HandleAttack()
         {
             if (target == null)
                 return;
 
-            //float direction = target.transform.position.x - transform.position.x;
+            currentState = State.Attack;
+
+        }
+
+        public virtual void HandleMove()
+        {
+            if (target == null)
+                return;
+
+            currentState = State.Move;
+            transform.position = Vector3.MoveTowards(transform.position, target.transform.position, Time.deltaTime * monsterStat.moveSpeed);
+            
+            Rotate();
+        }
+
+
+        public virtual void HandleDie()
+        {
+            currentState = State.Dead;
+            Die();
+        }
+
+        private IEnumerator AttackCor()
+        {
+            while (true)
+            {
+                if (!animator) yield break;
+                animator.Play(ATTACK, 0, 0f);
+                yield return attackDelayCount;
+            }
+        }
+
+        private void CanAttackCor(bool value)
+        {
+            if (value)
+            {
+                if (attackCor == null)
+                {
+                    attackCor = StartCoroutine(AttackCor());
+                }
+            }
+            else
+            {
+                if (attackCor != null)
+                {
+                    StopCoroutine(attackCor);
+                    attackCor = null;
+                }
+            }
+        }
+
+        public void Rotate()
+        {
+            if (target == null)
+                return;
+
+            float direction = target.transform.position.x - transform.position.x;
+            if (direction < 0)
+            {
+                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+                
+            }
+            else
+            {
+                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
+            }
         }
 
         public void TakeDamage(float damage)
@@ -248,58 +245,82 @@ namespace JHT
                 JHT_DamageBox obj = JHT_MonsterSpawnManager.Instance.damageTextPool.GetPooled() as JHT_DamageBox; 
                 obj.ShowDamageText(damage);
                 obj.transform.position = damageTextPos.position;
-                ChangeState(State.Dead);
             }
             else
             {
                 JHT_DamageBox obj = JHT_MonsterSpawnManager.Instance.damageTextPool.GetPooled() as JHT_DamageBox;
                 obj.ShowDamageText(damage);
                 obj.transform.position = damageTextPos.position;
-                ChangeState(State.Move);
+
+                if (takeDamageCor == null)
+                {
+                    takeDamageCor = StartCoroutine(TakeDamageCor());
+                }
+            }
+        }
+
+        IEnumerator TakeDamageCor()
+        {
+            WaitForSeconds pingpongTime = new WaitForSeconds(0.2f);
+
+            Color basicColor = Color.white;
+            Color changeColor = Color.red;
+            
+            if (head != null)
+            {
+                head.color = changeColor;
+                yield return pingpongTime;
+                head.color = basicColor;
+                yield return pingpongTime;
+            }
+            yield return null;
+
+            if (takeDamageCor != null)
+            {
+                StopCoroutine(takeDamageCor);
+                takeDamageCor = null;
             }
         }
 
         private void Die()
         {
             BattleManager.Instance.OnEnemyDead(monsterSO);
-            
+
             Outit();
         }
 
         public void Outit()
         {
-            isDead = true;
             monsterSO = null;
 
             monsterUI.ReleaseMonsterHP();
             monsterUI.gameObject.SetActive(false);
+
+            if (attackCor != null)
+            {
+                StopCoroutine(attackCor);
+                attackCor = null;
+            }
             
 
             if (monsterPrefab != null)
-                Destroy(monsterPrefab, 0.2f);
+                Destroy(monsterPrefab, 2f);
 
-            AnimatorChange(DEATH);
 
             Release(0.2f);
 
         }
 
-        private void AnimatorChange(int temp)
-        {
-            if (curAnim == temp && temp != ATTACK || animator == null)
-                return;
 
-            animator.Play(temp);
-            curAnim = temp;
-        }
-
-
+            
         private void ShowMonsterUI(float value)
         {
             if (monsterUI == null) 
                 return;
             curHP = value;
-            monsterUI.ChangeHP(value);
+
+            float percent = curHP / (float)monsterStat.maxHp;
+            monsterUI.ChangeHP(percent);
         }
     }
 }
