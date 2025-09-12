@@ -60,4 +60,17 @@ public class CameraFollow : MonoBehaviour
 
         return bounds.center;
     }
+
+    private void OnDrawGizmos()
+    {
+        if (multipleTargets == null || multipleTargets.Count == 0)
+            return;
+
+        // 중심 좌표 계산
+        Vector3 center = GetCenterPoint();
+
+        // 색상 및 크기 설정
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawSphere(center, 0.3f); // 중심 위치에 구 표시
+    }
 }
