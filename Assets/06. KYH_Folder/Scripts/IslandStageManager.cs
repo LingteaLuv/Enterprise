@@ -31,6 +31,8 @@ public class IslandStageManager : MonoBehaviour
     private Coroutine handleReturnAndNext;                              // 섬 이동 처리 코루틴
     private Coroutine moveToAndEnter;                                   // 배 도착 이후 전투 시작 처리 코루틴
 
+    [SerializeField] private AllHealthBarsPanel allHealthBarsPanel;     // 체력바 참조
+
     public static IslandStageManager Instance { get; private set; }     // 싱글 톤 인스턴스
 
     private void Awake()
@@ -181,6 +183,11 @@ public class IslandStageManager : MonoBehaviour
     /// </summary>
     private IEnumerator HandleReturnAndNext()
     {
+        if (allHealthBarsPanel != null)
+        {
+            allHealthBarsPanel.gameObject.SetActive(false);
+        }
+
         DeactivateAllBattleFields();
 
         bool done = false;
@@ -250,7 +257,8 @@ public class IslandStageManager : MonoBehaviour
 
         SetBattleField(index);
 
-        BattleManager.Instance?.StartBattle(currentIndex);
+        //BattleManager.Instance?.StartBattle(currentIndex);
+        BattleManager.Instance?.StartBattle(index);
         Debug.Log($"[MoveToAndEnter] StartBattle 호출 이후 정상 종료 index={index}");
 
         StopCoroutine(moveToAndEnter);

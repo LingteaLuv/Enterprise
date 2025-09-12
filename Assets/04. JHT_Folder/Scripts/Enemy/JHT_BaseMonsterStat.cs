@@ -7,15 +7,19 @@ namespace JHT
     {
         public JHT_MonsterDataSO curSO;
 
+        public GameObject enemyCharacter;
 
         public float maxHp;
         public float attackPower;
         public float defense;
         public float attackSpeed;
+        public float attackDelay;
 
         public float attackRange;
         public float chaseRange;
         public float moveSpeed;
+
+        public Sprite projectileSprite;
 
         public MonsterType monsterType;
         public MonsterRarity monsterRarity;
@@ -33,6 +37,8 @@ namespace JHT
             curSO = so;
             maxHp = curSO.maxHp;
 
+            enemyCharacter = so.enemyCharacter;
+
             // Stat Setting
             attackPower = curSO.attackPower;// * GlobalStageManager.Instance.currentStageIndex;
             defense = curSO.defense;// * GlobalStageManager.Instance.currentStageIndex;
@@ -40,6 +46,10 @@ namespace JHT
             chaseRange = curSO.chaseRange;
             moveSpeed = curSO.moveSpeed;
             attackSpeed = curSO.attackSpeed;
+            attackDelay = curSO.attackDelay;
+
+            //sprite
+            projectileSprite = curSO.projectileSprite;
 
             // Enum
             monsterType = curSO.monsterType;

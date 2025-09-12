@@ -150,11 +150,21 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         // 전달된 캐릭터가 리스트 내에서 몇 번째인지 찾습니다.
         currentIndex = characterList.FindIndex(c => c == character);
 
+        // 만약 현재 필터링된 리스트에 캐릭터가 없다면, 전체 리스트에서 다시 찾아봅니다.
         if (currentIndex == -1)
         {
-            Debug.LogError("선택된 캐릭터가 리스트에 없습니다!");
-            SetHide(); // ClosePanel() 대신 SetHide() 사용
-            return;
+            Debug.LogWarning("캐릭터가 현재 필터링된 리스트에 없습니다. 전체 리스트에서 다시 검색합니다.");
+            // PlayerDataManager에서 전체 캐릭터 리스트를 가져옵니다.
+            characterList = new List<PlayerCharacterData>(PlayerDataManager.Instance.ownedCharacters.Values);
+            currentIndex = characterList.FindIndex(c => c == character);
+
+            // 그래도 캐릭터를 찾을 수 없다면, 심각한 오류입니다.
+            if (currentIndex == -1)
+            {
+                Debug.LogError("선택된 캐릭터가 전체 캐릭터 리스트에도 존재하지 않습니다! 스크립트를 확인해주세요.");
+                SetHide();
+                return;
+            }
         }
 
         DisplayCharacter();

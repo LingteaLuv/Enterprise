@@ -1,5 +1,5 @@
-using System.Numerics;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 
 public static class DataUtility
@@ -33,7 +33,14 @@ public static class DataUtility
         var divisor = BigInteger.Pow(1000, suffixIndex);
         double valueToFormat = (double)number / (double)divisor;
 
-        return valueToFormat.ToString("0.##") + suffixes[suffixIndex];
+        string formattedValue = valueToFormat.ToString("0.##");
+        if (formattedValue == "1000" && suffixIndex + 1 < suffixes.Count)
+        {
+            formattedValue = "1";
+            suffixIndex++;
+        }
+
+        return formattedValue + suffixes[suffixIndex];
     }
 
     public static string FormatNumber(float number)
@@ -50,6 +57,13 @@ public static class DataUtility
         float divisor = Mathf.Pow(1000f, suffixIndex);
         float valueToFormat = number / divisor;
 
-        return valueToFormat.ToString("0.##") + suffixes[suffixIndex];
+        string formattedValue = valueToFormat.ToString("0.##");
+        if (formattedValue == "1000" && suffixIndex + 1 < suffixes.Count)
+        {
+            formattedValue = "1";
+            suffixIndex++;
+        }
+
+        return formattedValue + suffixes[suffixIndex];
     }
 }

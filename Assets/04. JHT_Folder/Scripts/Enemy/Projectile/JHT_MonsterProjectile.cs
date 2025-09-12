@@ -11,12 +11,18 @@ public class JHT_MonsterProjectile : JHT_PooledObject
     [SerializeField] private Rigidbody2D rigid;
 
     Coroutine startCor;
-    public void Init(Vector2 _targetPos, Vector2 monsterPos,float projectileSpeed, float power, JHT_BaseMonsterFSM baseMonster)
+    public void Init(Vector2 _targetPos, Vector2 monsterPos,float projectileSpeed, float power, Sprite baseMonsterSprite)
     {
+        if (baseMonsterSprite == null || rigid == null)
+        {
+            Release();
+            return;
+        }
+
         gameObject.transform.position = monsterPos;
         totalPower = power;
         rigid.linearVelocity = (_targetPos - (Vector2)transform.position).normalized * projectileSpeed;
-        projectileImg.sprite = baseMonster.monsterSO.projectileSprite;
+        projectileImg.sprite = baseMonsterSprite;
 
         if(startCor == null)
         {

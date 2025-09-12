@@ -31,11 +31,12 @@ namespace JHT
         [SerializeField] private JHT_MonsterDataTable sampleDataList4;
         [SerializeField] private JHT_MonsterDataTable sampleDataList5;
 
-        public int stageIndex;
+        public int islandIndex;
         public int roundIndex;
         public int curTotalCount;
 
         public Func<int,List<JHT_MonsterDataSO>> OnAddMonster;
+
         protected override void Awake()
         {
             base.Awake();
@@ -79,17 +80,17 @@ namespace JHT
             base.OnDestroy();
         }
 
-        public void ChangeStage(BattleField field,int _stageIndex)
+        public void ChangeIsland(BattleField field,int _islaneIndex)
         {
             roundIndex = 0;
-            if (_stageIndex < 0)
+            if (_islaneIndex < 0)
                return;
 
             if(posList.Count > 0)
                 posList.Clear();
 
-            stageIndex = _stageIndex;
-            roundTable = stageDic[_stageIndex];
+            islandIndex = _islaneIndex - 1;
+            roundTable = stageDic[_islaneIndex - 1];
 
 
             for (int i = 0; i < roundTable.monsterGroupPos.Count; i++)
@@ -114,9 +115,9 @@ namespace JHT
         }
 
         // curStageIndex를 ++을 통해 round를 구별해줄거임
-        public void ChangeRound(int curStageIndex)
+        public void ChangeRound(int curRoundIndex)
         {
-            if (posList.Count < curStageIndex)
+            if (posList.Count < curRoundIndex)
             {
                 Debug.LogError("현재 라운드 최대를 넘었음");
                 return;
@@ -126,9 +127,9 @@ namespace JHT
                 curMonsterCountList.Clear();
 
             curMonsterCountList = new();
-            curMonsterCountList = OnAddMonster?.Invoke(curStageIndex);
+            curMonsterCountList = OnAddMonster?.Invoke(curRoundIndex);
 
-            posList[curStageIndex].checkList = new();
+            posList[curRoundIndex].checkList = new();
 
 
             for (int i = 0; i < curMonsterCountList.Count; i++)
@@ -136,7 +137,12 @@ namespace JHT
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
                 obj.Init(curMonsterCountList[i]);
                 obj.transform.position = new Vector3(0, 0, -9.850784f);
-                obj.transform.position += posList[curStageIndex].SetPos(curMonsterCountList[i]).position;
+                obj.transform.position += posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
+                if (curRoundIndex / 2 != 0)
+                {
+                    obj.transform.localEulerAngles =
+                        new Vector3(obj.transform.localEulerAngles.x, 180, obj.transform.localEulerAngles.x);
+                }
             }
         }
 
@@ -201,6 +207,10 @@ namespace JHT
         }
 
 
+        private bool StageEndEvent(bool value)
+        {
+            return value;
+        }
 
         #region 이전 버전
         // globalManager?에서 currentIndex++시 이벤트 - 데이터 넣기

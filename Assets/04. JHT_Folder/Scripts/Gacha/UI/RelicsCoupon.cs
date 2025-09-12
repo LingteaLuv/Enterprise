@@ -7,12 +7,12 @@ public class RelicsCoupon : MonoBehaviour
     [SerializeField] private TextMeshProUGUI relicsCouponCountText;
 
 
-    private void Start()
+    private void OnEnable()
     {
         InventoryManager.Instance.OnChangeRelicsCoupon += ChangeValue;
         relicsCouponCountText.text = InventoryManager.Instance.RelicsCoupon.ToString();
     }
-    private void OnEnable()
+    private void OnDisable()
     {
         InventoryManager.Instance.OnChangeRelicsCoupon -= ChangeValue;
     }

@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// PartyManager로부터 파티 준비 완료 신호를 받아 체력바를 초기화합니다.
@@ -9,6 +9,11 @@ public class AllHealthBarsPanel : MonoBehaviour
     [Header("UI 설정")]
     [Tooltip("씬에 미리 배치한 HealthBarDisplay 오브젝트들을 여기에 등록하세요.")]
     [SerializeField] private List<HealthBarDisplay> healthBars = new List<HealthBarDisplay>();
+
+    private void Start()
+    {
+        gameObject.SetActive(false);
+    }
 
     private void OnEnable()
     {
@@ -41,19 +46,10 @@ public class AllHealthBarsPanel : MonoBehaviour
         // 등록된 체력바 개수만큼 반복합니다.
         for (int i = 0; i < healthBars.Count; i++)
         {
-            // 연결할 캐릭터가 파티 목록에 있는지, 그리고 해당 캐릭터가 활성화 상태인지 확인합니다.
-            if (i < partyCharacters.Count && partyCharacters[i].gameObject.activeInHierarchy)
-            {
-                // 체력바를 활성화하고, 해당 캐릭터를 연결해줍니다.
-                healthBars[i].gameObject.SetActive(true);
-                healthBars[i].Initialize(partyCharacters[i]);
-                Debug.Log($"체력바 {i}번에 '{partyCharacters[i].name}' 캐릭터를 연결했습니다.");
-            }
-            else
-            {
-                // 연결할 캐릭터가 없거나 비활성 상태이면, 해당 체력바를 보이지 않게 끕니다.
-                healthBars[i].gameObject.SetActive(false);
-            }
+            // 체력바를 활성화하고, 해당 캐릭터를 연결해줍니다.
+            healthBars[i].gameObject.SetActive(true);
+            healthBars[i].Initialize(partyCharacters[i]);
+            Debug.Log($"체력바 {i}번에 '{partyCharacters[i].name}' 캐릭터를 연결했습니다.");
         }
     }
 }
