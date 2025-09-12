@@ -824,6 +824,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             result.General.CurrentQuestStage = ToInt(g.Child("CurrentQuestStage").Value, 1);
             result.General.CurrentClearedStage = ToInt(g.Child("CurrentClearedStage").Value, 0);
         }
+        Debug.Log($"Load QuestID : {result.General.ActiveQuestId}");
 
         // 반환 받은 데이터에서 Temporary의 자식들을 받아옴
         var tNode = snapshot.Child("Temporary");
