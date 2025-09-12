@@ -35,7 +35,7 @@ public class CharacterData : ScriptableObject
     public string flavorText;
     public string instruction;
     public Sprite characterSprite; // 캐릭터 이미지
-    public Sprite characterSprite2;
+    public GameObject characterPrefab; // spum 프리팹
 
     [Header("분류 정보")]
     public CrewRole crewRole; // 진형(전중후최후)
