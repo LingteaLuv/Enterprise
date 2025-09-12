@@ -38,6 +38,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
         /// </summary>
         /// <returns></returns>
         public abstract bool IsCompleted();
+        
+        public abstract bool IsOnce();
 
         public void GoalCountAdjust(int count)
         {

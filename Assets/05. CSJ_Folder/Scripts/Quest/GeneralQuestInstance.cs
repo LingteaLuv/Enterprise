@@ -6,24 +6,31 @@ namespace _05._CSJ_Folder.Scripts.Quest
     {
         public readonly string GeneralQuestId;
         
-        private GeneralQuestDefinitionSO _def;
+        public GeneralQuestDefinitionSO Def { get; }
 
         public GeneralQuestInstance(string questId, GeneralQuestDefinitionSO def)
         {
             GeneralQuestId = questId;
-            _def = def;
+            Def = def;
         }
         
 
         public override bool IsCompleted()
         {
-            int goalRequiredCount = _def.Goal.RequireCount;
+            int goalRequiredCount = Def.Goal.RequireCount;
             // 목표보다 현재 Count수가 작다면
             if (goalRequiredCount > CurrentGoalCount)
             {
                 return false;
             }
             return true;
+        }
+
+        public override bool IsOnce()
+        {
+            if (Def.RepeatType == RepeatType_Enum.Once)
+                return true;
+            return false;
         }
     }
 }

@@ -12,30 +12,27 @@ namespace JHT
     {
         [Header("UI")]
         [SerializeField] private Image hpGuageImage;
-
-
-        private JHT_BaseMonsterStat curSO; 
-        
-        public void Init(JHT_BaseMonsterStat so)
+        private void OnEnable()
         {
-            curSO = so;
-        }
+            if (!hpGuageImage) 
+                return;
 
+            hpGuageImage.DOKill();
+            hpGuageImage.fillAmount = 1f;
+        }
+        private void OnDisable()
+        {
+            hpGuageImage.fillAmount = 0f;
+            if (hpGuageImage) hpGuageImage.DOKill();
+        }
 
         public void ChangeHP(float value)
         {
             if (!hpGuageImage) 
                 return;
 
-            if (curSO == null || curSO.maxHp <= 0f) 
-                return;
-
-            hpGuageImage.DOFillAmount(value,1f);
+            hpGuageImage.DOFillAmount(value, 0.5f);
         }
 
-        public void ReleaseMonsterHP()
-        {
-            hpGuageImage.fillAmount = 1f;
-        }
     }
 }
