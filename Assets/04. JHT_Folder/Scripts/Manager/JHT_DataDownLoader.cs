@@ -14,6 +14,7 @@ namespace JHT
         public const string lootTableURL = "https://docs.google.com/spreadsheets/d/13MgAe8F47N4GJRDn4vg4wGtn2Y31aOerQEQF096ox_g/export?format=csv";
 
         public event Action OnDataSetCompleted;
+        public event Action OnMonsterDataSetCompleted;
 
         public IEnumerator DownloadData()
         {
@@ -21,6 +22,14 @@ namespace JHT
             yield return LoadDataCSV(itemRelicsURL, SetRelics,2);
             yield return LoadDataCSV(lootTableURL, SetLootTable, 2);
             OnDataSetCompleted?.Invoke();
+        }
+
+        public IEnumerator DownLoadMonsterData()
+        {
+            yield return null;
+            //yield return LoadMonsterDataCSV();
+            //yield return LoadMonsterTableCSV();
+            OnMonsterDataSetCompleted?.Invoke();
         }
 
         private IEnumerator LoadDataCSV(string url, Action<string[][]> onParsed, int startLine = 1)
