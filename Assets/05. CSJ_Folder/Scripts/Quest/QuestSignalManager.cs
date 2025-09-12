@@ -1,9 +1,36 @@
+using System;
 using _05._CSJ_Folder.Scripts.Quest;
+using JHT;
 using UnityEngine;
 
 public class QuestSignalManager : Singleton<QuestSignalManager>
 {
     [SerializeField] private QuestSignalSO _signal;
+
+    private Action FomationChanged;
+    private Action AutoFomation;
+    private Action<RelicsObject> RelicTutorial;
+    private void OnEnable()
+    {
+        FomationChanged = () => ETCAchieve("ArrangeTutorial");
+        FormationManager.Instance.OnTempFormationChanged += FomationChanged;
+        AutoFomation = () => ETCAchieve("AutoArrangeTutorial");
+        FormationManager.Instance.OnAutoFormation += AutoFomation;
+        RelicTutorial = (_) => ETCAchieve("RelicTutorial");
+        InventoryManager.Instance.OnChangePanel += RelicTutorial;
+    }
+
+    private void OnDisable()
+    {
+        FormationManager.Instance.OnTempFormationChanged -= FomationChanged;
+        FormationManager.Instance.OnAutoFormation -= AutoFomation;
+        InventoryManager.Instance.OnChangePanel -= RelicTutorial;
+    }
+
+    public void OnBossBattleEnter()
+    {
+        ETCAchieve("BossBattle");
+    }
 
     // TODO : 추후 퀘스트 종류 입력을 받지 않고 자동으로 퀘스트 목록에 맞춰서 신호를 보낼 수도 있음
     
@@ -121,5 +148,6 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         _signal.OnComplete(QuestId);
     }
+    
     
 }

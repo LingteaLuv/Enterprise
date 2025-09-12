@@ -48,7 +48,7 @@ namespace JHT
 
         private void OnEnable()
         {
-            OnAddInventory += AddInventoryItem;
+             OnAddInventory += AddInventoryItem;
             OnRemoveInventory += RemoveInventoryIndex;
             OnChangeItem += AddRelicsItem;
             OnChangeAddItem += AddRelicsSolo;
