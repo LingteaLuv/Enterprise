@@ -38,7 +38,8 @@ public enum MonsterType
 public enum MonsterRarity
 {
     Normal,
-    Elite
+    Elite,
+    Boss
 }
 
 //public enum CrewRole
