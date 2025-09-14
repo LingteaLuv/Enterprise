@@ -1535,6 +1535,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
         // 클리어 버튼 / 정식 빌드에선 빠질 예정
         private void ForceQuestComplete()
         {
+            if (_isResetting) return;
+            
             CurrentClearedStage++;
             GeneralQuestInstance inst = GetActiveGeneralInstance();
             inst.ForceComplete();   
