@@ -36,6 +36,22 @@ public class IslandStageManager : MonoBehaviour
     private async void Awake()
     {
         Instance = this;
+
+        if(!await DatabaseManager.Instance.CheckFieldAsync("StageData/Island", (long value) =>
+        {
+            currentIndex = new Property<int>((int)value);
+            _isChecked = true;
+        }))
+        {
+            currentIndex = new Property<int>(0);
+            await DatabaseManager.Instance.SaveFieldAsync("StageData/Island", 0);
+            _isChecked = true;
+        }
+        
+        currentIndex.OnChanged += async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync("StageData/Island", value);
+        };
     }
 
 
@@ -66,7 +82,6 @@ public class IslandStageManager : MonoBehaviour
     {
         float timeout = 2f;
         float timer = 0f;
-
 
         while (travelUI == null || !travelUI.IsReady || !GlobalStageManager.Instance.IsChecked)
         {
@@ -259,6 +274,7 @@ public class IslandStageManager : MonoBehaviour
         Debug.Log($"[MoveToAndEnter] index={index} 시작");
 
         bool arrive = false;
+        
         yield return travelUI.MoveShipToMarker(GlobalStageManager.Instance.CurrentStageIndex.Value, index, () =>
         {
             arrive = true;

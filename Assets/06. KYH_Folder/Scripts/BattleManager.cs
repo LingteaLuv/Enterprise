@@ -166,6 +166,7 @@ public class BattleManager : MonoBehaviour
                 return;
             }
         }
+        
         JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[GlobalStageManager.Instance.CurrentStageIndex.Value],
             GlobalStageManager.Instance.CurrentStageIndex.Value);
 

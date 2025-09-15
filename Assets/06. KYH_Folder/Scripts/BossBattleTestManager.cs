@@ -17,8 +17,10 @@ public class BossBattleTestManager : MonoBehaviour
         _successBtn.onClick.AddListener(() =>
         {
             Debug.Log(" 보스전 승리!");
+
             QuestSignalManager.Instance.StageClear(GlobalStageManager.Instance.CurrentStageIndex.Value++);
             GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;
+
             GlobalStageManager.Instance.bossBattleTriggered = false;
             QuestSignalManager.Instance.KillEnemy(MonsterId.Boss);
             StartCoroutine(Delay1());
