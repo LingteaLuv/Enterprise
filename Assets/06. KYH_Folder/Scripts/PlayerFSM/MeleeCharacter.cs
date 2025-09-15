@@ -6,6 +6,15 @@ public class MeleeCharacter : BaseCharacterFSM
     private Transform target;
     private Coroutine findTargetRoutine;
 
+    //-----------
+    // 차후 수현님이 연결 할 케릭터에서 관리 될 변수들 목록 예시 -- 이 스크립트에서가 아닌 다른곳에서 참조하여 사용해도 됩니다.
+    // HandleSkill 내의 SkillRoutine 매서드 내에서 작업
+    private float skillCooldown = 8f; // 쿨타임 간격 (스탯에서 가져와도 됨)
+    private float lastSkillTime = -999f;
+    
+    private bool isSkillReady => Time.time >= lastSkillTime + skillCooldown;
+    //-----------
+
     protected override void Start()
     {
         base.Start();
@@ -27,12 +36,15 @@ public class MeleeCharacter : BaseCharacterFSM
     protected override void HandleIdle()
     {
         if (!IsTargetValid())
-            return; // 타겟 탐색은 코루틴에서 자동 실행 중
+            return;
 
-        float attackRange = PartyManager.Instance.attackRange;
-        float distance = Vector3.Distance(transform.position, target.position);
+        if (isSkillReady && IsTargetInAttackRange())
+        {
+            ChangeState(State.Skill);
+            return;
+        }
 
-        if (distance < attackRange)
+        if (IsTargetInAttackRange())
             ChangeState(State.Attack);
         else
             ChangeState(State.Move);
@@ -46,20 +58,33 @@ public class MeleeCharacter : BaseCharacterFSM
             return;
         }
 
-        float moveSpeed = PartyManager.Instance.moveSpeed;
-        float attackRange = PartyManager.Instance.attackRange;
-        float distance = Vector3.Distance(transform.position, target.position);
+        if (isSkillReady && IsTargetInAttackRange())
+        {
+            ChangeState(State.Skill);
+            return;
+        }
 
+        float moveSpeed = PartyManager.Instance.moveSpeed;
         transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
 
-        if (distance <= attackRange)
-        {
+        if (IsTargetInAttackRange())
             ChangeState(State.Attack);
-        }
     }
 
     protected override void HandleAttack()
     {
+        if (!IsTargetValid())
+        {
+            ChangeState(State.Idle);
+            return;
+        }
+
+        if (isSkillReady && IsTargetInAttackRange())
+        {
+            ChangeState(State.Skill);
+            return;
+        }
+
         if (attackRoutine == null)
             attackRoutine = StartCoroutine(AttackRoutine());
     }
@@ -98,7 +123,41 @@ public class MeleeCharacter : BaseCharacterFSM
         }
     }
 
-    // 🟡 타겟 감시 루프 (null되면 다시 탐색)
+    protected override void HandleSkill()
+    {
+        if (attackRoutine == null)
+            attackRoutine = StartCoroutine(SkillRoutine());
+    }
+
+    // 루틴 내부에서 스킬에 관련된 이펙트,애니메이션 등등의 세부적인 부분 불러오면 됨
+    private IEnumerator SkillRoutine()
+    {
+        Debug.Log($"{gameObject.name} 스킬 발동!");
+
+        // 애니메이션 재생 (있다면)
+        // animator?.SetTrigger("Skill");
+
+        // 스킬 이펙트, 데미지, 상태 이상 등 구현
+        if (IsTargetValid())
+        {
+            var targetScript = target.GetComponent<JHT_BaseMonsterFSM>();
+            if (targetScript != null)
+            {
+                float skillDamage = stats.GetCurrentStat(Stat.Attack) * 2f;
+                targetScript.TakeDamage(skillDamage);
+                Debug.Log($"스킬 공격: {targetScript.monsterSO.name}에게 {skillDamage} 피해!");
+            }
+        }
+
+        // 쿨타임 초기화
+        lastSkillTime = Time.time;
+
+        yield return new WaitForSeconds(1.5f); // 스킬 모션 시간 등
+
+        ChangeState(State.Idle); // 스킬 후 상태 복귀
+    }
+
+    //  타겟 감시 루프 (null되면 다시 탐색)
     private void StartFindTargetLoop()
     {
         if (findTargetRoutine != null)
@@ -163,5 +222,14 @@ public class MeleeCharacter : BaseCharacterFSM
     private bool IsTargetValid()
     {
         return target != null && !target.Equals(null) && target.GetComponent<JHT_BaseMonsterFSM>().curHP > 0;
+    }
+
+    private bool IsTargetInAttackRange()
+    {
+        if (!IsTargetValid()) return false;
+
+        float attackRange = PartyManager.Instance.attackRange;
+        float distance = Vector3.Distance(transform.position, target.position);
+        return distance <= attackRange;
     }
 }
