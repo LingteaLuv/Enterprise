@@ -5,7 +5,7 @@ namespace JHT
 {
     public class JHT_StateMachine
     {
-        public Dictionary<JHT_BaseMonsterFSM.State, JHT_BaseState> stateDic;
+        public Dictionary<PlayerState, JHT_BaseState> stateDic;
         public JHT_BaseState curState;
 
         public JHT_StateMachine()
@@ -15,10 +15,10 @@ namespace JHT
 
         public void ChangeState(JHT_BaseState changedState)
         {
-            if(curState == changedState) 
+            if (curState == changedState)
                 return;
 
-            if (curState != null) 
+            if (curState != null)
                 curState.Exit();
 
             curState = changedState;
@@ -27,6 +27,6 @@ namespace JHT
 
         public void Update() => curState.Update();
 
-        public void Exit()=> curState.Exit();
+        public void Exit() => curState.Exit();
     }
 }

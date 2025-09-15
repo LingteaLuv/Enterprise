@@ -13,7 +13,7 @@ namespace JHT
 
         public override void Enter()
         {
-            
+
         }
 
         public override void Exit()
@@ -23,11 +23,11 @@ namespace JHT
 
         public override void Update()
         {
-            if (fsm.currentState == JHT_BaseMonsterFSM.State.Dead)
+            if (fsm.currentState == PlayerState.DEATH)
                 return;
 
             if (fsm.curHP <= 0)
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.State.Dead]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.DEATH]);
 
         }
 
@@ -43,9 +43,9 @@ namespace JHT
         public override void Enter()
         {
             base.Enter();
-
-            if(fsm.animator != null)
-                fsm.animator.Play(fsm.IDLE);
+            fsm.HandleIdle();
+            //if(fsm.animator != null)
+            //    fsm.animator.Play(fsm.IDLE);
         }
 
         public override void Update()
@@ -63,7 +63,7 @@ namespace JHT
 
             if (dist < fsm.monsterStat.chaseRange)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.State.Move]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.MOVE]);
             }
         }
 
@@ -82,9 +82,9 @@ namespace JHT
         public override void Enter()
         {
             base.Enter();
-
-            if (fsm.animator != null)
-                fsm.animator.Play(fsm.MOVE);
+            fsm.HandleMove();
+            //if (fsm.animator != null)
+            //    fsm.animator.Play(fsm.MOVE);
         }
 
         public override void Update()
@@ -94,20 +94,20 @@ namespace JHT
 
             if (fsm.target == null)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.State.Idle]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.IDLE]);
                 return;
             }
-            
+
             float dist = Mathf.Abs(Vector2.Distance(fsm.target.transform.position, fsm.gameObject.transform.position));
 
             if (dist < fsm.monsterStat.attackRange)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.State.Attack]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.ATTACK]);
             }
 
             if (dist > fsm.monsterStat.chaseRange)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.State.Idle]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.IDLE]);
             }
         }
 
@@ -127,7 +127,6 @@ namespace JHT
         public override void Enter()
         {
             base.Enter();
-            fsm.CanAttack = true;
             fsm.HandleAttack();
         }
 
@@ -137,7 +136,7 @@ namespace JHT
 
             if (fsm.target == null)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.State.Idle]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.IDLE]);
                 return;
             }
 
@@ -146,8 +145,37 @@ namespace JHT
             if (Mathf.Abs(Vector2.Distance(fsm.target.transform.position,
                 fsm.gameObject.transform.position)) > fsm.monsterStat.attackRange + safeZone)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.State.Move]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.MOVE]);
                 return;
+            }
+
+            if (fsm.canAttack == false)
+            {
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.OTHER]);
+            }
+        }
+
+        public override void Exit()
+        {
+            base.Exit();
+        }
+    }
+
+    public class Monster_AttackDelay : JHT_MonsterState
+    {
+        public Monster_AttackDelay(JHT_BaseMonsterFSM _fsm) : base(_fsm) { }
+
+        public override void Enter()
+        {
+            base.Enter();
+            fsm.HandleAttackDelay();
+        }
+        public override void Update()
+        {
+            base.Update();
+            if (fsm.canAttack == true)
+            {
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.ATTACK]);
             }
         }
 
@@ -163,7 +191,8 @@ namespace JHT
 
         public override void Enter()
         {
-            fsm.animator.Play(fsm.DEATH);
+            base.Enter();
+            //fsm.animator.Play(fsm.DEATH);
             fsm.HandleDie();
         }
 
@@ -187,7 +216,7 @@ namespace JHT
         }
         public override void Enter()
         {
-            fsm.animator.Play(fsm.DEATH);
+            //fsm.animator.Play(fsm.DEATH);
             fsm.HandleDie();
         }
 

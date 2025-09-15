@@ -4,7 +4,7 @@ using UnityEngine.TextCore.Text;
 
 public abstract class BaseCharacterFSM : MonoBehaviour
 {
-    public enum State { Idle, Move, Attack, Dead }
+    public enum State { Idle, Move, Attack, Skill, Dead }
     public State currentState;
 
     protected CombatCharacter stats;
@@ -39,6 +39,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
             case State.Idle: HandleIdle(); break;
             case State.Move: HandleMove(); break;
             case State.Attack: HandleAttack(); break;
+            case State.Skill: HandleSkill(); break; // ← 추가
             case State.Dead: break;
         }
     }
@@ -82,7 +83,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
     protected abstract void HandleIdle();
     protected abstract void HandleMove();
     protected abstract void HandleAttack();
-
+    protected abstract void HandleSkill();
     public void ChangeStateIdleForce()
     {
         currentState = State.Idle;
