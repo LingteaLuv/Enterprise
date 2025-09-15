@@ -23,13 +23,11 @@ public class SkillSO : ScriptableObject
     [Header("스킬 정보")]
     public int skillID;
     public string skillName;
-    [TextArea] public string skillDescription;
-    public Sprite skillIcon;
     public float cooldown;
-    public ESkillTargetType skillTargetType = ESkillTargetType.Offensive;
+    public ESkillTargetType skillTargetType;
 
     [Header("타겟 설정")]
-    public ETargetLogic targetLogic = ETargetLogic.Self;
+    public ETargetLogic targetLogic;
     public CrewRole targetRole; // targetLogic이 ByRole일 때 사용할 역할
 
     [Header("스킬 효과 목록")]
