@@ -40,8 +40,6 @@ public class SkillSO : ScriptableObject
         CombatCharacter casterCharacter = caster as CombatCharacter;
         if (casterCharacter == null) return;
 
-        Debug.Log($"'{casterCharacter.name}'이(가) '{skillName}' 스킬을 사용!");
-
         // 1. 이 스킬의 targetLogic에 따라 타겟을 찾아요.
         List<IDamageable> finalTargets = FindTargets(casterCharacter);
 
@@ -65,7 +63,7 @@ public class SkillSO : ScriptableObject
 
         if (skillTargetType == ESkillTargetType.Supportive)
         {
-            var allAllies = GameObject.FindGameObjectsWithTag("Player")
+            var allAllies = GameObject.FindGameObjectsWithTag("Crew")
                                       .Select(go => go.GetComponent<CombatCharacter>())
                                       .Where(cc => cc != null)
                                       .ToList();
