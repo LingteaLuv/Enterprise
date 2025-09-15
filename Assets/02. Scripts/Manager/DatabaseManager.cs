@@ -138,6 +138,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     public async Task<bool> CheckFieldAsync<T>(string subPath, Action<T> callback)
     {
         string path = $"{_uid}/" + subPath;
+        
         DatabaseReference dataRef = FirebaseManager.DataReference.Child(path);
         DataSnapshot snapshot = await dataRef.GetValueAsync();
 

@@ -9,6 +9,7 @@ public class GlobalStageManager : MonoBehaviour
     public Property<int> CurrentIslandIndex { get; private set; }
     
     public bool IsChecked { get; private set; }
+
     public bool bossBattleTriggered = false;
 
     private async void Awake()
