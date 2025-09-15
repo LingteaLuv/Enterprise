@@ -183,7 +183,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             characterNameText.text = $"{currentCharacterData.characterdata.characterName}";
             characterImage.sprite = currentCharacterData.characterdata.characterSprite;
-            if (currentCharacterData.characterLevel == PlayerDataManager.MAX_CHARACTER_LEVEL)
+            if (currentCharacterData.characterLevel.Value == PlayerDataManager.MAX_CHARACTER_LEVEL)
             {
                 levelText.text = $"LV MAX";
             }
@@ -274,7 +274,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (CurrencyManager.Instance != null
             && CurrencyManager.Instance.GetCurrency(CurrencyType.EnhancementStone) >= stoneCost
             && CurrencyManager.Instance.GetCurrency(CurrencyType.Gold) >= goldCost
-            && currentCharacterData.characterLevel < PlayerDataManager.MAX_CHARACTER_LEVEL)
+            && currentCharacterData.characterLevel.Value < PlayerDataManager.MAX_CHARACTER_LEVEL)
         {
             levelUpButton.interactable = true;
         }
@@ -292,7 +292,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (currentCharacterData == null || starUpgradeCostText == null || starUpgradeButton == null) return;
 
         // 최대 성급 확인 (예: 5성이 최대라고 가정)
-        if (currentCharacterData.stars >= 5)
+        if (currentCharacterData.stars.Value >= 5)
         {
             starUpgradeCostText.text = "MAX";
             starUpgradeButton.interactable = false;
@@ -300,10 +300,10 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         }
 
         // 다음 성급에 필요한 비용 가져오기
-        int nextStarLevel = currentCharacterData.stars + 1;
+        int nextStarLevel = currentCharacterData.stars.Value + 1;
         int cost = 0;
         // PlayerDataManager.Instance.TryGetUpgradeCost가 int cost를 반환한다고 가정
-        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.stars, out cost))
+        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.stars.Value, out cost))
         {
             starUpgradeCostText.text = $"비용 : {cost} 영혼 조각";
 
@@ -341,7 +341,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (currentCharacterData == null) return;
 
         // 1. 먼저 스탯을 다시 계산합니다.
-        currentCharacterData.RecaculateStats();
+        currentCharacterData.RecalculateStats();
 
         // 2. 갱신된 스탯으로 UI를 업데이트합니다.
         atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Attack])}";

@@ -19,8 +19,8 @@ public class PlayerCharacterData
 {
     [Header("캐릭터")]
     public CharacterData characterdata; // 캐릭터 원본 데이터
-    public int characterLevel;
-    public int stars; // 성급
+    public Property<int> characterLevel;
+    public Property<int> stars; // 성급
 
     [Header("직업, 속성 아이콘")]
     public Sprite crewRoleIcon;
@@ -42,8 +42,8 @@ public class PlayerCharacterData
     public PlayerCharacterData(CharacterData so)
     {
         characterdata = so;
-        characterLevel = 1;
-        stars = 1; // 기본 등급 1성으로 설정
+        characterLevel = new Property<int>(1);
+        stars = new Property<int>(1); // 기본 등급 1성으로 설정
 
         // 아이콘
         crewRoleIcon = GetIcon(so.crewRole);
@@ -65,8 +65,8 @@ public class PlayerCharacterData
     public PlayerCharacterData(CharacterData so, GachaGrade grade)
     {
         characterdata = so;
-        characterLevel = 1;
-        stars = (int)grade; // 가챠로 뽑은 등급 설정
+        characterLevel =  new Property<int>(1);
+        stars = new Property<int>((int)grade); // 가챠로 뽑은 등급 설정
 
         // 아이콘
         crewRoleIcon = GetIcon(so.crewRole);
@@ -88,7 +88,7 @@ public class PlayerCharacterData
     /// <summary>
     /// 캐릭터에 적용되는 모든 스탯을 계산하고 전투력 변경 이벤트를 발생시킵니다.
     /// </summary>
-    public void RecaculateStats()
+    public void RecalculateStats()
     {
         BigInteger oldPower = battlePower; // 기존 전투력 저장
 
@@ -100,7 +100,7 @@ public class PlayerCharacterData
             foreach (var baseStat in characterdata.baseStats)
             {
                 // StatManager를 사용하여 레벨에 맞는 스탯 값을 계산합니다.
-                float calculatedValue = StatManager.CalculateStatValue(baseStat, this.characterLevel);
+                float calculatedValue = StatManager.CalculateStatValue(baseStat, this.characterLevel.Value);
                 finalStats[baseStat.statName] = calculatedValue;
             }
         }

@@ -55,7 +55,7 @@ public class CharacterPanelUI : MonoBehaviour
         nameText.text = data.characterdata.characterName;
 
         // 성급(별) UI 업데이트
-        UpdateStarUI(data.stars);
+        UpdateStarUI(data.stars.Value);
 
         // 영혼 조각 UI 업데이트
         UpdateSoulFragmentUI();
@@ -96,7 +96,7 @@ public class CharacterPanelUI : MonoBehaviour
         PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments);
 
         // 다음 성급 필요량 가져오기
-        bool hasNextStar = PlayerDataManager.Instance.TryGetUpgradeCost(currentPlayerCharData.stars, out int requiredFragments);
+        bool hasNextStar = PlayerDataManager.Instance.TryGetUpgradeCost(currentPlayerCharData.stars.Value, out int requiredFragments);
 
         if (hasNextStar)
         {
