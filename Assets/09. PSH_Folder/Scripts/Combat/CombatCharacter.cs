@@ -21,7 +21,6 @@ public class Buff
     }
 }
 
-[RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(HealthSystem))]
 public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
 {
@@ -46,12 +45,10 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
 
     // --- 컴포넌트 참조 ---
     private HealthSystem healthSystem;
-    private SpriteRenderer spriteRenderer;
 
     void Awake()
     {
         healthSystem = GetComponent<HealthSystem>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
@@ -80,11 +77,6 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
 
         // 버프 리스트 초기화
         activeBuffs.Clear();
-
-        if (spriteRenderer != null && data.characterdata != null)
-        {
-            spriteRenderer.sprite = data.characterdata.characterSprite;
-        }
 
         Debug.Log($"'{charName}' 데이터 적용 완료.");
 
