@@ -96,6 +96,19 @@ public class HealthSystem : MonoBehaviour
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
+    /// <summary>
+    /// 체력을 회복시킵니다.
+    /// </summary>
+    public void Heal(float amount)
+    {
+        if (amount <= 0) return;
+
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        Debug.Log($"❤️ {statProvider.name}'이(가) {amount:F1}만큼 체력을 회복했습니다. 현재 체력: {currentHealth:F1}/{maxHealth:F1}");
+
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
     // 오류떠서 냅둠 나중에 지울 것
     public void TakeDamage(float amount)
     {

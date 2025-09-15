@@ -1,6 +1,7 @@
-using UnityEngine;
-using System.Collections;
 using JHT;
+using System.Collections;
+using System.Linq;
+using UnityEngine;
 public class MeleeCharacter : BaseCharacterFSM
 {
     private Transform target;
@@ -35,14 +36,13 @@ public class MeleeCharacter : BaseCharacterFSM
 
     protected override void HandleIdle()
     {
-        if (!IsTargetValid())
-            return;
-
-        if (isSkillReady && IsTargetInAttackRange())
+        if (isSkillReady)
         {
             ChangeState(State.Skill);
             return;
         }
+
+        if (!IsTargetValid()) return;
 
         if (IsTargetInAttackRange())
             ChangeState(State.Attack);
@@ -64,7 +64,7 @@ public class MeleeCharacter : BaseCharacterFSM
             return;
         }
 
-        float moveSpeed = PartyManager.Instance.moveSpeed;
+        float moveSpeed = stats.moveSpeed;
         transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
 
         if (IsTargetInAttackRange())
@@ -99,7 +99,7 @@ public class MeleeCharacter : BaseCharacterFSM
                 yield break;
             }
 
-            float attackRange = PartyManager.Instance.attackRange;
+            float attackRange = stats.attackRange;
             float attackDelay = stats.GetCurrentStat(Stat.AttackSpeed);
             float distance = Vector3.Distance(transform.position, target.position);
 
@@ -132,22 +132,21 @@ public class MeleeCharacter : BaseCharacterFSM
     // 루틴 내부에서 스킬에 관련된 이펙트,애니메이션 등등의 세부적인 부분 불러오면 됨
     private IEnumerator SkillRoutine()
     {
-        Debug.Log($"{gameObject.name} 스킬 발동!");
-
         // 애니메이션 재생 (있다면)
         // animator?.SetTrigger("Skill");
 
         // 스킬 이펙트, 데미지, 상태 이상 등 구현
-        if (IsTargetValid())
+        var skill = stats.skills.FirstOrDefault();
+
+        if (skill == null)
         {
-            var targetScript = target.GetComponent<JHT_BaseMonsterFSM>();
-            if (targetScript != null)
-            {
-                float skillDamage = stats.GetCurrentStat(Stat.Attack) * 2f;
-                targetScript.TakeDamage(skillDamage);
-                Debug.Log($"스킬 공격: {targetScript.monsterSO.name}에게 {skillDamage} 피해!");
-            }
+            Debug.LogWarning("사용할 스킬이 없어 Idle 상태로 돌아갑니다.");
+            ChangeState(State.Idle);
+            yield break;
         }
+
+        Debug.Log($"{stats.charName}이/가 {skill.skillName} 스킬을 발동");
+        skill.Use(stats);
 
         // 쿨타임 초기화
         lastSkillTime = Time.time;

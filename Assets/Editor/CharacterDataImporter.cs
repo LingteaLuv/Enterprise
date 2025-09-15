@@ -114,7 +114,7 @@ public class CharacterDataImporter
                 data.atkRangeType = (AtkRangeType)Enum.Parse(typeof(AtkRangeType), fields[headerMap["AtkRange_Type"]], true);
 
                 // 스킬 정보 파싱
-                data.skillPassiveID = int.Parse(fields[headerMap["SkillPassive_ID"]]);
+                data.skillPassiveID = data.characterID; // 같은 것도 있지만 다른게 많아서 그냥 각각 하는게 나을듯
                 data.skillPassiveMotion = fields[headerMap["Skill_PassiveMotion"]];
 
                 // --- 스탯 정보 파싱 (CSV 헤더와 Stat Enum 매핑) ---
