@@ -135,9 +135,9 @@ public class DatabaseManager : Singleton<DatabaseManager>
         callback(data);
     }
 
-    public async Task<bool> CheckFieldAsync<T>(string tempPath, Action<T> callback)
+    public async Task<bool> CheckFieldAsync<T>(string subPath, Action<T> callback)
     {
-        string path = $"{_uid}/" + tempPath;
+        string path = $"{_uid}/" + subPath;
         DatabaseReference dataRef = FirebaseManager.DataReference.Child(path);
         DataSnapshot snapshot = await dataRef.GetValueAsync();
 
@@ -453,6 +453,17 @@ public class DatabaseManager : Singleton<DatabaseManager>
 
     #endregion
 
+    public async Task SaveCrewDataAsync(string subPath, PlayerCharacterData data)
+    {
+        Init();
+        var root = $"{_uid}/{subPath}";
+        var crewData = new Dictionary<string, object>();
+        
+        crewData[$"{root}/Level"] = data.characterLevel;
+        crewData[$"{root}/Star"] = data.stars;
+            
+        await SaveFieldsAsync(crewData);
+    }
 
     #region QuestCheck (AddedByCSJ)
     

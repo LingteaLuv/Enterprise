@@ -13,13 +13,13 @@ public class NotificationManager : Singleton<NotificationManager>
         if (character == null) return false;
 
         // 1. 최대 성급인지 확인 (5성이라고 가정)
-        if (character.stars >= 5)
+        if (character.stars.Value >= 5)
         {
             return false;
         }
 
         // 2. 다음 성급으로 업그레이드하는 데 필요한 비용(영혼 조각 수)을 가져옵니다.
-        if (PlayerDataManager.Instance.TryGetUpgradeCost(character.stars, out int requiredCost))
+        if (PlayerDataManager.Instance.TryGetUpgradeCost(character.stars.Value, out int requiredCost))
         {
             // 3. 현재 보유한 영혼 조각 수를 가져옵니다.
             PlayerDataManager.Instance.characterSoulFragments.TryGetValue(character.characterdata.characterID, out int currentFragments);

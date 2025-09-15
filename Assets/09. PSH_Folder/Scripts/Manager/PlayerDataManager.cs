@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using Firebase.Database;
 using UnityEngine;
 
 public class PlayerDataManager : Singleton<PlayerDataManager>
@@ -122,7 +125,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         };
     }
 
-    public PlayerCharacterData AddCharacter(CharacterData characterdata)
+    public async Task<PlayerCharacterData> AddCharacter(CharacterData characterdata)
     {
         if (ownedCharacters.TryGetValue(characterdata.characterID, out PlayerCharacterData existingCharData))
         {
@@ -136,8 +139,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         {
             PlayerCharacterData newCharData = new PlayerCharacterData(characterdata);
             ownedCharacters.Add(characterdata.characterID, newCharData);
+            await DatabaseManager.Instance.SaveCrewDataAsync($"StatusData/Crew/{characterdata.characterID}", newCharData);
             Debug.Log($"[신규] {characterdata.characterName}({newCharData.stars}성) 획득!");
-            newCharData.RecaculateStats();
+            newCharData.RecalculateStats();
             OnOwnedCharactersChanged?.Invoke();
             return newCharData;
         }
@@ -149,12 +153,12 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         {
             int newStarLevel = (int)grade;
 
-            if (newStarLevel > existingCharData.stars)
+            if (newStarLevel > existingCharData.stars.Value)
             {
-                int oldStarLevel = existingCharData.stars;
+                int oldStarLevel = existingCharData.stars.Value;
                 Debug.Log($"<color=cyan>[승급!] {existingCharData.characterdata.characterName}의 등급이 {oldStarLevel}성에서 {newStarLevel}성으로 올랐습니다!</color>");
-                existingCharData.stars = newStarLevel;
-                existingCharData.RecaculateStats();
+                existingCharData.stars.Value = newStarLevel;
+                existingCharData.RecalculateStats();
                 OnCharacterDataUpdated?.Invoke(existingCharData);
 
                 int fragmentsGained = 0;
@@ -192,13 +196,13 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             PlayerCharacterData newCharData = new PlayerCharacterData(characterdata, grade);
             ownedCharacters.Add(characterdata.characterID, newCharData);
             Debug.Log($"[신규] {characterdata.characterName}({newCharData.stars}성) 획득!");
-            newCharData.RecaculateStats();
+            newCharData.RecalculateStats();
             OnOwnedCharactersChanged?.Invoke();
             return newCharData;
         }
     }
 
-    public void AddSoulFragments(int characterId, int amount)
+    public async void AddSoulFragments(int characterId, int amount)
     {
         if (characterSoulFragments.ContainsKey(characterId))
         {
@@ -209,23 +213,25 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             characterSoulFragments.Add(characterId, amount);
         }
         Debug.Log($"캐릭터 ID {characterId}의 영혼 조각 +{amount}. 현재: {characterSoulFragments[characterId]}개");
+        await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{characterId}/SoulFragments", characterSoulFragments[characterId]);
     }
 
-    public bool TryUpgradeCharacterStar(PlayerCharacterData playerCharData)
+    public async UniTask<bool> TryUpgradeCharacterStar(PlayerCharacterData playerCharData)
     {
         if (playerCharData == null) { Debug.LogError("업그레이드할 캐릭터 데이터가 null입니다."); return false; }
         int characterId = playerCharData.characterdata.characterID;
-        if (playerCharData.stars >= 5) { Debug.LogWarning($"{playerCharData.characterdata.characterName}은(는) 이미 최대 성급입니다."); return false; }
-        if (!starUpgradeCosts.TryGetValue(playerCharData.stars, out int cost)) { Debug.LogError($"현재 성급 {playerCharData.stars} 업그레이드 비용이 정의되지 않았습니다."); return false; }
+        if (playerCharData.stars.Value >= 5) { Debug.LogWarning($"{playerCharData.characterdata.characterName}은(는) 이미 최대 성급입니다."); return false; }
+        if (!starUpgradeCosts.TryGetValue(playerCharData.stars.Value, out int cost)) { Debug.LogError($"현재 성급 {playerCharData.stars.Value} 업그레이드 비용이 정의되지 않았습니다."); return false; }
         if (!characterSoulFragments.ContainsKey(characterId) || characterSoulFragments[characterId] < cost)
         {
             Debug.LogWarning($"{playerCharData.characterdata.characterName}의 영혼 조각이 부족합니다!");
             return false;
         }
         characterSoulFragments[characterId] -= cost;
-        playerCharData.stars++;
-        Debug.Log($"{playerCharData.characterdata.characterName}이(가) {playerCharData.stars}성으로 승급했습니다!");
-        playerCharData.RecaculateStats();
+        await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{characterId}/SoulFragments", characterSoulFragments[characterId]);
+        playerCharData.stars.Value++;
+        Debug.Log($"{playerCharData.characterdata.characterName}이(가) {playerCharData.stars.Value}성으로 승급했습니다!");
+        playerCharData.RecalculateStats();
         OnCharacterDataUpdated?.Invoke(playerCharData);
         return true;
     }
@@ -237,7 +243,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     public bool TryLevelUpCharacter(PlayerCharacterData character)
     {
-        if (character.characterLevel >= MAX_CHARACTER_LEVEL)
+        if (character.characterLevel.Value >= MAX_CHARACTER_LEVEL)
         {
             Debug.LogWarning($"{character.characterdata.characterName}은(는) 이미 최대 레벨({MAX_CHARACTER_LEVEL})입니다.");
             return false;
@@ -253,10 +259,10 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         CurrencyManager.Instance.SpendCurrency(CurrencyType.Gold, fixedLevelUpGoldCost);
         CurrencyManager.Instance.SpendCurrency(CurrencyType.EnhancementStone, fixedLevelUpStoneCost);
 
-        character.characterLevel++;
-        Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.characterLevel})");
+        character.characterLevel.Value++;
+        Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.characterLevel.Value})");
         QuestSignalManager.Instance.LevelUp(ItemType.Character, 1);
-        character.RecaculateStats();
+        character.RecalculateStats();
         OnCharacterDataUpdated?.Invoke(character);
         CurrencyManager.Instance.UpdateCurrencyUI();
         return true;
@@ -317,13 +323,13 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
         if (!isBatchUpdating)
         {
-            character.RecaculateStats();
+            character.RecalculateStats();
             OnCharacterDataUpdated?.Invoke(character);
         }
 
         if (oldOwner != null && oldOwner != character)
         {
-            oldOwner.RecaculateStats();
+            oldOwner.RecalculateStats();
             OnCharacterDataUpdated?.Invoke(oldOwner);
         }
 
@@ -346,7 +352,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
         if (triggerUpdate)
         {
-            character.RecaculateStats();
+            character.RecalculateStats();
             OnCharacterDataUpdated?.Invoke(character);
         }
     }
@@ -385,7 +391,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
         isBatchUpdating = false;
 
-        character.RecaculateStats();
+        character.RecalculateStats();
         OnCharacterDataUpdated?.Invoke(character);
 
         Debug.Log($"{character.characterdata.characterName}의 모든 장비 해제가 완료되었습니다.");
@@ -435,7 +441,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         if (equippedSomething)
         {
             Debug.Log("전체 장비 자동 장착이 완료되었습니다.");
-            character.RecaculateStats();
+            character.RecalculateStats();
             OnCharacterDataUpdated?.Invoke(character);
         }
         else
@@ -526,7 +532,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         Debug.Log("모든 캐릭터의 스탯을 재계산합니다...");
         foreach (var character in ownedCharacters.Values)
         {
-            character.RecaculateStats();
+            character.RecalculateStats();
         }
     }
 

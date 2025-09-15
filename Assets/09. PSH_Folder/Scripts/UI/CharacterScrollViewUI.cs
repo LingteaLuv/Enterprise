@@ -288,11 +288,11 @@ public class CharacterScrollViewUI : UIBase
         switch (currentSort)
         {
             case CharacterSortOption.Stars:
-                sortedCharacters = sortedCharacters.ThenByDescending(c => c.stars)
+                sortedCharacters = sortedCharacters.ThenByDescending(c => c.stars.Value)
                                                    .ThenBy(c => c.characterdata.characterName);
                 break;
             case CharacterSortOption.Level:
-                sortedCharacters = sortedCharacters.ThenByDescending(c => c.characterLevel)
+                sortedCharacters = sortedCharacters.ThenByDescending(c => c.characterLevel.Value)
                                                    .ThenBy(c => c.characterdata.characterName);
                 break;
         }
