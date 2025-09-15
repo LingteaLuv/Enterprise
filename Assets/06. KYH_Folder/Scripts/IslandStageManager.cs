@@ -26,18 +26,36 @@ public class IslandStageManager : MonoBehaviour
     private List<GameObject> battleFields = new();                      // 각 섬의 전투 필드
     private List<IslandMaker> islandMakers = new();                     // IslandMaker 스크립트가 붙은 섬
 
-    private int currentIndex = 0;                                       // 현재 진행 중인 섬 인덱스
+    private Property<int> currentIndex;                                       // 현재 진행 중인 섬 인덱스
 
     private Coroutine handleReturnAndNext;                              // 섬 이동 처리 코루틴
     private Coroutine moveToAndEnter;                                   // 배 도착 이후 전투 시작 처리 코루틴
 
     [SerializeField] private AllHealthBarsPanel allHealthBarsPanel;     // 체력바 참조
 
+    private bool _isChecked;
+    
     public static IslandStageManager Instance { get; private set; }     // 싱글 톤 인스턴스
 
-    private void Awake()
+    private async void Awake()
     {
         Instance = this;
+
+        if(!await DatabaseManager.Instance.CheckFieldAsync("StageData/Island", (long value) =>
+        {
+            currentIndex = new Property<int>((int)value);
+            _isChecked = true;
+        }))
+        {
+            currentIndex = new Property<int>(0);
+            await DatabaseManager.Instance.SaveFieldAsync("StageData/Island", 0);
+            _isChecked = true;
+        }
+        
+        currentIndex.OnChanged += async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync("StageData/Island", value);
+        };
     }
 
 
@@ -71,7 +89,7 @@ public class IslandStageManager : MonoBehaviour
         float timer = 0f;
 
 
-        while (travelUI == null || !travelUI.IsReady)
+        while (travelUI == null || !travelUI.IsReady || !_isChecked)
         {
             timer += Time.deltaTime;
             if (timer >= timeout)
@@ -81,9 +99,8 @@ public class IslandStageManager : MonoBehaviour
             }
             yield return null;
         }
-
-
-        StartStage();
+        
+        moveToAndEnter = StartCoroutine(MoveToAndEnter(currentIndex.Value));
     }
 
     /// <summary>
@@ -147,8 +164,8 @@ public class IslandStageManager : MonoBehaviour
     public void StartStage()
     {
         Debug.Log("시작");
-        currentIndex = 0;
-        moveToAndEnter = StartCoroutine(MoveToAndEnter(currentIndex));
+        currentIndex.Value = 0;
+        moveToAndEnter = StartCoroutine(MoveToAndEnter(currentIndex.Value));
     }
 
     /// <summary>
@@ -156,15 +173,15 @@ public class IslandStageManager : MonoBehaviour
     /// </summary>
     public void OnBattleComplete()
     {
-        Debug.Log($"[OnBattleComplete 호출됨] currentIndex: {currentIndex}");
+        Debug.Log($"[OnBattleComplete 호출됨] currentIndex: {currentIndex.Value}");
 
         if (!GlobalStageManager.Instance.bossBattleTriggered)
         {
-            SpawnClearMarker(currentIndex);
+            SpawnClearMarker(currentIndex.Value);
         }
         else
         {
-            Debug.Log($" 깃발 생략됨 (보스전 패배 이후 루프): index={currentIndex}");
+            Debug.Log($" 깃발 생략됨 (보스전 패배 이후 루프): index={currentIndex.Value}");
         }
 
         QuestSignalManager.Instance.ETCAchieve("IslandClear");
@@ -201,11 +218,11 @@ public class IslandStageManager : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        currentIndex++;
-        Debug.Log($" [HandleReturnAndNext] currentIndex 증가됨: {currentIndex}");
+        currentIndex.Value++;
+        Debug.Log($" [HandleReturnAndNext] currentIndex 증가됨: {currentIndex.Value}");
 
         // 모든 섬을 클리어했다면 → 보스전으로 이동
-        if (currentIndex >= islandSets.Count)
+        if (currentIndex.Value >= islandSets.Count)
         {
             Debug.Log(" [HandleReturnAndNext] 모든 섬 완료");
 
@@ -228,8 +245,8 @@ public class IslandStageManager : MonoBehaviour
         }
 
         // 다음 섬으로 이동
-        Debug.Log($" [HandleReturnAndNext] MoveToAndEnter({currentIndex}) 호출 시도");
-        moveToAndEnter = StartCoroutine(MoveToAndEnter(currentIndex));
+        Debug.Log($" [HandleReturnAndNext] MoveToAndEnter({currentIndex.Value}) 호출 시도");
+        moveToAndEnter = StartCoroutine(MoveToAndEnter(currentIndex.Value));
         Debug.Log(" [HandleReturnAndNext] MoveToAndEnter 종료");
     }
 
@@ -241,7 +258,7 @@ public class IslandStageManager : MonoBehaviour
         Debug.Log($"[MoveToAndEnter] index={index} 시작");
 
         bool arrive = false;
-        yield return travelUI.MoveShipToMarker(GlobalStageManager.Instance.currentStageIndex, index, () =>
+        yield return travelUI.MoveShipToMarker(GlobalStageManager.Instance.currentStageIndex.Value, index, () =>
         {
             arrive = true;
             Debug.Log($"[MoveToAndEnter] onArrive 수신 index={index}");

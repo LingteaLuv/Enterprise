@@ -89,9 +89,9 @@ public class FirebaseManager : Singleton<FirebaseManager>
         {
             Debug.Log("테스트 로그인 완료, 씬 전환");
             DatabaseManager.Instance.Init();
-            await DatabaseManager.Instance.SaveFieldAsync($"{_user.UserId}/CreditData/Gold", 1000000000);
-            await DatabaseManager.Instance.SaveFieldAsync($"{_user.UserId}/CreditData/Gem", 1000000000);
-            await DatabaseManager.Instance.SaveFieldAsync($"{_user.UserId}/CreditData/EnhancementStone", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gold", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gem", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/EnhancementStone", 1000000000);
             SceneManager.LoadScene(_sceneName);
         }
     }

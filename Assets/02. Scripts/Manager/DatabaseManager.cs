@@ -34,9 +34,10 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <summary>
     /// Firebase RTDB에 단일 데이터를 저장하는 메서드
     /// </summary>
-    public async Task SaveFieldAsync(string path, object value)
+    public async Task SaveFieldAsync(string tempPath, object value)
     {
         Dictionary<string, object> dictionary = new Dictionary<string, object>();
+        string path = $"{_uid}/" + tempPath;
         dictionary[path] = value;
         
         var task = FirebaseManager.DataReference.UpdateChildrenAsync(dictionary);
@@ -133,6 +134,19 @@ public class DatabaseManager : Singleton<DatabaseManager>
         T data = JsonUtility.FromJson<T>(json);
         callback(data);
     }
+
+    public async Task<bool> CheckFieldAsync<T>(string tempPath, Action<T> callback)
+    {
+        string path = $"{_uid}/" + tempPath;
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(path);
+        DataSnapshot snapshot = await dataRef.GetValueAsync();
+
+        if (!snapshot.Exists) return false;
+        
+        T newData = (T)Convert.ChangeType(snapshot.Value, typeof(T));
+        callback(newData);
+        return true;
+    }
     
     #region Nickname
     
@@ -153,7 +167,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             nickname = newNickname;
         }
 
-        await SaveFieldAsync($"{_uid}/PublicData/Nickname",nickname);
+        await SaveFieldAsync($"PublicData/Nickname",nickname);
 
         OnChangedNickname?.Invoke();
     }

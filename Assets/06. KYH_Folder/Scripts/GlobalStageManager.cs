@@ -5,10 +5,10 @@ public class GlobalStageManager : MonoBehaviour
 {
     public static GlobalStageManager Instance;
 
-    public int currentStageIndex = 1;
+    public Property<int> currentStageIndex;
     public bool bossBattleTriggered = false;
 
-    private void Awake()
+    private async void Awake()
     {
         if (Instance != null && Instance != this)
         {
@@ -18,5 +18,19 @@ public class GlobalStageManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject); // 씬 전환에도 유지
+
+        if(!await DatabaseManager.Instance.CheckFieldAsync("StageData/Stage", (long value) =>
+           {
+               currentStageIndex = new Property<int>((int)value);
+           }))
+        {
+            currentStageIndex = new Property<int>(1);
+            await DatabaseManager.Instance.SaveFieldAsync("StageData/Stage", 1);
+        }
+        
+        currentStageIndex.OnChanged += async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync("StageData/Stage", value);
+        };
     }
 }
