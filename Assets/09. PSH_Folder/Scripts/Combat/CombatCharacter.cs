@@ -27,7 +27,7 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
 {
     public PlayerCharacterData CharacterStats { get; private set; } // 원본 데이터 참조
 
-    [SerializeField] private string charName;
+    [SerializeField] public string charName;
     // --- 전투 기본 스탯 (Initialize에서 복사) ---
     [SerializeField] private float baseAttack;
     [SerializeField] private float baseHealth;
@@ -35,8 +35,8 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
     [SerializeField] private float baseCritChance;
     [SerializeField] private float baseCritDamage;
     [SerializeField] private float baseAttackSpeed;
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private float attackRange;
+    [SerializeField] public float moveSpeed;
+    [SerializeField] public float attackRange;
 
     // --- 현재 적용중인 버프 리스트 ---
     [SerializeField] private List<Buff> activeBuffs = new List<Buff>();
@@ -242,7 +242,7 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
         SkillSO skillToUse = skills[skillIndex];
         if (skillToUse != null)
         {
-            skillToUse.Use(this, targets);
+            skillToUse.Use(this);
         }
     }
 }
