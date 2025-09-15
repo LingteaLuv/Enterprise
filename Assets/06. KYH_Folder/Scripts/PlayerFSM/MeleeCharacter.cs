@@ -116,7 +116,7 @@ public class MeleeCharacter : BaseCharacterFSM
             {
                 float attackPower = stats.GetCurrentStat(Stat.Attack);
                 targetScript.TakeDamage(attackPower);
-                Debug.Log($"MeleeCharacter AttackRoutine : {targetScript.monsterSO.name}");
+                //Debug.Log($"MeleeCharacter AttackRoutine : {targetScript.monsterSO.name}");
             }
             // todo : Attack Delay에 따라 () 내부 시간 연산, 대입
             yield return new WaitForSeconds(2f);

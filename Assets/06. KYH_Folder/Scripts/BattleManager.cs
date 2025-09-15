@@ -358,18 +358,18 @@ public class BattleManager : MonoBehaviour
     }
 
     // 적 제거
-    private void ClearEnemies()
+    public void ClearEnemies()
     {
-        foreach (var enemy in spawnedEnemies)
+        /*foreach (var enemy in spawnedEnemies)
         {
             if (enemy != null)
                 Destroy(enemy);
-        }
+        }*/
         spawnedEnemies.Clear();
     }
 
     // 플레이어 제거
-    private void ClearPlayers()
+    public void ClearPlayers()
     {
         foreach (var player in currentPlayers)
         {

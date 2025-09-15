@@ -34,20 +34,24 @@ namespace JHT
         public int islandIndex;
         public int roundIndex;
         public int curTotalCount;
+        
+        private GameObject projectilePoolParent;
+        private GameObject monsterPoolParent;
 
+        private GameObject damageTextPoolParent;
         public Func<int,List<JHT_MonsterDataSO>> OnAddMonster;
 
         protected override void Awake()
         {
             base.Awake();
 
-            GameObject projectilePoolParent = new GameObject($"{monsterProjectile.name} Pool_Parent");
+            projectilePoolParent = new GameObject($"{monsterProjectile.name} Pool_Parent");
             projectilePoolParent.transform.SetParent(transform);
 
-            GameObject monsterPoolParent = new GameObject($"{monsterPrefab.name} Pool_Parent");
+            monsterPoolParent = new GameObject($"{monsterPrefab.name} Pool_Parent");
             monsterPoolParent.transform.SetParent(transform);
 
-            GameObject damageTextPoolParent = new GameObject($"{damageTextPrefab.name} Pool_Parent");
+            damageTextPoolParent = new GameObject($"{damageTextPrefab.name} Pool_Parent");
             damageTextPoolParent.transform.SetParent(transform);
 
             monsterPool = new JHT_ObjectPool(monsterPrefab, 10, monsterPoolParent.transform);
@@ -206,6 +210,25 @@ namespace JHT
             return dataList;
         }
 
+        public void MonsterAllClear()
+        {
+            for (int i = 0; i < monsterPoolParent.transform.childCount; i++)
+            {
+                if (monsterPoolParent.transform.GetChild(i).gameObject.activeInHierarchy)
+                {
+                    monsterPoolParent.transform.GetChild(i).GetComponent<JHT_BaseMonsterFSM>().Outit();
+                }
+            }
+
+            for (int i = 0; i < projectilePoolParent.transform.childCount; i++)
+            {
+                if (projectilePoolParent.transform.GetChild(i).gameObject.activeInHierarchy)
+                {
+                    projectilePoolParent.transform.GetChild(i).GetComponent<JHT_MonsterProjectile>().Release();
+                }
+            }
+            curMonsterCountList.Clear();
+        }
 
         private bool StageEndEvent(bool value)
         {

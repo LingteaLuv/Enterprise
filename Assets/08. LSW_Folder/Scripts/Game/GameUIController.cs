@@ -121,6 +121,9 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     private IEnumerator Delay()
     {
         yield return new WaitForSeconds(5f);
+        JHT_MonsterSpawnManager.Instance.MonsterAllClear();
+        BattleManager.Instance.ClearEnemies();
+        BattleManager.Instance.ClearPlayers();
         SceneManager.LoadScene("BossBattleScene");
     }
 }

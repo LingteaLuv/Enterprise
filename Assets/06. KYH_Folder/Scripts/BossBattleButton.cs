@@ -9,6 +9,7 @@ public class BossBattleButton : MonoBehaviour
     private void Start()
     {
         bossButton.onClick.AddListener(EnterBossBattle);
+        bossButton.onClick.AddListener(QuestSignalManager.Instance.OnBossBattleEnter);
     }
 
     private void EnterBossBattle()
