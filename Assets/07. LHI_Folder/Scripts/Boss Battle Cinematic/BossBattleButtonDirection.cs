@@ -1,4 +1,5 @@
 using DG.Tweening;
+using JHT;
 using TMPro;
 using UnityEngine;
 
@@ -44,7 +45,8 @@ public class BossBattleButtonDirection : MonoBehaviour
     {
         audioSource.Stop();
         bossBattleButtonIntro?.Pause(); // 시퀀스 일시정지
-
+        JHT_MonsterSpawnManager.Instance.MonsterAllClear();
+        BattleManager.Instance.ClearEnemies();
         WarningBeltCanvasGroup.alpha = 0f;
         WarningBeltTMP.rectTransform.localPosition = WarningBeltTextPos;
 

@@ -99,6 +99,8 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         });
         _dungeonBtn.onClick.AddListener(()=>
         {
+            JHT_MonsterSpawnManager.Instance.MonsterAllClear();
+            BattleManager.Instance.ClearEnemies();
             SceneManager.LoadScene("DungeonScene");
         });
         
