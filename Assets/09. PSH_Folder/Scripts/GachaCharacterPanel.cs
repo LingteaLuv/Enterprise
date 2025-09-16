@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,7 @@ public class GachaCharacterPanel : MonoBehaviour
     public Image characterImage;
     public Image[] starImages; // 별 이미지 배열
     public Image bg;
+    public TextMeshProUGUI nameText;
 
     [Header("직업, 속성 아이콘")]
     public Image crewRoleIcon;
@@ -19,6 +21,7 @@ public class GachaCharacterPanel : MonoBehaviour
     {
         // 캐릭터 기본 정보 설정
         characterImage.sprite = data.characterdata.characterSprite;
+        nameText.text = data.characterdata.characterName;
 
         // '이번에 뽑힌 등급'을 기준으로 별 UI 업데이트
         int star = (int)grade;
