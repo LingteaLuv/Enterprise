@@ -18,10 +18,6 @@ public static class GoogleSheetImporter
             "Assets/CSVData/EquipData.csv"
         ),
         (
-            "https://docs.google.com/spreadsheets/d/1bkHFHadz8Dh2NA0E9lrFMsCoei2Ae3_MMPfBAfyrXhs/export?format=csv&gid=291995308",
-            "Assets/CSVData/SkillData.csv"
-        ),
-        (
             "https://docs.google.com/spreadsheets/d/1bkHFHadz8Dh2NA0E9lrFMsCoei2Ae3_MMPfBAfyrXhs/export?format=csv&gid=725504099",
             "Assets/CSVData/Skills.csv"
         ),
