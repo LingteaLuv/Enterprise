@@ -237,4 +237,9 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
             skillToUse.Use(this);
         }
     }
+
+    public string GetName()
+    {
+        return charName;
+    }
 }
