@@ -52,5 +52,8 @@ public class GlobalStageManager : MonoBehaviour
         {
             await DatabaseManager.Instance.SaveFieldAsync("StageData/Island", value);
         };
+
+        CurrentStageIndex.Value = 1;
+        CurrentIslandIndex.Value = 0;
     }
 }
