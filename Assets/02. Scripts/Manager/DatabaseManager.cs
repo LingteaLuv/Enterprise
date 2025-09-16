@@ -460,8 +460,8 @@ public class DatabaseManager : Singleton<DatabaseManager>
         var root = $"{_uid}/{subPath}";
         var crewData = new Dictionary<string, object>();
         
-        crewData[$"{root}/Level"] = data.characterLevel;
-        crewData[$"{root}/Star"] = data.stars;
+        crewData[$"{root}/Level"] = data.Level;
+        crewData[$"{root}/Star"] = data.Star;
             
         await SaveFieldsAsync(crewData);
     }

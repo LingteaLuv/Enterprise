@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System;
+using Cysharp.Threading.Tasks;
 
 public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
 {
@@ -106,7 +107,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         }
     }
 
-    private void ExecuteGachaDraw(int count)
+    private async UniTask ExecuteGachaDraw(int count)
     {
         LastGachaResults = new List<PlayerCharacterData>();
         List<GachaGrade> resultGrades = new List<GachaGrade>();
@@ -132,7 +133,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
                 grade = GetRandomGrade(gradeChances);
             }
 
-            PlayerCharacterData drawnCharacter = GetCharacterFromPool(isCaptain, grade);
+            PlayerCharacterData drawnCharacter = await GetCharacterFromPool(isCaptain, grade);
 
             if (drawnCharacter != null)
             {
@@ -157,7 +158,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         OnGachaPityChanged?.Invoke();
     }
 
-    private PlayerCharacterData GetCharacterFromPool(bool isCaptain, GachaGrade grade)
+    private async UniTask<PlayerCharacterData> GetCharacterFromPool(bool isCaptain, GachaGrade grade)
     {
         List<CharacterData> characterPool = isCaptain ? captainPool : crewPool;
         if (characterPool == null || characterPool.Count == 0)
@@ -167,7 +168,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         }
 
         CharacterData drawnCharacterSO = characterPool[UnityEngine.Random.Range(0, characterPool.Count)];
-        PlayerCharacterData newCharacterInstance = PlayerDataManager.Instance.AddCharacter(drawnCharacterSO, grade);
+        PlayerCharacterData newCharacterInstance = await PlayerDataManager.Instance.AddCharacter(drawnCharacterSO, grade);
 
         Debug.Log($"캐릭터 뽑기 결과: [{(isCaptain ? "선장" : "선원")}, {grade}] {newCharacterInstance.characterdata.characterName}");
         return newCharacterInstance;
