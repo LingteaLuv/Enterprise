@@ -21,7 +21,7 @@ public class BuffEffectSO : SkillEffectSO
         if (targetCharacter != null)
         {
             targetCharacter.ApplyBuff(statToBuff, buffValue, duration, buffType);
-            Debug.Log($"'{targetCharacter.name}'에게 {statToBuff} 버프를 {duration}초 동안 적용했습니다.");
+            Debug.Log($"'{targetCharacter.charName}'에게 {statToBuff} 버프를 {duration}초 동안 적용했습니다.");
         }
         else
         {
