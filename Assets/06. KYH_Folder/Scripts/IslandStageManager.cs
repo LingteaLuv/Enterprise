@@ -36,22 +36,6 @@ public class IslandStageManager : MonoBehaviour
     private async void Awake()
     {
         Instance = this;
-
-        if(!await DatabaseManager.Instance.CheckFieldAsync("StageData/Island", (long value) =>
-        {
-            currentIndex = new Property<int>((int)value);
-            _isChecked = true;
-        }))
-        {
-            currentIndex = new Property<int>(0);
-            await DatabaseManager.Instance.SaveFieldAsync("StageData/Island", 0);
-            _isChecked = true;
-        }
-        
-        currentIndex.OnChanged += async (value) =>
-        {
-            await DatabaseManager.Instance.SaveFieldAsync("StageData/Island", value);
-        };
     }
 
 
