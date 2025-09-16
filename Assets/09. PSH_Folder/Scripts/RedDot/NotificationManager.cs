@@ -13,21 +13,26 @@ public class NotificationManager : Singleton<NotificationManager>
         if (character == null) return false;
 
         // 1. 최대 성급인지 확인 (5성이라고 가정)
-        if (character.stars.Value >= 5)
+        if (character.Star.Value >= 5)
         {
             return false;
         }
 
         // 2. 다음 성급으로 업그레이드하는 데 필요한 비용(영혼 조각 수)을 가져옵니다.
-        if (PlayerDataManager.Instance.TryGetUpgradeCost(character.stars.Value, out int requiredCost))
+        /*if (PlayerDataManager.Instance.TryGetUpgradeCost(character.Stars.Value, out int requiredCost))
         {
             // 3. 현재 보유한 영혼 조각 수를 가져옵니다.
             PlayerDataManager.Instance.characterSoulFragments.TryGetValue(character.characterdata.characterID, out int currentFragments);
 
             // 4. 보유량이 필요량보다 많거나 같으면 true를 반환합니다.
             return currentFragments >= requiredCost;
-        }
+        }*/
 
+        if (PlayerDataManager.Instance.TryGetUpgradeCost(character.Star.Value, out int requiredCost))
+        {
+            // 3. 현재 보유한 영혼 조각 수를 가져옵니다. 보유량이 필요량보다 많거나 같으면 true를 반환합니다.
+            return PlayerDataManager.Instance.OwnedCharacters[character.characterdata.characterID].Soul.Value >= requiredCost;
+        }
         // 업그레이드 비용 정보가 없으면 불가능으로 처리
         return false;
     }
@@ -56,7 +61,7 @@ public class NotificationManager : Singleton<NotificationManager>
     public bool ShouldShowOverallCharacterRedDot()
     {
         // 모든 보유 캐릭터를 순회합니다.
-        foreach (var character in PlayerDataManager.Instance.ownedCharacters.Values)
+        foreach (var character in PlayerDataManager.Instance.OwnedCharacters.Values)
         {
             // 승급이 가능한지 확인
             if (CanUpgradeStar(character))

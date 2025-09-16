@@ -55,6 +55,7 @@ public class AuthManager : Singleton<AuthManager>
                 _auth.SignOut();
                 return false;
             }
+            LoginCompleted?.Invoke();
             return true;
         }
         return false;

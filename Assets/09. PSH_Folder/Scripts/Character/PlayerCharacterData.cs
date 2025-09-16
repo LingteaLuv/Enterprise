@@ -1,6 +1,7 @@
 using JHT;
 using System.Collections.Generic;
 using System.Numerics;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public enum Stat
@@ -19,8 +20,9 @@ public class PlayerCharacterData
 {
     [Header("캐릭터")]
     public CharacterData characterdata; // 캐릭터 원본 데이터
-    public Property<int> characterLevel;
-    public Property<int> stars; // 성급
+    public Property<int> Level;
+    public Property<int> Star; // 성급
+    public Property<int> Soul; // 소울 조각 
 
     [Header("직업, 속성 아이콘")]
     public Sprite crewRoleIcon;
@@ -42,8 +44,6 @@ public class PlayerCharacterData
     public PlayerCharacterData(CharacterData so)
     {
         characterdata = so;
-        characterLevel = new Property<int>(1);
-        stars = new Property<int>(1); // 기본 등급 1성으로 설정
 
         // 아이콘
         crewRoleIcon = GetIcon(so.crewRole);
@@ -62,11 +62,9 @@ public class PlayerCharacterData
         battlePower = 0;
     }
 
-    public PlayerCharacterData(CharacterData so, GachaGrade grade)
+    /*public PlayerCharacterData(CharacterData so, GachaGrade grade)
     {
         characterdata = so;
-        characterLevel =  new Property<int>(1);
-        stars = new Property<int>((int)grade); // 가챠로 뽑은 등급 설정
 
         // 아이콘
         crewRoleIcon = GetIcon(so.crewRole);
@@ -83,7 +81,7 @@ public class PlayerCharacterData
 
         // 최초 스탯 계산. BasicStatManager가 준비되기 전에 호출될 수 있으므로 battlePower만 초기화합니다.
         battlePower = 0;
-    }
+    }*/
 
     /// <summary>
     /// 캐릭터에 적용되는 모든 스탯을 계산하고 전투력 변경 이벤트를 발생시킵니다.
@@ -100,7 +98,7 @@ public class PlayerCharacterData
             foreach (var baseStat in characterdata.baseStats)
             {
                 // StatManager를 사용하여 레벨에 맞는 스탯 값을 계산합니다.
-                float calculatedValue = StatManager.CalculateStatValue(baseStat, this.characterLevel.Value);
+                float calculatedValue = StatManager.CalculateStatValue(baseStat, this.Level.Value);
                 finalStats[baseStat.statName] = calculatedValue;
             }
         }
@@ -175,6 +173,39 @@ public class PlayerCharacterData
     {
         string path = $"PSHTest/Icon/{role}";
         return Resources.Load<Sprite>(path);
+    }
+
+    public async UniTask Init(int crewId, int star)
+    {
+        Level = new Property<int>(1);
+        Star = new Property<int>(star);
+        Soul = new Property<int>(0);
+        await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Level", 1);
+        await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Star", star);
+        await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Soul", 0);
+        
+        Level.OnChanged += async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Level", value);
+        };
+        
+        Star.OnChanged += async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Star", value);
+        };
+        
+        Soul.OnChanged += async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Soul", value);
+        };
+        Debug.LogError($"{crewId}저장 완료");
+    }
+
+    public static async UniTask<PlayerCharacterData> Instantiate(CharacterData so, int star)
+    {
+        PlayerCharacterData data = new PlayerCharacterData(so);
+        await data.Init(so.characterID, star);
+        return data;
     }
 }
 

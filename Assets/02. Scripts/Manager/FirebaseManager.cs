@@ -59,24 +59,19 @@ public class FirebaseManager : Singleton<FirebaseManager>
         // 초기화한 설정을 GoogleSignIn.Configuration에 적용
         GoogleSignIn.Configuration = _configuration;
         
-        if (_isTest)
-        {
-            StartCoroutine(InitFirebaseCoroutine());
-            QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 60;
-            Time.fixedDeltaTime = 1f / 60f;
-        }
+        /*StartCoroutine(InitFirebaseCoroutine());
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+        Time.fixedDeltaTime = 1f / 60f;*/
+        
     }
 
     private void Start()
     {
-        if (!_isTest)
-        {
-            StartCoroutine(InitFirebaseCoroutine());
-            QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 60;
-            Time.fixedDeltaTime = 1f / 60f;
-        }
+        StartCoroutine(InitFirebaseCoroutine());
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+        Time.fixedDeltaTime = 1f / 60f;
     }
 
     public async Task TestLogin()

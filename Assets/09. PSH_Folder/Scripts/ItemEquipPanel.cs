@@ -82,7 +82,7 @@ namespace JHT // 동일한 네임스페이스 사용
                 equippedByPanel.SetActive(true);
                 if (int.TryParse(weaponObject.EquippedByCharacterId, out int charId) && PlayerDataManager.Instance != null)
                 {
-                    if (PlayerDataManager.Instance.ownedCharacters.TryGetValue(charId, out PlayerCharacterData owner))
+                    if (PlayerDataManager.Instance.OwnedCharacters.TryGetValue(charId, out PlayerCharacterData owner))
                     {
                         equippedByText.text = $"장착중: {owner.characterdata.characterName}";
                     }
