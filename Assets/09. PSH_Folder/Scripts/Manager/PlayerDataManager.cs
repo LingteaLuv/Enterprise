@@ -198,7 +198,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         {
             PlayerCharacterData newCharData = await PlayerCharacterData.Instantiate(characterdata, (int)grade);
             OwnedCharacters.Add(characterdata.characterID, newCharData);
-            Debug.Log($"[신규] {characterdata.characterName}({newCharData.Star}성) 획득!");
+            Debug.Log($"[신규] {characterdata.characterName}({newCharData.Star.Value}성) 획득!");
             newCharData.RecalculateStats();
             OnOwnedCharactersChanged?.Invoke();
             return newCharData;

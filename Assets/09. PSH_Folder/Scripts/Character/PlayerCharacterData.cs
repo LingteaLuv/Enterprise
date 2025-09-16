@@ -198,7 +198,7 @@ public class PlayerCharacterData
         {
             await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Soul", value);
         };
-        Debug.LogError($"{crewId}저장 완료");
+        //Debug.LogError($"{crewId}저장 완료");
     }
 
     public static async UniTask<PlayerCharacterData> Instantiate(CharacterData so, int star)

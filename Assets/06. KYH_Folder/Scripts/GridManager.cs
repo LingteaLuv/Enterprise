@@ -1,4 +1,3 @@
-using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -70,7 +69,7 @@ public class GridManager : MonoBehaviour
         int x = Mathf.RoundToInt((worldPosition.x - originPosition.x) / cellSize.x);
         int y = Mathf.RoundToInt((worldPosition.y - originPosition.y) / cellSize.y);
 
-        Debug.Log($"월드 좌표: {worldPosition}, 계산된 그리드 좌표: ({x},{y})");
+        //Debug.Log($"월드 좌표: {worldPosition}, 계산된 그리드 좌표: ({x},{y})");
 
         if (x >= 0 && x < gridSizeX && y >= 0 && y < gridSizeY)
             return grid[x, y];
@@ -103,16 +102,16 @@ public class GridManager : MonoBehaviour
     }
 
    // 디버그용 경로 기즈모
- // private void OnDrawGizmos()
- // {
- //     if (grid != null)
- //     {
- //         foreach (Node n in grid)
- //         {
- //             Gizmos.color = n.walkable ? Color.white : Color.red;
- //             Vector3 gizmoSize = new Vector3(cellSize.x - 0.05f, cellSize.y - 0.05f, 0.1f);
- //             Gizmos.DrawCube(n.worldPosition, gizmoSize);
- //         }
- //     }
- // }
+    private void OnDrawGizmos()
+    {
+        if (grid != null)
+        {
+            foreach (Node n in grid)
+            {
+                Gizmos.color = n.walkable ? Color.white : Color.red;
+                Vector3 gizmoSize = new Vector3(cellSize.x - 0.05f, cellSize.y - 0.05f, 0.1f);
+                Gizmos.DrawCube(n.worldPosition, gizmoSize);
+            }
+        }
+    }
 }
