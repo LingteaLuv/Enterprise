@@ -33,7 +33,7 @@ public class IslandStageManager : MonoBehaviour
     
     public static IslandStageManager Instance { get; private set; }     // 싱글 톤 인스턴스
 
-    private async void Awake()
+    private void Awake()
     {
         Instance = this;
     }
