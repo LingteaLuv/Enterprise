@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using _05._CSJ_Folder.Scripts.Quest;
-using _05._CSJ_Folder.Scripts.Quest.Definition;
 using _05._CSJ_Folder.Scripts.Quest.Sequence;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +9,6 @@ public class TemporaryQuestController : UIBase
 {
     
     [SerializeField] private QuestListController _questListController;
-    [SerializeField] private QuestRewardController _questRewardController;
     [SerializeField] private Button _closeButton;
     
     [SerializeField] private Button _dailyButton;

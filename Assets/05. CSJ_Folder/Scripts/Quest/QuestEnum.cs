@@ -34,4 +34,9 @@
     {
         Easy, Normal, Hard,
     }
+    
+    public enum QuestRewardType_Enum
+    {
+        Gem, Exp, Gold, CrewTicket, EquipmentTicket, CrewEnchantStone, 
+    }
 }

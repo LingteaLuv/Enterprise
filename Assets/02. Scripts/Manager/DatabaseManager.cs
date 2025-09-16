@@ -662,7 +662,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <summary>
     /// 마지막 퀘스트 수행 요일을 받아옵니다.
     /// </summary>
-    //TODO : 추후 사용할 여지가 있어 만들었습니다. 현재는 미사용
+    // 추후 사용할 수도 있어 만들었습니다. 현재는 미사용
     private async Task<DayOfWeek> GetWeeklyQuestDay()
     {
         Init();
@@ -682,7 +682,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     private static DateTime GetWeeklyBoundary(DateTime now, DayOfWeek resetDay, int resetTime)
     {
         // 경계 기본 값을 지정합니다.
-        var BaseToday = new DateTime(now.Year, now.Month, now.Day, resetTime, 0, 0, DateTimeKind.Utc);;
+        var BaseToday = new DateTime(now.Year, now.Month, now.Day, resetTime, 0, 0, DateTimeKind.Utc);
       
         // 오늘의 요일에서 초기화 요일을 빼서 초기화 요일 기준으로 경계를 지정합니다.
         var delta = ((int)now.DayOfWeek - (int)resetDay + 7) % 7;
@@ -788,8 +788,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             payload[$"{root}/General/ActiveProgress"] = data.General.ActiveProgress;
             
             payload[$"{root}/General/ClearedQuestCount"] = data.General.ClearedQuestCount;
-            payload[$"{root}/General/CurrentQuestStage"] = data.General.CurrentQuestStage;
-            payload[$"{root}/General/CurrentClearedStage"] = data.General.CurrentClearedStage;
+            payload[$"{root}/General/CurrentQuestStage"] = data.General.CurrentQuestStage; 
         }
 
         // Temporary 칸이 null이 아닌 경우 딕셔너리화
@@ -848,7 +847,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
             
             result.General.ClearedQuestCount = ToInt(g.Child("ClearedQuestCount").Value, 0);
             result.General.CurrentQuestStage = ToInt(g.Child("CurrentQuestStage").Value, 1);
-            result.General.CurrentClearedStage = ToInt(g.Child("CurrentClearedStage").Value, 0);
         }
         Debug.Log($"Load QuestID : {result.General.ActiveQuestId}");
 
