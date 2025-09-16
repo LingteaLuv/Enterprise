@@ -12,7 +12,7 @@ public class CharacterDataImporter
     private static string csvFilePath = Application.dataPath + "/CSVData/CharacterData.csv";
 
     // ScriptableObject 에셋을 저장할 기본 경로
-    private static string soSavePath = "Assets/Resources/CharacterData/";
+    private static string soSavePath = "Assets/Resources_moved/CharacterData/";
 
     [MenuItem("Tools/Import Data/Character")]
     public static void ImportData()
