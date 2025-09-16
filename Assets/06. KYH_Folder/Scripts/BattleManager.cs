@@ -236,7 +236,7 @@ public class BattleManager : MonoBehaviour
             var character = party[i];
             character.Initialize(character.CharacterStats); // 캐릭터 스탯 초기화
             character.transform.SetParent(null);
-            character.transform.position = field.PlayerSpawnPoint.position + new Vector3(i * 1.5f, 0, 0);
+            character.transform.position = field.PlayerSpawnPoint.position + new Vector3(i * 0.3f, 0, 0);
             character.gameObject.SetActive(true);
 
             // FSM 활성화 보장
