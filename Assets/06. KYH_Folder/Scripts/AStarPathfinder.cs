@@ -23,7 +23,7 @@ public class AStarPathfinding : MonoBehaviour
         Node targetNode = GridManager.Instance.GetNodeFromWorldPos(targetWorldPos);
 
         Vector2Int startGrid = GridManager.Instance.WorldToGridPos(startWorldPos);
-        Debug.Log($"[FindPath] 시작 위치: {startWorldPos}, 변환된 그리드 좌표: {startGrid}");
+        //Debug.Log($"[FindPath] 시작 위치: {startWorldPos}, 변환된 그리드 좌표: {startGrid}");
 
         if (startNode == null)
         {
@@ -65,7 +65,7 @@ public class AStarPathfinding : MonoBehaviour
             {
                 if (!neighbor.walkable)
                 {
-                    Debug.Log($"[A*] Blocked Node at {neighbor.gridX},{neighbor.gridY} → walkable = false");
+                    //Debug.Log($"[A*] Blocked Node at {neighbor.gridX},{neighbor.gridY} → walkable = false");
                     continue;
                 }
 
