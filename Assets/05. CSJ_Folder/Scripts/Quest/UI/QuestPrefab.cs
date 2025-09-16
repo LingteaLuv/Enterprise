@@ -14,7 +14,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
         [SerializeField] private TextMeshProUGUI _questContent;
         [SerializeField] private Image RewardSprite;
 
-        private string QuestId;
+        [SerializeField] private string QuestId;
         private UnityAction ButtonEvent;
         private Image objectImg;
         
@@ -27,7 +27,6 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
 
             switch (inst.QuestState)
             {
-                case QuestState_Enum.BeforeActive:
                 case QuestState_Enum.Received:
                     _CompleteButton.gameObject.SetActive(false);
                     _ClearButton.SetActive(true);
@@ -52,7 +51,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
             _progressContent.text = $"{inst.CurrentGoalCount} / {inst.DemandedGoalCount}";
             _questContent.text = inst.temporaryQuestContent;
             //TODO : RewardImage
-            if (inst.Def.Reward.Reward.RewardIcon is not null)
+            if (inst.Def.Reward?.Reward.RewardIcon is not null)
             {
                 RewardSprite.sprite = inst.Def.Reward.Reward.RewardIcon;
             }

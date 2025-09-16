@@ -48,7 +48,7 @@
 
     public enum ItemType
     {
-        Character, Equipment, Relic, All
+        Character, Equipment, Relic, All, RareRelic
     }
 
     public enum UpgradeType

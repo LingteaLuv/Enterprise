@@ -26,7 +26,7 @@ public class QuestListController : MonoBehaviour
         {
             var card = Instantiate(questPrefab, content);
             card.CardSet(inst);
-            questDic.Add(inst, card);
+            questDic.TryAdd(inst, card);
         }
         
         LayoutRebuilder.ForceRebuildLayoutImmediate(content);

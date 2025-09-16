@@ -75,7 +75,7 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         var key = QuestKeys.GachaPull(gachaId);
         SendSignal(key, count, general, daily, weekly);
-        if (gachaId is ItemType.All) return;
+        if (gachaId is ItemType.All or ItemType.RareRelic) return;
         SendSignal(QuestKeys.GachaPull(ItemType.All), count, general, daily, weekly);
     }
     
