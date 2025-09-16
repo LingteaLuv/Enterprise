@@ -287,7 +287,7 @@ namespace JHT
             }
             else
             {
-                //gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
+                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
                 ui.transform.localScale = new Vector3(-1, 1, 1);
             }
         }

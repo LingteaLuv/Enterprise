@@ -227,6 +227,14 @@ namespace JHT
                     projectilePoolParent.transform.GetChild(i).GetComponent<JHT_MonsterProjectile>().Release();
                 }
             }
+
+            for (int i = 0; i < damageTextPoolParent.transform.childCount; i++)
+            {
+                if (damageTextPoolParent.transform.GetChild(i).gameObject.activeInHierarchy)
+                {
+                    damageTextPoolParent.transform.GetChild(i).GetComponent<JHT_DamageBox>().Release();
+                }
+            }
             curMonsterCountList.Clear();
         }
 

@@ -147,6 +147,7 @@ public class BattleManager : MonoBehaviour
         }
 
         IslandStageManager.Instance.OnBattleComplete();
+        JHT_MonsterSpawnManager.Instance.MonsterAllClear();
         ClearEnemies();
         ClearPlayers();
     }

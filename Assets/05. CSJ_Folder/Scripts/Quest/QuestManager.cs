@@ -57,7 +57,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         // 현재 퀘스트가 요구하는 스테이지, 완료 버튼을 눌러서 새 사이클이 시작될 때 +1
         private int CurrentQuestStage = 1;
         // 현재 플레이어가 클리어한 스테이지, 클리어 스테이지를 signal로 받아 +1
-        public int CurrentClearedStage => GlobalStageManager.Instance.currentStageIndex;
+        public int CurrentClearedStage => GlobalStageManager.Instance.CurrentStageIndex.Value;
         
         // 현재 active 일반퀘스트의 Id를 캐싱
         private string _activeGeneralId;
