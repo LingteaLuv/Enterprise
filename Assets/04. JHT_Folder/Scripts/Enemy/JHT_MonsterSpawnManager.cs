@@ -140,7 +140,7 @@ namespace JHT
             {
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
                 obj.Init(curMonsterCountList[i]);
-                obj.transform.position = new Vector3(0, 0, -9.850784f);
+             //   obj.transform.position = new Vector3(0, 0, -9.850784f);
                 obj.transform.position += posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
                 if (curRoundIndex / 2 != 0)
                 {
