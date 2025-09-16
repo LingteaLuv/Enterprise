@@ -103,16 +103,16 @@ public class GridManager : MonoBehaviour
     }
 
    // 디버그용 경로 기즈모
-  //private void OnDrawGizmos()
-  //{
-  //    if (grid != null)
-  //    {
-  //        foreach (Node n in grid)
-  //        {
-  //            Gizmos.color = n.walkable ? Color.white : Color.red;
-  //            Vector3 gizmoSize = new Vector3(cellSize.x - 0.05f, cellSize.y - 0.05f, 0.1f);
-  //            Gizmos.DrawCube(n.worldPosition, gizmoSize);
-  //        }
-  //    }
-  //}
+ // private void OnDrawGizmos()
+ // {
+ //     if (grid != null)
+ //     {
+ //         foreach (Node n in grid)
+ //         {
+ //             Gizmos.color = n.walkable ? Color.white : Color.red;
+ //             Vector3 gizmoSize = new Vector3(cellSize.x - 0.05f, cellSize.y - 0.05f, 0.1f);
+ //             Gizmos.DrawCube(n.worldPosition, gizmoSize);
+ //         }
+ //     }
+ // }
 }

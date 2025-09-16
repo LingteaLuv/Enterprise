@@ -2,7 +2,6 @@ using JHT;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 public class MeleeCharacter : BaseCharacterFSM
 {
@@ -11,7 +10,10 @@ public class MeleeCharacter : BaseCharacterFSM
     private Coroutine moveRoutine;
     private Animator animator;
     private SPUM_Prefabs spum;
+    private List<Vector3> currentPath;
 
+    private float moveAnimCooldown = 0.5f;   // 1초 간격
+    private float lastMoveAnimTime = -999f;
     //-----------
     // 차후 수현님이 연결 할 케릭터에서 관리 될 변수들 목록 예시 -- 이 스크립트에서가 아닌 다른곳에서 참조하여 사용해도 됩니다.
     // HandleSkill 내의 SkillRoutine 매서드 내에서 작업
@@ -19,21 +21,28 @@ public class MeleeCharacter : BaseCharacterFSM
     private float lastSkillTime = -999f;
     private bool isSkillReady => Time.time >= lastSkillTime + skillCooldown;
 
-  //  protected override void Awake()
-  //  {
-  //      animator = GetComponentInChildren<Animator>();
-  //      if (animator == null)
-  //          Debug.LogError("[MeleeCharacter] Animator가 연결되지 않았습니다.");
-  //
-  //      spum = GetComponent<SPUM_Prefabs>();
-  //      if (spum == null)
-  //          Debug.LogError("[MeleeCharacter] SPUM_Prefabs 컴포넌트가 없습니다.");
-  //  }
+    //  protected override void Awake()
+    //  {
+    //      animator = GetComponentInChildren<Animator>();
+    //      if (animator == null)
+    //          Debug.LogError("[MeleeCharacter] Animator가 연결되지 않았습니다.");
+    //
+    //      spum = GetComponent<SPUM_Prefabs>();
+    //      if (spum == null)
+    //          Debug.LogError("[MeleeCharacter] SPUM_Prefabs 컴포넌트가 없습니다.");
+    //  }
     protected override void Start()
     {
         base.Start();
         skillCooldown = stats.skills.FirstOrDefault().cooldown;
         StartFindTargetLoop();
+        animator = GetComponentInChildren<Animator>();
+        if (animator == null)
+            Debug.LogError("[MeleeCharacter] Animator가 연결되지 않았습니다.");
+
+        spum = GetComponentInChildren<SPUM_Prefabs>();
+        if (spum == null)
+            Debug.LogError("[MeleeCharacter] SPUM_Prefabs 컴포넌트가 없습니다.");
     }
 
     protected override void OnEnable()
@@ -50,7 +59,7 @@ public class MeleeCharacter : BaseCharacterFSM
 
     protected override void HandleIdle()
     {
-       // PlayIdleAnim(); // 추가
+         PlayIdleAnim(); // 추가
 
         if (!IsTargetValid()) return;
 
@@ -68,7 +77,7 @@ public class MeleeCharacter : BaseCharacterFSM
 
     protected override void HandleMove()
     {
-       // PlayMoveAnim(); // 추가
+         PlayMoveAnim(); // 추가
 
         if (!IsTargetValid())
         {
@@ -149,7 +158,7 @@ public class MeleeCharacter : BaseCharacterFSM
 
     protected override void HandleAttack()
     {
-      //  PlayAttackAnim(); // 추가
+          PlayAttackAnim(); // 추가
 
         if (!IsTargetValid())
         {
@@ -196,13 +205,13 @@ public class MeleeCharacter : BaseCharacterFSM
                 //Debug.Log($"MeleeCharacter AttackRoutine : {targetScript.monsterSO.name}");
             }
 
-            yield return new WaitForSeconds(attackDelay);
+            yield return new WaitForSeconds(1f);
         }
     }
 
     protected override void HandleSkill()
     {
-        // PlaySkillAnim(); // 추가
+         PlaySkillAnim(); // 추가
 
         if (attackRoutine == null)
             attackRoutine = StartCoroutine(SkillRoutine());
@@ -210,17 +219,17 @@ public class MeleeCharacter : BaseCharacterFSM
 
     private IEnumerator SkillRoutine()
     {
-        Debug.Log($"{gameObject.name} 스킬 발동!");
+        // 애니메이션 재생(있다면)
+        // animator?.SetTrigger("Skill");
 
-        if (IsTargetValid())
+        // 스킬 이펙트, 데미지, 상태 이상 등 구현
+        var skill = stats.skills.FirstOrDefault();
+
+        if (skill == null)
         {
-            var targetScript = target.GetComponent<JHT_BaseMonsterFSM>();
-            if (targetScript != null)
-            {
-                float skillDamage = stats.GetCurrentStat(Stat.Attack) * 2f;
-                targetScript.TakeDamage(skillDamage);
-                Debug.Log($"스킬 공격: {targetScript.monsterSO.name}에게 {skillDamage} 피해!");
-            }
+            Debug.LogWarning("사용할 스킬이 없어 Idle 상태로 돌아갑니다.");
+            ChangeState(State.Idle);
+            yield break;
         }
 
         Debug.Log($"{stats.charName}이/가 {skill.skillName} 스킬을 발동");
@@ -237,7 +246,50 @@ public class MeleeCharacter : BaseCharacterFSM
         yield return new WaitForSeconds(1.5f);
 
         attackRoutine = null;
-        ChangeState(State.Attack);
+        if (IsTargetValid())
+        {
+            float distance = Vector3.Distance(transform.position, target.position);
+            float attackRange = PartyManager.Instance.attackRange;
+
+            if (distance <= attackRange)
+                ChangeState(State.Attack);
+            else
+                ChangeState(State.Move);
+        }
+        else
+        {
+            ChangeState(State.Idle);
+        }
+    }
+
+    private void PlayIdleAnim()
+    {
+        if (spum.IDLE_List != null && spum.IDLE_List.Count > 0)
+            animator.Play("IDLE"); // "0_idle"
+    }
+
+    private void PlayMoveAnim()
+    {
+        if (spum.MOVE_List != null && spum.MOVE_List.Count > 0)
+        {
+            if (Time.time >= lastMoveAnimTime + moveAnimCooldown)
+            {
+                lastMoveAnimTime = Time.time;
+                animator.Play("MOVE"); // "0_move"
+            }
+        }
+    }
+
+    private void PlayAttackAnim()
+    {
+        if (spum.ATTACK_List != null && spum.ATTACK_List.Count > 0)
+            animator.Play("ATTACK"); // "0_Attack_Normal"
+    }
+
+    private void PlaySkillAnim()
+    {
+        if (spum.ATTACK_List != null && spum.ATTACK_List.Count > 1)
+            animator.Play("ATTACK"); // "1_Skill_Normal"
     }
 
     private void StartFindTargetLoop()
@@ -328,7 +380,7 @@ public class MeleeCharacter : BaseCharacterFSM
         float attackRange = PartyManager.Instance.attackRange;
         float distance = Vector3.Distance(transform.position, target.position);
 
-        return distance <= attackRange + 0.5f;
+        return distance <= attackRange;
     }
 
     private void OnDrawGizmosSelected()
@@ -341,27 +393,5 @@ public class MeleeCharacter : BaseCharacterFSM
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 
-    private void PlayIdleAnim()
-    {
-        if (spum.IDLE_List != null && spum.IDLE_List.Count > 0)
-            animator.Play("IDLE"); // "0_idle"
-    }
-
-    private void PlayMoveAnim()
-    {
-        if (spum.MOVE_List != null && spum.MOVE_List.Count > 0)
-            animator.Play("MOVE"); // "0_move"
-    }
-
-    private void PlayAttackAnim()
-    {
-        if (spum.ATTACK_List != null && spum.ATTACK_List.Count > 0)
-            animator.Play("ATTACK"); // "0_Attack_Normal"
-    }
-
-    private void PlaySkillAnim()
-    {
-        if (spum.ATTACK_List != null && spum.ATTACK_List.Count > 1)
-            animator.Play("ATTACK"); // "1_Skill_Normal"
-    }
+    
 }
