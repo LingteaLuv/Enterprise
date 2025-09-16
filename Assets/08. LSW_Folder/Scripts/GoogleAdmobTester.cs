@@ -1,10 +1,12 @@
+using System;
 using GoogleMobileAds.Api;
 using UnityEngine;
 
 public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
 {
-    private string _adID = "ca-app-pub-3940256099942544/1033173712";
+    private string _adID = "ca-app-pub-3940256099942544/5354046379";
     private InterstitialAd _loadedAd;
+    private RewardedInterstitialAd _rewardedInterstitialAd;
     
     protected override void Awake()
     {
@@ -16,11 +18,11 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
     {
         if (status == null)
         {
-            Debug.Log("모바일 광고 초기화 실패");
+            Debug.LogError("모바일 광고 초기화 실패");
             return;
         }
-        Debug.Log("광고 초기화 성공");
-        LoadAd();
+        Debug.LogError("광고 초기화 성공");
+        LoadAdTest();
     }
 
     public void LoadAd()
@@ -30,22 +32,54 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
         {
             if (error != null)
             {
-                Debug.Log($"광고 에러 이유 : {error.ToString()}");
+                Debug.LogError($"광고 에러 이유 : {error.ToString()}");
                 _loadedAd = null;
                 return;
             }
-            Debug.Log("로딩 성공");
+            Debug.LogError("로딩 성공");
             _loadedAd = ad;
             _loadedAd.OnAdFullScreenContentClosed -= LoadAd;
             _loadedAd.OnAdFullScreenContentClosed += LoadAd;
         });
     }
 
-    public void ShowAd()
+    public void LoadAdTest()
+    {
+        AdRequest adRequest = new AdRequest();
+        RewardedInterstitialAd.Load(_adID, adRequest, (ad, error) =>
+        {
+            if (error != null)
+            {
+                Debug.LogError($"광고 에러 이유 : {error.ToString()}");
+                _rewardedInterstitialAd = null;
+                return;
+            }
+            Debug.LogError("로딩 성공");
+            _rewardedInterstitialAd = ad;
+            _rewardedInterstitialAd.OnAdFullScreenContentClosed -= LoadAdTest;
+            _rewardedInterstitialAd.OnAdFullScreenContentClosed += LoadAdTest;
+        });
+    }
+    
+    /*public void ShowAd()
     {
         if (_loadedAd != null && _loadedAd.CanShowAd())
         {
             _loadedAd.Show();
+        }
+    }*/
+    
+    public void ShowRewardedAd(Action<Reward> callback)
+    {
+        if (_rewardedInterstitialAd != null && _rewardedInterstitialAd.CanShowAd())
+        {
+            // 이 부분에서 끝까지 시청 완료되면 콜백으로 HandleUserEarnedReward을 호출하는듯!
+            _rewardedInterstitialAd.Show(callback); 
+            Debug.LogError("리워드 광고 표시됨.");
+        }
+        else
+        {
+            Debug.LogError("리워드 광고가 로드되지 않았습니다. 먼저 광고를 로드하세요.");
         }
     }
 }
