@@ -189,7 +189,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             }
             else
             {
-                levelText.text = $"LV {currentCharacterData.Level}";
+                levelText.text = $"LV {currentCharacterData.Level.Value}";
             }
             flavorText.text = currentCharacterData.characterdata.flavorText;
 

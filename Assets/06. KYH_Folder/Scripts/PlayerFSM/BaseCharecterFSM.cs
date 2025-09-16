@@ -46,7 +46,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
 
     protected virtual void ChangeState(State newState)
     {
-        Debug.Log($"[FSM] {gameObject.name} 상태 전환: {currentState} → {newState}");
+        Debug.Log($"[FSM] {stats.charName} 상태 전환: {currentState} → {newState}");
         currentState = newState;
         if (newState != State.Attack && attackRoutine != null)
         {
@@ -54,7 +54,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
             attackRoutine = null;
         }
     }
-
+    /*
     public virtual void TakeDamage(float amount)
     {
         health.TakeDamage(amount);
@@ -64,10 +64,10 @@ public abstract class BaseCharacterFSM : MonoBehaviour
             Die();
         }
     }
-
+    */
     public virtual void Die()
     {
-        Debug.Log($"{gameObject.name} 사망");
+        Debug.Log($"{stats.charName} 사망");
 
         if (CompareTag("Crew"))
             BattleManager.Instance?.OnPlayerDead(gameObject);
@@ -87,6 +87,6 @@ public abstract class BaseCharacterFSM : MonoBehaviour
     public void ChangeStateIdleForce()
     {
         currentState = State.Idle;
-        Debug.Log($"[FSM] {gameObject.name} 상태 강제 리셋: Idle");
+        Debug.Log($"[FSM] {stats.charName} 상태 강제 리셋: Idle");
     }
 }

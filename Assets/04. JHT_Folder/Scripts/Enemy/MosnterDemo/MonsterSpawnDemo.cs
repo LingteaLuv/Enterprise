@@ -30,7 +30,7 @@ public class MonsterSpawnDemo : MonoBehaviour
 
     public void ChangeHp()
     {
-        monster.TakeDamage(1.5f);
+        // monster.TakeDamage(1.5f);
     }
 
 

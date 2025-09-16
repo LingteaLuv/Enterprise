@@ -14,13 +14,13 @@ public class JHT_DamageBox : JHT_PooledObject
     private WaitForSeconds TextDestroyTime = new WaitForSeconds(1.5f);
     public void ShowDamageText(float value)
     {
-        StartCoroutine(StartShowText(value));
+        StartCoroutine(StartShowText(DataUtility.FormatNumber(value)));
     }
 
 
-    IEnumerator StartShowText(float value)
+    IEnumerator StartShowText(string value)
     {
-        hitBoxText.text = value.ToString();
+        hitBoxText.text = value;
         hitBoxText.color = Color.red;
         hitBoxText.DOFade(0f, 2f);
 
