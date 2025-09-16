@@ -90,9 +90,9 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
     }
 
     // IDamageable 인터페이스 구현
-    public void TakeDamage(IAttacker attacker)
+    public void TakeDamage(IAttacker attacker, float powerRatio = 1f)
     {
-        healthSystem.CalculateAndApplyDamage(attacker);
+        healthSystem.CalculateAndApplyDamage(attacker, powerRatio);
     }
 
     public float GetCurrentStat(Stat stat)

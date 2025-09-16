@@ -61,12 +61,12 @@ public class HealthSystem : MonoBehaviour
     /// <summary>
     /// IDamageable 인터페이스를 통해 호출되며, 실제 데미지 계산 및 적용을 담당합니다.
     /// </summary>
-    public void CalculateAndApplyDamage(IAttacker attacker)
+    public void CalculateAndApplyDamage(IAttacker attacker, float powerRatio)
     {
         if (statProvider == null) return;
 
         // 1. 공격자와 방어자의 스탯 가져오기
-        float attackerAttack = attacker.GetCurrentStat(Stat.Attack);
+        float attackerAttack = attacker.GetCurrentStat(Stat.Attack) * powerRatio;
         float attackerCritChance = attacker.GetCurrentStat(Stat.CritChance);
         float attackerCritDamage = attacker.GetCurrentStat(Stat.CritDamage);
         float defenderDefense = statProvider.GetCurrentStat(Stat.Defense); // 자신의 스탯 사용
