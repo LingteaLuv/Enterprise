@@ -1,9 +1,10 @@
-using UnityEngine;
-using UnityEditor;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions; // 정규식을 위해 추가!
+using UnityEditor;
+using UnityEngine;
 
 public class PassiveSkillDataImporter
 {
@@ -41,7 +42,8 @@ public class PassiveSkillDataImporter
 
         for (int i = 1; i < lines.Length; i++)
         {
-            string[] fields = lines[i].Split(',');
+            // ✨ 변경점: 새로운 Split 함수 사용!
+            string[] fields = SplitCsvLine(lines[i]);
 
             try
             {
@@ -50,9 +52,10 @@ public class PassiveSkillDataImporter
 
                 string effectType = GetString(fields, headerMap, "EffectType");
                 string paramString1 = GetString(fields, headerMap, "Param_String1");
-                string paramString2 = GetString(fields, headerMap, "Param_String1");
+                string paramString2 = GetString(fields, headerMap, "Param_String2");
                 float paramFloat1 = GetFloat(fields, headerMap, "Param_Float1");
                 float paramFloat2 = GetFloat(fields, headerMap, "Param_Float2");
+                float paramFloat3 = GetFloat(fields, headerMap, "Param_Float3");
 
                 string assetPath = EFFECT_SO_PATH + effectID + ".asset";
 
@@ -71,6 +74,13 @@ public class PassiveSkillDataImporter
                         HealEffectSO healEffect = AssetDatabase.LoadAssetAtPath<HealEffectSO>(assetPath) ?? CreateAsset<HealEffectSO>(assetPath);
                         healEffect.healAmount = paramFloat1;
                         EditorUtility.SetDirty(healEffect);
+                        break;
+                    case "Damage":
+                        DamageEffectSO damageEffect = AssetDatabase.LoadAssetAtPath<DamageEffectSO>(assetPath) ?? CreateAsset<DamageEffectSO>(assetPath);
+                        damageEffect.powerRatio = paramFloat1;
+                        damageEffect.hitCount = (int)paramFloat2;
+                        damageEffect.delayBetweenHits = (int)paramFloat3;
+                        EditorUtility.SetDirty(damageEffect);
                         break;
                 }
             }
@@ -98,7 +108,8 @@ public class PassiveSkillDataImporter
 
         for (int i = 1; i < lines.Length; i++)
         {
-            string[] fields = lines[i].Split(',');
+            // ✨ 변경점: 새로운 Split 함수 사용!
+            string[] fields = SplitCsvLine(lines[i]);
 
             try
             {
@@ -108,12 +119,24 @@ public class PassiveSkillDataImporter
                 string assetPath = SKILL_SO_PATH + skillID + ".asset";
                 SkillSO skillSO = AssetDatabase.LoadAssetAtPath<SkillSO>(assetPath) ?? CreateAsset<SkillSO>(assetPath);
 
+                // --- 유효성 검사를 위해 Enum 값을 먼저 변수에 저장 ---
+                ESkillTargetType type = GetEnum<ESkillTargetType>(GetString(fields, headerMap, "skillTargetType"));
+                ETargetLogic logic = GetEnum<ETargetLogic>(GetString(fields, headerMap, "targetLogic"));
+
+                // ✨ 변경점: 유효성 검사 로직 호출!
+                if (!IsCombinationValid(type, logic))
+                {
+                    Debug.LogError($"[CSV 파싱 유효성 오류] 스킬 ID: {skillID} - TargetType '{type}'과 TargetLogic '{logic}'은 잘못된 조합입니다. CSV 파일을 확인해주세요!");
+                    continue; // 잘못된 데이터는 건너뛰기
+                }
+
+                // --- 검사를 통과한 데이터만 최종 할당 ---
                 skillSO.skillID = int.Parse(skillID);
                 skillSO.name = skillID;
                 skillSO.skillName = GetString(fields, headerMap, "skillName");
                 skillSO.cooldown = GetFloat(fields, headerMap, "cooldown");
-                skillSO.skillTargetType = GetEnum<ESkillTargetType>(GetString(fields, headerMap, "skillTargetType"));
-                skillSO.targetLogic = GetEnum<ETargetLogic>(GetString(fields, headerMap, "targetLogic"));
+                skillSO.skillTargetType = type;
+                skillSO.targetLogic = logic;
                 skillSO.targetRole = GetEnum<CrewRole>(GetString(fields, headerMap, "targetRole"));
 
                 skillSO.effects.Clear();
@@ -146,10 +169,45 @@ public class PassiveSkillDataImporter
         Debug.Log("[PassiveSkillParser] Skills.csv 파싱 완료.");
     }
 
+    // ✨ 새로운 기능: 따옴표 안의 쉼표를 무시하는 CSV 라인 분리기
+    private static string[] SplitCsvLine(string line)
+    {
+        // 따옴표 안 쉼표는 무시, 따옴표 밖 쉼표에서만 Split
+        // 정규식 설명:
+        // ,(?=(?:[^"]*"[^"]*")*[^"]*$)
+        //  └→ 따옴표의 짝수 개수 뒤의 쉼표만 매칭
+        var pattern = @",(?=(?:[^""]*""[^""]*"")*[^""]*$)";
+
+        return Regex.Split(line, pattern)
+                    .Select(s => s.Trim().Trim('"'))
+                    .ToArray();
+    }
+
+    // ✨ 새로운 기능: TargetType과 TargetLogic 조합 유효성 검사기
+    private static bool IsCombinationValid(ESkillTargetType type, ETargetLogic logic)
+    {
+        if (type == ESkillTargetType.Supportive)
+        {
+            return logic == ETargetLogic.Self ||
+                   logic == ETargetLogic.AllAllies ||
+                   logic == ETargetLogic.SingleAlly_ByRole ||
+                   logic == ETargetLogic.SingleLowestAlly_ByRole ||
+                   logic == ETargetLogic.AllAllies_ByRole;
+        }
+        else // Offensive
+        {
+            return logic == ETargetLogic.PrimaryTarget ||
+                   logic == ETargetLogic.ClosestEnemy ||
+                   logic == ETargetLogic.LowestHealthEnemy ||
+                   logic == ETargetLogic.AllEnemiesInRadius;
+        }
+    }
+
     private static Dictionary<string, int> CreateHeaderMap(string headerLine)
     {
         var headerMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        string[] headers = headerLine.Split(',');
+        // ✨ 변경점: 새로운 Split 함수 사용!
+        string[] headers = SplitCsvLine(headerLine);
         for (int i = 0; i < headers.Length; i++)
         {
             string trimmedHeader = headers[i].Trim();
@@ -161,6 +219,7 @@ public class PassiveSkillDataImporter
         return headerMap;
     }
 
+    // --- 아래의 헬퍼 함수들은 기존과 동일 ---
     private static string GetString(string[] fields, Dictionary<string, int> map, string name)
     {
         return map.TryGetValue(name, out int i) && i < fields.Length ? fields[i].Trim() : "";
