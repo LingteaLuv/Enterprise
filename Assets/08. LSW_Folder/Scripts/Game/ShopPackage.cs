@@ -25,17 +25,19 @@ public class ShopPackage : MonoBehaviour
     
     private void OnTouchPurchaseBtn()
     {
-        DatabaseManager.Instance.SavePackage(_packageId);
-        GoogleAdmobTester.Instance.ShowAd();
-        DatabaseManager.Instance.LoadPackageData(_packageId, (price, reward) =>
+        GoogleAdmobTester.Instance.ShowRewardedAd((reward) =>
         {
-            DatabaseManager.Instance.AddCurrency("Gem", -price);
-            foreach (var kvp in reward)
+            DatabaseManager.Instance.LoadPackageData(_packageId, (price, rewardGem) =>
             {
-                DatabaseManager.Instance.AddCurrency($"{kvp.Key}", Convert.ToInt32(kvp.Value));
-            }
+                DatabaseManager.Instance.AddCurrency("Gem", -price);
+                foreach (var kvp in rewardGem)
+                {
+                    DatabaseManager.Instance.AddCurrency($"{kvp.Key}", Convert.ToInt32(kvp.Value));
+                    DatabaseManager.Instance.SavePackage(_packageId);
+                    UpdatePanel();
+                }
+            });
         });
-        UpdatePanel();
     }
 
     private void UpdatePanel()
