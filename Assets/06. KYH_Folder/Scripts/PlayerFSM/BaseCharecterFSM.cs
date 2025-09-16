@@ -48,6 +48,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
     {
         Debug.Log($"[FSM] {stats.charName} 상태 전환: {currentState} → {newState}");
         currentState = newState;
+
         if (newState != State.Attack && attackRoutine != null)
         {
             StopCoroutine(attackRoutine);

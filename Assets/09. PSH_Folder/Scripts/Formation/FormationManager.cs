@@ -148,7 +148,7 @@ public class FormationManager : Singleton<FormationManager>
     public void AutoFormTeam()
     {
         Debug.Log("새로운 자동 편성 로직을 시작합니다...");
-        var allCharacters = PlayerDataManager.Instance.ownedCharacters.Values.ToList();
+        var allCharacters = PlayerDataManager.Instance.OwnedCharacters.Values.ToList();
         if (allCharacters.Count == 0) return;
 
         // 1. 새 편성 정보와 이미 선택된 캐릭터를 추적할 Set을 준비합니다.

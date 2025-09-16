@@ -9,7 +9,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             
         public QuestType_Enum QuestType { get; set; }
         public readonly QuestDifficult_Enum QuestDifficult;
-        public int DemandedGoalCount = 0;
+        public int DemandedGoalCount;
         public readonly string TemporaryQuestId;
         public TemporaryQuestDefinitionSO Def;
         public bool IsDaily => QuestType == QuestType_Enum.Daily;
