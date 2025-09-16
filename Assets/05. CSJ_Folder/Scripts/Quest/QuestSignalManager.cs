@@ -31,8 +31,6 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         ETCAchieve("BossBattle");
     }
-
-    // TODO : 추후 퀘스트 종류 입력을 받지 않고 자동으로 퀘스트 목록에 맞춰서 신호를 보낼 수도 있음
     
     /// <summary>
     /// 적을 죽였을 때 이를 퀘스트로 갱신할 때 호출하는 시그널
@@ -47,6 +45,8 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         var key = QuestKeys.Kill(enemyId);
         SendSignal(key, count, general, daily, weekly);
+        if (enemyId is MonsterId.All) return;
+        SendSignal(QuestKeys.Kill(MonsterId.All), count, general,daily, weekly);
     }
 
     /// <summary>
@@ -75,6 +75,8 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         var key = QuestKeys.GachaPull(gachaId);
         SendSignal(key, count, general, daily, weekly);
+        if (gachaId is ItemType.All) return;
+        SendSignal(QuestKeys.GachaPull(ItemType.All), count, general, daily, weekly);
     }
     
     /// <summary>
@@ -135,6 +137,18 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         var key = QuestKeys.StageClear();
         SendSignal(key, stage, general, daily, weekly);
+    }
+
+    public void DeckComposition(DeckSynergy synergy, int count, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.DeckComposition(synergy);
+        SendSignal(key, count, general, daily, weekly);
+    }
+
+    public void RankUp(ItemType rankKey, int rankCount, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.RankUp(rankKey);
+        SendSignal(key, rankCount, general, daily, weekly);
     }
 
     private void SendSignal(string key, int count, bool general, bool daily, bool weekly)

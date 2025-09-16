@@ -1,6 +1,4 @@
-﻿using System;
-using _05._CSJ_Folder.Scripts.Quest.Definition;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -47,8 +45,6 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                     _ClearButton.gameObject.SetActive(false);
                     objectImg.color = ActiveColor;
                     break;
-                default:
-                    break;
             }
 
             _progress.maxValue = inst.DemandedGoalCount;
@@ -56,6 +52,10 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
             _progressContent.text = $"{inst.CurrentGoalCount} / {inst.DemandedGoalCount}";
             _questContent.text = inst.temporaryQuestContent;
             //TODO : RewardImage
+            if (inst.Def.Reward.Reward.RewardIcon is not null)
+            {
+                RewardSprite.sprite = inst.Def.Reward.Reward.RewardIcon;
+            }
             
             QuestId = inst.TemporaryQuestId;
             _CompleteButton.onClick.RemoveAllListeners();

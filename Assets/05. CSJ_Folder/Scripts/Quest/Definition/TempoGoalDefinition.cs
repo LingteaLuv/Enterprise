@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using UnityEngine;
 
 namespace _05._CSJ_Folder.Scripts.Quest.Definition
@@ -21,13 +20,13 @@ namespace _05._CSJ_Folder.Scripts.Quest.Definition
         [NonSerialized] private string _cachedKey; 
         
         // 키의 경우 BuildKey로 만든 키 값을 캐시화 하여 제공 
-        public string Key => _cachedKey ??= BuildKey();
+        private string Key => _cachedKey ??= BuildKey();
 
         // QuestKeys.Compose를 통해서 Key 값을 만들고 정규화를 진행
         private string BuildKey() => Normalize(QuestKeys.Compose(keyValue, enumKey));
 
         // 입력받은 키와 현재 목표의 키가 동일한지 판별하여 참 거짓을 반환
-        public bool Matches(string signalKey) => string.Equals(Normalize(signalKey), Key, StringComparison.Ordinal);
+        private bool Matches(string signalKey) => string.Equals(Normalize(signalKey), Key, StringComparison.Ordinal);
         
 
         // 목표와 키가 동일하다면 마릿수 반환, 아니라면 진행 안된 사실 반환

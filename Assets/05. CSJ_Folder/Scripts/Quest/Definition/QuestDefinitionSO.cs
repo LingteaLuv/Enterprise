@@ -6,10 +6,12 @@ namespace _05._CSJ_Folder.Scripts.Quest.Definition
     public class QuestDefinitionSO : ScriptableObject
     {
         [Header("퀘스트 내용")] 
-        // quest 이름
-        public string questName;
         // 퀘스트의 보상
         public QuestRewardSO Reward;
+        // quest 이름
+        public string questName;
+
+
 
         // 프로퍼티
         /// <summary>

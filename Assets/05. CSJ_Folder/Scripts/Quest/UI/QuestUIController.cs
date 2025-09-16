@@ -3,8 +3,6 @@ using _05._CSJ_Folder.Scripts.Quest;
 using _05._CSJ_Folder.Scripts.Quest.Definition;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using Button = UnityEngine.UI.Button;
 using Image = UnityEngine.UI.Image;
 
@@ -63,14 +61,9 @@ public class QuestUIController : MonoBehaviour
         if (QuestDef.GeneralType == GeneralType_Enum.StageClear)
         {
             _questGoalText.text = QuestInst.stageClearMission;
-            if (QuestInst.needToClearStage <= QuestManager.Instance.CurrentClearedStage)
-            {
-                _questGoalCountText.text = "클리어";
-            }
-            else
-            {
-                _questGoalCountText.text = $"{QuestManager.Instance.CurrentClearedStage} / {QuestInst.needToClearStage}";
-            }
+            _questGoalCountText.text = QuestInst.needToClearStage <= QuestManager.Instance.CurrentClearedStage 
+                ? "클리어" 
+                : $"{QuestManager.Instance.CurrentClearedStage} / {QuestInst.needToClearStage}";
         }
         else
         {
@@ -88,7 +81,8 @@ public class QuestUIController : MonoBehaviour
         _questButton.image.canvasRenderer.SetAlpha(
             QuestInst.QuestState == QuestState_Enum.Completed ? 0.7f : 0.3f);
 
-        //_questCurrentGoalImage.sprite = QuestReward.Reward.RewardIcon;
+        if(QuestReward.Reward.RewardIcon is not null)
+            _questCurrentGoalImage.sprite = QuestReward.Reward.RewardIcon;
     }
     
     

@@ -8,6 +8,5 @@
         
         public int ClearedQuestCount;
         public int CurrentQuestStage;
-        public int CurrentClearedStage;
     }
 }
