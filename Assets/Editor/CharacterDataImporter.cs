@@ -87,10 +87,11 @@ public class CharacterDataImporter
                 data.instruction = fields[headerMap["Instruction"]];
 
                 // Sprite 로드 (Resources 폴더 내에 스프라이트가 있어야 함)
-                string spritePath = fields[headerMap["Char_Sprite"]];
+                //string spritePath = fields[headerMap["Char_Sprite"]];
+                string spritePath = "Assets/00. Imports/CharImage/GeneratedPortraits/";
                 if (!string.IsNullOrEmpty(spritePath))
                 {
-                    data.characterSprite = Resources.Load<Sprite>(spritePath);
+                    data.characterSprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{spritePath}{data.characterID}.png");
                     if (data.characterSprite == null)
                     {
                         Debug.LogWarning($"캐릭터 스프라이트를 로드할 수 없습니다: {spritePath} (ID: {data.characterID})");
