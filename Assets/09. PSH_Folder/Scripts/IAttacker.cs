@@ -12,5 +12,5 @@ public interface IAttacker
     /// <summary>
     /// 공격자의 이름입니다. (MonoBehaviour의 name 속성을 사용합니다)
     /// </summary>
-    string name { get; }
+    string GetName();
 }

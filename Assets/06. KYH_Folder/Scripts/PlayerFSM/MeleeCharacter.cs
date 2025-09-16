@@ -12,9 +12,10 @@ public class MeleeCharacter : BaseCharacterFSM
     private Animator animator;
     private SPUM_Prefabs spum;
 
-    private List<Vector3> currentPath;
-
-    private float skillCooldown = 8f;
+    //-----------
+    // 차후 수현님이 연결 할 케릭터에서 관리 될 변수들 목록 예시 -- 이 스크립트에서가 아닌 다른곳에서 참조하여 사용해도 됩니다.
+    // HandleSkill 내의 SkillRoutine 매서드 내에서 작업
+    private float skillCooldown; // 쿨타임 간격 (스탯에서 가져와도 됨)
     private float lastSkillTime = -999f;
     private bool isSkillReady => Time.time >= lastSkillTime + skillCooldown;
 
@@ -31,6 +32,7 @@ public class MeleeCharacter : BaseCharacterFSM
     protected override void Start()
     {
         base.Start();
+        skillCooldown = stats.skills.FirstOrDefault().cooldown;
         StartFindTargetLoop();
     }
 
@@ -184,14 +186,14 @@ public class MeleeCharacter : BaseCharacterFSM
                 ChangeState(State.Move);
                 yield break;
             }
-
-            Debug.Log($"{gameObject.name}이(가) 근접 공격!");
+            Debug.Log($"{stats.charName}이(가) 근접 공격!");
 
             var targetScript = target.GetComponent<JHT_BaseMonsterFSM>();
             if (targetScript != null)
             {
                 float attackPower = stats.GetCurrentStat(Stat.Attack);
-                targetScript.TakeDamage(attackPower);
+                targetScript.TakeDamage(stats);
+                //Debug.Log($"MeleeCharacter AttackRoutine : {targetScript.monsterSO.name}");
             }
 
             yield return new WaitForSeconds(attackDelay);
@@ -221,6 +223,15 @@ public class MeleeCharacter : BaseCharacterFSM
             }
         }
 
+        Debug.Log($"{stats.charName}이/가 {skill.skillName} 스킬을 발동");
+
+        // 캐릭터의 현재 타겟을 IDamageable으로 가져와요.
+        IDamageable primaryTarget = target?.GetComponent<IDamageable>();
+
+        // Use 함수에 나의 기본 타겟을 '참고용'으로 넘겨줘요.
+        skill.Use(stats, primaryTarget);
+
+        // 쿨타임 초기화
         lastSkillTime = Time.time;
 
         yield return new WaitForSeconds(1.5f);
