@@ -109,9 +109,5 @@ public class HealthSystem : MonoBehaviour
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
-    // 오류떠서 냅둠 나중에 지울 것
-    public void TakeDamage(float amount)
-    {
-        currentHealth -= amount;
-    }
+
 }

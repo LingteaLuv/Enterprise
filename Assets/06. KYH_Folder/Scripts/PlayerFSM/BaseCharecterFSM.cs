@@ -54,7 +54,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
             attackRoutine = null;
         }
     }
-
+    /*
     public virtual void TakeDamage(float amount)
     {
         health.TakeDamage(amount);
@@ -64,7 +64,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
             Die();
         }
     }
-
+    */
     public virtual void Die()
     {
         Debug.Log($"{gameObject.name} 사망");

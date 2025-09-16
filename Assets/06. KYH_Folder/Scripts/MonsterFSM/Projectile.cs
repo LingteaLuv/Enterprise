@@ -32,7 +32,7 @@ public class Projectile : MonoBehaviour
             var target = other.GetComponent<HealthSystem>();
             if (target != null)
             {
-                target.TakeDamage(damage); // 충돌 대상에게 데미지 전달
+                //target.TakeDamage(damage); // 충돌 대상에게 데미지 전달
             }
 
             Debug.Log("Crew에게 명중되고 파괴됨.");

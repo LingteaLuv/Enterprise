@@ -10,7 +10,7 @@ namespace JHT
 {
     // 상태 통일
 
-    public abstract class JHT_BaseMonsterFSM : JHT_PooledObject
+    public abstract class JHT_BaseMonsterFSM : JHT_PooledObject, IAttacker, IDamageable
     {
         //public enum State { Idle, Move, Attack, Dead }
 
@@ -292,7 +292,7 @@ namespace JHT
             }
         }
 
-        public void TakeDamage(float damage)
+        private void ApplyDamageEffects(float damage)
         {
             monsterStat.CurHp = Mathf.Max(monsterStat.CurHp - damage, 0);
             if (monsterStat.CurHp == 0)
@@ -379,6 +379,32 @@ namespace JHT
             Unit._prefabs._anim.Rebind();
             Unit.SetStateAnimationIndex(state);
             Unit.PlayStateAnimation(state);
+        }
+
+        // --- IAttacker 인터페이스 구현 ---
+        public float GetCurrentStat(Stat stat)
+        {
+            // BaseMonsterStat에 만든 함수를 호출해서 스탯을 가져와요.
+            return monsterStat.GetCurrentStat(stat);
+        }
+
+        // --- IDamageable 인터페이스 구현 ---
+        public string GetName()
+        {
+            // 몬스터의 이름을 돌려줘요.
+            return monsterStat.curSO.name;
+        }
+
+        public void TakeDamage(IAttacker attacker, float powerRatio = 1f)
+        {
+            // 1. 공격자와 방어자의 스탯 가져오기
+            float attackerAttack = attacker.GetCurrentStat(Stat.Attack) * powerRatio;
+            float defenderDefense = GetCurrentStat(Stat.Defense); // 자신의 스탯 사용
+
+            // 2. 데미지 계산
+            float finalDamage = attackerAttack * (100f / (100f + defenderDefense));
+
+            ApplyDamageEffects(finalDamage);
         }
     }
 }
