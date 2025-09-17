@@ -41,7 +41,7 @@ public class BattleManager : MonoBehaviour
 
     private List<GameObject> currentPlayers = new();  // 기존 currentPlayer 대신 여러 명
 
-    public List<JHT_MonsterDataSO> spawnedEnemies = new(); // GameObject -> JHT_MOnsterDataSO
+    public List<JHT_BaseMonsterStat> spawnedEnemies = new(); // GameObject -> JHT_MOnsterDataSO
 
     public int currentRoundIndex = 0;
     private bool isbattleover = false;
@@ -277,7 +277,7 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator SpawnDelay(int roundIndex)
     {
-        yield return new WaitForSeconds(1f);
+        yield return null;
 
         JHT_MonsterSpawnManager.Instance.ChangeRound(roundIndex);
         // 몬스터 데이터 넣기
@@ -295,7 +295,7 @@ public class BattleManager : MonoBehaviour
     }
 
     // 적 사망 시 호출
-    public void OnEnemyDead(JHT_MonsterDataSO enemy) //GameObject -> JHT_MonsterDataSO
+    public void OnEnemyDead(JHT_BaseMonsterStat enemy) //GameObject -> JHT_MonsterDataSO
     {
         if (spawnedEnemies.Contains(enemy))
             spawnedEnemies.Remove(enemy);

@@ -52,6 +52,8 @@ namespace JHT
 
             OnRelicsDataLoadFinish?.Invoke(false);
 
+            downLoader = new();
+
             weaponList = new();
             weaponDataDic = new();
 
@@ -176,21 +178,20 @@ namespace JHT
 
         private IEnumerator RelicsEndInit()
         {
-            yield return new WaitForEndOfFrame();
             OnRelicInit?.Invoke();
 
-            yield return DownLoadCSV();
+            yield return DownRelicsCSV();
         }
 
-        private IEnumerator DownLoadCSV()
+        private IEnumerator DownRelicsCSV()
         {
             while (!IsRelicsDataLoaded)
                 yield return null;
-
-            downLoader = new JHT_DataDownLoader();
+            Debug.LogError($"유물 csv");
+            //downLoader = new JHT_DataDownLoader();
+            yield return downLoader.DownRelicsData();
 
             OnRelicsDataLoadFinish?.Invoke(true);
-            yield return downLoader.DownloadData();
         }
 
         #endregion
@@ -234,15 +235,14 @@ namespace JHT
 
         private IEnumerator LootTableEndit()
         {
-            yield return new WaitForEndOfFrame();
 
             while (!IsLootTableDataLoaded)
                 yield return null;
 
-            downLoader = new JHT_DataDownLoader();
-
+            //downLoader = new JHT_DataDownLoader();
+            Debug.LogError($"루트테이블 csv");
+            yield return downLoader.DownLootTableData();
             OnRelicsDataLoadFinish?.Invoke(true);
-            yield return downLoader.DownloadData();
         }
         #endregion
 

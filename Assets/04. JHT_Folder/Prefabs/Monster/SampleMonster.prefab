@@ -349,7 +349,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6753825981913469969}
   - component: {fileID: 1572445644008787276}
-  - component: {fileID: 7746037899818873035}
   m_Layer: 7
   m_Name: SampleMonster
   m_TagString: Enemy
@@ -391,36 +390,8 @@ MonoBehaviour:
     m_Bits: 64
   target: {fileID: 0}
   monsterSO: {fileID: 0}
-  monsterStat: {fileID: 7746037899818873035}
   monsterPrefab: {fileID: 0}
   monsterUI: {fileID: 5445776065480494246}
   curHP: 0
   damageTextPos: {fileID: 6803831390064297184}
-  animator: {fileID: 0}
---- !u!114 &7746037899818873035
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4975594216215629071}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9eaf1a45f0d6d88409acf3ff7178b497, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  curSO: {fileID: 0}
-  enemyCharacter: {fileID: 0}
-  maxHp: 0
-  attackPower: 0
-  defense: 0
-  attackSpeed: 0
-  attackDelay: 0
-  attackRange: 0
-  chaseRange: 0
-  moveSpeed: 0
-  projectileSprite: {fileID: 0}
-  monsterType: 0
-  monsterRarity: 0
-  monsterCrewRole: 0
-  animatorOverride: {fileID: 0}
+  canAttack: 0

@@ -373,7 +373,7 @@ public class MeleeCharacter : BaseCharacterFSM
     private bool IsTargetValid()
     {
         bool valid = target != null && !target.Equals(null) &&
-                     target.GetComponent<JHT_BaseMonsterFSM>()?.curHP > 0;
+                     target.GetComponent<JHT_BaseMonsterFSM>()?.CurHP > 0;
 
         if (!valid)
         {

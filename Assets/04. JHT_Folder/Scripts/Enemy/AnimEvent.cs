@@ -9,7 +9,7 @@ public class AnimEvent : MonoBehaviour
     {
         fsm = GetComponentInParent<JHT_BaseMonsterFSM>();
 
-        if(fsm.monsterSO.monsterRarity == MonsterRarity.Normal || fsm.monsterSO.monsterRarity == MonsterRarity.Elite)
+        if(fsm.monsterStat.monsterRarity == MonsterRarity.Normal || fsm.monsterStat.monsterRarity == MonsterRarity.Elite)
             normalFSM = fsm as JHT_NormalMonster;
     }
 

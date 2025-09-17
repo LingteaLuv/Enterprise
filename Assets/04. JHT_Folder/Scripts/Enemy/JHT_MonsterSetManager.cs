@@ -16,11 +16,19 @@ namespace JHT
 
         public List<CrewRole> checkList;
 
-        public Transform SetPos(JHT_MonsterDataSO so)
+        public Transform SetPos(JHT_BaseMonsterStat stat)
         {
-            int idx = SetPosIndex(so);
+            int idx = -1;
+            if (stat.monsterRarity == MonsterRarity.Elite)
+            {
+                idx = 6;
+            }
+            else
+            {
+                idx = SetPosIndex(stat);
+            }
 
-            if (so == null)
+            if (stat == null)
             {
                 Debug.LogError("[SetPos] : so없음");
                 return null;
@@ -35,16 +43,16 @@ namespace JHT
             return pos;
         }
 
-        public int SetPosIndex(JHT_MonsterDataSO so)
+        public int SetPosIndex(JHT_BaseMonsterStat stat)
         {
             int index = -1;
-            if (monsterCrewCountDic.TryGetValue(so.monsterCrewRole, out int value))
+            if (monsterCrewCountDic.TryGetValue(stat.monsterCrewRole, out int value))
             {
-                if (checkList.Contains(so.monsterCrewRole))
+                if (checkList.Contains(stat.monsterCrewRole))
                     index = value + 1;
                 else
                 {
-                    checkList.Add(so.monsterCrewRole);
+                    checkList.Add(stat.monsterCrewRole);
                     index = value;
                 }
             }
