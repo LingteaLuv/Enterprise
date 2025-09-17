@@ -98,6 +98,17 @@ public class CharacterDataImporter
                     }
                 }
 
+                // 일러스트 로드
+                string illustPath = fields[headerMap["Char_Illust"]];
+                if (!string.IsNullOrEmpty(illustPath))
+                {
+                    data.characterIllust = AssetDatabase.LoadAssetAtPath<Sprite>($"{illustPath}");
+                    if (data.characterSprite == null)
+                    {
+                        Debug.LogWarning($"캐릭터 일러스트를 로드할 수 없습니다: {spritePath} (ID: {data.characterID})");
+                    }
+                }
+
                 // 프리팹 경로로 프리팹을 로드하여 직접 연결
                 string prefabPath = fields[headerMap["Prefab_Path"]];
                 if (!string.IsNullOrEmpty(prefabPath))

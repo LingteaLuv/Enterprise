@@ -35,6 +35,7 @@ public class CharacterData : ScriptableObject
     public string flavorText;
     public string instruction;
     public Sprite characterSprite; // 캐릭터 이미지
+    public Sprite characterIllust; // 캐릭터 CG
     public GameObject characterPrefab; // spum 프리팹
 
     [Header("분류 정보")]
