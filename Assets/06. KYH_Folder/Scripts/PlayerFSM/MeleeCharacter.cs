@@ -31,6 +31,7 @@ public class MeleeCharacter : BaseCharacterFSM
     //      if (spum == null)
     //          Debug.LogError("[MeleeCharacter] SPUM_Prefabs 컴포넌트가 없습니다.");
     //  }
+    
     protected override void Start()
     {
         base.Start();
@@ -94,6 +95,15 @@ public class MeleeCharacter : BaseCharacterFSM
         if (currentPath == null || currentPath.Count == 0)
         {
             Vector3 dir = (target.position - transform.position).normalized;
+            if (dir.x > 0)
+            {
+                transform.localScale = new Vector3(-1, 1, 1);
+            }
+            else
+            {
+                transform.localScale = new Vector3(1, 1, 1);
+            }
+            
             Vector3 destination = target.position - dir * PartyManager.Instance.attackRange;
 
             currentPath = AStarPathfinding.Instance.FindPath(transform.position, destination);
@@ -190,11 +200,12 @@ public class MeleeCharacter : BaseCharacterFSM
             float attackDelay = stats.GetCurrentStat(Stat.AttackSpeed);
             float distance = Vector3.Distance(transform.position, target.position);
 
-            if (distance > attackRange)
+            /*if (distance > attackRange)
             {
                 ChangeState(State.Move);
                 yield break;
-            }
+            }*/
+            
             Debug.Log($"{stats.charName}이(가) 근접 공격!");
 
             var targetScript = target.GetComponent<JHT_BaseMonsterFSM>();
@@ -380,7 +391,7 @@ public class MeleeCharacter : BaseCharacterFSM
         float attackRange = PartyManager.Instance.attackRange;
         float distance = Vector3.Distance(transform.position, target.position);
 
-        return distance <= attackRange;
+        return distance <= attackRange + 0.1f;
     }
 
     private void OnDrawGizmosSelected()
