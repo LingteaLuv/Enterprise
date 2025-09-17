@@ -58,6 +58,7 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
             _rewardedInterstitialAd = ad;
             _rewardedInterstitialAd.OnAdFullScreenContentClosed -= LoadAdTest;
             _rewardedInterstitialAd.OnAdFullScreenContentClosed += LoadAdTest;
+            QuestSignalManager.Instance.ETCAchieve("AdWatch");
         });
     }
     

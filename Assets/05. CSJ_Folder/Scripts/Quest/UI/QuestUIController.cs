@@ -128,6 +128,7 @@ public class QuestUIController : MonoBehaviour
         QuestSignalManager.Instance.GachaPull(ItemType.Character, 5);
         QuestSignalManager.Instance.GachaPull(ItemType.Equipment, 5);
         QuestSignalManager.Instance.GachaPull(ItemType.Relic, 5);
+        QuestSignalManager.Instance.GachaPull(ItemType.RareRelic, 5);
     }
 
     private void OnClickLevelUpButton()

@@ -261,6 +261,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         OwnedCharacters[characterId].Soul.Value -= cost;
         playerCharData.Star.Value++;
         Debug.Log($"{playerCharData.characterdata.characterName}이(가) {playerCharData.Star.Value}성으로 승급했습니다!");
+        QuestSignalManager.Instance.RankUp(ItemType.Character, 1);
         playerCharData.RecalculateStats();
         OnCharacterDataUpdated?.Invoke(playerCharData);
         return true;

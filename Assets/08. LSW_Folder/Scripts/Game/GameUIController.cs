@@ -101,6 +101,7 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         {
             JHT_MonsterSpawnManager.Instance.MonsterAllClear();
             BattleManager.Instance.ClearEnemies();
+            QuestSignalManager.Instance.Active(ActiveType.Dungeon);
             SceneManager.LoadScene("DungeonScene");
         });
         

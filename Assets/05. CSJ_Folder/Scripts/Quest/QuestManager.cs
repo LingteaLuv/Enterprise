@@ -223,7 +223,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (_temporaryQuestController != null)
             {
                 // 퀘스트 초기화를 진행합니다.
-                _temporaryQuestController.QuestInit(_temporaryQuest, _temporaryInstances);
+                _temporaryQuestController.QuestInit(_temporaryQuests.ToList(), _temporaryInstances);
             
                 foreach (var kv in _temporaryInstances)
                 {
@@ -614,6 +614,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             // 퀘스트 클리어 카운트를 +1합니다
             ClearedQuestCount++;
+            QuestSignalManager.Instance.ETCAchieve("GeneralClear");
             // 다음 일반 퀘스트를 작동시킵니다.
             EnsureGeneralActive();
             // QuestUI를 새로고침합니다
@@ -695,18 +696,12 @@ namespace _05._CSJ_Folder.Scripts.Quest
         [CanBeNull]
         private QuestInstance GetInstance(string questId)
         {
-            if(_instances.TryGetValue(questId, out var inst))
-                return inst;
-            Debug.LogError($"Quest not found: {questId}");
-            return null;
+            return _instances.TryGetValue(questId, out var inst) ? inst : null;
         }
         
         private QuestDefinitionSO GetDefinition(string questId)
         {
-            if (_generalDefs.TryGetValue(questId, out var def))
-                return def;
-            Debug.LogError($"Quest not found: {questId}");
-            return null;
+            return _generalDefs.TryGetValue(questId, out var def) ? def : null;
         }
 
     
@@ -839,6 +834,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (_temporaryQuest != null)
             {
                 _temporaryQuests = EnqueueOrderByIdTemporary(_temporaryQuest.GetSequence());
+                Debug.Log($"temporaryQuestsCount {_temporaryQuests.Count}, _dailyQuest {_dailyQuests.Count}, _weekly {_weeklyQuests.Count}");
             }
             
             
@@ -904,10 +900,16 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 {
                     QuestType_Enum type = t.isDaily(i) ? QuestType_Enum.Daily : QuestType_Enum.Weekly;
                     TemporaryInstance inst = new TemporaryInstance(t, type, i);
-                    var id = (t.GetQuestKeyByType(type) + i).ToString();
+                    string id;
+                    if (type == QuestType_Enum.Daily)
+                        id = (t.GetQuestKeyByType(type) + i).ToString();
+                    else
+                    {
+                        id = (t.GetQuestKeyByType(type) + i - t.dailyCountArray.Length).ToString();
+                    }
                     
-                    _temporaryInstances.Add(id, inst);
-                    _instances.Add(id, inst);
+                    _temporaryInstances.TryAdd(id, inst);
+                    _instances.TryAdd(id, inst);
                     
                     _sequence.Add(inst);
                 }
@@ -1375,14 +1377,14 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         private void OnTemporaryProgress(QuestType_Enum type, string signalKey, int progress)
         {
-            foreach (var t in _temporaryInstances)
+            var quests = type == QuestType_Enum.Daily ? _dailyQuests : _weeklyQuests;
+            foreach (var inst in quests)
             {
-                var inst = t.Value;
-
                 if (inst is null) continue;
                 if (inst.QuestState == QuestState_Enum.Received) continue;
                 if (type != inst.QuestType) continue;
-                    
+                if (inst.Def?.TempoGoal is null) continue;
+                
                 var delta = inst.Def.TempoGoal.ProgressDeltaFrom(signalKey, progress);
                 // 만약 진척도가 <=0이라면; 키가 일치하지 않는다면
                 if (delta <= 0) continue;
@@ -1467,7 +1469,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
                 if (_temporaryQuestController != null)
                 {
-                    _temporaryQuestController.QuestInit(_temporaryQuest, _temporaryInstances);
+                    _temporaryQuestController.QuestInit(_temporaryQuests.ToList(), _temporaryInstances);
                 }
 
                 foreach (var kv in _temporaryInstances)
