@@ -356,11 +356,6 @@ namespace JHT
 
             animator.Play(temp);
         }
-        public float GetCurrentStat(Stat stat)
-        {
-            throw new NotImplementedException();
-        }
-
         // --- IAttacker 인터페이스 구현 ---
         public float GetCurrentStat(Stat stat)
         {

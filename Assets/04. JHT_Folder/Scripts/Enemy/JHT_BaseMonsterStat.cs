@@ -13,7 +13,7 @@ namespace JHT
         public float defense;
         //public float attackSpeed;
         public float attackDelay;
-
+        public float attackSpeed;
         public float attackRange;
         public float chaseRange;
         public float moveSpeed;
@@ -45,7 +45,7 @@ namespace JHT
             attackRange = curSO.attackRange;
             chaseRange = curSO.chaseRange;
             moveSpeed = curSO.moveSpeed;
-            //attackSpeed = curSO.attackSpeed;
+            attackSpeed = curSO.attackSpeed;
             attackDelay = curSO.attackDelay;
 
             //sprite
@@ -98,13 +98,14 @@ namespace JHT
                     break;
             }
             return total;
+        }
 
         public float GetCurrentStat(Stat stat)
         {
             switch (stat)
             {
                 case Stat.Attack:
-                    return this.attackPower;
+                    return this.totalAttackPower;
                 case Stat.Defense:
                     return this.defense;
                 case Stat.CritChance:
