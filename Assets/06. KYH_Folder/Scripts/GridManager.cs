@@ -41,7 +41,7 @@ public class GridManager : MonoBehaviour
 
     public void CreateGrid()
     {
-        Debug.Log("그리드 생성 호출됨");
+        Debug.LogError("그리드 생성 호출됨");
         grid = new Node[gridSizeX, gridSizeY];
 
         for (int x = 0; x < gridSizeX; x++)
@@ -59,6 +59,8 @@ public class GridManager : MonoBehaviour
                 grid[x, y] = new Node(walkable, worldPoint, x, y);
             }
         }
+
+        //tilemap.gameObject.SetActive(false);
     }
 
     public Node GetNodeFromWorldPos(Vector3 worldPosition)
@@ -102,7 +104,7 @@ public class GridManager : MonoBehaviour
     }
 
    // 디버그용 경로 기즈모
-    private void OnDrawGizmos()
+    /*private void OnDrawGizmos()
     {
         if (grid != null)
         {
@@ -113,5 +115,5 @@ public class GridManager : MonoBehaviour
                 Gizmos.DrawCube(n.worldPosition, gizmoSize);
             }
         }
-    }
+    }*/
 }

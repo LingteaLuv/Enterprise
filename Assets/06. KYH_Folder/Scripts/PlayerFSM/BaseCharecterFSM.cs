@@ -46,7 +46,7 @@ public abstract class BaseCharacterFSM : MonoBehaviour
 
     protected virtual void ChangeState(State newState)
     {
-        Debug.Log($"[FSM] {stats.charName} 상태 전환: {currentState} → {newState}");
+        //Debug.Log($"[FSM] {stats.charName} 상태 전환: {currentState} → {newState}");
         currentState = newState;
 
         if (newState != State.Attack && attackRoutine != null)
