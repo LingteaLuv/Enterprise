@@ -83,7 +83,7 @@ namespace JHT
                 //    obj.Init(targetPos, startPos, monsterStat.totalAttackPower, monsterStat.totalAttackPower,monsterStat.projectileSprite);
 
                 float projectileSpeed = 3f;
-                obj.Init(this, targetPos, startPos, projectileSpeed, monsterStat.attackPower,monsterStat.projectileSprite);
+                obj.Init(this, targetPos, startPos, projectileSpeed, monsterStat.totalAttackPower,monsterStat.projectileSprite);
 
             }
         }
