@@ -98,6 +98,17 @@ public class CharacterDataImporter
                     }
                 }
 
+                // Sprite 로드 (Resources 폴더 내에 스프라이트가 있어야 함)
+                string soulPath = "Assets/00. Imports/CharImage/SoulFragmentImage/";
+                if (!string.IsNullOrEmpty(soulPath))
+                {
+                    data.characterSoul = AssetDatabase.LoadAssetAtPath<Sprite>($"{soulPath}{data.characterID}.png");
+                    if (data.characterSprite == null)
+                    {
+                        Debug.LogWarning($"캐릭터 영혼조각이미지를 로드할 수 없습니다: {soulPath} (ID: {data.characterID})");
+                    }
+                }
+
                 // 일러스트 로드
                 string illustPath = fields[headerMap["Char_Illust"]];
                 if (!string.IsNullOrEmpty(illustPath))
@@ -105,7 +116,7 @@ public class CharacterDataImporter
                     data.characterIllust = AssetDatabase.LoadAssetAtPath<Sprite>($"{illustPath}");
                     if (data.characterSprite == null)
                     {
-                        Debug.LogWarning($"캐릭터 일러스트를 로드할 수 없습니다: {spritePath} (ID: {data.characterID})");
+                        Debug.LogWarning($"캐릭터 일러스트를 로드할 수 없습니다: {illustPath} (ID: {data.characterID})");
                     }
                 }
 

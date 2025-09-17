@@ -29,8 +29,8 @@ public class SoulFragmentPanel : MonoBehaviour
 
     public void SetUp(PlayerCharacterData cd)
     {
-        soulImage.sprite = cd.characterdata.characterSprite;
-        int currentFragments;
+        soulImage.sprite = cd.characterdata.characterSoul;
+        //int currentFragments;
         /*PlayerDataManager.Instance.characterSoulFragments.TryGetValue(cd.characterdata.characterID, out currentFragments);
         countText.text = currentFragments.ToString();*/
         countText.text = PlayerDataManager.Instance.OwnedCharacters[cd.characterdata.characterID].Soul.Value.ToString();
