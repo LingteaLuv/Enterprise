@@ -93,14 +93,13 @@ namespace JHT
             if(posList.Count > 0)
                 posList.Clear();
 
-            islandIndex = _islaneIndex - 1;
-            roundTable = stageDic[_islaneIndex - 1];
+            islandIndex = _islaneIndex;
+            roundTable = stageDic[_islaneIndex];
 
 
-            for (int i = 0; i < roundTable.monsterGroupPos.Count; i++)
+            for (int i = 0; i < roundTable.monsterPosData.Count; i++)
             {
-                roundTable.monsterGroupPos[i] = field.EnemySpawnPoints[i].position; //다시봐야함
-                roundTable.monsterPosData[i].transform.position = roundTable.monsterGroupPos[i];//EnemySpawnPoints[i].position;
+                roundTable.monsterPosData[i].transform.position = field.EnemySpawnPoints[i].position; //EnemySpawnPoints[i].position;
             }
 
             for (int i = 0; i < roundTable.roundCount; i++)
@@ -141,7 +140,7 @@ namespace JHT
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
                 obj.Init(curMonsterCountList[i]);
              //   obj.transform.position = new Vector3(0, 0, -9.850784f);
-                obj.transform.position += posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
+                obj.transform.position = posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
                 if (curRoundIndex / 2 != 0)
                 {
                     obj.transform.localEulerAngles =

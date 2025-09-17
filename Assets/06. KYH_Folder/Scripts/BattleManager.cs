@@ -131,6 +131,7 @@ public class BattleManager : MonoBehaviour
         {
             Debug.LogError("BattleFields 오브젝트를 찾을 수 없습니다.");
         }
+        battleFields[0].gameObject.SetActive(true);
     }
 
     // 스킵 버튼 클릭 시 호출
@@ -168,8 +169,8 @@ public class BattleManager : MonoBehaviour
             }
         }
         
-        JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[GlobalStageManager.Instance.CurrentStageIndex.Value],
-            GlobalStageManager.Instance.CurrentStageIndex.Value);
+        JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[(GlobalStageManager.Instance.CurrentStageIndex.Value - 1)],
+            (GlobalStageManager.Instance.CurrentStageIndex.Value-1));
 
         IsStageEnd = false;
 

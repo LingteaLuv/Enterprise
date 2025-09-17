@@ -50,7 +50,6 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         }
 
         Debug.Log("[CharacterGachaManager] 어드레서블을 통해 캐릭터 풀 로딩을 시작합니다...");
-
         var handle = Addressables.LoadAssetsAsync<CharacterData>(characterDataLabel, null);
         _characterLoadHandle = handle;
 

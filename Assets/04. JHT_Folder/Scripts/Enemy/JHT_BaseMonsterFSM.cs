@@ -203,7 +203,7 @@ namespace JHT
 
             ChangeAnim(this.monsterPrefab.GetComponent<PlayerObj>(), currentState);
 
-            if (attackCor == null)
+            if (attackCor == null && gameObject != null)
                 attackCor = StartCoroutine(AttackCor());
 
         }
