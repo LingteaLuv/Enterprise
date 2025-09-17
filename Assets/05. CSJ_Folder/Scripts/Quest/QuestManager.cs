@@ -83,6 +83,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         // 퀘스트 리셋중인지 확인
         private bool _isResetting;
         private bool isLoaded;
+        private bool _initialized;
         
         private const string QuestDataPath = "QuestData";
         
@@ -160,6 +161,15 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         private IEnumerator Start()
         {
+            yield return WaitForLogin();
+            if (_initialized) yield break;
+            yield return Initialize();
+
+        }
+
+        private IEnumerator Initialize()
+        {
+            _initialized = true;
             yield return DatabaseManager.Instance.EnsureServerOffset().AsIEnumerator();
             
             var dataTask = LoadAsync();
@@ -205,7 +215,19 @@ namespace _05._CSJ_Folder.Scripts.Quest
             yield return CheckTemporaryQuestsReset(dailyCheck, weeklyCheck).AsIEnumerator();
 
             ScheduleNextResetTick();
+        }
+
+        private IEnumerator WaitForLogin()
+        {
+            while (AuthManager.Instance == null) yield return null;
             
+            if (AuthManager.Instance.isLogined) yield break;
+
+            bool done = false;
+            void Handler() => done = true;
+            AuthManager.Instance.LoginCompleted += Handler;
+            yield return new WaitUntil(() => done || AuthManager.Instance.isLogined);
+            AuthManager.Instance.LoginCompleted -= Handler;
         }
 
         #endregion
