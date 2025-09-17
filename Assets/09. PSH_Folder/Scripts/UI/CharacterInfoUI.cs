@@ -182,7 +182,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (currentCharacterData != null)
         {
             characterNameText.text = $"{currentCharacterData.characterdata.characterName}";
-            characterImage.sprite = currentCharacterData.characterdata.characterSprite;
+            characterImage.sprite = currentCharacterData.characterdata.characterIllust;
             if (currentCharacterData.Level.Value == PlayerDataManager.MAX_CHARACTER_LEVEL)
             {
                 levelText.text = $"LV MAX";
