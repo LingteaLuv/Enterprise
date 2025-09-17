@@ -13,18 +13,14 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     private void OnEnable()
     {
         FomationChanged = () => ETCAchieve("ArrangeTutorial");
+        FormationManager.Instance.OnTempFormationChanged -= FomationChanged;
         FormationManager.Instance.OnTempFormationChanged += FomationChanged;
         AutoFomation = () => ETCAchieve("AutoArrangeTutorial");
+        FormationManager.Instance.OnAutoFormation -= AutoFomation;
         FormationManager.Instance.OnAutoFormation += AutoFomation;
         RelicTutorial = (_) => ETCAchieve("RelicTutorial");
-        InventoryManager.Instance.OnChangePanel += RelicTutorial;
-    }
-
-    private void OnDisable()
-    {
-        FormationManager.Instance.OnTempFormationChanged -= FomationChanged;
-        FormationManager.Instance.OnAutoFormation -= AutoFomation;
         InventoryManager.Instance.OnChangePanel -= RelicTutorial;
+        InventoryManager.Instance.OnChangePanel += RelicTutorial;
     }
 
     public void OnBossBattleEnter()
