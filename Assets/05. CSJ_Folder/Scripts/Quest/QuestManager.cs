@@ -77,6 +77,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         // 추후 보상관련 사용
         public event Action<QuestRewardSO.RewardEntry> OnRewardGranted;
+        public event Action<TutorialQuestDefinitionSO> OnTutorialQuestCompleted;
 
         // 퀘스트 초기화 확인용 코루틴
         private Coroutine _nextResetCoroutine;
@@ -637,6 +638,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 퀘스트 클리어 카운트를 +1합니다
             ClearedQuestCount++;
             QuestSignalManager.Instance.ETCAchieve("GeneralClear");
+            
             // 다음 일반 퀘스트를 작동시킵니다.
             EnsureGeneralActive();
             // QuestUI를 새로고침합니다
@@ -701,9 +703,14 @@ namespace _05._CSJ_Folder.Scripts.Quest
             {
                 _clearedTutorialQuestIds.Add(inst.QuestId);
             }
+
             if (def.isGeneral)
+            {
+                if (def is TutorialQuestDefinitionSO tutorialQuestDef)
+                    OnTutorialQuestCompleted?.Invoke(tutorialQuestDef);
                 // 일반 퀘스트의 보상처리를 마무리합니다.
                 OnGeneralCompleted();
+            }
 
             if (def.isTemporary)
                 OnTemporaryCompleted(inst as TemporaryInstance);
@@ -725,7 +732,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             return _generalDefs.TryGetValue(questId, out var def) ? def : null;
         }
-
     
         
         #endregion
@@ -1214,9 +1220,13 @@ namespace _05._CSJ_Folder.Scripts.Quest
             var snapshot = _tutorialQuests.ToArray();
             var index = Array.FindIndex(snapshot, tutorial => tutorial.questId == activeId);
             if (index < 0) return false;
-            
-            for (int i = 0; i< index && _tutorialQuests.Count > 0; i++)
-                _tutorialQuests.Dequeue();
+
+            for (int i = 0; i < index && _tutorialQuests.Count > 0; i++)
+            {
+                var tutorial = _tutorialQuests.Dequeue();
+                QuestSignalManager.Instance.UnSubscribeTutorial(tutorial);
+            }
+
 
             if (_tutorialQuests.Count > 0)
             {

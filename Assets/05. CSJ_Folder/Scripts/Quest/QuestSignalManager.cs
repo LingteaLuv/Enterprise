@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using _05._CSJ_Folder.Scripts.Quest;
+using _05._CSJ_Folder.Scripts.Quest.Definition;
 using JHT;
 using UnityEngine;
 
@@ -10,22 +12,88 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     private Action FomationChanged;
     private Action AutoFomation;
     private Action<RelicsObject> RelicTutorial;
+    
+    public event Action BossBattleEnter;
+    public event Action OnDungeonEnter;
+    
     private void OnEnable()
     {
-        FomationChanged = () => ETCAchieve("ArrangeTutorial");
+        QuestManager.Instance.OnTutorialQuestCompleted -= UnSubscribeTutorial;
+        QuestManager.Instance.OnTutorialQuestCompleted += UnSubscribeTutorial;
+        
+        FomationChanged = () => Tutorial("ArrangeTutorial");
         FormationManager.Instance.OnTempFormationChanged -= FomationChanged;
         FormationManager.Instance.OnTempFormationChanged += FomationChanged;
-        AutoFomation = () => ETCAchieve("AutoArrangeTutorial");
+        
+        AutoFomation = () => Tutorial("AutoArrangeTutorial");
         FormationManager.Instance.OnAutoFormation -= AutoFomation;
         FormationManager.Instance.OnAutoFormation += AutoFomation;
-        RelicTutorial = (_) => ETCAchieve("RelicTutorial");
+        
+        RelicTutorial = (_) => Tutorial("RelicTutorial");
         InventoryManager.Instance.OnChangePanel -= RelicTutorial;
         InventoryManager.Instance.OnChangePanel += RelicTutorial;
+
+        BossBattleEnter -= OnBossTutorial;
+        BossBattleEnter += OnBossTutorial;
+
+        OnDungeonEnter -= OnTutorial;
+        OnDungeonEnter -= OnActiveDungeon;
+        OnDungeonEnter += OnTutorial;
+        OnDungeonEnter += OnActiveDungeon;
+    }
+
+    public void UnSubscribeTutorial(TutorialQuestDefinitionSO def)
+    {
+        var tuto = def.Goal.enumKey.ToKeyString();
+        switch (tuto)
+        {
+            case "ArrangeTutorial":
+                FormationManager.Instance.OnTempFormationChanged -= FomationChanged;
+                break;
+            case "AutoArrangeTutorial":
+                FormationManager.Instance.OnAutoFormation -= AutoFomation;
+                break;
+            case "RelicTutorial":
+                InventoryManager.Instance.OnChangePanel -= RelicTutorial;
+                break;
+            case "BossTutorial":
+                BossBattleEnter -= OnBossTutorial;
+                break;
+            case "RogulikeTutorial":
+                OnDungeonEnter -= OnTutorial;
+                break;
+            // TODO : 추후 스킬을 이으며 추가
+            case "SkillTutorial":
+                break;
+        }
     }
 
     public void OnBossBattleEnter()
     {
+        Debug.Log("Boss Battle Enter");
         ETCAchieve("BossBattle");
+        BossBattleEnter?.Invoke();
+    }
+
+    public void OnBossTutorial()
+    {
+        Debug.Log("Boss Tutorial");
+        Tutorial("BossTutorial");
+    }
+
+    public void OnDungeonEntered()
+    {
+        OnDungeonEnter?.Invoke();
+    }
+
+    public void OnTutorial()
+    {
+        Tutorial("RoguelikeTutorial");
+    }
+
+    public void OnActiveDungeon()
+    {
+        Active(ActiveType.Dungeon);
     }
     
     /// <summary>
@@ -145,6 +213,13 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         var key = QuestKeys.RankUp(rankKey);
         SendSignal(key, rankCount, general, daily, weekly);
+    }
+
+    public void Tutorial(string def, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.Tutorial(def);
+        Debug.Log($"tutorialkey {key}");
+        SendSignal(key, 1, general, daily, weekly);
     }
 
     private void SendSignal(string key, int count, bool general, bool daily, bool weekly)
