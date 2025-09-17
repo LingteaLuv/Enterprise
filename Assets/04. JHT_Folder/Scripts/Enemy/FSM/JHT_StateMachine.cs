@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static JHT.JHT_BaseMonsterFSM;
 
 namespace JHT
 {
     public class JHT_StateMachine
     {
-        public Dictionary<PlayerState, JHT_BaseState> stateDic;
+        public Dictionary<MonsterState, JHT_BaseState> stateDic;
         public JHT_BaseState curState;
 
         public JHT_StateMachine()

@@ -23,11 +23,11 @@ namespace JHT
 
         public override void Update()
         {
-            if (fsm.currentState == PlayerState.DEATH)
+            if (fsm.currentState == JHT_BaseMonsterFSM.MonsterState.DEATH)
                 return;
 
-            if (fsm.curHP <= 0)
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.DEATH]);
+            if (fsm.monsterStat != null  && fsm.CurHP <= 0)
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.DEATH]);
 
         }
 
@@ -54,6 +54,7 @@ namespace JHT
 
             if (fsm.target == null)
             {
+                Debug.LogError($"Idle : null");
                 fsm.TryAcquireNextTarget();
                 return;
             }
@@ -63,7 +64,8 @@ namespace JHT
 
             if (dist < fsm.monsterStat.chaseRange)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.MOVE]);
+                Debug.LogError($"Idle dist : {dist}");
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.MOVE]);
             }
         }
 
@@ -90,25 +92,29 @@ namespace JHT
         public override void Update()
         {
             base.Update();
-            fsm.HandleMove();
 
             if (fsm.target == null)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.IDLE]);
+                Debug.LogError($"MOVE : target null");
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.IDLE]);
                 return;
             }
+
+            fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position,
+            Time.deltaTime * fsm.monsterStat.moveSpeed);
+            fsm.Rotate();
 
             float dist = Mathf.Abs(Vector2.Distance(fsm.target.transform.position, fsm.gameObject.transform.position));
 
             if (dist < fsm.monsterStat.attackRange)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.ATTACK]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.ATTACK]);
             }
 
-            if (dist > fsm.monsterStat.chaseRange)
-            {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.IDLE]);
-            }
+            //if (dist > fsm.monsterStat.chaseRange)
+            //{
+            //    fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.IDLE]);
+            //}
         }
 
         public override void Exit()
@@ -136,7 +142,7 @@ namespace JHT
 
             if (fsm.target == null)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.IDLE]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.IDLE]);
                 return;
             }
 
@@ -145,14 +151,10 @@ namespace JHT
             if (Mathf.Abs(Vector2.Distance(fsm.target.transform.position,
                 fsm.gameObject.transform.position)) > fsm.monsterStat.attackRange + safeZone)
             {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.MOVE]);
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.MOVE]);
                 return;
             }
 
-            if (fsm.canAttack == false)
-            {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.OTHER]);
-            }
         }
 
         public override void Exit()
@@ -161,22 +163,42 @@ namespace JHT
         }
     }
 
-    public class Monster_AttackDelay : JHT_MonsterState
+    public class Monster_Skill1 : JHT_MonsterState
     {
-        public Monster_AttackDelay(JHT_BaseMonsterFSM _fsm) : base(_fsm) { }
+        public Monster_Skill1(JHT_BaseMonsterFSM _fsm) : base(_fsm) { }
 
         public override void Enter()
         {
             base.Enter();
-            fsm.HandleAttackDelay();
         }
+
         public override void Update()
         {
             base.Update();
-            if (fsm.canAttack == true)
-            {
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.ATTACK]);
-            }
+
+
+        }
+
+        public override void Exit()
+        {
+            base.Exit();
+        }
+    }
+
+    public class Monster_Skill2 : JHT_MonsterState
+    {
+        public Monster_Skill2(JHT_BaseMonsterFSM _fsm) : base(_fsm) { }
+
+        public override void Enter()
+        {
+            base.Enter();
+        }
+
+        public override void Update()
+        {
+            base.Update();
+
+
         }
 
         public override void Exit()
@@ -193,7 +215,7 @@ namespace JHT
         {
             base.Enter();
             //fsm.animator.Play(fsm.DEATH);
-            fsm.HandleDie();
+            
         }
 
         public override void Update()

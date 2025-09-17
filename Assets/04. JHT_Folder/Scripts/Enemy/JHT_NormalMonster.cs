@@ -6,43 +6,20 @@ namespace JHT
     public class JHT_NormalMonster : JHT_BaseMonsterFSM
     {
 
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-        }
-
         protected override void OnDisable()
         {
             base.OnDisable();
         }
 
-        public override void Init(JHT_MonsterDataSO so)
+        public override void Init(JHT_BaseMonsterStat stat)
         {
-            base.Init(so);
+            base.Init(stat);
 
             if (monsterUI != null)
             {
                 monsterUI.gameObject.SetActive(true);
             }
 
-            switch (monsterStat.monsterRarity)
-            {
-                case MonsterRarity.Elite:
-                    gameObject.transform.localScale = new Vector3(1.3f, 1.3f, 1);
-                    monsterPrefab.transform.localScale = gameObject.transform.localScale;
-                    monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.2f, 0);
-                    break;
-                case MonsterRarity.Normal:
-                    gameObject.transform.localScale = Vector3.one;
-                    monsterPrefab.transform.localScale = gameObject.transform.localScale;
-                    monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.15f, 0);
-                    break;
-                case MonsterRarity.Boss:
-                    gameObject.transform.localScale = new Vector3(1.5f, 1.5f, 1);
-                    monsterPrefab.transform.localScale = gameObject.transform.localScale;
-                    monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.3f, 0);
-                    break;
-            }
         }
         protected override void Update()
         {
@@ -69,7 +46,7 @@ namespace JHT
         public void NormalMonsterAttack()
         {
             // 근접 공격일경우
-            if (monsterStat.monsterType == MonsterType.close)
+            if (monsterStat.monsterAttackType == AtkRangeType.Melee_Attack)
             {
                 Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, monsterStat.attackRange, targetLayer);
                 
@@ -81,7 +58,7 @@ namespace JHT
                     if (hs != null)
                     {
                         //Pool 파티클 사용
-                        hs.TakeDamage(monsterStat.attackPower);
+                        hs.TakeDamage(monsterStat.totalAttackPower);
                     }
 
                 }
@@ -103,7 +80,7 @@ namespace JHT
                 Vector2 targetPos = (Vector2)target.transform.position;
 
                 if (this != null)
-                    obj.Init(targetPos, startPos, monsterStat.attackPower, monsterStat.attackPower,monsterStat.projectileSprite);
+                    obj.Init(targetPos, startPos, monsterStat.totalAttackPower, monsterStat.totalAttackPower,monsterStat.projectileSprite);
             }
         }
 

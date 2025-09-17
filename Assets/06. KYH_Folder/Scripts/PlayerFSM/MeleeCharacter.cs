@@ -221,7 +221,7 @@ public class MeleeCharacter : BaseCharacterFSM
 
     private bool IsTargetValid()
     {
-        return target != null && !target.Equals(null) && target.GetComponent<JHT_BaseMonsterFSM>().curHP > 0;
+        return target != null && !target.Equals(null) && target.GetComponent<JHT_BaseMonsterFSM>().CurHP > 0;
     }
 
     private bool IsTargetInAttackRange()

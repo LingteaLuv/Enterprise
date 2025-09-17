@@ -1,21 +1,26 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 
 
 namespace JHT
 {
     // 상태 통일
-
-    public abstract class JHT_BaseMonsterFSM : JHT_PooledObject
+    public enum MonsterSkillCool
     {
-        //public enum State { Idle, Move, Attack, Dead }
+        Normal,
+        Skill1,
+        Skill2
+    }
+
+
+    public abstract class JHT_BaseMonsterFSM : JHT_PooledObject, IAttacker
+    {
+        public enum MonsterState { IDLE, MOVE, ATTACK, DEATH, SKILL1, SKILL2 }
 
         [Header("State")]
-        public PlayerState currentState;
+        public MonsterState currentState;
         public JHT_StateMachine stateMachine;
 
         [Header("Target")]
@@ -28,42 +33,50 @@ namespace JHT
         public GameObject monsterPrefab;
         public Canvas monsterUI;
         SpriteRenderer head;
-        public float curHP;
         [SerializeField] private Transform damageTextPos;
 
         private Coroutine takeDamageCor;
         private Coroutine attackCor;
-        private Coroutine attackBoolCor;
         private WaitForSeconds attackDelayCount;
 
-        public bool canAttack;
-        //public bool CanAttack { get { return canAttack; } set { canAttack = value; OnChangeAttack?.Invoke(canAttack); } }
-        //public Action<bool> OnChangeAttack;
+        private bool _initialized;
+
+        private float curHP;
+        public float CurHP { get { return curHP; } set { curHP = value; OnChangeHp?.Invoke(curHP); } }
+        public Action<float> OnChangeHp;
+
         #region Animator
 
-        //[Header("Anim")]
-        //public Animator animator;
+        [Header("Anim")]
+        public Animator animator;
 
-        //public readonly int IDLE = Animator.StringToHash("IDLE");
-        //public readonly int MOVE = Animator.StringToHash("MOVE");
-        //public readonly int ATTACK = Animator.StringToHash("ATTACK");
-        //public readonly int DEATH = Animator.StringToHash("DEATH");
-
+        public readonly int IDLE = Animator.StringToHash("IDLE");
+        public readonly int MOVE = Animator.StringToHash("MOVE");
+        public readonly int ATTACK = Animator.StringToHash("ATTACK");
+        public readonly int DEATH = Animator.StringToHash("DEATH");
         #endregion
 
 
-        public virtual void Init(JHT_MonsterDataSO so)
+        public virtual void Init(JHT_BaseMonsterStat stat)
         {
-            StartSetting(so);
+            StartCoroutine(StartSetting(stat));
         }
 
-        private void StartSetting(JHT_MonsterDataSO so)
+        private IEnumerator StartSetting(JHT_BaseMonsterStat stat)
         {
+            _initialized = false;
             target = null;
-            canAttack = false;
 
-            monsterSO = so;
-            monsterStat.Init(monsterSO);
+            yield return new WaitUntil(() => MonsterDataManager.Instance.IsPrefabLoadedFinish);
+
+            yield return null;
+
+            monsterSO = stat.curSO;
+            monsterStat = stat;
+
+            OnChangeHp += ShowMonsterUI;
+
+            curHP = monsterStat.maxHp;
 
             if (attackCor != null)
             {
@@ -77,50 +90,71 @@ namespace JHT
                 takeDamageCor = null;
             }
 
-            monsterPrefab = Instantiate(monsterStat.enemyCharacter, transform);
-            monsterPrefab.transform.localRotation = Quaternion.identity;
-
-            monsterStat.CurHp = monsterStat.maxHp;
-            attackDelayCount = new WaitForSeconds(monsterStat.attackDelay);
-
-            //animator = monsterPrefab.GetComponentInChildren<Animator>(true);
+            if (MonsterDataManager.Instance.monsterPrefabDic.TryGetValue(monsterSO.ID.ToString(), out GameObject value))
+            {
+                monsterPrefab = Instantiate(value, transform);
+                monsterPrefab.transform.localRotation = Quaternion.identity;
+            }
 
 
-            //if (so.animatorOverrideController != null)
-            //{
-            //    animator.runtimeAnimatorController = monsterStat.animatorOverride;
-            //    //animator.SetFloat("AttackSpeed", monsterStat.attackSpeed);
-            //}
+            attackDelayCount = new WaitForSeconds(monsterStat.attackDelay - 1);
+
+            animator = monsterPrefab.GetComponentInChildren<Animator>(true);
+            
+            if (monsterStat.aoc != null)
+            {
+                animator.runtimeAnimatorController = monsterStat.aoc;
+                //animator.SetFloat("AttackSpeed", monsterStat.attackSpeed);
+            }
             StateMachineInit();
+            MonsterScale(monsterStat);
 
-            head = monsterPrefab.transform.Find("Monster_SPUM_1/UnitRoot/Root/BodySet/P_Body/HeadSet/P_Head/P_Head/5_Head")?.GetComponent<SpriteRenderer>();
+            head = monsterPrefab.transform.Find($"{monsterPrefab.name}/UnitRoot/Root/BodySet/P_Body/HeadSet/P_Head/P_Head/5_Head")?.GetComponent<SpriteRenderer>();
         }
 
         private void StateMachineInit()
         {
             stateMachine = new JHT_StateMachine();
-            stateMachine.stateDic.Add(PlayerState.IDLE, new Monster_Idle(this));
-            stateMachine.stateDic.Add(PlayerState.MOVE, new Monster_Move(this));
-            stateMachine.stateDic.Add(PlayerState.ATTACK, new Monster_Attack(this));
-            stateMachine.stateDic.Add(PlayerState.DEATH, new Monster_Die(this));
-            stateMachine.stateDic.Add(PlayerState.OTHER, new Monster_AttackDelay(this));
+            stateMachine.stateDic.Add(MonsterState.IDLE, new Monster_Idle(this));
+            stateMachine.stateDic.Add(MonsterState.MOVE, new Monster_Move(this));
+            stateMachine.stateDic.Add(MonsterState.ATTACK, new Monster_Attack(this));
+            stateMachine.stateDic.Add(MonsterState.DEATH, new Monster_Die(this));
+            stateMachine.stateDic.Add(MonsterState.SKILL1, new Monster_Skill1(this));
+            stateMachine.stateDic.Add(MonsterState.SKILL2, new Monster_Skill2(this));
 
-            stateMachine.curState = stateMachine.stateDic[PlayerState.IDLE];
-            currentState = PlayerState.IDLE;
+            currentState = MonsterState.IDLE;
+            stateMachine.curState = stateMachine.stateDic[MonsterState.IDLE];
+
+            _initialized = true;
         }
 
-        protected virtual void OnEnable()
+        private void MonsterScale(JHT_BaseMonsterStat monsterStat)
         {
-            if (monsterStat != null)
-                monsterStat.OnChangeHp += ShowMonsterUI;
 
-            //OnChangeAttack += CanAttackCor;
+            switch (monsterStat.monsterRarity)
+            {
+                case MonsterRarity.Elite:
+                    gameObject.transform.localScale = new Vector3(1.3f, 1.3f, 1);
+                    monsterPrefab.transform.localScale = gameObject.transform.localScale;
+                    monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.2f, 0);
+                    break;
+                case MonsterRarity.Normal:
+                    gameObject.transform.localScale = Vector3.one;
+                    monsterPrefab.transform.localScale = gameObject.transform.localScale;
+                    monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.15f, 0);
+                    break;
+                case MonsterRarity.Boss:
+                    gameObject.transform.localScale = new Vector3(1.5f, 1.5f, 1);
+                    monsterPrefab.transform.localScale = gameObject.transform.localScale;
+                    monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.3f, 0);
+                    break;
+            }
         }
+
 
         protected virtual void OnDisable()
         {
-            if (monsterStat != null)
-                monsterStat.OnChangeHp -= ShowMonsterUI;
+            OnChangeHp -= ShowMonsterUI;
 
             //canAttack = false;
             //OnChangeAttack -= CanAttackCor;
@@ -128,8 +162,12 @@ namespace JHT
 
         protected virtual void Update()
         {
-            if (currentState == PlayerState.DEATH)
+            if (!_initialized) return;
+
+            if (currentState == MonsterState.DEATH)
                 return;
+
+            if (stateMachine == null || stateMachine.curState == null) return;
 
             stateMachine.Update();
         }
@@ -160,8 +198,7 @@ namespace JHT
 
         public virtual void HandleIdle()
         {
-            currentState = PlayerState.IDLE;
-            ChangeAnim(this.monsterPrefab.GetComponent<PlayerObj>(), currentState);
+            ChangeAnim(IDLE, MonsterState.IDLE);
         }
 
         public virtual void HandleAttack()
@@ -169,13 +206,11 @@ namespace JHT
             if (target == null)
                 return;
 
-            canAttack = true;
-            currentState = PlayerState.ATTACK;
-            ChangeAnim(this.monsterPrefab.GetComponent<PlayerObj>(), currentState);
+            ChangeAnim(ATTACK, MonsterState.ATTACK);
 
-            if (attackBoolCor == null)
+            if (attackCor == null)
             {
-                attackBoolCor = StartCoroutine(AttackBoolCor());
+                attackCor = StartCoroutine(AttackCor());
             }
 
         }
@@ -185,91 +220,29 @@ namespace JHT
             if (target == null)
                 return;
 
-            currentState = PlayerState.MOVE;
-            ChangeAnim(this.monsterPrefab.GetComponent<PlayerObj>(), currentState);
-
-            transform.position = Vector3.MoveTowards(transform.position, target.transform.position,
-                Time.deltaTime * monsterStat.moveSpeed);
-
-
-            Rotate();
-        }
-
-        public virtual void HandleAttackDelay()
-        {
-            currentState = PlayerState.OTHER;
-
-            Rotate();
-
-            ChangeAnim(this.monsterPrefab.GetComponent<PlayerObj>(), currentState);
-
-            if (attackCor == null)
-                attackCor = StartCoroutine(AttackCor());
-
-        }
-
-        private IEnumerator AttackBoolCor()
-        {
-            yield return new WaitForSeconds(1f);
-            canAttack = false;
-
-            if (attackBoolCor != null)
-            {
-                StopCoroutine(attackBoolCor);
-                attackBoolCor = null;
-            }
-
-        }
-
-        private IEnumerator AttackCor()
-        {
-            yield return attackDelayCount;
-            canAttack = true;
-
-            if (attackCor != null)
-            {
-                StopCoroutine(attackCor);
-                attackCor = null;
-            }
+            ChangeAnim(MOVE, MonsterState.MOVE);
 
         }
 
         public virtual void HandleDie()
         {
-            currentState = PlayerState.DEATH;
+            currentState = MonsterState.DEATH;
             Die();
         }
 
-        //private IEnumerator AttackCor()
-        //{
-        //    while (true)
-        //    {
-        //        //if (!animator) yield break;
-        //        Debug.LogError("Attackkkkkkkkkkkk222222");
+        private IEnumerator AttackCor()
+        {
+            while (true)
+            {
+                if (!animator) 
+                    yield break;
 
-        //        //animator.Play(ATTACK, 0, 0f);
-        //        yield return attackDelayCount;
-        //    }
-        //}
+                animator.Play(ATTACK, 0, 0f);
+                yield return new WaitForSeconds(1f);
 
-        //private void CanAttackCor(bool value)
-        //{
-        //    if (value)
-        //    {
-        //        if (attackCor == null)
-        //        {
-        //            attackCor = StartCoroutine(AttackCor());
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (attackCor != null)
-        //        {
-        //            StopCoroutine(attackCor);
-        //            attackCor = null;
-        //        }
-        //    }
-        //}
+                yield return attackDelayCount;
+            }
+        }
 
         public void Rotate()
         {
@@ -294,8 +267,8 @@ namespace JHT
 
         public void TakeDamage(float damage)
         {
-            monsterStat.CurHp = Mathf.Max(monsterStat.CurHp - damage, 0);
-            if (monsterStat.CurHp == 0)
+            CurHP = Mathf.Max(CurHP - damage, 0);
+            if (CurHP == 0)
             {
                 JHT_DamageBox obj = JHT_MonsterSpawnManager.Instance.damageTextPool.GetPooled() as JHT_DamageBox;
                 obj.ShowDamageText(damage);
@@ -339,7 +312,7 @@ namespace JHT
 
         private void Die()
         {
-            BattleManager.Instance.OnEnemyDead(monsterSO);
+            BattleManager.Instance.OnEnemyDead(monsterStat);
 
             Outit();
         }
@@ -350,11 +323,7 @@ namespace JHT
 
             monsterUI.gameObject.SetActive(false);
 
-            if (attackCor != null)
-            {
-                StopCoroutine(attackCor);
-                attackCor = null;
-            }
+            ChangeAnim(DEATH, MonsterState.DEATH);
 
             if (monsterPrefab != null)
                 Destroy(monsterPrefab);
@@ -373,12 +342,24 @@ namespace JHT
             monsterUI.GetComponentInChildren<JHT_UIMonster>().ChangeHP(percent);
         }
 
-        public void ChangeAnim(PlayerObj Unit, PlayerState state)
+        private void ChangeAnim(int temp, MonsterState curState)
         {
-            Unit.isAction = true;
-            Unit._prefabs._anim.Rebind();
-            Unit.SetStateAnimationIndex(state);
-            Unit.PlayStateAnimation(state);
+            if (animator == null || curState == currentState)
+                return;
+
+            if (currentState == MonsterState.ATTACK && attackCor != null)
+            {
+                StopCoroutine(attackCor);
+                attackCor = null;
+            }
+
+            currentState = curState;
+
+            animator.Play(temp);
+        }
+        public float GetCurrentStat(Stat stat)
+        {
+            throw new NotImplementedException();
         }
     }
 }
