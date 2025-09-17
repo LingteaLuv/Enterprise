@@ -12,24 +12,43 @@ namespace JHT
     {
         public const string itemRelicsURL = "https://docs.google.com/spreadsheets/d/1yrgwWQ_XijgUwjyUSkgDH9wji0oHuoYjEcmjZdZVGmg/export?format=csv"; //범위 설정 : &range=A2:B, 두번쨰시트 : &gid~~
         public const string lootTableURL = "https://docs.google.com/spreadsheets/d/13MgAe8F47N4GJRDn4vg4wGtn2Y31aOerQEQF096ox_g/export?format=csv";
-
+        public const string monsterDataURL = "https://docs.google.com/spreadsheets/d/1PmzSVnMU8XB2xUcDjxwD2VnZMGChZEwb0RiKSioXa8Q/export?format=csv";
+        public const string monsterTableDataURL = "https://docs.google.com/spreadsheets/d/1VoQEEhbJ2EDee1ZxL99--B5VUV-qBRnSVTzkIGlpBEY/export?format=csv";
+        
         public event Action OnDataSetCompleted;
-        public event Action OnMonsterDataSetCompleted;
+        public event Action OnMonsterDataTableSetCompleted;
 
-        public IEnumerator DownloadData()
+        public bool isMonsterDataReady;
+        public IEnumerator DownRelicsData()
         {
             yield return null;
+            //데이터 두번 받아옴 한번으로 변경 필요해보임
             yield return LoadDataCSV(itemRelicsURL, SetRelics,2);
-            yield return LoadDataCSV(lootTableURL, SetLootTable, 2);
             OnDataSetCompleted?.Invoke();
+        }
+
+        public IEnumerator DownLootTableData()
+        {
+            yield return null;
+            yield return LoadDataCSV(lootTableURL, SetLootTable, 2);
         }
 
         public IEnumerator DownLoadMonsterData()
         {
+            isMonsterDataReady = false;
             yield return null;
-            //yield return LoadMonsterDataCSV();
-            //yield return LoadMonsterTableCSV();
-            OnMonsterDataSetCompleted?.Invoke();
+            yield return LoadDataCSV(monsterDataURL, SetData, 2);
+            isMonsterDataReady = true;
+
+        }
+
+        public IEnumerator DownLoadMonsterTableData()
+        {
+            yield return null;
+            yield return new WaitUntil(() => isMonsterDataReady);
+            yield return LoadDataCSV(monsterTableDataURL, SetMonsterTableData, 2);
+            
+            OnMonsterDataTableSetCompleted?.Invoke();
         }
 
         private IEnumerator LoadDataCSV(string url, Action<string[][]> onParsed, int startLine = 1)
@@ -101,6 +120,55 @@ namespace JHT
                 if (so != null)
                 {
                     so._items[rarity-1].weight = int.Parse(row[2]);
+                }
+            }
+        }
+
+        private void SetData(string[][] data)
+        {
+            JHT_MonsterDataSO[] parse = new JHT_MonsterDataSO[MonsterDataManager.Instance.monsterDataList.Count];
+            for (int i = 0; i < MonsterDataManager.Instance.monsterDataList.Count; i++)
+            {
+                parse[i] = MonsterDataManager.Instance.monsterDataList[i];
+            }
+
+            foreach (var row in data)
+            {
+                int MonsterID = int.Parse(row[0]);
+                
+                JHT_MonsterDataSO so = Array.Find(parse, w => w.ID == MonsterID);
+                if (so != null)
+                {
+                    so.monsterName = row[1]; 
+                    so.monsterCrewRole = (CrewRole)Enum.Parse(typeof(CrewRole), row[2]);
+                    so.monsterAttackType = (AtkRangeType)Enum.Parse(typeof(AtkRangeType), row[4]);
+                    so.normalSkill = row[7];
+                    //so.skillAttack1 = row[7];
+                    //so.buffSkill =row[8];
+                }
+            }
+        }
+
+        private void SetMonsterTableData(string[][] data)
+        {
+            JHT_MonsterDataTable[] parse = new JHT_MonsterDataTable[MonsterDataManager.Instance.monsterTableList.Count];
+            for (int i = 0; i < MonsterDataManager.Instance.monsterTableList.Count; i++)
+            {
+                parse[i] = MonsterDataManager.Instance.monsterTableList[i];
+            }
+
+            foreach (var row in data)
+            {
+                int TableID = int.Parse(row[0]);
+                int readNum = int.Parse(row[1]);
+
+                JHT_MonsterDataTable so = Array.Find(parse, w => w.ID == TableID);
+                if (so != null)
+                {
+                    so.monsterReadForCSV[readNum - 1] = int.Parse(row[1]);
+                    so.monsterData[readNum - 1] = MonsterDataManager.Instance.monsterDataDic[row[2]];
+                    so.roundCount = int.Parse(row[3]);
+                    so.totalCost = int.Parse(row[4]);
                 }
             }
         }

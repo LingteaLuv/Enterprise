@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace JHT
@@ -14,6 +15,8 @@ namespace JHT
         [SerializeField] private JHT_BaseMonsterFSM monsterPrefab;
         [SerializeField] private JHT_MonsterProjectile monsterProjectile;
         [SerializeField] private JHT_DamageBox damageTextPrefab;
+        public List<JHT_MonsterSetManager> monsterPosPrefab;
+        private List<JHT_MonsterSetManager> monsterSamplePos;
 
         public JHT_MonsterDataTable roundTable;
         //[SerializeField] List<JHT_MonsterDataTable> roundList;
@@ -22,24 +25,26 @@ namespace JHT
         // => 데이터 정보를 가져오는건 미리 addressable에서 로드한 모든 몬스터 데이터를 매 스테이지시 로드하는 걸로 하는게 좋아보임(fade in,out이 스테이지당 하는거같음)
         Dictionary<int, JHT_MonsterDataTable> stageDic;
         public List<JHT_MonsterSetManager> posList;
-        public List<JHT_MonsterDataSO> curMonsterCountList;
+        public List<JHT_BaseMonsterStat> curMonsterCountList =new ();
+        Dictionary<AtkRangeType, AnimatorOverrideController> aocDic;
 
-        // Demo
-        [SerializeField] private JHT_MonsterDataTable sampleDataList1;
-        [SerializeField] private JHT_MonsterDataTable sampleDataList2;
-        [SerializeField] private JHT_MonsterDataTable sampleDataList3;
-        [SerializeField] private JHT_MonsterDataTable sampleDataList4;
-        [SerializeField] private JHT_MonsterDataTable sampleDataList5;
 
         public int islandIndex;
         public int roundIndex;
         public int curTotalCount;
+
+        private bool isMonsterDataSetReady;
+        private bool isSkillSetReady;
         
         private GameObject projectilePoolParent;
         private GameObject monsterPoolParent;
-
         private GameObject damageTextPoolParent;
-        public Func<int,List<JHT_MonsterDataSO>> OnAddMonster;
+        public GameObject spawnPosParent;
+
+
+        public Func<int,List<JHT_BaseMonsterStat>> OnAddMonster;
+
+        MonsterDataManager monsterDataManager;
 
         protected override void Awake()
         {
@@ -54,58 +59,83 @@ namespace JHT
             damageTextPoolParent = new GameObject($"{damageTextPrefab.name} Pool_Parent");
             damageTextPoolParent.transform.SetParent(transform);
 
+            spawnPosParent = new GameObject("SpawnPos_Parent");
+            spawnPosParent.transform.SetParent(transform);
+            monsterSamplePos = new(monsterPosPrefab.Count);
+            for (int i = 0; i < monsterPosPrefab.Count; i++)
+            {
+                JHT_MonsterSetManager obj = Instantiate(monsterPosPrefab[i], spawnPosParent.transform);
+                monsterSamplePos.Add(obj);
+            }
+
             monsterPool = new JHT_ObjectPool(monsterPrefab, 10, monsterPoolParent.transform);
             projectilePool = new JHT_ObjectPool(monsterProjectile, 20, projectilePoolParent.transform);
             damageTextPool = new JHT_ObjectPool(damageTextPrefab, 20, damageTextPoolParent.transform);
+
+            monsterDataManager = MonsterDataManager.Instance;
         }
 
-        private void Start()
+        private void OnEnable()
         {
             stageDic = new();
             posList = new();
-            Init();
-        }
+            aocDic = new();
 
-        public void Init()
-        {
-            // MonsterDataLoad 스크립트에서 로드된 데이터를 가져와서 roundList, roundDic에 저장
-            stageDic.Add(0, sampleDataList1);
-            stageDic.Add(1, sampleDataList2);
-            stageDic.Add(2, sampleDataList3);
-            stageDic.Add(3, sampleDataList4);
-            stageDic.Add(4, sampleDataList5);
+            isMonsterDataSetReady = false;
+            isSkillSetReady = false;
 
             OnAddMonster += SetSpawnRound;
+            monsterDataManager.OnMonsterTableLoadFinish += DataStageLoad;
+            monsterDataManager.OnMonsterSkillLoadFinish += SkillDataLoad;
         }
 
         protected override void OnDestroy()
         {
             OnAddMonster -= SetSpawnRound;
+            monsterDataManager.OnMonsterTableLoadFinish -= DataStageLoad;
+            monsterDataManager.OnMonsterSkillLoadFinish -= SkillDataLoad;
             base.OnDestroy();
         }
 
-        public void ChangeIsland(BattleField field,int _islaneIndex)
+        public void SkillDataLoad()
+        {
+            isSkillSetReady = true;
+        }
+
+        public void DataStageLoad()
+        {
+            isMonsterDataSetReady = true;
+            // 현재 스테이지만 로드할지 아니면 전체 다 로드할지 - 현재는 전체 다 로드함
+            for (int i = 0; i < monsterDataManager.monsterTableList.Count; i++)
+            {
+                stageDic.Add(i, monsterDataManager.monsterTableList[i]);
+            }
+        }
+
+
+        public void ChangeIsland(BattleField field,int _islandIndex)
         {
             roundIndex = 0;
-            if (_islaneIndex < 0)
+            if (_islandIndex < 0)
                return;
 
             if(posList.Count > 0)
                 posList.Clear();
 
-            islandIndex = _islaneIndex;
-            roundTable = stageDic[_islaneIndex];
+            islandIndex = _islandIndex;
+            roundTable = stageDic[_islandIndex];
 
 
-            for (int i = 0; i < roundTable.monsterPosData.Count; i++)
+            for (int i = 0; i < monsterSamplePos.Count; i++)
             {
-                roundTable.monsterPosData[i].transform.position = field.EnemySpawnPoints[i].position; //EnemySpawnPoints[i].position;
+                monsterSamplePos[i].transform.position = field.EnemySpawnPoints[i].position;
+
             }
 
             for (int i = 0; i < roundTable.roundCount; i++)
             {
-                int rand = UnityEngine.Random.Range(0, roundTable.monsterPosData.Count);
-                posList.Add(roundTable.monsterPosData[rand]);
+                int rand = UnityEngine.Random.Range(0, monsterSamplePos.Count);
+                posList.Add(monsterSamplePos[rand]);
 
                 if (i != 0 && posList[i] == posList[i - 1])
                 {
@@ -125,11 +155,10 @@ namespace JHT
                 Debug.LogError("현재 라운드 최대를 넘었음");
                 return;
             }
-
+            roundIndex = curRoundIndex;
             if (curMonsterCountList.Count > 0)
                 curMonsterCountList.Clear();
 
-            curMonsterCountList = new();
             curMonsterCountList = OnAddMonster?.Invoke(curRoundIndex);
 
             posList[curRoundIndex].checkList = new();
@@ -139,7 +168,6 @@ namespace JHT
             {
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
                 obj.Init(curMonsterCountList[i]);
-             //   obj.transform.position = new Vector3(0, 0, -9.850784f);
                 obj.transform.position = posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
                 if (curRoundIndex / 2 != 0)
                 {
@@ -152,10 +180,14 @@ namespace JHT
 
         // 비동기식으로 다음 라운드의 적 미리 생성해두면 빠를듯
         // 현재 라운드의 totalCost를 통해 랜덤으로 몬스터 가져오기
-        public List<JHT_MonsterDataSO> SetSpawnRound(int curRoundIndex)
+        public List<JHT_BaseMonsterStat> SetSpawnRound(int curRoundIndex)
         {
+            if (!(isMonsterDataSetReady && isSkillSetReady))
+                return null;
+
             int count = 0;
-            List<JHT_MonsterDataSO> dataList = new();
+            // 메모리 낭비아닌가?
+            List<JHT_BaseMonsterStat> dataList = new();
             Dictionary<CrewRole, int> crewRoleCounter = new();
 
             float roundStart = Time.realtimeSinceStartup;
@@ -178,6 +210,7 @@ namespace JHT
                     break;
                 }
 
+
                 if (count > curTotalCount)
                 {
                     count -= roundTable.monsterData[rand].cost;
@@ -195,14 +228,34 @@ namespace JHT
                             count -= roundTable.monsterData[rand].cost;
                             continue;
                         }
+
                         crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = value + 1;
                     }
                     else
                     {
                         crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = 1;
                     }
+                    MonsterSkillSO normal = roundTable.monsterData[rand].normalSkill == "" ? 
+                        null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].normalSkill];
 
-                    dataList.Add(roundTable.monsterData[rand]);
+                    MonsterSkillSO skill1 = roundTable.monsterData[rand].skill1 == "" ? 
+                        null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill1];
+
+                    MonsterSkillSO skill2 = roundTable.monsterData[rand].skill2 == "" ? 
+                        null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill2];
+
+                    JHT_BaseMonsterStat stat = new(roundTable.monsterData[rand],normal,skill1,skill2);
+
+                    if (roundIndex >= 5 && dataList.Find(a => a.monsterRarity == MonsterRarity.Elite) == null)
+                    {
+                        stat.monsterRarity = MonsterRarity.Elite;
+                    }
+                    else
+                    {
+                        stat.monsterRarity = MonsterRarity.Normal;
+                    }
+
+                    dataList.Add(stat);
                 }
 
             }
