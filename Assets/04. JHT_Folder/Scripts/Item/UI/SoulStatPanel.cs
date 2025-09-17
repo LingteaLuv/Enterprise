@@ -21,7 +21,7 @@ public class SoulStatPanel : MonoBehaviour
     public void Init(PlayerCharacterData data)
     {
 
-        characterImage.sprite = data.characterdata.characterSprite;
+        characterImage.sprite = data.characterdata.characterSoul;
         nameText.text = data.characterdata.characterName + "의 영혼조각";
 
         btn.onClick.RemoveAllListeners();

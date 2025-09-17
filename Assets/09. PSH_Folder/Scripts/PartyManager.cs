@@ -10,7 +10,9 @@ public class PartyManager : Singleton<PartyManager>
 
     [Header("전투시만 필요한 스탯")]
     public float moveSpeed;
+    [Tooltip("원거리")]
     public float attackRange;
+    [Tooltip("근거리")]
     public float attackRange2;
 
     // 생성된 파티원들을 관리하는 리스트

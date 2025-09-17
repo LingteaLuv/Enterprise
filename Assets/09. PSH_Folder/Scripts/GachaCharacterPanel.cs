@@ -1,66 +1,110 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GachaCharacterPanel : MonoBehaviour
 {
-    [Header("기본 UI 요소")]
+    [Header("오브젝트 연결")]
+    [Tooltip("카드의 앞면 UI 그룹")]
+    public GameObject frontFace;
+    [Tooltip("카드의 뒷면 UI 그룹")]
+    public GameObject backFace;
+    [Tooltip("클릭 이벤트를 받을 버튼 (보통 backFace 자식)")]
+    public Button flipButton;
+
+    [Header("앞면 UI 요소")]
     public Image characterImage;
-    public Image[] starImages; // 별 이미지 배열
     public Image bg;
     public TextMeshProUGUI nameText;
-
-    [Header("직업, 속성 아이콘")]
     public Image crewRoleIcon;
-    public Image factionIcon;
+
+    [Header("뒤집기 애니메이션 설정")]
+    [Tooltip("뒤집기 애니메이션 시간")]
+    public float flipDuration = 0.5f;
+
+    private bool isFlipping = false;
+    private bool hasFlipped = false;
+
+    void Start()
+    {
+        // 처음엔 뒷면만 보이도록 설정
+        frontFace.SetActive(false);
+        backFace.SetActive(true);
+        hasFlipped = false;
+        isFlipping = false;
+
+        if (flipButton != null)
+        {
+            flipButton.onClick.AddListener(Flip);
+        }
+    }
 
     /// <summary>
-    /// 캐릭터 데이터와 '뽑힌 등급'으로 이 패널의 UI를 설정합니다.
+    /// 캐릭터 데이터와 등급으로 카드 앞면 UI를 설정합니다.
     /// </summary>
     public void Setup(PlayerCharacterData data, GachaGrade grade)
     {
-        // 캐릭터 기본 정보 설정
         characterImage.sprite = data.characterdata.characterSprite;
         nameText.text = data.characterdata.characterName;
 
-        // '이번에 뽑힌 등급'을 기준으로 별 UI 업데이트
-        int star = (int)grade;
-        UpdateStarUI(star);
-
-        // '이번에 뽑힌 등급'을 기준으로 테두리 색 변경
-        switch (star)
+        // 등급에 따라 배경색 변경
+        switch ((int)grade)
         {
-            case 1:
-                bg.color = Color.white; // 1성
-                break;
-            case 2:
-                bg.color = Color.blue; // 2성
-                break;
-            case 3:
-                bg.color = Color.magenta; // 3성
-                break;
-            default:
-                bg.color = Color.white; // 예외 처리
-                break;
+            case 1: bg.color = Color.white; break;
+            case 2: bg.color = Color.blue; break;
+            case 3: bg.color = Color.magenta; break;
+            default: bg.color = Color.white; break;
         }
 
-        // 아이콘 업데이트
-        UpdateIcon(data);
+        crewRoleIcon.sprite = data.crewRoleIcon;
     }
 
     /// <summary>
-    /// 성급(별) UI를 현재 성급에 맞게 갱신합니다.
+    /// 카드를 뒤집는 애니메이션을 실행합니다.
     /// </summary>
-    private void UpdateStarUI(int currentStars)
+    public void Flip()
     {
-        for (int i = 0; i < starImages.Length; i++)
+        if (isFlipping || hasFlipped) return;
+        StartCoroutine(FlipCoroutine());
+    }
+
+    private IEnumerator FlipCoroutine()
+    {
+        isFlipping = true;
+
+        // 뒷면에서 앞면으로 절반 뒤집기
+        float elapsed = 0f;
+        Quaternion originalRotation = transform.rotation;
+        Quaternion targetRotation = originalRotation * Quaternion.Euler(0, 90, 0);
+
+        while (elapsed < flipDuration / 2)
         {
-            starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
+            transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, elapsed / (flipDuration / 2));
+            elapsed += Time.deltaTime;
+            yield return null;
         }
+        transform.rotation = targetRotation;
+
+        // 앞/뒷면 교체
+        backFace.SetActive(false);
+        frontFace.SetActive(true);
+
+        // 앞면으로 완전히 뒤집기
+        elapsed = 0f;
+        originalRotation = transform.rotation;
+        targetRotation = originalRotation * Quaternion.Euler(0, -90, 0); // 다시 원래 각도로
+
+        while (elapsed < flipDuration / 2)
+        {
+            transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, elapsed / (flipDuration / 2));
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        transform.rotation = Quaternion.identity; // 최종 각도 보정
+
+        hasFlipped = true;
+        isFlipping = false;
     }
-    public void UpdateIcon(PlayerCharacterData data)
-    {
-        crewRoleIcon.sprite = data.crewRoleIcon;
-        factionIcon.sprite = data.factionIcon;
-    }
+
 }
