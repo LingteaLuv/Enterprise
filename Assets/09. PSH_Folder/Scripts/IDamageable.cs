@@ -7,5 +7,7 @@ public interface IDamageable
     /// 지정된 공격자로부터 데미지를 받습니다.
     /// </summary>
     /// <param name="attacker">데미지를 가하는 공격자</param>
-    void TakeDamage(IAttacker attacker);
+    /// <param name="powerRatio">스킬 계수</param>
+    void TakeDamage(IAttacker attacker, float powerRatio = 1f);
+    string GetName();
 }

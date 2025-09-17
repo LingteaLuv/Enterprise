@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using _05._CSJ_Folder.Scripts.Quest;
 using _05._CSJ_Folder.Scripts.Quest.Definition;
 using _05._CSJ_Folder.Scripts.Quest.Sequence;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +10,6 @@ public class TemporaryQuestController : UIBase
 {
     
     [SerializeField] private QuestListController _questListController;
-    [SerializeField] private QuestRewardController _questRewardController;
     [SerializeField] private Button _closeButton;
     
     [SerializeField] private Button _dailyButton;
@@ -87,22 +84,15 @@ public class TemporaryQuestController : UIBase
         _questListController.Refresh(inst);
     }
 
-    public void QuestInit(TemporaryQuestListSO temporaryQuests, Dictionary<string, TemporaryInstance> temporaryInstances)
+    public void QuestInit(List<TemporaryInstance> temporaryQuests, Dictionary<string, TemporaryInstance> temporaryInstances)
     {
         _dailyQuests = new List<TemporaryInstance>();
         _weeklyQuests = new List<TemporaryInstance>();
 
-        foreach (var quest in temporaryQuests.GetSequence())
+        foreach (var inst in temporaryQuests)
         {
-            for (int i = 0; i < quest.QuestCount; i++)
-            {
-                var id = (quest.GetQuestKeyByType(quest.isDaily(i) ? QuestType_Enum.Daily : QuestType_Enum.Weekly)+ i).ToString();
-                if (temporaryInstances.TryGetValue( id, out var inst))
-                {
-                    var list = inst.IsDaily ? _dailyQuests : _weeklyQuests;
-                    list.Add(inst);
-                }
-            }
+            var list = inst.IsDaily ? _dailyQuests : _weeklyQuests;
+            list.Add(inst);
         }
     }
 }

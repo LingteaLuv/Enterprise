@@ -168,7 +168,6 @@ namespace JHT
             {
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
                 obj.Init(curMonsterCountList[i]);
-
                 obj.transform.position = posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
                 if (curRoundIndex / 2 != 0)
                 {
@@ -278,6 +277,14 @@ namespace JHT
                 if (projectilePoolParent.transform.GetChild(i).gameObject.activeInHierarchy)
                 {
                     projectilePoolParent.transform.GetChild(i).GetComponent<JHT_MonsterProjectile>().Release();
+                }
+            }
+
+            for (int i = 0; i < damageTextPoolParent.transform.childCount; i++)
+            {
+                if (damageTextPoolParent.transform.GetChild(i).gameObject.activeInHierarchy)
+                {
+                    damageTextPoolParent.transform.GetChild(i).GetComponent<JHT_DamageBox>().Release();
                 }
             }
             curMonsterCountList.Clear();

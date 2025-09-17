@@ -98,6 +98,27 @@ namespace JHT
                     break;
             }
             return total;
+
+        public float GetCurrentStat(Stat stat)
+        {
+            switch (stat)
+            {
+                case Stat.Attack:
+                    return this.attackPower;
+                case Stat.Defense:
+                    return this.defense;
+                case Stat.CritChance:
+                    return 0; // 몬스터는 크리티컬이 없다고 가정
+                case Stat.CritDamage:
+                    return 1; // 몬스터는 크리티컬이 없다고 가정
+                case Stat.Health:
+                    return this.maxHp;
+                case Stat.AttackSpeed:
+                    return this.attackSpeed;
+                default:
+                    return 0;
+            }
+
         }
     }
 }

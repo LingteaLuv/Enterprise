@@ -1,15 +1,16 @@
 ﻿using System.Text;
 using _05._CSJ_Folder.Scripts.Quest.Definition;
+using UnityEngine;
 
 namespace _05._CSJ_Folder.Scripts.Quest
 {
-    public class TemporaryInstance :QuestInstance
+    public class TemporaryInstance : QuestInstance
     {
-        public string temporaryQuestContent;
+        public readonly string temporaryQuestContent;
             
         public QuestType_Enum QuestType { get; set; }
         public readonly QuestDifficult_Enum QuestDifficult;
-        public int DemandedGoalCount = 0;
+        public readonly int DemandedGoalCount;
         public readonly string TemporaryQuestId;
         public TemporaryQuestDefinitionSO Def;
         public bool IsDaily => QuestType == QuestType_Enum.Daily;
@@ -20,9 +21,15 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             Def = _def;
             QuestType = _type;
-            TemporaryQuestId = (_def.GetQuestKeyByType(QuestType) + _questIndex).ToString();
+            if (QuestType == QuestType_Enum.Daily)
+                TemporaryQuestId = (_def.GetQuestKeyByType(QuestType) + _questIndex).ToString();
+            else
+            {
+                TemporaryQuestId = (_def.GetQuestKeyByType(QuestType) + _questIndex - _def.dailyCountArray.Length).ToString();
+            }
             QuestDifficult = _def.DifficultByIndex(_questIndex);
             DemandedGoalCount = _def.GetQuestDemand(_questIndex);
+            QuestState = QuestState_Enum.Active;
 
             _sb.Append(_def.questName);
             _sb.Append(DemandedGoalCount.ToString());

@@ -51,11 +51,11 @@ public class CharacterPanelUI : MonoBehaviour
 
         // 캐릭터 기본 정보 설정
         characterImage.sprite = data.characterdata.characterSprite;
-        levelText.text = $"Lv.{data.characterLevel}";
+        levelText.text = $"Lv.{data.Level.Value}";
         nameText.text = data.characterdata.characterName;
 
         // 성급(별) UI 업데이트
-        UpdateStarUI(data.stars);
+        UpdateStarUI(data.Star.Value);
 
         // 영혼 조각 UI 업데이트
         UpdateSoulFragmentUI();
@@ -92,20 +92,21 @@ public class CharacterPanelUI : MonoBehaviour
         int characterId = currentPlayerCharData.characterdata.characterID;
 
         // 현재 보유량 가져오기
-        int currentFragments = 0;
-        PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments);
+        //int currentFragments = 0;
+        //PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments);
 
         // 다음 성급 필요량 가져오기
-        bool hasNextStar = PlayerDataManager.Instance.TryGetUpgradeCost(currentPlayerCharData.stars, out int requiredFragments);
+        bool hasNextStar = PlayerDataManager.Instance.TryGetUpgradeCost(currentPlayerCharData.Star.Value, out int requiredFragments);
 
         if (hasNextStar)
         {
             // 승급 가능할 때
-            soulFragmentText.text = $"{currentFragments} / {requiredFragments}";
+            //soulFragmentText.text = $"{currentFragments} / {requiredFragments}";
+            soulFragmentText.text = $"{currentPlayerCharData.Soul.Value} / {requiredFragments}";
             if (soulFragmentSlider != null)
             {
                 soulFragmentSlider.maxValue = requiredFragments;
-                soulFragmentSlider.value = currentFragments;
+                soulFragmentSlider.value = currentPlayerCharData.Soul.Value;
             }
         }
         else

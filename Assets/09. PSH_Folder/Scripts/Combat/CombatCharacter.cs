@@ -8,24 +8,25 @@ using System.Linq;
 public class Buff
 {
     public Stat Stat { get; private set; }
+    public BuffType BuffType { get; private set; } // 버프 타입 추가
     public float Value { get; private set; }
     public float Duration { get; set; }
 
-    public Buff(Stat stat, float value, float duration)
+    public Buff(Stat stat, float value, float duration, BuffType buffType)
     {
         this.Stat = stat;
         this.Value = value;
         this.Duration = duration;
+        this.BuffType = buffType;
     }
 }
 
-[RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(HealthSystem))]
 public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
 {
     public PlayerCharacterData CharacterStats { get; private set; } // 원본 데이터 참조
 
-    [SerializeField] private string charName;
+    [SerializeField] public string charName;
     // --- 전투 기본 스탯 (Initialize에서 복사) ---
     [SerializeField] private float baseAttack;
     [SerializeField] private float baseHealth;
@@ -33,8 +34,8 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
     [SerializeField] private float baseCritChance;
     [SerializeField] private float baseCritDamage;
     [SerializeField] private float baseAttackSpeed;
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private float attackRange;
+    [SerializeField] public float moveSpeed;
+    [SerializeField] public float attackRange;
 
     // --- 현재 적용중인 버프 리스트 ---
     [SerializeField] private List<Buff> activeBuffs = new List<Buff>();
@@ -44,12 +45,10 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
 
     // --- 컴포넌트 참조 ---
     private HealthSystem healthSystem;
-    private SpriteRenderer spriteRenderer;
 
     void Awake()
     {
         healthSystem = GetComponent<HealthSystem>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
@@ -79,55 +78,55 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
         // 버프 리스트 초기화
         activeBuffs.Clear();
 
-        if (spriteRenderer != null && data.characterdata != null)
-        {
-            spriteRenderer.sprite = data.characterdata.characterSprite;
-        }
-
         Debug.Log($"'{charName}' 데이터 적용 완료.");
 
         if (healthSystem != null)
         {
             healthSystem.Initialize();
         }
+
+        // 스킬 등록
+        RegisterSkills(data);
     }
 
     // IDamageable 인터페이스 구현
-    public void TakeDamage(IAttacker attacker)
+    public void TakeDamage(IAttacker attacker, float powerRatio = 1f)
     {
-        healthSystem.CalculateAndApplyDamage(attacker);
+        healthSystem.CalculateAndApplyDamage(attacker, powerRatio);
     }
 
     public float GetCurrentStat(Stat stat)
     {
-        float bonusValue = activeBuffs.Where(b => b.Stat == stat).Sum(b => b.Value);
-        float finalValue = 0; // 최종 스탯 값을 저장할 변수
-
+        float baseValue = 0;
         switch (stat)
         {
-            case Stat.Attack: finalValue = baseAttack + bonusValue; break;
-            case Stat.Health: finalValue = baseHealth + bonusValue; break;
-            case Stat.Defense: finalValue = baseDefense + bonusValue; break;
-            case Stat.CritChance: finalValue = baseCritChance + bonusValue; break;
-            case Stat.CritDamage: finalValue = baseCritDamage + bonusValue; break;
-            case Stat.AttackSpeed: finalValue = baseAttackSpeed + bonusValue; break;
-            default: finalValue = 0; break; // 정의되지 않은 스탯은 0으로 처리
+            case Stat.Attack: baseValue = baseAttack; break;
+            case Stat.Health: baseValue = baseHealth; break;
+            case Stat.Defense: baseValue = baseDefense; break;
+            case Stat.CritChance: baseValue = baseCritChance; break;
+            case Stat.CritDamage: baseValue = baseCritDamage; break;
+            case Stat.AttackSpeed: baseValue = baseAttackSpeed; break;
         }
 
-        Debug.Log($"[CombatCharacter] {charName}의 {stat} 최종 스탯: {finalValue}"); // 최종 스탯 로그 출력
+        float flatBonus = activeBuffs.Where(b => b.Stat == stat && b.BuffType == BuffType.Flat).Sum(b => b.Value);
+        float percentBonus = activeBuffs.Where(b => b.Stat == stat && b.BuffType == BuffType.Percent).Sum(b => b.Value);
+
+        float finalValue = (baseValue + flatBonus) * (1 + percentBonus);
+
+        Debug.Log($"[CombatCharacter] {charName}의 {stat} 최종 스탯: {finalValue} (기본: {baseValue}, 고정 버프: {flatBonus}, 퍼센트 버프: {percentBonus})");
         return finalValue;
     }
 
     /// <summary>
     /// 새로운 버프를 캐릭터에게 적용합니다.
     /// </summary>
-    public void ApplyBuff(Stat stat, float value, float duration)
+    public void ApplyBuff(Stat stat, float value, float duration, BuffType buffType)
     {
-        Buff newBuff = new Buff(stat, value, duration);
+        Buff newBuff = new Buff(stat, value, duration, buffType);
         activeBuffs.Add(newBuff);
-        Debug.Log($"'{charName}'에게 버프 적용: {stat}, 수치: {value}, 지속시간: {duration}초");
+        Debug.Log($"'{charName}'에게 버프 적용: {stat}, 타입: {buffType}, 수치: {value}, 지속시간: {duration}초");
 
-        // 체력 버프는 즉시 HealthSystem에 반영
+        // 체력 관련 스탯이 변경되면 HealthSystem에 즉시 반영
         if (stat == Stat.Health)
         {
             healthSystem?.OnStatUpdate();
@@ -187,15 +186,44 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
             baseAttackSpeed = updatedData.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0);
 
             healthSystem?.OnStatUpdate();
+            RegisterSkills(updatedData); // 스킬 정보도 갱신
         }
     }
 
     /// <summary>
-    /// 지정된 인덱스의 스킬을 대상에게 사용합니다.
+    /// 캐릭터 데이터에 명시된 스킬 ID를 기반으로 스킬 리스트를 설정합니다.
+    /// </summary>
+    private void RegisterSkills(PlayerCharacterData data)
+    {
+        skills.Clear();
+
+        // 패시브 스킬 등록
+        if (data.characterdata.skillPassiveID != 0)
+        {
+            SkillSO passiveSkill = SkillDatabase.GetSkillByID(data.characterdata.skillPassiveID);
+            if (passiveSkill != null)
+            {
+                skills.Add(passiveSkill);
+                Debug.Log($"'{charName}'에게 패시브 스킬 '{passiveSkill.skillName}'을(를) 등록했습니다.");
+            }
+        }
+
+        // TODO: 액티브 스킬 등 다른 스킬 ID가 있다면 여기에 추가로 등록하는 로직을 구현할 수 있습니다.
+    }
+
+    /// <param name="skillIndex">사용할 스킬의 리스트 인덱스</param>
+    /// <param name="target">스킬 대상</param>
+    public void UseSkill(int skillIndex, IDamageable target)
+    {
+        UseSkill(skillIndex, new List<IDamageable> { target });
+    }
+
+    /// <summary>
+    /// 지정된 인덱스의 스킬을 여러 대상에게 사용합니다.
     /// </summary>
     /// <param name="skillIndex">사용할 스킬의 리스트 인덱스</param>
-    /// <param name="target">스킬 대상 캐릭터</param>
-    public void UseSkill(int skillIndex, CombatCharacter target)
+    /// <param name="targets">스킬 대상 리스트</param>
+    public void UseSkill(int skillIndex, List<IDamageable> targets)
     {
         if (skillIndex < 0 || skillIndex >= skills.Count)
         {
@@ -206,9 +234,12 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
         SkillSO skillToUse = skills[skillIndex];
         if (skillToUse != null)
         {
-            // 공격자는 자기 자신(this)이고, 대상(target)은 IDamageable이어야 합니다.
-            // target이 CombatCharacter이므로 IDamageable을 구현하고 있어 문제가 없습니다.
-            skillToUse.Use(this, target);
+            skillToUse.Use(this);
         }
+    }
+
+    public string GetName()
+    {
+        return charName;
     }
 }

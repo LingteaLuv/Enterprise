@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 using Firebase.Auth;
@@ -12,6 +13,7 @@ public class AuthManager : Singleton<AuthManager>
     private FirebaseAuth _auth;
     private bool _isClicked;
     public event Action LoginCompleted;
+    public bool isLogined = false;
 
     private void Start()
     {
@@ -21,6 +23,7 @@ public class AuthManager : Singleton<AuthManager>
     private void Init()
     {
         _auth = FirebaseManager.Auth;
+        LoginCompleted += () => isLogined = true;
     }
 
 
@@ -55,6 +58,7 @@ public class AuthManager : Singleton<AuthManager>
                 _auth.SignOut();
                 return false;
             }
+            LoginCompleted?.Invoke();
             return true;
         }
         return false;
@@ -385,4 +389,9 @@ public class AuthManager : Singleton<AuthManager>
     }
 
     #endregion
+
+    public IEnumerator LoginSuccessed()
+    {
+        yield return isLogined = true;
+    }
 }

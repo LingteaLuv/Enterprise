@@ -215,7 +215,6 @@ namespace JHT
         {
             base.Enter();
             //fsm.animator.Play(fsm.DEATH);
-            
         }
 
         public override void Update()

@@ -29,6 +29,8 @@ public class RelicsGachaManager : MonoBehaviour
     private InventoryManager inventoryManager;
 
     public Action<RelicsObject, RelicsObject> OnChooseItem;
+    
+    private bool isSpecial = false;
 
     public void Start()
     {
@@ -61,6 +63,7 @@ public class RelicsGachaManager : MonoBehaviour
 
     private IEnumerator GetData(int curTableLevel)
     {
+        isSpecial = false;
         if (curTableLevel >= 0)
         {
             GetRarity(curTableLevel);
@@ -83,6 +86,7 @@ public class RelicsGachaManager : MonoBehaviour
 
         AddResult(relicsResult, rarityResult, levelResult);
         QuestSignalManager.Instance.GachaPull(ItemType.Relic,1);
+        if(isSpecial) QuestSignalManager.Instance.GachaPull(ItemType.RareRelic,1);
     }
 
     public void GetSO()
@@ -109,6 +113,7 @@ public class RelicsGachaManager : MonoBehaviour
     {
         RelicsGacha picked = specialTable.GetRandomRange();
         rarityResult = picked.rarity;
+        isSpecial = true;
     }
 
     public void GetLevel()

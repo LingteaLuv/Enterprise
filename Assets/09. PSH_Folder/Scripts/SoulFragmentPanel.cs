@@ -31,9 +31,9 @@ public class SoulFragmentPanel : MonoBehaviour
     {
         soulImage.sprite = cd.characterdata.characterSprite;
         int currentFragments;
-        PlayerDataManager.Instance.characterSoulFragments.TryGetValue(cd.characterdata.characterID, out currentFragments);
-        countText.text = currentFragments.ToString();
-
+        /*PlayerDataManager.Instance.characterSoulFragments.TryGetValue(cd.characterdata.characterID, out currentFragments);
+        countText.text = currentFragments.ToString();*/
+        countText.text = PlayerDataManager.Instance.OwnedCharacters[cd.characterdata.characterID].Soul.Value.ToString();
         // 장현태 추가코드
         data = cd;
         // 버튼 이벤트는 중복 등록을 막기 위해 기존 리스너를 지우고 새로 추가하는 것이 안전합니다.

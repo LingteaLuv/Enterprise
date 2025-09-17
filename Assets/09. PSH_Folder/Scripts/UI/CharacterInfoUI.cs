@@ -155,7 +155,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             Debug.LogWarning("캐릭터가 현재 필터링된 리스트에 없습니다. 전체 리스트에서 다시 검색합니다.");
             // PlayerDataManager에서 전체 캐릭터 리스트를 가져옵니다.
-            characterList = new List<PlayerCharacterData>(PlayerDataManager.Instance.ownedCharacters.Values);
+            characterList = new List<PlayerCharacterData>(PlayerDataManager.Instance.OwnedCharacters.Values);
             currentIndex = characterList.FindIndex(c => c == character);
 
             // 그래도 캐릭터를 찾을 수 없다면, 심각한 오류입니다.
@@ -183,13 +183,13 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             characterNameText.text = $"{currentCharacterData.characterdata.characterName}";
             characterImage.sprite = currentCharacterData.characterdata.characterSprite;
-            if (currentCharacterData.characterLevel == PlayerDataManager.MAX_CHARACTER_LEVEL)
+            if (currentCharacterData.Level.Value == PlayerDataManager.MAX_CHARACTER_LEVEL)
             {
                 levelText.text = $"LV MAX";
             }
             else
             {
-                levelText.text = $"LV {currentCharacterData.characterLevel}";
+                levelText.text = $"LV {currentCharacterData.Level.Value}";
             }
             flavorText.text = currentCharacterData.characterdata.flavorText;
 
@@ -245,9 +245,13 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         int characterId = currentCharacterData.characterdata.characterID;
         int currentFragments = 0;
 
-        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments))
+        /*if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments))
         {
             soulFragmentsText.text = $"영혼 조각 : {currentFragments} \n 승급";
+        }*/
+        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.OwnedCharacters.TryGetValue(characterId, out var data))
+        {
+            soulFragmentsText.text = $"영혼 조각 : {data.Soul.Value} \n 승급";
         }
         else
         {
@@ -274,7 +278,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (CurrencyManager.Instance != null
             && CurrencyManager.Instance.GetCurrency(CurrencyType.EnhancementStone) >= stoneCost
             && CurrencyManager.Instance.GetCurrency(CurrencyType.Gold) >= goldCost
-            && currentCharacterData.characterLevel < PlayerDataManager.MAX_CHARACTER_LEVEL)
+            && currentCharacterData.Level.Value < PlayerDataManager.MAX_CHARACTER_LEVEL)
         {
             levelUpButton.interactable = true;
         }
@@ -292,7 +296,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (currentCharacterData == null || starUpgradeCostText == null || starUpgradeButton == null) return;
 
         // 최대 성급 확인 (예: 5성이 최대라고 가정)
-        if (currentCharacterData.stars >= 5)
+        if (currentCharacterData.Star.Value >= 5)
         {
             starUpgradeCostText.text = "MAX";
             starUpgradeButton.interactable = false;
@@ -300,19 +304,30 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         }
 
         // 다음 성급에 필요한 비용 가져오기
-        int nextStarLevel = currentCharacterData.stars + 1;
+        int nextStarLevel = currentCharacterData.Star.Value + 1;
         int cost = 0;
         // PlayerDataManager.Instance.TryGetUpgradeCost가 int cost를 반환한다고 가정
-        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.stars, out cost))
+        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.Star.Value, out cost))
         {
             starUpgradeCostText.text = $"비용 : {cost} 영혼 조각";
 
             // 해당 캐릭터의 영혼 조각이 충분한지 확인하여 버튼 활성화/비활성화
             int currentFragments = 0;
             // PlayerDataManager.Instance.characterSoulFragments가 int를 저장한다고 가정
-            if (PlayerDataManager.Instance.characterSoulFragments.TryGetValue(currentCharacterData.characterdata.characterID, out currentFragments))
+            /*if (PlayerDataManager.Instance.characterSoulFragments.TryGetValue(currentCharacterData.characterdata.characterID, out currentFragments))
             {
                 if (currentFragments >= cost)
+                {
+                    starUpgradeButton.interactable = true;
+                }
+                else
+                {
+                    starUpgradeButton.interactable = false;
+                }
+            }*/
+            if (PlayerDataManager.Instance.OwnedCharacters.TryGetValue(currentCharacterData.characterdata.characterID, out var data))
+            {
+                if (data.Soul.Value >= cost)
                 {
                     starUpgradeButton.interactable = true;
                 }
@@ -341,7 +356,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (currentCharacterData == null) return;
 
         // 1. 먼저 스탯을 다시 계산합니다.
-        currentCharacterData.RecaculateStats();
+        currentCharacterData.RecalculateStats();
 
         // 2. 갱신된 스탯으로 UI를 업데이트합니다.
         atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Attack])}";

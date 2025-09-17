@@ -131,6 +131,7 @@ public class BattleManager : MonoBehaviour
         {
             Debug.LogError("BattleFields 오브젝트를 찾을 수 없습니다.");
         }
+        battleFields[0].gameObject.SetActive(true);
     }
 
     // 스킵 버튼 클릭 시 호출
@@ -147,6 +148,7 @@ public class BattleManager : MonoBehaviour
         }
 
         IslandStageManager.Instance.OnBattleComplete();
+        JHT_MonsterSpawnManager.Instance.MonsterAllClear();
         ClearEnemies();
         ClearPlayers();
     }
@@ -166,8 +168,9 @@ public class BattleManager : MonoBehaviour
                 return;
             }
         }
-        JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[GlobalStageManager.Instance.currentStageIndex-1],
-            GlobalStageManager.Instance.currentStageIndex-1);
+        
+        JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[(GlobalStageManager.Instance.CurrentStageIndex.Value - 1)],
+            (GlobalStageManager.Instance.CurrentStageIndex.Value-1));
 
         IsStageEnd = false;
 
@@ -235,7 +238,7 @@ public class BattleManager : MonoBehaviour
             var character = party[i];
             character.Initialize(character.CharacterStats); // 캐릭터 스탯 초기화
             character.transform.SetParent(null);
-            character.transform.position = field.PlayerSpawnPoint.position + new Vector3(i * 1.5f, 0, 0);
+            character.transform.position = field.PlayerSpawnPoint.position + new Vector3(i * 0.3f, 0, 0);
             character.gameObject.SetActive(true);
 
             // FSM 활성화 보장

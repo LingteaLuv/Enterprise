@@ -59,24 +59,19 @@ public class FirebaseManager : Singleton<FirebaseManager>
         // 초기화한 설정을 GoogleSignIn.Configuration에 적용
         GoogleSignIn.Configuration = _configuration;
         
-        if (_isTest)
-        {
-            StartCoroutine(InitFirebaseCoroutine());
-            QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 60;
-            Time.fixedDeltaTime = 1f / 60f;
-        }
+        /*StartCoroutine(InitFirebaseCoroutine());
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+        Time.fixedDeltaTime = 1f / 60f;*/
+        
     }
 
     private void Start()
     {
-        if (!_isTest)
-        {
-            StartCoroutine(InitFirebaseCoroutine());
-            QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 60;
-            Time.fixedDeltaTime = 1f / 60f;
-        }
+        StartCoroutine(InitFirebaseCoroutine());
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+        Time.fixedDeltaTime = 1f / 60f;
     }
 
     public async Task TestLogin()
@@ -89,9 +84,9 @@ public class FirebaseManager : Singleton<FirebaseManager>
         {
             Debug.Log("테스트 로그인 완료, 씬 전환");
             DatabaseManager.Instance.Init();
-            await DatabaseManager.Instance.SaveFieldAsync($"{_user.UserId}/CreditData/Gold", 1000000000);
-            await DatabaseManager.Instance.SaveFieldAsync($"{_user.UserId}/CreditData/Gem", 1000000000);
-            await DatabaseManager.Instance.SaveFieldAsync($"{_user.UserId}/CreditData/EnhancementStone", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gold", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gem", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/EnhancementStone", 1000000000);
             SceneManager.LoadScene(_sceneName);
         }
     }

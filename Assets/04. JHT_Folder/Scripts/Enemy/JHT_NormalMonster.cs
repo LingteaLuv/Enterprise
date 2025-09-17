@@ -52,35 +52,39 @@ namespace JHT
                 
                 foreach (var c in cols)
                 {
-                    //일단은 일방적인 플레이어 스크립트
-                    HealthSystem hs = c.GetComponent<HealthSystem>();
-
-                    if (hs != null)
+                    IDamageable targetDamageable = c.GetComponent<IDamageable>();
+                    if (targetDamageable != null)
                     {
                         //Pool 파티클 사용
-                        hs.TakeDamage(monsterStat.totalAttackPower);
-                    }
+                        //hs.TakeDamage(monsterStat.totalAttackPower);
+                        targetDamageable.TakeDamage(this, 1f);
 
+                    }
                 }
             }
             else //원거리 일경우
             {
                 if (target == null) return;
 
-                HealthSystem hs = target.GetComponent<HealthSystem>();
-                if (hs == null || hs.currentHealth <= 0) 
+                IDamageable targetDamageable = target.GetComponent<IDamageable>();
+                if (targetDamageable == null)
                     return;
 
                 JHT_MonsterProjectile obj = JHT_MonsterSpawnManager.Instance.projectilePool.GetPooled() as JHT_MonsterProjectile;
 
-                if (JHT_MonsterSpawnManager.Instance.projectilePool == null || obj == null)
+                if (obj == null)
                     return;
 
                 Vector2 startPos = transform.position;
                 Vector2 targetPos = (Vector2)target.transform.position;
 
-                if (this != null)
-                    obj.Init(targetPos, startPos, monsterStat.totalAttackPower, monsterStat.totalAttackPower,monsterStat.projectileSprite);
+
+                //if (this != null)
+                //    obj.Init(targetPos, startPos, monsterStat.totalAttackPower, monsterStat.totalAttackPower,monsterStat.projectileSprite);
+
+                float projectileSpeed = 3f;
+                obj.Init(this, targetPos, startPos, projectileSpeed, monsterStat.attackPower,monsterStat.projectileSprite);
+
             }
         }
 

@@ -50,8 +50,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private Dictionary<string, TemporaryInstance> _temporaryInstances;
         
         private List<string> _clearedTutorialQuestIds;
-        
-        private GeneralQuestInstance _stageClearInstance;
         private GeneralQuestInstance _completedInstance;
         
         // 클리어한 퀘스트 개수, 완료 버튼을 누를때 +1
@@ -59,7 +57,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         // 현재 퀘스트가 요구하는 스테이지, 완료 버튼을 눌러서 새 사이클이 시작될 때 +1
         private int CurrentQuestStage = 1;
         // 현재 플레이어가 클리어한 스테이지, 클리어 스테이지를 signal로 받아 +1
-        public int CurrentClearedStage { get; private set; }
+        public int CurrentClearedStage => GlobalStageManager.Instance.CurrentStageIndex.Value;
         
         // 현재 active 일반퀘스트의 Id를 캐싱
         private string _activeGeneralId;
@@ -79,12 +77,14 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         // 추후 보상관련 사용
         public event Action<QuestRewardSO.RewardEntry> OnRewardGranted;
+        public event Action<TutorialQuestDefinitionSO> OnTutorialQuestCompleted;
 
         // 퀘스트 초기화 확인용 코루틴
         private Coroutine _nextResetCoroutine;
         // 퀘스트 리셋중인지 확인
         private bool _isResetting;
         private bool isLoaded;
+        private bool _initialized;
         
         private const string QuestDataPath = "QuestData";
         
@@ -95,8 +95,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         private const int CurrentDataVersion = 3;
         private static string QuestDataPathV => $"{QuestDataPath}_v{CurrentDataVersion}";
-
-        [SerializeField] private bool isSetted = false;
         
         #endregion
 
@@ -115,21 +113,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             _dailyQuests = new();
             _weeklyQuests = new();
             _clearedTutorialQuestIds = new List<string>();
-            
-
-            
-
-            // if (_temporaryQuestController != null)
-            // {
-            //     _temporaryQuestController.QuestInit(_temporaryQuest, _temporaryInstances);
-            // }
-            //
-            // // 일반 퀘스트 동작
-            // GeneralQuestEnqueue();
-            // EnsureGeneralActive();
-            //
-            // // 퀘스트 UI 활성화
-            // ActiveQuestUI();
 
         }
 
@@ -179,6 +162,15 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         private IEnumerator Start()
         {
+            yield return WaitForLogin();
+            if (_initialized) yield break;
+            yield return Initialize();
+
+        }
+
+        private IEnumerator Initialize()
+        {
+            _initialized = true;
             yield return DatabaseManager.Instance.EnsureServerOffset().AsIEnumerator();
             
             var dataTask = LoadAsync();
@@ -224,37 +216,25 @@ namespace _05._CSJ_Folder.Scripts.Quest
             yield return CheckTemporaryQuestsReset(dailyCheck, weeklyCheck).AsIEnumerator();
 
             ScheduleNextResetTick();
+        }
+
+        private IEnumerator WaitForLogin()
+        {
+            while (AuthManager.Instance == null) yield return null;
             
+            if (AuthManager.Instance.isLogined) yield break;
+
+            bool done = false;
+            void Handler() => done = true;
+            AuthManager.Instance.LoginCompleted += Handler;
+            yield return new WaitUntil(() => done || AuthManager.Instance.isLogined);
+            AuthManager.Instance.LoginCompleted -= Handler;
         }
 
         #endregion
         
         #region public
-        // 추후 퀘스트 강제 작동?
-        public bool ActivateQuest(string questId)
-        {
-            return _generalDefs.TryGetValue(questId, out var def) 
-                   && EnsureActive(def);
-        }
         
-        // 퀘스트 ID를 받으면 해당 퀘스트의 인스턴스 반환
-        [CanBeNull]
-        public QuestInstance GetInstance(string questId)
-        {
-            if(_instances.TryGetValue(questId, out var inst))
-                return inst;
-            Debug.LogError($"Quest not found: {questId}");
-            return null;
-        }
-
-        public QuestDefinitionSO GetDefinition(string questId)
-        {
-            if (_generalDefs.TryGetValue(questId, out var def))
-                return def;
-            Debug.LogError($"Quest not found: {questId}");
-            return null;
-        }
-
         public void BindUI(GameObject uiCon, TemporaryQuestController tempoCon)
         {
             QuestUI = uiCon;
@@ -266,7 +246,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (_temporaryQuestController != null)
             {
                 // 퀘스트 초기화를 진행합니다.
-                _temporaryQuestController.QuestInit(_temporaryQuest, _temporaryInstances);
+                _temporaryQuestController.QuestInit(_temporaryQuests.ToList(), _temporaryInstances);
             
                 foreach (var kv in _temporaryInstances)
                 {
@@ -305,21 +285,13 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 일반 퀘스트 큐에 원소가 들어있다면 탈출
             if (_generalQuests.Count != 0) return;
             
-            // TODO : 추후 Save 데이터와 연동
-            // QuestCount의 경우 queue에 넣기 전에 저장을 진행하여 Load할 때 참조 오류가 일어나지 않도록 사용
-            // SaveQuestCount();
-            
-            // // 우선 스테이지 클리어 미션을 삽입
-            // InsertStageClearMission();
-            
             // 튜토리얼 삽입(수정)
             InsertTutorials();
             
             // 반복 퀘스트 삽입
             InsertRoutineQuest();
         }
-
-        //TODO : 추후 어떻게 넣을지 생각하고 수정할 예정입니다.
+        
         /// <summary>
         /// 스테이지 클리어 미션을 삽입하는 메서드입니다.
         /// </summary>
@@ -330,14 +302,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 스테이지 클리어 템플릿이 없다면 return
             if (_stageClearTemplate == null) return;
             
-            
-            
-            // // 일반 퀘스트가 현재 존재한다면 리턴
-            // if (_generalQuests.Count != 0) return;
-            // // 현재 작동중인 일반 퀘스트가 존재한다면 리턴 -> Queue에서 마지막 원소를 꺼내 작동중인 경우
-            // if (HasActiveGeneral()) return;
-            
-            // -> 스테이지 클리어가 중간 삽입으로 변경되어 일단 주석 처리
             
             // 일반 퀘스트 큐에 스테이지 클리어 미션을 삽입
             _generalQuests.Enqueue(_stageClearTemplate);
@@ -360,7 +324,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 // 해당 미션과 인스턴스 연결
                 _instances.TryAdd(_stageClearTemplate.questId, inst);
                 _generalInstances.TryAdd(_stageClearTemplate.questId, inst);
-                _stageClearInstance = inst;
             }
             // 인스턴스를 찾았다면
             else
@@ -445,39 +408,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
         }
 
         
-        // TODO : 미사용 전환 -> 추후 삭제 예정
-        // private void DeleteTutorials()
-        // {
-        //     // 만약 튜토리얼 큐의 COUNT가 0인 경우 탈출
-        //     if (_tutorialQuests.Count == 0) return;
-        //     
-        //     // 튜토리얼이 있고 타깃 차례인 경우
-        //     while (_tutorialQuests.Count >0 && _tutorialQuests.Peek().targetStage <= CurrentQuestStage)
-        //     {
-        //         // 튜토리얼 퀘스트 큐에서 제거하고 계속
-        //         _tutorialQuests.Dequeue();
-        //     }
-        // }
-        // private void DeleteTutorials(int currentStage)
-        // {
-        //     // 만약 튜토리얼 큐의 COUNT가 0인 경우 탈출
-        //     if (_tutorialQuests.Count == 0) return;
-        //     
-        //     // 튜토리얼이 있고 타깃 차례인 경우
-        //     while (_tutorialQuests.Count >0 && _tutorialQuests.Peek().targetStage <= CurrentQuestStage)
-        //     {
-        //         if (_tutorialQuests.Peek().targetStage == currentStage)
-        //         {
-        //             _generalQuests.Enqueue(_tutorialQuests.Dequeue());
-        //         }
-        //         else
-        //         {
-        //             // 튜토리얼 퀘스트 큐에서 제거하고 계속
-        //             _tutorialQuests.Dequeue();
-        //         }
-        //     }
-        //     
-        // }
 
         /// <summary>
         /// 일반 퀘스트를 작동시키는 함수
@@ -517,10 +447,10 @@ namespace _05._CSJ_Folder.Scripts.Quest
         /// <summary>
         /// 인자로 받은 퀘스트를 실행시킵니다. 
         /// </summary>
-        private bool EnsureActive(GeneralQuestDefinitionSO def)
+        private void EnsureActive(GeneralQuestDefinitionSO def)
         {
             // 현재 인스턴스가 활성화 중인 경우 탈출 
-            if (GetActiveGeneralInstance() is not null) return false;
+            if (GetActiveGeneralInstance() is not null) return;
             GeneralQuestInstance g;
             // 인스턴스에서 questId로 탐색 실패시 (=_instances에 def가 없는 경우)
             if (!_instances.TryGetValue(def.questId, out var inst))
@@ -553,8 +483,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 탐색에 성공했다면
             else
             {
-                if (inst is not GeneralQuestInstance) return false;
-                g = inst as GeneralQuestInstance;
+                if (inst is not GeneralQuestInstance value) return;
+                g = value;
                 
                 Debug.Log($"1. {g.QuestState}");
                 
@@ -569,8 +499,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
                 Debug.Log($"2. {g.QuestState}");
                 g.GeneralQuestCount = computeQuestNumber();
-                if (!_generalInstances.ContainsKey(def.questId))
-                    _generalInstances.Add(def.questId,g);
+                _generalInstances.TryAdd(def.questId, g);
 
                 _activeGeneralId = g.QuestId;
                 if (IsStageCleared(g.Def))
@@ -585,7 +514,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             }
 
             RefreshActiveQuestUI(def, g);
-            return true;
         }
         
         private bool IsStageCleared(GeneralQuestDefinitionSO def)
@@ -617,11 +545,11 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 return;
             }
             
-            // 키 값이 stageclear인 경우
+            // 키 값이 stageClear인 경우
             if (signalKey == QuestKeys.StageClear())
             {
                 // 스테이지 클리어 처리 후 탈출
-                OnStageCleared(amount);
+                OnStageCleared();
                 return;
             }
             
@@ -658,17 +586,12 @@ namespace _05._CSJ_Folder.Scripts.Quest
         }
         
         // 스테이지 클리어 시 
-        private void OnStageCleared(int stage)
+        private void OnStageCleared()
         {
-            // 만약 갱신된 스테이지가 현재 클리어한 스테이지 보다 큰 경우 그 값으로 변경합니다.
-            if(stage > CurrentClearedStage) CurrentClearedStage = stage;
-            
             var activeGeneral = GetActiveGeneralInstance();
             if (activeGeneral == null) return;
 
             var def = GetActiveQuestDefinition();
-            // TODO : Save와 연계
-            // DatabaseManager.Instance.SaveCount(CurrentClearedStage);
             
             // 만약 현재 인스턴스의 def가 스테이지 클리어이고 완료조건이 충족되었다면
             if (def.GeneralType == GeneralType_Enum.StageClear && 
@@ -714,6 +637,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             // 퀘스트 클리어 카운트를 +1합니다
             ClearedQuestCount++;
+            QuestSignalManager.Instance.ETCAchieve("GeneralClear");
+            
             // 다음 일반 퀘스트를 작동시킵니다.
             EnsureGeneralActive();
             // QuestUI를 새로고침합니다
@@ -772,15 +697,20 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (inst.QuestState == QuestState_Enum.Received) return;
             if (!inst.IsCompleted()) return;
             // def의 보상에서 획득을 호출합니다.
-            def.Reward?.AddReward(this);
+            def.Reward?.AddReward(this, def, inst);
 
             if (inst.IsOnce())
             {
                 _clearedTutorialQuestIds.Add(inst.QuestId);
             }
+
             if (def.isGeneral)
+            {
+                if (def is TutorialQuestDefinitionSO tutorialQuestDef)
+                    OnTutorialQuestCompleted?.Invoke(tutorialQuestDef);
                 // 일반 퀘스트의 보상처리를 마무리합니다.
                 OnGeneralCompleted();
+            }
 
             if (def.isTemporary)
                 OnTemporaryCompleted(inst as TemporaryInstance);
@@ -790,7 +720,18 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             return ClearedQuestCount + 1;
         }
-
+        
+        // 퀘스트 ID를 받으면 해당 퀘스트의 인스턴스 반환
+        [CanBeNull]
+        private QuestInstance GetInstance(string questId)
+        {
+            return _instances.TryGetValue(questId, out var inst) ? inst : null;
+        }
+        
+        private QuestDefinitionSO GetDefinition(string questId)
+        {
+            return _generalDefs.TryGetValue(questId, out var def) ? def : null;
+        }
     
         
         #endregion
@@ -857,13 +798,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             
             // 퀘스트 ui에 퀘스트 정보를 전달합니다
             OnQuestUpdated?.Invoke(so, inst);
-            
-            foreach (var kv in _temporaryInstances)
-            {
-                var tinst = kv.Value;
-                var def = tinst.Def;
-                var goal = def?.TempoGoal;
-            }
         }
 
         /// <summary>
@@ -928,6 +862,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (_temporaryQuest != null)
             {
                 _temporaryQuests = EnqueueOrderByIdTemporary(_temporaryQuest.GetSequence());
+                Debug.Log($"temporaryQuestsCount {_temporaryQuests.Count}, _dailyQuest {_dailyQuests.Count}, _weekly {_weeklyQuests.Count}");
             }
             
             
@@ -993,10 +928,16 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 {
                     QuestType_Enum type = t.isDaily(i) ? QuestType_Enum.Daily : QuestType_Enum.Weekly;
                     TemporaryInstance inst = new TemporaryInstance(t, type, i);
-                    var id = (t.GetQuestKeyByType(type) + i).ToString();
+                    string id;
+                    if (type == QuestType_Enum.Daily)
+                        id = (t.GetQuestKeyByType(type) + i).ToString();
+                    else
+                    {
+                        id = (t.GetQuestKeyByType(type) + i - t.dailyCountArray.Length).ToString();
+                    }
                     
-                    _temporaryInstances.Add(id, inst);
-                    _instances.Add(id, inst);
+                    _temporaryInstances.TryAdd(id, inst);
+                    _instances.TryAdd(id, inst);
                     
                     _sequence.Add(inst);
                 }
@@ -1113,19 +1054,13 @@ namespace _05._CSJ_Folder.Scripts.Quest
                     try
                     {
                         // 현재 데이터 경로에서 questData를 불러옵니다.
-                        var data = await DatabaseManager.Instance.LoadQuestDatatAsync(QuestDataPathV);
-                        if (data == null)
-                        {
-                            data = await DatabaseManager.Instance.LoadQuestDatatAsync(QuestDataPath);
-                        }
+                        var data = await DatabaseManager.Instance.LoadQuestDatatAsync(QuestDataPathV) ?? await DatabaseManager.Instance.LoadQuestDatatAsync(QuestDataPath);
 
                         return data;
                     }
-                    catch (NullReferenceException nre)
+                    catch (NullReferenceException)
                     {
-                        //Debug.LogError($"nre 발생 {attempt}번 시도");
                         await Task.Delay(500);
-                        continue;
                     }
                     catch (Exception e)
                     {
@@ -1133,28 +1068,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
                         return null;
                     }
                 }
-
-                // => 해당 부분 Start로 이관
-                // // 데이터가 존재한다면 해당 데이터를 기반으로 정보를 복구합니다.
-                // if (data != null)
-                // {
-                //     RestoreFromQuestData(data);
-                //     RebuildGeneralQuest(data);
-                // }
-                //
-                // ActiveQuestUI();
-                //
-                // // 기간 퀘스트 컨트롤러가 존재한다면
-                // if (_temporaryQuestController != null)
-                // {
-                //     // 퀘스트 초기화를 진행합니다.
-                //     _temporaryQuestController.QuestInit(_temporaryQuest, _temporaryInstances);
-                //
-                //     foreach (var kv in _temporaryInstances)
-                //     {
-                //         OnTempoQuestUpdated?.Invoke(kv.Value);
-                //     }
-                // }
             }
             catch (Exception e)
             {
@@ -1170,20 +1083,18 @@ namespace _05._CSJ_Folder.Scripts.Quest
         /// </summary>
         private QuestData BuildQuestData()
         {
-            var generalInst = GetActiveGeneralInstance();
-            if (generalInst == null) generalInst = _completedInstance;
+            var generalInst = GetActiveGeneralInstance() ?? _completedInstance;
 
             // 현재 진행 중인 퀘스트 내용을 바탕으로 GeneralQuestData을 제작합니다.
             var general = new GeneralQuestData
             {
                 ActiveQuestId = generalInst?.QuestId ?? string.Empty,
-                ActiveState = generalInst != null ? (int)generalInst?.QuestState : 0,
+                ActiveState = generalInst != null ? (int)generalInst.QuestState : 0,
                 ActiveProgress = generalInst?.CurrentGoalCount ?? 0,
                 ClearedQuestCount = ClearedQuestCount,
                 CurrentQuestStage = CurrentQuestStage,
-                CurrentClearedStage = CurrentClearedStage,
             };
-            Debug.Log($"savegeneralId : {general.ActiveQuestId} ");
+            Debug.Log($"SaveGeneralId : {general.ActiveQuestId} ");
             
             var temporary = new Dictionary<string, TemporaryQuestData>(); 
             // 기간 퀘스트를 순회하며 각 퀘스트 들의 내용을 저장합니다.
@@ -1222,7 +1133,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             { 
                 ClearedQuestCount = data.General.ClearedQuestCount;
                 CurrentQuestStage = data.General.CurrentQuestStage;
-                CurrentClearedStage = data.General.CurrentClearedStage;
                 if (!string.IsNullOrEmpty(data.General.ActiveQuestId) &&
                     _generalDefs.TryGetValue(data.General.ActiveQuestId, out var def))
                 {
@@ -1272,8 +1182,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             _generalQuests.Clear();
 
             var activeId = data?.General?.ActiveQuestId ?? string.Empty;
-            var cleared = Mathf.Max(0, data?.General?.ClearedQuestCount ?? 0);
-
             var isEnqueued = TryEnqueueActiveTutorial(activeId);
             InsertTutorials();
             if (!isEnqueued)
@@ -1282,9 +1190,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 if (parity.Count > 0)
                 {
                     bool found = false;
-                    for (int i = 0; i < parity.Count; i++)
+                    foreach (var quest in parity)
                     {
-                        var quest = parity[i];
                         if (!found && quest.questId == activeId) found = true;
                         if (found && quest.GeneralType == GeneralType_Enum.StageClear)
                         {
@@ -1313,9 +1220,13 @@ namespace _05._CSJ_Folder.Scripts.Quest
             var snapshot = _tutorialQuests.ToArray();
             var index = Array.FindIndex(snapshot, tutorial => tutorial.questId == activeId);
             if (index < 0) return false;
-            
-            for (int i = 0; i< index && _tutorialQuests.Count > 0; i++)
-                _tutorialQuests.Dequeue();
+
+            for (int i = 0; i < index && _tutorialQuests.Count > 0; i++)
+            {
+                var tutorial = _tutorialQuests.Dequeue();
+                QuestSignalManager.Instance.UnSubscribeTutorial(tutorial);
+            }
+
 
             if (_tutorialQuests.Count > 0)
             {
@@ -1328,12 +1239,12 @@ namespace _05._CSJ_Folder.Scripts.Quest
         #endregion
 
         #region IRewardGiver
-        //TODO : 인벤토리등과 연계하여 지급
         public void Give(QuestRewardSO.RewardEntry entry)
         {
             OnRewardGranted?.Invoke(entry);
-            DatabaseManager.Instance.AddCurrency(entry.RewardType, entry.Amount);
-            // TODO : Inventory.Add(entry); || Inventory.Add(entry.RewardType, entry.Amount); 등 진행
+            // TODO : 아직 재화 구조가 확정되지 않았고 작동 확인은 진행했으므로 우선 주석 전환
+            // 추후 팝업 메시지 창과 연결 가능성
+            // DatabaseManager.Instance.AddCurrency(entry.RewardType, entry.FixedAmount);
         }
         #endregion
 
@@ -1368,7 +1279,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                     var needDailyReset = await DatabaseManager.Instance.DailyCheckIn();
                     if (needDailyReset)
                     {
-                        ResetTemporaryQuests(_dailyQuests, QuestType_Enum.Daily);
+                        ResetTemporaryQuests(_dailyQuests);
                         await DatabaseManager.Instance.SetDailyQuestTime();
                     }
                 }
@@ -1379,7 +1290,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                     var needWeeklyReset = await DatabaseManager.Instance.WeeklyCheckIn();
                     if (needWeeklyReset)
                     {
-                        ResetTemporaryQuests(_weeklyQuests, QuestType_Enum.Weekly);
+                        ResetTemporaryQuests(_weeklyQuests);
                         await DatabaseManager.Instance.SetWeeklyQuestTime();
                     }
                 }
@@ -1418,29 +1329,30 @@ namespace _05._CSJ_Folder.Scripts.Quest
             
             var nextDaily = (nowStd >= Today) ? Today.AddDays(1) : Today;
             
-            int dayUntilReset = ((int)resetDay - (int)nowStd.DayOfWeek + 7) % 7;;
+            int dayUntilReset = ((int)resetDay - (int)nowStd.DayOfWeek + 7) % 7;
             if (dayUntilReset == 0 && nowStd >= Today) dayUntilReset = 7;
-            DateTime nextWeekly = Today.AddDays(dayUntilReset);
+            
+            var nextWeekly = Today.AddDays(dayUntilReset);
 
             var nextBoundary = nextDaily < nextWeekly ? nextDaily : nextWeekly;
-            double WaitSec = (nextBoundary - nowStd).TotalSeconds;
+            var WaitSec = (nextBoundary - nowStd).TotalSeconds;
             if (WaitSec < 1) WaitSec = 1;
             
             yield return new WaitForSeconds((float)WaitSec + 1f);
 
             yield return DatabaseManager.Instance.EnsureServerOffset().AsIEnumerator();
-            bool daily = DatabaseManager.Instance.QuickDailyCheck();
-            bool weekly = DatabaseManager.Instance.QuickWeeklyCheck();
+            var daily = DatabaseManager.Instance.QuickDailyCheck();
+            var weekly = DatabaseManager.Instance.QuickWeeklyCheck();
             yield return CheckTemporaryQuestsReset(daily, weekly).AsIEnumerator();
             
             ScheduleNextResetTick(resetHour, resetDay);
         }
 
 
-        private void ResetTemporaryQuests(IEnumerable<TemporaryInstance> quests, QuestType_Enum questType)
+        private void ResetTemporaryQuests(IEnumerable<TemporaryInstance> quests)
         {
             if(quests == null) return;
-
+            
             foreach (var quest in quests)
             {
                 if (quest == null) continue;
@@ -1456,7 +1368,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private TemporaryInstance[] GetTemporaryInstance(TemporaryQuestDefinitionSO def)
         {
             var instCount = def.QuestCount;
-            TemporaryInstance[] insts = new TemporaryInstance[instCount];
+            var insts = new TemporaryInstance[instCount];
             
             for (int i = 0; i < instCount; i++)
             {
@@ -1497,15 +1409,14 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         private void OnTemporaryProgress(QuestType_Enum type, string signalKey, int progress)
         {
-            foreach (var t in _temporaryInstances)
+            var quests = type == QuestType_Enum.Daily ? _dailyQuests : _weeklyQuests;
+            foreach (var inst in quests)
             {
-                string questId = t.Key;
-                var inst = t.Value;
-
                 if (inst is null) continue;
                 if (inst.QuestState == QuestState_Enum.Received) continue;
                 if (type != inst.QuestType) continue;
-                    
+                if (inst.Def?.TempoGoal is null) continue;
+                
                 var delta = inst.Def.TempoGoal.ProgressDeltaFrom(signalKey, progress);
                 // 만약 진척도가 <=0이라면; 키가 일치하지 않는다면
                 if (delta <= 0) continue;
@@ -1536,21 +1447,18 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private void ForceQuestComplete()
         {
             if (_isResetting) return;
-            
-            CurrentClearedStage++;
             GeneralQuestInstance inst = GetActiveGeneralInstance();
             inst.ForceComplete();   
             MarkCompleted(GetActiveQuestDefinition(),inst);
         }
 
-        public void ForceQuestReset()
+        private void ForceQuestReset()
         {
             if (_isResetting) return;
             _isResetting = true;
 
             try
             {
-                CurrentClearedStage = 0;
                 CurrentQuestStage = 1;
                 ClearedQuestCount = 0;
 
@@ -1593,7 +1501,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
                 if (_temporaryQuestController != null)
                 {
-                    _temporaryQuestController.QuestInit(_temporaryQuest, _temporaryInstances);
+                    _temporaryQuestController.QuestInit(_temporaryQuests.ToList(), _temporaryInstances);
                 }
 
                 foreach (var kv in _temporaryInstances)

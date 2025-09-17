@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using Cysharp.Threading.Tasks;
+
 
 public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
 {
@@ -11,8 +15,9 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
     public int gachaPityCounter = 0;
 
     [Header("캐릭터 데이터 (전용)")]
-    [Tooltip("캐릭터 SO 에셋들이 저장된 폴더 경로")]
-    public string characterDataFolderPath = "CharacterData";
+    [Tooltip("어드레서블에 등록된 캐릭터 데이터 애셋들의 레이블")]
+    public string characterDataLabel = "Characters";
+
     [Tooltip("게임에 존재하는 모든 캐릭터 SO 목록")]
     public List<CharacterData> allCharacters;
 
@@ -29,9 +34,11 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
     private List<CharacterData> captainPool;
     private List<CharacterData> crewPool;
 
+    private AsyncOperationHandle<IList<CharacterData>> _characterLoadHandle;
+
     protected override void Start()
     {
-        base.Start(); // 부모 클래스의 Start()를 먼저 실행
+        base.Start();
         StartCoroutine(InitializeGachaPool());
     }
 
@@ -41,17 +48,40 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         {
             yield return null;
         }
-        allCharacters = Resources.LoadAll<CharacterData>(characterDataFolderPath).ToList();
-        Debug.Log($"[CharacterGachaManager] {allCharacters.Count}명의 캐릭터를 뽑기 풀에 추가했습니다.");
 
-        captainPool = allCharacters.Where(c => c.crewRole == CrewRole.Captain).ToList();
-        crewPool = allCharacters.Where(c => c.crewRole != CrewRole.Captain).ToList();
+        Debug.Log("[CharacterGachaManager] 어드레서블을 통해 캐릭터 풀 로딩을 시작합니다...");
+        var handle = Addressables.LoadAssetsAsync<CharacterData>(characterDataLabel, null);
+        _characterLoadHandle = handle;
 
-        Debug.Log($"[CharacterGachaManager] 선장 풀: {captainPool.Count}명, 선원 풀: {crewPool.Count}명");
+        yield return handle;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            allCharacters = handle.Result.ToList();
+            Debug.Log($"[CharacterGachaManager] {allCharacters.Count}명의 캐릭터를 뽑기 풀에 추가했습니다.");
+
+            captainPool = allCharacters.Where(c => c.crewRole == CrewRole.Captain).ToList();
+            crewPool = allCharacters.Where(c => c.crewRole != CrewRole.Captain).ToList();
+
+            Debug.Log($"[CharacterGachaManager] 선장 풀: {captainPool.Count}명, 선원 풀: {crewPool.Count}명");
+        }
+        else
+        {
+            Debug.LogError($"[CharacterGachaManager] 어드레서블 로딩 실패! 레이블 '{characterDataLabel}'을 확인해주세요.");
+        }
 
         gachaPityCounter = PlayerDataManager.Instance.GachaPityCounter;
         Debug.Log($"[CharacterGachaManager] 현재 천장 카운트: {gachaPityCounter}");
         OnGachaPityChanged?.Invoke();
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (_characterLoadHandle.IsValid())
+        {
+            Addressables.Release(_characterLoadHandle);
+            Debug.Log("[CharacterGachaManager] 캐릭터 풀 어드레서블 핸들을 해제했습니다.");
+        }
     }
 
     public override bool PerformMultipleGacha(int count)
@@ -106,7 +136,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         }
     }
 
-    private void ExecuteGachaDraw(int count)
+    private async UniTask ExecuteGachaDraw(int count)
     {
         LastGachaResults = new List<PlayerCharacterData>();
         List<GachaGrade> resultGrades = new List<GachaGrade>();
@@ -132,7 +162,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
                 grade = GetRandomGrade(gradeChances);
             }
 
-            PlayerCharacterData drawnCharacter = GetCharacterFromPool(isCaptain, grade);
+            PlayerCharacterData drawnCharacter = await GetCharacterFromPool(isCaptain, grade);
 
             if (drawnCharacter != null)
             {
@@ -157,7 +187,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         OnGachaPityChanged?.Invoke();
     }
 
-    private PlayerCharacterData GetCharacterFromPool(bool isCaptain, GachaGrade grade)
+    private async UniTask<PlayerCharacterData> GetCharacterFromPool(bool isCaptain, GachaGrade grade)
     {
         List<CharacterData> characterPool = isCaptain ? captainPool : crewPool;
         if (characterPool == null || characterPool.Count == 0)
@@ -167,7 +197,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
         }
 
         CharacterData drawnCharacterSO = characterPool[UnityEngine.Random.Range(0, characterPool.Count)];
-        PlayerCharacterData newCharacterInstance = PlayerDataManager.Instance.AddCharacter(drawnCharacterSO, grade);
+        PlayerCharacterData newCharacterInstance = await PlayerDataManager.Instance.AddCharacter(drawnCharacterSO, grade);
 
         Debug.Log($"캐릭터 뽑기 결과: [{(isCaptain ? "선장" : "선원")}, {grade}] {newCharacterInstance.characterdata.characterName}");
         return newCharacterInstance;

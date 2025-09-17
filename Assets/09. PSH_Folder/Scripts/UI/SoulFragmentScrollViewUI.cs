@@ -114,15 +114,15 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
         }
 
         // ownedCharacters의 모든 값을 가져와서 Enumerable로 처리합니다.
-        var charactersQuery = PlayerDataManager.Instance.ownedCharacters.Values.AsEnumerable();
+        var charactersQuery = PlayerDataManager.Instance.OwnedCharacters.Values.AsEnumerable();
 
         // 영혼 조각이 0보다 큰 캐릭터만 필터링합니다.
         charactersQuery = charactersQuery.Where(c =>
         {
             int fragmentCount;
             // characterSoulFragments 딕셔너리에서 해당 캐릭터의 조각 수를 찾아, 0보다 큰지 확인합니다.
-            bool hasFragments = PlayerDataManager.Instance.characterSoulFragments.TryGetValue(c.characterdata.characterID, out fragmentCount);
-            return hasFragments && fragmentCount > 0;
+            bool hasFragments = PlayerDataManager.Instance.OwnedCharacters.TryGetValue(c.characterdata.characterID, out var data);
+            return hasFragments && data.Soul.Value > 0;
         });
 
 
@@ -134,10 +134,10 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
                 sortedCharacters = charactersQuery.OrderByDescending(c => c.battlePower);
                 break;
             case 1:
-                sortedCharacters = charactersQuery.OrderByDescending(c => c.stars);
+                sortedCharacters = charactersQuery.OrderByDescending(c => c.Star);
                 break;
             case 2:
-                sortedCharacters = charactersQuery.OrderByDescending(c => c.characterLevel);
+                sortedCharacters = charactersQuery.OrderByDescending(c => c.Level);
                 break;
             case -1:
                 sortedCharacters = charactersQuery.OrderBy(c => c.characterdata.characterName);

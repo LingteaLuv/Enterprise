@@ -215,7 +215,7 @@ public class CharacterScrollViewUI : UIBase
 
         if (characterCountText != null)
         {
-            int totalOwnedCount = PlayerDataManager.Instance.ownedCharacters.Count;
+            int totalOwnedCount = PlayerDataManager.Instance.OwnedCharacters.Count;
             characterCountText.text = $"{totalOwnedCount} / 55";
         }
 
@@ -267,7 +267,7 @@ public class CharacterScrollViewUI : UIBase
 
     private List<PlayerCharacterData> GetSortedCharacters()
     {
-        var charactersQuery = PlayerDataManager.Instance.ownedCharacters.Values.AsEnumerable();
+        var charactersQuery = PlayerDataManager.Instance.OwnedCharacters.Values.AsEnumerable();
 
         if (currentFactionFilter != FactionFilterOption.All)
         {
@@ -288,11 +288,11 @@ public class CharacterScrollViewUI : UIBase
         switch (currentSort)
         {
             case CharacterSortOption.Stars:
-                sortedCharacters = sortedCharacters.ThenByDescending(c => c.stars)
+                sortedCharacters = sortedCharacters.ThenByDescending(c => c.Star.Value)
                                                    .ThenBy(c => c.characterdata.characterName);
                 break;
             case CharacterSortOption.Level:
-                sortedCharacters = sortedCharacters.ThenByDescending(c => c.characterLevel)
+                sortedCharacters = sortedCharacters.ThenByDescending(c => c.Level.Value)
                                                    .ThenBy(c => c.characterdata.characterName);
                 break;
         }

@@ -85,6 +85,15 @@ public class PartyManager : Singleton<PartyManager>
         foreach (PlayerCharacterData data in currentPartyData)
         {
             GameObject charObject = Instantiate(characterPrefab, characterParent);
+
+            // 데이터에 연결된 characterPrefab(모델)이 있는지 확인합니다.
+            var modelPrefab = data.characterdata.characterPrefab;
+            if (modelPrefab != null)
+            {
+                // 모델 프리팹을 방금 생성한 charObject의 자식으로 생성합니다.
+                Instantiate(modelPrefab, charObject.transform);
+            }
+
             CombatCharacter combatChar = charObject.GetComponent<CombatCharacter>();
             if (combatChar != null)
             {

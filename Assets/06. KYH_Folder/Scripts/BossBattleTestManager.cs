@@ -17,7 +17,10 @@ public class BossBattleTestManager : MonoBehaviour
         _successBtn.onClick.AddListener(() =>
         {
             Debug.Log(" 보스전 승리!");
-            QuestSignalManager.Instance.StageClear(GlobalStageManager.Instance.currentStageIndex++);
+
+            QuestSignalManager.Instance.StageClear(GlobalStageManager.Instance.CurrentStageIndex.Value++);
+            GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;
+
             GlobalStageManager.Instance.bossBattleTriggered = false;
             QuestSignalManager.Instance.KillEnemy(MonsterId.Boss);
             StartCoroutine(Delay1());
@@ -26,6 +29,7 @@ public class BossBattleTestManager : MonoBehaviour
         _failBtn.onClick.AddListener(() =>
         {
             Debug.Log(" 보스전 패배!");
+            GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;
             StartCoroutine(Delay2());
         });
         

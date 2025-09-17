@@ -12,7 +12,7 @@ public class CharacterDataImporter
     private static string csvFilePath = Application.dataPath + "/CSVData/CharacterData.csv";
 
     // ScriptableObject 에셋을 저장할 기본 경로
-    private static string soSavePath = "Assets/Resources/CharacterData/";
+    private static string soSavePath = "Assets/Resources_moved/CharacterData/";
 
     [MenuItem("Tools/Import Data/Character")]
     public static void ImportData()
@@ -87,10 +87,11 @@ public class CharacterDataImporter
                 data.instruction = fields[headerMap["Instruction"]];
 
                 // Sprite 로드 (Resources 폴더 내에 스프라이트가 있어야 함)
-                string spritePath = fields[headerMap["Char_Sprite"]];
+                //string spritePath = fields[headerMap["Char_Sprite"]];
+                string spritePath = "Assets/00. Imports/CharImage/GeneratedPortraits/";
                 if (!string.IsNullOrEmpty(spritePath))
                 {
-                    data.characterSprite = Resources.Load<Sprite>(spritePath);
+                    data.characterSprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{spritePath}{data.characterID}.png");
                     if (data.characterSprite == null)
                     {
                         Debug.LogWarning($"캐릭터 스프라이트를 로드할 수 없습니다: {spritePath} (ID: {data.characterID})");
@@ -114,7 +115,7 @@ public class CharacterDataImporter
                 data.atkRangeType = (AtkRangeType)Enum.Parse(typeof(AtkRangeType), fields[headerMap["AtkRange_Type"]], true);
 
                 // 스킬 정보 파싱
-                data.skillPassiveID = int.Parse(fields[headerMap["SkillPassive_ID"]]);
+                data.skillPassiveID = data.characterID; // 같은 것도 있지만 다른게 많아서 그냥 각각 하는게 나을듯
                 data.skillPassiveMotion = fields[headerMap["Skill_PassiveMotion"]];
 
                 // --- 스탯 정보 파싱 (CSV 헤더와 Stat Enum 매핑) ---

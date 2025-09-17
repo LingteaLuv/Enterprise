@@ -219,7 +219,6 @@ namespace JHT
         {
             if (target == null)
                 return;
-
             ChangeAnim(MOVE, MonsterState.MOVE);
 
         }
@@ -260,12 +259,12 @@ namespace JHT
             }
             else
             {
-                //gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
+                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
                 ui.transform.localScale = new Vector3(-1, 1, 1);
             }
         }
 
-        public void TakeDamage(float damage)
+        private void ApplyDamageEffects(float damage)
         {
             CurHP = Mathf.Max(CurHP - damage, 0);
             if (CurHP == 0)
@@ -360,6 +359,32 @@ namespace JHT
         public float GetCurrentStat(Stat stat)
         {
             throw new NotImplementedException();
+        }
+
+        // --- IAttacker 인터페이스 구현 ---
+        public float GetCurrentStat(Stat stat)
+        {
+            // BaseMonsterStat에 만든 함수를 호출해서 스탯을 가져와요.
+            return monsterStat.GetCurrentStat(stat);
+        }
+
+        // --- IDamageable 인터페이스 구현 ---
+        public string GetName()
+        {
+            // 몬스터의 이름을 돌려줘요.
+            return monsterStat.curSO.name;
+        }
+
+        public void TakeDamage(IAttacker attacker, float powerRatio = 1f)
+        {
+            // 1. 공격자와 방어자의 스탯 가져오기
+            float attackerAttack = attacker.GetCurrentStat(Stat.Attack) * powerRatio;
+            float defenderDefense = GetCurrentStat(Stat.Defense); // 자신의 스탯 사용
+
+            // 2. 데미지 계산
+            float finalDamage = attackerAttack * (100f / (100f + defenderDefense));
+
+            ApplyDamageEffects(finalDamage);
         }
     }
 }

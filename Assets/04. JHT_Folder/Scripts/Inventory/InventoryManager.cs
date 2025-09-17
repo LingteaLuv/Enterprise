@@ -178,6 +178,7 @@ namespace JHT
 
             // 조건 없이 성급 증가 TODO 나중에 조건 추가
             weapon.ItemStar++;
+            QuestSignalManager.Instance.RankUp(global::ItemType.Equipment, 1);
 
             // 5성이 되었는지 확인하는 로직
             if (weapon.ItemStar >= 5)

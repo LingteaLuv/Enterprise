@@ -94,7 +94,7 @@ public class EquipmentDetailPanel : MonoBehaviour
         {
             if (int.TryParse(currentWeapon.EquippedByCharacterId, out int ownerId) && ownerId != currentCharacter.characterdata.characterID)
             {
-                if (PlayerDataManager.Instance.ownedCharacters.TryGetValue(ownerId, out PlayerCharacterData owner))
+                if (PlayerDataManager.Instance.OwnedCharacters.TryGetValue(ownerId, out PlayerCharacterData owner))
                 {
                     string message = $"{owner.characterdata.characterName}이(가) 사용 중인 장비입니다. 교체하시겠습니까?";
                     PopManager.Instance.ShowOKCancelPopup(message, "예", () => ProceedEquip(), "아니오");

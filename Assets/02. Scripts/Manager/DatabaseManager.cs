@@ -34,9 +34,10 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <summary>
     /// Firebase RTDB에 단일 데이터를 저장하는 메서드
     /// </summary>
-    public async Task SaveFieldAsync(string path, object value)
+    public async Task SaveFieldAsync(string tempPath, object value)
     {
         Dictionary<string, object> dictionary = new Dictionary<string, object>();
+        string path = $"{_uid}/" + tempPath;
         dictionary[path] = value;
         
         var task = FirebaseManager.DataReference.UpdateChildrenAsync(dictionary);
@@ -133,6 +134,20 @@ public class DatabaseManager : Singleton<DatabaseManager>
         T data = JsonUtility.FromJson<T>(json);
         callback(data);
     }
+
+    public async Task<bool> CheckFieldAsync<T>(string subPath, Action<T> callback)
+    {
+        string path = $"{_uid}/" + subPath;
+        
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(path);
+        DataSnapshot snapshot = await dataRef.GetValueAsync();
+
+        if (!snapshot.Exists) return false;
+        
+        T newData = (T)Convert.ChangeType(snapshot.Value, typeof(T));
+        callback(newData);
+        return true;
+    }
     
     #region Nickname
     
@@ -153,7 +168,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             nickname = newNickname;
         }
 
-        await SaveFieldAsync($"{_uid}/PublicData/Nickname",nickname);
+        await SaveFieldAsync($"PublicData/Nickname",nickname);
 
         OnChangedNickname?.Invoke();
     }
@@ -439,6 +454,17 @@ public class DatabaseManager : Singleton<DatabaseManager>
 
     #endregion
 
+    public async Task SaveCrewDataAsync(string subPath, PlayerCharacterData data)
+    {
+        Init();
+        var root = $"{_uid}/{subPath}";
+        var crewData = new Dictionary<string, object>();
+        
+        crewData[$"{root}/Level"] = data.Level;
+        crewData[$"{root}/Star"] = data.Star;
+            
+        await SaveFieldsAsync(crewData);
+    }
 
     #region QuestCheck (AddedByCSJ)
     
@@ -636,7 +662,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <summary>
     /// 마지막 퀘스트 수행 요일을 받아옵니다.
     /// </summary>
-    //TODO : 추후 사용할 여지가 있어 만들었습니다. 현재는 미사용
+    // 추후 사용할 수도 있어 만들었습니다. 현재는 미사용
     private async Task<DayOfWeek> GetWeeklyQuestDay()
     {
         Init();
@@ -656,7 +682,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     private static DateTime GetWeeklyBoundary(DateTime now, DayOfWeek resetDay, int resetTime)
     {
         // 경계 기본 값을 지정합니다.
-        var BaseToday = new DateTime(now.Year, now.Month, now.Day, resetTime, 0, 0, DateTimeKind.Utc);;
+        var BaseToday = new DateTime(now.Year, now.Month, now.Day, resetTime, 0, 0, DateTimeKind.Utc);
       
         // 오늘의 요일에서 초기화 요일을 빼서 초기화 요일 기준으로 경계를 지정합니다.
         var delta = ((int)now.DayOfWeek - (int)resetDay + 7) % 7;
@@ -762,8 +788,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             payload[$"{root}/General/ActiveProgress"] = data.General.ActiveProgress;
             
             payload[$"{root}/General/ClearedQuestCount"] = data.General.ClearedQuestCount;
-            payload[$"{root}/General/CurrentQuestStage"] = data.General.CurrentQuestStage;
-            payload[$"{root}/General/CurrentClearedStage"] = data.General.CurrentClearedStage;
+            payload[$"{root}/General/CurrentQuestStage"] = data.General.CurrentQuestStage; 
         }
 
         // Temporary 칸이 null이 아닌 경우 딕셔너리화
@@ -822,7 +847,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
             
             result.General.ClearedQuestCount = ToInt(g.Child("ClearedQuestCount").Value, 0);
             result.General.CurrentQuestStage = ToInt(g.Child("CurrentQuestStage").Value, 1);
-            result.General.CurrentClearedStage = ToInt(g.Child("CurrentClearedStage").Value, 0);
         }
         Debug.Log($"Load QuestID : {result.General.ActiveQuestId}");
 

@@ -17,6 +17,18 @@ public static class GoogleSheetImporter
             "https://docs.google.com/spreadsheets/d/1bkHFHadz8Dh2NA0E9lrFMsCoei2Ae3_MMPfBAfyrXhs/export?format=csv&gid=923429344",
             "Assets/CSVData/EquipData.csv"
         ),
+        (
+            "https://docs.google.com/spreadsheets/d/1bkHFHadz8Dh2NA0E9lrFMsCoei2Ae3_MMPfBAfyrXhs/export?format=csv&gid=725504099",
+            "Assets/CSVData/Skills.csv"
+        ),
+        (
+            "https://docs.google.com/spreadsheets/d/1bkHFHadz8Dh2NA0E9lrFMsCoei2Ae3_MMPfBAfyrXhs/export?format=csv&gid=1113506832",
+            "Assets/CSVData/Effects.csv"
+        ),
+        (
+            "https://docs.google.com/spreadsheets/d/1bkHFHadz8Dh2NA0E9lrFMsCoei2Ae3_MMPfBAfyrXhs/export?format=csv&gid=1754334009",
+            "Assets/CSVData/Portraits.csv"
+        ),
         // 필요하면 더 추가 가능
     };
 

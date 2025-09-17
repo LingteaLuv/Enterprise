@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using _05._CSJ_Folder.Scripts.Quest;
+using _05._CSJ_Folder.Scripts.Quest.Definition;
 using JHT;
 using UnityEngine;
 
@@ -10,29 +12,89 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     private Action FomationChanged;
     private Action AutoFomation;
     private Action<RelicsObject> RelicTutorial;
+    
+    public event Action BossBattleEnter;
+    public event Action OnDungeonEnter;
+    
     private void OnEnable()
     {
-        FomationChanged = () => ETCAchieve("ArrangeTutorial");
+        QuestManager.Instance.OnTutorialQuestCompleted -= UnSubscribeTutorial;
+        QuestManager.Instance.OnTutorialQuestCompleted += UnSubscribeTutorial;
+        
+        FomationChanged = () => Tutorial("ArrangeTutorial");
+        FormationManager.Instance.OnTempFormationChanged -= FomationChanged;
         FormationManager.Instance.OnTempFormationChanged += FomationChanged;
-        AutoFomation = () => ETCAchieve("AutoArrangeTutorial");
+        
+        AutoFomation = () => Tutorial("AutoArrangeTutorial");
+        FormationManager.Instance.OnAutoFormation -= AutoFomation;
         FormationManager.Instance.OnAutoFormation += AutoFomation;
-        RelicTutorial = (_) => ETCAchieve("RelicTutorial");
+        
+        RelicTutorial = (_) => Tutorial("RelicTutorial");
+        InventoryManager.Instance.OnChangePanel -= RelicTutorial;
         InventoryManager.Instance.OnChangePanel += RelicTutorial;
+
+        BossBattleEnter -= OnBossTutorial;
+        BossBattleEnter += OnBossTutorial;
+
+        OnDungeonEnter -= OnTutorial;
+        OnDungeonEnter -= OnActiveDungeon;
+        OnDungeonEnter += OnTutorial;
+        OnDungeonEnter += OnActiveDungeon;
     }
 
-    private void OnDisable()
+    public void UnSubscribeTutorial(TutorialQuestDefinitionSO def)
     {
-        FormationManager.Instance.OnTempFormationChanged -= FomationChanged;
-        FormationManager.Instance.OnAutoFormation -= AutoFomation;
-        InventoryManager.Instance.OnChangePanel -= RelicTutorial;
+        var tuto = def.Goal.enumKey.ToKeyString();
+        switch (tuto)
+        {
+            case "ArrangeTutorial":
+                FormationManager.Instance.OnTempFormationChanged -= FomationChanged;
+                break;
+            case "AutoArrangeTutorial":
+                FormationManager.Instance.OnAutoFormation -= AutoFomation;
+                break;
+            case "RelicTutorial":
+                InventoryManager.Instance.OnChangePanel -= RelicTutorial;
+                break;
+            case "BossTutorial":
+                BossBattleEnter -= OnBossTutorial;
+                break;
+            case "RogulikeTutorial":
+                OnDungeonEnter -= OnTutorial;
+                break;
+            // TODO : 추후 스킬을 이으며 추가
+            case "SkillTutorial":
+                break;
+        }
     }
 
     public void OnBossBattleEnter()
     {
+        Debug.Log("Boss Battle Enter");
         ETCAchieve("BossBattle");
+        BossBattleEnter?.Invoke();
     }
 
-    // TODO : 추후 퀘스트 종류 입력을 받지 않고 자동으로 퀘스트 목록에 맞춰서 신호를 보낼 수도 있음
+    public void OnBossTutorial()
+    {
+        Debug.Log("Boss Tutorial");
+        Tutorial("BossTutorial");
+    }
+
+    public void OnDungeonEntered()
+    {
+        OnDungeonEnter?.Invoke();
+    }
+
+    public void OnTutorial()
+    {
+        Tutorial("RoguelikeTutorial");
+    }
+
+    public void OnActiveDungeon()
+    {
+        Active(ActiveType.Dungeon);
+    }
     
     /// <summary>
     /// 적을 죽였을 때 이를 퀘스트로 갱신할 때 호출하는 시그널
@@ -47,6 +109,8 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         var key = QuestKeys.Kill(enemyId);
         SendSignal(key, count, general, daily, weekly);
+        if (enemyId is MonsterId.All) return;
+        SendSignal(QuestKeys.Kill(MonsterId.All), count, general,daily, weekly);
     }
 
     /// <summary>
@@ -75,6 +139,8 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         var key = QuestKeys.GachaPull(gachaId);
         SendSignal(key, count, general, daily, weekly);
+        if (gachaId is ItemType.All or ItemType.RareRelic) return;
+        SendSignal(QuestKeys.GachaPull(ItemType.All), count, general, daily, weekly);
     }
     
     /// <summary>
@@ -135,6 +201,25 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         var key = QuestKeys.StageClear();
         SendSignal(key, stage, general, daily, weekly);
+    }
+
+    public void DeckComposition(DeckSynergy synergy, int count, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.DeckComposition(synergy);
+        SendSignal(key, count, general, daily, weekly);
+    }
+
+    public void RankUp(ItemType rankKey, int rankCount, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.RankUp(rankKey);
+        SendSignal(key, rankCount, general, daily, weekly);
+    }
+
+    public void Tutorial(string def, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.Tutorial(def);
+        Debug.Log($"tutorialkey {key}");
+        SendSignal(key, 1, general, daily, weekly);
     }
 
     private void SendSignal(string key, int count, bool general, bool daily, bool weekly)
