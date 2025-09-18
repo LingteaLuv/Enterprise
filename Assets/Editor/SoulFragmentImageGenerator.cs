@@ -31,6 +31,9 @@ public class SoulFragmentImageGenerator
 
         // --- 2. 재료 준비 ---
         Material maskMaterial = new Material(Shader.Find("Custom/MaskedShader"));
+        // 셰이더의 _Color 속성 알파를 설정하여 전체 투명도 조절
+        maskMaterial.SetColor("_Color", new Color(1, 1, 1, .8f));
+
         Material blendMaterial = new Material(Shader.Find("Sprites/Default"));
 
         if (maskMaterial == null || blendMaterial == null)
