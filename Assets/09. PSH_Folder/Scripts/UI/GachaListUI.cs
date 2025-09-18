@@ -21,12 +21,16 @@ public class GachaListUI : MonoBehaviour
     private List<GachaCharacterPanel> _characterCards = new List<GachaCharacterPanel>();
     private List<GachaItemPanel> _equipmentCards = new List<GachaItemPanel>();
 
+    private int _flippedCardCount = 0; // 뒤집힌 카드 수
+    private int _totalCards = 0; // 전체 카드 수
+
     private void Start()
     {
         if (revealAllButton != null)
         {
             revealAllButton.onClick.AddListener(RevealAllCards);
             closeButton.onClick.AddListener(ClosePanel);
+            closeButton.gameObject.SetActive(false); // 초기에는 닫기 버튼 숨김
         }
     }
 
@@ -56,6 +60,11 @@ public class GachaListUI : MonoBehaviour
 
         ClearAllCards();
 
+        _flippedCardCount = 0; // 카드 카운터 초기화
+        _totalCards = 0; // 전체 카드 수 초기화
+        closeButton.gameObject.SetActive(false); // 닫기 버튼 다시 숨김
+        revealAllButton.gameObject.SetActive(true);
+
         for (int i = 0; i < characterResults.Count; i++)
         {
             GameObject itemGO = Instantiate(characterResultItemPrefab, contentParent);
@@ -63,7 +72,9 @@ public class GachaListUI : MonoBehaviour
             if (panelUI != null)
             {
                 panelUI.Setup(characterResults[i], grades[i]);
+                panelUI.OnCardFlipped += OnAnyCardFlipped; // 카드 뒤집힘 이벤트 구독
                 _characterCards.Add(panelUI);
+                _totalCards++; // 전체 카드 수 증가
             }
         }
     }
@@ -81,6 +92,11 @@ public class GachaListUI : MonoBehaviour
 
         ClearAllCards();
 
+        _flippedCardCount = 0; // 카드 카운터 초기화
+        _totalCards = 0; // 전체 카드 수 초기화
+        closeButton.gameObject.SetActive(false); // 닫기 버튼 다시 숨김
+        revealAllButton.gameObject.SetActive(true);
+
         foreach (var resultData in equipmentResults)
         {
             GameObject itemGO = Instantiate(equipmentResultItemPrefab, contentParent);
@@ -95,7 +111,9 @@ public class GachaListUI : MonoBehaviour
                         itemTiers.TryGetValue(itemData.itemNum, out tier);
                     }
                     panelUI.SetUp(itemData, tier);
+                    panelUI.OnCardFlipped += OnAnyCardFlipped; // 카드 뒤집힘 이벤트 구독
                     _equipmentCards.Add(panelUI);
+                    _totalCards++; // 전체 카드 수 증가
                 }
             }
         }
@@ -106,6 +124,8 @@ public class GachaListUI : MonoBehaviour
     /// </summary>
     public void RevealAllCards()
     {
+        revealAllButton.gameObject.SetActive(false);
+
         foreach (var card in _characterCards)
         {
             card.Flip();
@@ -118,5 +138,18 @@ public class GachaListUI : MonoBehaviour
     private void ClosePanel()
     {
         gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// 개별 카드가 뒤집혔을 때 호출됩니다.
+    /// </summary>
+    private void OnAnyCardFlipped()
+    {
+        _flippedCardCount++;
+        if (_flippedCardCount >= _totalCards)
+        {
+            closeButton.gameObject.SetActive(true); // 모든 카드가 뒤집히면 닫기 버튼 활성화
+            revealAllButton.gameObject.SetActive(false);
+        }
     }
 }

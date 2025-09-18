@@ -105,6 +105,8 @@ public class GachaCharacterPanel : MonoBehaviour
 
         hasFlipped = true;
         isFlipping = false;
+        OnCardFlipped?.Invoke(); // 카드가 뒤집혔음을 알립니다.
     }
 
+    public event System.Action OnCardFlipped; // 카드가 뒤집혔을 때 호출될 이벤트
 }
