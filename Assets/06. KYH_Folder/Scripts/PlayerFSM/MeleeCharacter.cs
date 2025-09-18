@@ -159,7 +159,7 @@ public class MeleeCharacter : BaseCharacterFSM
             yield break;
         }
 
-        Debug.Log($"{stats.charName}이/가 {skill.skillName} 스킬 발동");
+      //  Debug.Log($"{stats.charName}이/가 {skill.skillName} 스킬 발동");
 
         // 스킬도 Attack 애니메이션 트리거로 처리
         animator.SetTrigger("2_Attack");
@@ -321,7 +321,7 @@ public class MeleeCharacter : BaseCharacterFSM
             if (e == null) continue;
 
             var monster = e.GetComponent<JHT_BaseMonsterFSM>();
-            if (monster == null || monster.curHP <= 0) continue;
+            if (monster == null || monster.CurHP <= 0) continue;
 
             float dist = Vector3.Distance(transform.position, e.transform.position);
             if (dist < minDist)
@@ -352,7 +352,7 @@ public class MeleeCharacter : BaseCharacterFSM
             if (e == null) continue;
 
             var monster = e.GetComponent<JHT_BaseMonsterFSM>();
-            if (monster == null || monster.curHP <= 0) continue;
+            if (monster == null || monster.CurHP <= 0) continue;
 
             // 현재 타겟은 제외
             if (target != null && e.transform == target) continue;
