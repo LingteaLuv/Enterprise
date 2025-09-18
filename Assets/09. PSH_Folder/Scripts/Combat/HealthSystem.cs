@@ -84,7 +84,7 @@ public class HealthSystem : MonoBehaviour
 
         // 3. 최종 데미지 적용
         currentHealth -= finalDamage;
-        Debug.Log($"💥 {attacker.GetName()}이(가) {statProvider.GetName()}에게 {finalDamage:F1}의 데미지를 입혔습니다!");
+      //  Debug.Log($"💥 {attacker.GetName()}이(가) {statProvider.GetName()}에게 {finalDamage:F1}의 데미지를 입혔습니다!");
 
         if (currentHealth <= 0)
         {
