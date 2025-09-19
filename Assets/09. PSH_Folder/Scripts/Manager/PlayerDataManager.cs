@@ -1,11 +1,10 @@
+using Cysharp.Threading.Tasks;
 using JHT;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
-using Firebase.Database;
 using UnityEngine;
 
 public class PlayerDataManager : Singleton<PlayerDataManager>
@@ -27,15 +26,18 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     //todo석원 : DB 연동 - 레벨 성급, 장착 무기, 영혼 조각 개수
     public Dictionary<int, PlayerCharacterData> OwnedCharacters = new Dictionary<int, PlayerCharacterData>();
     //public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
-    
+
     private Dictionary<int, int> starUpgradeCosts;
     private const int STAR_UPGRADE_COST_1 = 20;
     private const int STAR_UPGRADE_COST_2 = 40;
     private const int STAR_UPGRADE_COST_3 = 120;
     private const int STAR_UPGRADE_COST_4 = 180;
-    private const int FRAGMENT_GAIN_1 = 10;
-    private const int FRAGMENT_GAIN_2 = 40;
-    private const int FRAGMENT_GAIN_3 = 300;
+    private const int FRAGMENT_GAIN_1 = 4;
+    private const int FRAGMENT_GAIN_2 = 8;
+    private const int FRAGMENT_GAIN_3 = 16;
+    private const int CAPTAIN_FRAGMENT_GAIN_1 = 2;
+    private const int CAPTAIN_FRAGMENT_GAIN_2 = 3;
+    private const int CAPTAIN_FRAGMENT_GAIN_3 = 6;
     public int GachaPityCounter { get; set; }
 
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
@@ -70,7 +72,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
                 AutoFormTeam();
                 Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
             }
-            
+
             StartCoroutine(InitialCalculationCoroutine());
         };
     }
@@ -128,6 +130,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         };
     }
 
+    // 초기 지급 캐릭터 관련
     public async Task<PlayerCharacterData> AddCharacter(CharacterData characterdata)
     {
         if (OwnedCharacters.TryGetValue(characterdata.characterID, out PlayerCharacterData existingCharData))
@@ -150,6 +153,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
     }
 
+    // 뽑기로 획득하는 캐릭터
     public async UniTask<PlayerCharacterData> AddCharacter(CharacterData characterdata, GachaGrade grade)
     {
         if (OwnedCharacters.TryGetValue(characterdata.characterID, out PlayerCharacterData existingCharData))
@@ -167,9 +171,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
                 int fragmentsGained = 0;
                 switch (oldStarLevel)
                 {
-                    case 1: fragmentsGained = FRAGMENT_GAIN_1; break;
-                    case 2: fragmentsGained = FRAGMENT_GAIN_2; break;
-                    case 3: fragmentsGained = FRAGMENT_GAIN_3; break;
+                    case 1: fragmentsGained = characterdata.crewRole == CrewRole.Captain ? CAPTAIN_FRAGMENT_GAIN_1 : FRAGMENT_GAIN_1; break;
+                    case 2: fragmentsGained = characterdata.crewRole == CrewRole.Captain ? CAPTAIN_FRAGMENT_GAIN_2 : FRAGMENT_GAIN_2; break;
+                    case 3: fragmentsGained = characterdata.crewRole == CrewRole.Captain ? CAPTAIN_FRAGMENT_GAIN_3 : FRAGMENT_GAIN_3; break;
                 }
 
                 if (fragmentsGained > 0)
@@ -183,9 +187,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
                 int fragmentsGained = 0;
                 switch (grade)
                 {
-                    case GachaGrade.OneStar: fragmentsGained = FRAGMENT_GAIN_1; break;
-                    case GachaGrade.TwoStar: fragmentsGained = FRAGMENT_GAIN_2; break;
-                    case GachaGrade.ThreeStar: fragmentsGained = FRAGMENT_GAIN_3; break;
+                    case GachaGrade.OneStar: fragmentsGained = characterdata.crewRole == CrewRole.Captain ? CAPTAIN_FRAGMENT_GAIN_1 : FRAGMENT_GAIN_1; break;
+                    case GachaGrade.TwoStar: fragmentsGained = characterdata.crewRole == CrewRole.Captain ? CAPTAIN_FRAGMENT_GAIN_2 : FRAGMENT_GAIN_2; break;
+                    case GachaGrade.ThreeStar: fragmentsGained = characterdata.crewRole == CrewRole.Captain ? CAPTAIN_FRAGMENT_GAIN_3 : FRAGMENT_GAIN_3; break;
                 }
                 AddSoulFragments(characterdata.characterID, fragmentsGained);
                 Debug.Log($"[중복] {characterdata.characterName} 획득! 영혼 조각 +{fragmentsGained}");
@@ -218,11 +222,11 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         Debug.Log($"캐릭터 ID {characterId}의 영혼 조각 +{amount}. 현재: {characterSoulFragments[characterId]}개");
         await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{characterId}/SoulFragments", characterSoulFragments[characterId]);
     }*/
-    
+
     private void AddSoulFragments(int characterId, int amount)
     {
         OwnedCharacters[characterId].Soul.Value += amount;
-        
+
         Debug.Log($"캐릭터 ID {characterId}의 영혼 조각 +{amount}. 현재: {OwnedCharacters[characterId].Soul.Value}개");
     }
 
@@ -266,7 +270,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         OnCharacterDataUpdated?.Invoke(playerCharData);
         return true;
     }
-    
+
     public bool TryGetUpgradeCost(int currentStarLevel, out int cost)
     {
         return starUpgradeCosts.TryGetValue(currentStarLevel, out cost);

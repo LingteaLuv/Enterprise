@@ -31,6 +31,9 @@ public class SoulFragmentImageGenerator
 
         // --- 2. 재료 준비 ---
         Material maskMaterial = new Material(Shader.Find("Custom/MaskedShader"));
+        // 셰이더의 _Color 속성 알파를 설정하여 전체 투명도 조절
+        maskMaterial.SetColor("_Color", new Color(1, 1, 1, .8f));
+
         Material blendMaterial = new Material(Shader.Find("Sprites/Default"));
 
         if (maskMaterial == null || blendMaterial == null)
@@ -40,9 +43,9 @@ public class SoulFragmentImageGenerator
         }
 
         // 공통으로 사용할 배경 및 프레임 로드
-        Texture2D backgroundTex = LoadTexture($"{COMMON_ICON_PATH}/Portrait_BG.png");
-        Texture2D frameTex = LoadTexture($"{COMMON_ICON_PATH}/Frame.png");
-        Texture2D frameMaskTex = LoadTexture($"{COMMON_ICON_PATH}/FrameMask.png");
+        Texture2D backgroundTex = LoadTexture($"{COMMON_ICON_PATH}/BG.png");
+        Texture2D frameTex = LoadTexture($"{COMMON_ICON_PATH}/FRAME.png");
+        Texture2D glassTex = LoadTexture($"{COMMON_ICON_PATH}/GLASS.png");
 
         if (backgroundTex == null || frameTex == null)
         {
@@ -94,13 +97,14 @@ public class SoulFragmentImageGenerator
             GL.Clear(true, true, Color.clear); // 렌더 텍스처를 투명하게 비움
 
             // 1. 배경
-            maskMaterial.SetTexture("_Mask", frameMaskTex);
-            maskMaterial.SetColor("_Color", new Color(0.9f, 0.2f, 0.5f));
+            maskMaterial.SetTexture("_Mask", backgroundTex);
+
             Graphics.Blit(backgroundTex, rt, maskMaterial);
 
             // 2. 캐릭터는 마스크 머티리얼로 그리기
             Graphics.Blit(sourceTex, rt, maskMaterial);
 
+            Graphics.Blit(glassTex, rt, blendMaterial);
             // 3. 마지막에 프레임 PNG를 마스크 없이 올리기
             Graphics.Blit(frameTex, rt, blendMaterial);
 

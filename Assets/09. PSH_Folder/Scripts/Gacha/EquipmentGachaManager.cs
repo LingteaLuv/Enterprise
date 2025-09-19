@@ -193,7 +193,7 @@ public class EquipmentGachaManager : BaseGachaManager<ItemObject>
     {
         if (weapon == null) return;
         const int levelUpCost = 10;
-        const int maxLevel = 50;
+        const int maxLevel = 10;
 
         bool needsStarUp = weapon.ItemLevel > 0 && weapon.ItemLevel % 10 == 0 && weapon.ItemStar < (weapon.ItemLevel / 10);
         bool canLevelUp = InventoryManager.Instance.GetEnhancementPoints(weapon.itemNum) >= levelUpCost && weapon.ItemLevel < maxLevel && !needsStarUp;
