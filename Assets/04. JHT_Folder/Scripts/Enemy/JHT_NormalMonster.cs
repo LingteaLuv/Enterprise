@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using JHT;
 using UnityEngine;
 
@@ -26,10 +27,9 @@ namespace JHT
             base.Update();
         }
 
-        public override void HandleAttack()
+        public override void HandleAttackAsync()
         {
-            //애니메이션 실행(이벤트 사용할거임)
-            base.HandleAttack();
+            base.HandleAttackAsync();
         }
 
         public override void HandleMove()
@@ -45,47 +45,17 @@ namespace JHT
         // Attack애니메이션 이벤트로 실행할 함수
         public void NormalMonsterAttack()
         {
-            // 근접 공격일경우
-            if (monsterStat.monsterAttackType == AtkRangeType.Melee_Attack)
-            {
-                Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, monsterStat.attackRange, targetLayer);
-                
-                foreach (var c in cols)
-                {
-                    IDamageable targetDamageable = c.GetComponent<IDamageable>();
-                    if (targetDamageable != null)
-                    {
-                        //Pool 파티클 사용
-                        //hs.TakeDamage(monsterStat.totalAttackPower);
-                        targetDamageable.TakeDamage(this, 1f);
+            monsterStat.normalSkill.Use(this);
+        }
 
-                    }
-                }
-            }
-            else //원거리 일경우
-            {
-                if (target == null) return;
+        public void Skill1MonsterAttack()
+        {
+            monsterStat.skill1.Use(this);
+        }
 
-                IDamageable targetDamageable = target.GetComponent<IDamageable>();
-                if (targetDamageable == null)
-                    return;
-
-                JHT_MonsterProjectile obj = JHT_MonsterSpawnManager.Instance.projectilePool.GetPooled() as JHT_MonsterProjectile;
-
-                if (obj == null)
-                    return;
-
-                Vector2 startPos = transform.position;
-                Vector2 targetPos = (Vector2)target.transform.position;
-
-
-                //if (this != null)
-                //    obj.Init(targetPos, startPos, monsterStat.totalAttackPower, monsterStat.totalAttackPower,monsterStat.projectileSprite);
-
-                float projectileSpeed = 3f;
-                obj.Init(this, targetPos, startPos, projectileSpeed, monsterStat.totalAttackPower,monsterStat.projectileSprite);
-
-            }
+        public void Skill2MonsterAttack()
+        {
+            monsterStat.skill2.Use(this);
         }
 
         private void OnDrawGizmosSelected()
