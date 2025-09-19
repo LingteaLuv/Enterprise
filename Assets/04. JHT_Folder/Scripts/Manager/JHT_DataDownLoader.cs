@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace JHT
 {
@@ -12,11 +13,13 @@ namespace JHT
     {
         public const string itemRelicsURL = "https://docs.google.com/spreadsheets/d/1yrgwWQ_XijgUwjyUSkgDH9wji0oHuoYjEcmjZdZVGmg/export?format=csv"; //범위 설정 : &range=A2:B, 두번쨰시트 : &gid~~
         public const string lootTableURL = "https://docs.google.com/spreadsheets/d/13MgAe8F47N4GJRDn4vg4wGtn2Y31aOerQEQF096ox_g/export?format=csv";
-        public const string monsterDataURL = "https://docs.google.com/spreadsheets/d/1PmzSVnMU8XB2xUcDjxwD2VnZMGChZEwb0RiKSioXa8Q/export?format=csv";
+        public const string monsterDataURL = "https://docs.google.com/spreadsheets/d/1PmzSVnMU8XB2xUcDjxwD2VnZMGChZEwb0RiKSioXa8Q/export?format=csv&gid=1883053582";
         public const string monsterTableDataURL = "https://docs.google.com/spreadsheets/d/1VoQEEhbJ2EDee1ZxL99--B5VUV-qBRnSVTzkIGlpBEY/export?format=csv";
-        
+        public const string skillDataURL = "https://docs.google.com/spreadsheets/d/1PmzSVnMU8XB2xUcDjxwD2VnZMGChZEwb0RiKSioXa8Q/export?format=csv&gid=1671130256";
+            
         public event Action OnDataSetCompleted;
         public event Action OnMonsterDataTableSetCompleted;
+        public event Action<List<MonsterSkillSO>> OnSkillDataSetCompleted;
 
         public bool isMonsterDataReady;
         public IEnumerator DownRelicsData()
@@ -35,20 +38,19 @@ namespace JHT
 
         public IEnumerator DownLoadMonsterData()
         {
-            isMonsterDataReady = false;
             yield return null;
-            yield return LoadDataCSV(monsterDataURL, SetData, 2);
-            isMonsterDataReady = true;
+            yield return LoadDataCSV(monsterDataURL, SetData, 4);
+            yield return LoadDataCSV(monsterTableDataURL, SetMonsterTableData, 2);
 
+            OnMonsterDataTableSetCompleted?.Invoke();
         }
 
-        public IEnumerator DownLoadMonsterTableData()
+        public IEnumerator DownLoadSkillTabledata()
         {
             yield return null;
-            yield return new WaitUntil(() => isMonsterDataReady);
-            yield return LoadDataCSV(monsterTableDataURL, SetMonsterTableData, 2);
-            
-            OnMonsterDataTableSetCompleted?.Invoke();
+            yield return LoadDataCSV(skillDataURL, SetSKillData, 2);
+
+            OnSkillDataSetCompleted?.Invoke(MonsterDataManager.Instance.monsterSkillList);
         }
 
         private IEnumerator LoadDataCSV(string url, Action<string[][]> onParsed, int startLine = 1)
@@ -142,7 +144,12 @@ namespace JHT
                     so.monsterName = row[1]; 
                     so.monsterCrewRole = (CrewRole)Enum.Parse(typeof(CrewRole), row[2]);
                     so.monsterAttackType = (AtkRangeType)Enum.Parse(typeof(AtkRangeType), row[4]);
-                    so.normalSkill = row[7];
+                    so.normalSkill = row[6];
+                    so.attackPower = float.Parse(row[7]);
+                    so.maxHp = float.Parse(row[8]);
+                    so.skill1 = row[13];
+                    so.cost = int.Parse(row[15]);
+                    so.chaseRange = float.Parse(row[16]);
                     //so.skillAttack1 = row[7];
                     //so.buffSkill =row[8];
                 }
@@ -169,6 +176,28 @@ namespace JHT
                     so.monsterData[readNum - 1] = MonsterDataManager.Instance.monsterDataDic[row[2]];
                     so.roundCount = int.Parse(row[3]);
                     so.totalCost = int.Parse(row[4]);
+                }
+            }
+        }
+
+        public void SetSKillData(string[][] data)
+        {
+            MonsterSkillSO[] parse = new MonsterSkillSO[MonsterDataManager.Instance.monsterSkillList.Count];
+            for (int i = 0; i < MonsterDataManager.Instance.monsterSkillList.Count; i++)
+            {
+                parse[i] = MonsterDataManager.Instance.monsterSkillList[i];
+            }
+
+            foreach (var row in data)
+            {
+                int skillID = int.Parse(row[0]);
+
+                MonsterSkillSO so = Array.Find(parse, w => w.ID == skillID);
+                if (so != null)
+                {
+                    so.skillName = row[1];
+                    so.monsterSkillAttackType = (MonsterSkillAttackType)Enum.Parse(typeof(MonsterSkillAttackType), row[1]);
+                    so.coolTime = float.Parse(row[5]);
                 }
             }
         }
