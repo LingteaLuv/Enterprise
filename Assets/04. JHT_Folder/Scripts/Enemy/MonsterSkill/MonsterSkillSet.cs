@@ -3,19 +3,29 @@ using System.Collections.Generic;
 using JHT;
 using UnityEngine;
 
-public abstract class MonsterSkillSet : MonoBehaviour
+[Serializable]
+public class MonsterSkillSet
 {
+    MonsterSkillSO skillSO;
     public float totalPower; //?
     MonsterSkillType skillType;
-    
+    ETargetLogic target;
+    private JHT_BaseMonsterStat stat;
+
+    public MonsterSkillSet(JHT_BaseMonsterStat stat, MonsterSkillSO _skillSO)
+    {
+        this.stat = stat;
+        skillSO = _skillSO;
+        totalPower = stat.totalAttackPower;
+        skillType = skillSO.skillType;
+        target = skillSO.targetLogic;
+    }
 
     //private GameObject skillEffect;
 
-    public void Init(JHT_BaseMonsterStat stat)
+    public virtual void UseSkill(JHT_BaseMonsterFSM fsm)
     {
-        totalPower = stat.totalAttackPower;
-        
+        Debug.LogError("스킬 적용안됨");
     }
 
-    public abstract void Attck(MonsterSkillCool collType);
 }

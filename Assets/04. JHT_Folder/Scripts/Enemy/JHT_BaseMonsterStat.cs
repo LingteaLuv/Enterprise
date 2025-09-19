@@ -11,8 +11,6 @@ namespace JHT
         public float maxHp;
         public float totalAttackPower;
         public float defense;
-        //public float attackSpeed;
-        public float attackDelay;
         public float attackSpeed;
         public float attackRange;
         public float chaseRange;
@@ -22,7 +20,7 @@ namespace JHT
 
         public Sprite projectileSprite;
 
-        public AtkRangeType monsterAttackType;
+        public AtkRangeType monsterAttackRangeType;
         public MonsterRarity monsterRarity;
         public CrewRole monsterCrewRole;
         public AnimatorOverrideController aoc;
@@ -42,17 +40,17 @@ namespace JHT
             // Stat Setting
             totalAttackPower = AttackCalculate(curSO);// * GlobalStageManager.Instance.currentStageIndex;
             defense = curSO.defense;// * GlobalStageManager.Instance.currentStageIndex;
-            attackRange = curSO.attackRange;
             chaseRange = curSO.chaseRange;
             moveSpeed = curSO.moveSpeed;
             attackSpeed = curSO.attackSpeed;
-            attackDelay = curSO.attackDelay;
 
             //sprite
             projectileSprite = curSO.projectileSprite;
 
             // Enum
-            monsterAttackType = curSO.monsterAttackType;
+            monsterAttackRangeType = curSO.monsterAttackType;
+            attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack? 1f : 2f;
+
             monsterCrewRole = curSO.monsterCrewRole;
 
             cost = curSO.cost;
@@ -72,10 +70,10 @@ namespace JHT
                 aoc["Monster_ATTACK"] = normalSkill.clip;
 
             if (skill1 != null)
-                aoc["SKILL1"] = skill1.clip;
+                aoc["Monster_SKILL1"] = skill1.clip;
 
             if(skill2 != null)
-                aoc["SKILL2"] = skill2.clip;
+                aoc["Monster_SKILL2"] = skill2.clip;
         }
 
         private float AttackCalculate(JHT_MonsterDataSO curSO)

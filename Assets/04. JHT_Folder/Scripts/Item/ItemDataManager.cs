@@ -240,7 +240,7 @@ namespace JHT
                 yield return null;
 
             //downLoader = new JHT_DataDownLoader();
-            Debug.LogError($"루트테이블 csv");
+            
             yield return downLoader.DownLootTableData();
             OnRelicsDataLoadFinish?.Invoke(true);
         }
