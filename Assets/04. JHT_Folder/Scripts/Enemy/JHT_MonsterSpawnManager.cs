@@ -23,7 +23,7 @@ namespace JHT
 
         // int : 스테이지,  JHT_MonsterDataTable은 몬스터의 정보를 stirng(int로 변경해도 됨)을 가져와서 해당 데이터의 정보를 로드할거임
         // => 데이터 정보를 가져오는건 미리 addressable에서 로드한 모든 몬스터 데이터를 매 스테이지시 로드하는 걸로 하는게 좋아보임(fade in,out이 스테이지당 하는거같음)
-        Dictionary<int, JHT_MonsterDataTable> stageDic;
+        public Dictionary<int, JHT_MonsterDataTable> stageDic;
         public List<JHT_MonsterSetManager> posList;
         public List<JHT_BaseMonsterStat> curMonsterCountList =new ();
         Dictionary<AtkRangeType, AnimatorOverrideController> aocDic;
@@ -45,6 +45,8 @@ namespace JHT
         public Func<int,List<JHT_BaseMonsterStat>> OnAddMonster;
 
         MonsterDataManager monsterDataManager;
+
+        public Coroutine roundCor;
 
         protected override void Awake()
         {
@@ -147,14 +149,38 @@ namespace JHT
             curTotalCount = roundTable.totalCost;
         }
 
-        // curStageIndex를 ++을 통해 round를 구별해줄거임
         public void ChangeRound(int curRoundIndex)
         {
-            if (posList.Count < curRoundIndex)
+            
+            if (roundCor == null)
             {
-                Debug.LogError("현재 라운드 최대를 넘었음");
-                return;
+                roundCor = StartCoroutine(ChangeRoundCor(curRoundIndex));
             }
+        }
+
+        public void EndChangeRound()
+        {
+            if (roundCor != null)
+            {
+                StopCoroutine(roundCor);
+                roundCor = null;
+            }
+        }
+
+        // curStageIndex를 ++을 통해 round를 구별해줄거임
+        private IEnumerator ChangeRoundCor(int curRoundIndex)
+        {
+            while (!(isMonsterDataSetReady && isSkillSetReady) || roundTable == null)
+            {
+                yield return null;
+            }
+            
+            if (curRoundIndex > posList.Count)
+            {
+                Debug.LogError("라운드끝");
+                yield return null;
+            }
+            
             roundIndex = curRoundIndex;
             if (curMonsterCountList.Count > 0)
                 curMonsterCountList.Clear();
@@ -182,9 +208,6 @@ namespace JHT
         // 현재 라운드의 totalCost를 통해 랜덤으로 몬스터 가져오기
         public List<JHT_BaseMonsterStat> SetSpawnRound(int curRoundIndex)
         {
-            if (!(isMonsterDataSetReady && isSkillSetReady))
-                return null;
-
             int count = 0;
             // 메모리 낭비아닌가?
             List<JHT_BaseMonsterStat> dataList = new();
@@ -287,6 +310,7 @@ namespace JHT
                     damageTextPoolParent.transform.GetChild(i).GetComponent<JHT_DamageBox>().Release();
                 }
             }
+            EndChangeRound();
             curMonsterCountList.Clear();
         }
 

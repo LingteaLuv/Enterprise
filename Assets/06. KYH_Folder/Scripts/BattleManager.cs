@@ -168,9 +168,8 @@ public class BattleManager : MonoBehaviour
                 return;
             }
         }
-        
         JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[(GlobalStageManager.Instance.CurrentStageIndex.Value - 1)],
-            (GlobalStageManager.Instance.CurrentStageIndex.Value-1));
+            (GlobalStageManager.Instance.CurrentStageIndex.Value - 1));
 
         IsStageEnd = false;
 
@@ -181,9 +180,19 @@ public class BattleManager : MonoBehaviour
             _skipBtn.interactable = true;
     }
 
+    //private IEnumerator StageStartCor()
+    //{
+    //    while (JHT_MonsterSpawnManager.Instance.stageDic.Count <= 0)
+    //        yield return null;
+    //
+    //    
+    //}
+
     // 전투 흐름 코루틴
     private IEnumerator BattleRoutine()
     {
+        while(JHT_MonsterSpawnManager.Instance.roundTable == null)
+            yield return null;
 
         Debug.Log("전투 시작");
 
@@ -278,8 +287,13 @@ public class BattleManager : MonoBehaviour
     IEnumerator SpawnDelay(int roundIndex)
     {
         yield return null;
-
+        
         JHT_MonsterSpawnManager.Instance.ChangeRound(roundIndex);
+
+        while (JHT_MonsterSpawnManager.Instance.curMonsterCountList.Count <= 0)
+        {
+            yield return null;
+        }
         // 몬스터 데이터 넣기
         for (int i = 0; i < JHT_MonsterSpawnManager.Instance.curMonsterCountList.Count; i++)
         {

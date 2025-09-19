@@ -54,7 +54,6 @@ namespace JHT
 
             if (fsm.target == null)
             {
-                Debug.LogError($"Idle : null");
                 fsm.TryAcquireNextTarget();
                 return;
             }
@@ -64,7 +63,6 @@ namespace JHT
 
             if (dist < fsm.monsterStat.chaseRange)
             {
-                Debug.LogError($"Idle dist : {dist}");
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.MOVE]);
             }
         }
@@ -95,7 +93,6 @@ namespace JHT
 
             if (fsm.target == null)
             {
-                Debug.LogError($"MOVE : target null");
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.IDLE]);
                 return;
             }
@@ -133,7 +130,7 @@ namespace JHT
         public override void Enter()
         {
             base.Enter();
-            fsm.HandleAttack();
+            fsm.HandleAttackAsync();
         }
 
         public override void Update()
@@ -154,50 +151,6 @@ namespace JHT
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.MOVE]);
                 return;
             }
-
-        }
-
-        public override void Exit()
-        {
-            base.Exit();
-        }
-    }
-
-    public class Monster_Skill1 : JHT_MonsterState
-    {
-        public Monster_Skill1(JHT_BaseMonsterFSM _fsm) : base(_fsm) { }
-
-        public override void Enter()
-        {
-            base.Enter();
-        }
-
-        public override void Update()
-        {
-            base.Update();
-
-
-        }
-
-        public override void Exit()
-        {
-            base.Exit();
-        }
-    }
-
-    public class Monster_Skill2 : JHT_MonsterState
-    {
-        public Monster_Skill2(JHT_BaseMonsterFSM _fsm) : base(_fsm) { }
-
-        public override void Enter()
-        {
-            base.Enter();
-        }
-
-        public override void Update()
-        {
-            base.Update();
-
 
         }
 

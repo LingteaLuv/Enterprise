@@ -67,8 +67,8 @@ namespace JHT
             LoadWeaponList(loadedWeapons);
 
             //weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>(WEAPON_LABEL);
-            relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>(RELICS_LABEL);
-            lootTableHandler = Addressables.LoadAssetsAsync<RelicsGachaLootTable>(LOOTTABLE_LABEL);
+            relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>("ItemRelics");
+            lootTableHandler = Addressables.LoadAssetsAsync<RelicsGachaLootTable>("RootTable");
 
             //yield return weaponHandle;
             yield return relicsHandle;
@@ -240,7 +240,7 @@ namespace JHT
                 yield return null;
 
             //downLoader = new JHT_DataDownLoader();
-            Debug.LogError($"루트테이블 csv");
+            
             yield return downLoader.DownLootTableData();
             OnRelicsDataLoadFinish?.Invoke(true);
         }

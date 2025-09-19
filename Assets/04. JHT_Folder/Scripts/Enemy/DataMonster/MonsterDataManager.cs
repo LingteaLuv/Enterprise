@@ -30,12 +30,13 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     private AsyncOperationHandle<IList<GameObject>> monsterPrefabHandle;
     private AsyncOperationHandle<IList<MonsterSkillSO>> monsterSkillHandle;
 
-    public JHT_DataDownLoader downLoader;
+    public JHT_DataDownLoader dataLoader;
     public MonsterSkillSet skillManager;
 
     public bool isDataLoaded { get; private set; }
     public bool isTableLoaded { get; private set; }
     public bool IsPrefabLoadedFinish;
+    public bool isSkillListFinish;
 
     private bool isDataLodedFinish;
     private bool isTableLoadedFinish;
@@ -48,14 +49,22 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     protected override void Awake()
     {
         base.Awake();
-        downLoader = new JHT_DataDownLoader();
+        dataLoader = new JHT_DataDownLoader();
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        dataLoader.OnMonsterDataTableSetCompleted -= AllDataLoaded;
+        dataLoader.OnSkillDataSetCompleted -= LoadMonsterSkillFinish;
     }
 
     private IEnumerator Start()
     {
         yield return null;
 
-        downLoader.OnMonsterDataTableSetCompleted += AllDataLoaded;
+        dataLoader.OnMonsterDataTableSetCompleted += AllDataLoaded;
+        dataLoader.OnSkillDataSetCompleted += LoadMonsterSkillFinish;
 
         isDataLodedFinish = false;
         isTableLoadedFinish = false;
@@ -71,10 +80,10 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         monsterPrefabDic = new();
         monsterSkillDic = new();
 
-        monsterTableHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataTable>(MONSTERTABLE_LABEL);
-        monsterDataHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataSO>(MONSTERDATA_LABEL);
-        monsterPrefabHandle = Addressables.LoadAssetsAsync<GameObject>(MONSTERPREFAB_LABEL);
-        monsterSkillHandle = Addressables.LoadAssetsAsync<MonsterSkillSO>(MONSTERSKILL_LABEL);
+        monsterTableHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataTable>("MonsterSpawnRoundTable");
+        monsterDataHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataSO>("MonsterData");
+        monsterPrefabHandle = Addressables.LoadAssetsAsync<GameObject>("MonsterPrefab");
+        monsterSkillHandle = Addressables.LoadAssetsAsync<MonsterSkillSO>("MonsterSkill");
 
         yield return monsterPrefabHandle;
         yield return monsterTableHandle;
@@ -96,8 +105,15 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         {
             monsterSkillList.Add(o);
         }
+        monsterSkillList.Sort((a, b) => a.ID.CompareTo(b.ID));
 
-        LoadMonsterSkillFinish(monsterSkillList);
+        Debug.LogError($"상태 : {monsterSkillHandle.Status}");
+
+        if (monsterSkillHandle.Status == AsyncOperationStatus.Succeeded)
+        {
+            StartCoroutine(DownLoadSkillData());
+        }
+
     }
 
     private void LoadMonsterSkillFinish(List<MonsterSkillSO> list)
@@ -108,22 +124,22 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
             {
                 Debug.LogError($"스킬 : 없음");
             }
-            else
-            {
-                Debug.LogError($"스킬 : {list[i].skillName}");
-            }
 
 
             if (!monsterSkillDic.ContainsKey(list[i].skillName))
             {
-                Debug.LogError($"포함된 스킬 : {list[i].skillName}");
                 monsterSkillDic.Add(list[i].skillName, list[i]);
             }
         }
 
         OnMonsterSkillLoadFinish?.Invoke();
     }
+    IEnumerator DownLoadSkillData()
+    {
+        yield return null;
 
+        yield return dataLoader.DownLoadSkillTabledata();
+    }
     #endregion
 
 
@@ -141,7 +157,8 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         {
             monsterPrefabList.Add(list[i]);
         }
-        
+
+
         LoadMonsterPrefabFinish(list);
     }
 
@@ -163,12 +180,7 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
             //StartCoroutine(MonsterPrefabEndInit());
         }
     }
-
-    IEnumerator MonsterPrefabEndInit()
-    {
-        yield return new WaitForEndOfFrame();
-    }
-
+    
     #endregion
 
     #region MonsterTable
@@ -220,7 +232,7 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         while (!(isDataLodedFinish && isTableLoadedFinish))
             yield return null;
 
-        yield return downLoader.DownLoadMonsterTableData();
+        yield return dataLoader.DownLoadMonsterData();
     }
 
     private void AllDataLoaded()
@@ -264,20 +276,11 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         {
             Debug.Log("bbb");
             isDataLodedFinish = true;
-            StartCoroutine(DownLoadDataCSV());
         }
         else
         {
             Debug.LogError($"데이터 실패 : {monsterDataHandle.Status}");
         }
-    }
-
-    private IEnumerator DownLoadDataCSV()
-    {
-        while (!isDataLodedFinish)
-            yield return null;
-        
-        yield return downLoader.DownLoadMonsterData();
     }
 
     #endregion
