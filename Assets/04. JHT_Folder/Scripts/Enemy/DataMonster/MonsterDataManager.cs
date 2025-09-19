@@ -71,10 +71,10 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         monsterPrefabDic = new();
         monsterSkillDic = new();
 
-        monsterTableHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataTable>(MONSTERTABLE_LABEL);
-        monsterDataHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataSO>(MONSTERDATA_LABEL);
-        monsterPrefabHandle = Addressables.LoadAssetsAsync<GameObject>(MONSTERPREFAB_LABEL);
-        monsterSkillHandle = Addressables.LoadAssetsAsync<MonsterSkillSO>(MONSTERSKILL_LABEL);
+        monsterTableHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataTable>("MonsterSpawnRoundTable");
+        monsterDataHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataSO>("MonsterData");
+        monsterPrefabHandle = Addressables.LoadAssetsAsync<GameObject>("MonsterPrefab");
+        monsterSkillHandle = Addressables.LoadAssetsAsync<MonsterSkillSO>("MonsterSkill");
 
         yield return monsterPrefabHandle;
         yield return monsterTableHandle;
