@@ -1,37 +1,22 @@
 using System;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class InfoPanel : UIBase
+public class PlayerInfoPanel : MonoBehaviour
 {
-    [SerializeField] private Button _startBtn;
+    [SerializeField] private TextMeshProUGUI _nicknameText;
+    [SerializeField] private TextMeshProUGUI _loginType;
     [SerializeField] private Button _linkBtn;
-    [SerializeField] private Button _deleteBtn;
     [SerializeField] private Button _logoutBtn;
-
-    [SerializeField] private TextMeshProUGUI _welcomeText;
-
-    public Action OnGameExit;
-    public Action OnGameStart;
-
-    private void Awake()
-    {
-        OnGameExit += () =>
-        {
-            _linkBtn.gameObject.SetActive(true);
-        };
-    }
     
+
     private void Start()
     {
-        _startBtn.onClick.AddListener(OnTouchStartBtn);
         _linkBtn.onClick.AddListener(OnTouchLinkBtn);
-        _deleteBtn.onClick.AddListener(async () => await OnTouchDeleteBtn());
+        
         _logoutBtn.onClick.AddListener(OnTouchLogoutBtn);
 
         if (!FirebaseManager.Auth.CurrentUser.IsAnonymous)
@@ -40,16 +25,18 @@ public class InfoPanel : UIBase
         }
     }
     
-    private async void OnEnable()
+    private void OnEnable()
     {
-        await SetText();
+        _nicknameText.text = DataManager.Instance.Nickname;
+        _loginType.text = DataManager.Instance.LoginType.ToString();
     }
 
     private void OnDisable()
     {
-        _welcomeText.text = "";
+        _nicknameText.text = "";
+        _loginType.text = "";
     }
-
+    
     private async UniTask SetText()
     {
         if (!FirebaseManager.Auth.CurrentUser.IsAnonymous)
@@ -59,13 +46,8 @@ public class InfoPanel : UIBase
         
         await DatabaseManager.Instance.LoadNicknameAsync((nickname) =>
         {
-            _welcomeText.text = $"어서오세요\n{nickname} 님";
+            _nicknameText.text = nickname;
         });
-    }
-
-    private void OnTouchStartBtn()
-    {
-        OnGameStart?.Invoke();
     }
     
     private void OnTouchLinkBtn()
@@ -76,15 +58,9 @@ public class InfoPanel : UIBase
         });
     }
     
-    private async Task OnTouchDeleteBtn()
-    {
-        await AuthManager.Instance.DeleteAccount();
-        OnGameExit?.Invoke();
-    }
-    
     private void OnTouchLogoutBtn()
     {
         AuthManager.Instance.Logout();
-        OnGameExit?.Invoke();
+        SceneManager.LoadScene("LoginScene");
     }
 }

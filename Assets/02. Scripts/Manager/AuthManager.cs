@@ -58,6 +58,7 @@ public class AuthManager : Singleton<AuthManager>
                 _auth.SignOut();
                 return false;
             }
+            DataManager.Instance.SetLoginType(user.ProviderId);
             LoginCompleted?.Invoke();
             return true;
         }
@@ -90,6 +91,7 @@ public class AuthManager : Singleton<AuthManager>
         {
             //await user.ReloadAsync();
             await DatabaseManager.Instance.SetNickname();
+            DataManager.Instance.SetLoginType("anonymous");
             LoginCompleted?.Invoke();
         }
         _isClicked = false;
@@ -144,6 +146,7 @@ public class AuthManager : Singleton<AuthManager>
         {
             await DatabaseManager.Instance.SetNickname(user.DisplayName);
             //await user.ReloadAsync();
+            DataManager.Instance.SetLoginType(user.ProviderId);
             LoginCompleted?.Invoke();
             return true;
         }
@@ -227,6 +230,7 @@ public class AuthManager : Singleton<AuthManager>
         {
             await DatabaseManager.Instance.SetNickname(user.DisplayName);
             //await user.ReloadAsync();
+            DataManager.Instance.SetLoginType(user.ProviderId);
             LoginCompleted?.Invoke();
         }
     }

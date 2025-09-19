@@ -197,6 +197,29 @@ public class DatabaseManager : Singleton<DatabaseManager>
             callback(null);
         }
     }
+    
+    public void LoadNickname(Action<string> callback)
+    {
+        _uid = FirebaseManager.Auth.CurrentUser.UserId;
+        DatabaseReference nicknameRef = FirebaseManager.DataReference.Child(_uid).Child("PublicData").Child("Nickname");
+        Debug.Log($"{_uid}");    
+        nicknameRef.GetValueAsync().ContinueWithOnMainThread((task)=>
+        {
+            if (task.IsCanceled || task.IsFaulted) return;
+
+            if (task.Result == null)
+            {
+                Debug.LogWarning("닉네임 데이터 없음");
+                callback(null);
+                return;
+            }
+            
+            string nickname = task.Result.ToString();
+            Debug.LogWarning($"닉네임 로드 성공 : {nickname}");
+            callback(nickname);
+        });
+    }
+    
     #endregion
 
     #region Time
