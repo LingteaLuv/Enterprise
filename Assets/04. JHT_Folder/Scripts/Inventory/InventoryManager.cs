@@ -121,14 +121,13 @@ namespace JHT
                 case 0:
                 case 1:
                 case 2:
-                    return 10;
+                    return 100;
                 case 3:
-                    return 20;
+                    return 200;
                 case 4:
-                    return 30;
+                    return 300;
                 default:
-                    // 5성 이상일 경우, 가장 높은 값인 30으로 유지합니다.
-                    return 30;
+                    return 300;
             }
         }
 

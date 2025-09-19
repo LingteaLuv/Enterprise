@@ -27,14 +27,14 @@ public class EquipDataImporter
         // BOM이 포함된 UTF-8 파일을 위해 Encoding.UTF8을 명시적으로 사용
         string[] lines = File.ReadAllLines(csvFilePath, System.Text.Encoding.UTF8);
 
-        if (lines.Length <= 1)
+        if (lines.Length <= 3)
         {
             Debug.LogWarning("CSV 파일에 헤더만 있거나 데이터가 없습니다.");
             return;
         }
 
         // --- 헤더 파싱 ---
-        string[] headers = lines[0].Split(',').Select(h => h.Trim()).ToArray();
+        string[] headers = lines[2].Split(',').Select(h => h.Trim()).ToArray();
         Dictionary<string, int> headerMap = new Dictionary<string, int>();
         for (int i = 0; i < headers.Length; i++)
         {
@@ -55,7 +55,7 @@ public class EquipDataImporter
         }
 
         // --- 데이터 파싱 및 SO 생성 ---
-        for (int i = 1; i < lines.Length; i++) // 첫 번째 줄(헤더)은 건너뛰고 두 번째 줄부터 시작합니다.
+        for (int i = 3; i < lines.Length; i++) // 3줄 건너뛰고 4줄부터 시작
         {
             string line = lines[i].Trim();
             if (string.IsNullOrEmpty(line)) continue; // 비어있는 줄은 건너뜀
@@ -73,13 +73,13 @@ public class EquipDataImporter
             try
             {
                 // 기본 정보 파싱
-                data.itemNum = int.Parse(fields[headerMap["equipID"]]);
-                data.itemName = fields[headerMap["equipName"]];
-                data.desc = fields[headerMap["description"]];
+                data.itemNum = int.Parse(fields[headerMap["Equip_ID"]]);
+                data.itemName = fields[headerMap["Equip_Name"]];
 
-                // Sprite 로드 (Resources 폴더 내에 스프라이트가 있어야 함)
-                string spritePath = fields[headerMap["spritePath"]];
-                data.icon = Resources.Load<Sprite>(spritePath);
+                // Sprite 로드
+                string spritePath = $"Assets/00. Imports/EquipImage_Resized/{fields[headerMap["spritePath"]]}";
+                
+                data.icon = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
                 if (data.icon == null)
                 {
                     Debug.LogWarning($"스프라이트를 로드할 수 없습니다: {spritePath} (줄 {i + 1})");
@@ -88,7 +88,7 @@ public class EquipDataImporter
                 // Enum 파싱
                 // Rarity는 CharacterData.cs에 정의된 Enum을 사용합니다.
                 data.equipCategory = (EquipCategory)Enum.Parse(typeof(EquipCategory), fields[headerMap["equipCategory"]], true);
-                data.equipType = (EquipType)Enum.Parse(typeof(EquipType), fields[headerMap["equipType"]], true);
+                data.equipType = (EquipType)Enum.Parse(typeof(EquipType), fields[headerMap["Equip_type"]], true);
 
                 data.statType = (Stat)Enum.Parse(typeof(Stat), fields[headerMap["statType"]], true);
 

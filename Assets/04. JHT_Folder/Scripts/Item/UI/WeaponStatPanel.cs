@@ -14,10 +14,10 @@ namespace JHT
         [SerializeField] private Image[] starImages;
         [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private TextMeshProUGUI pointText;
-        [SerializeField] private TextMeshProUGUI needPointText;
         [SerializeField] private TextMeshProUGUI levelText; // 레벨 표시용 텍스트
         [SerializeField] private TextMeshProUGUI statText;
         [SerializeField] private TextMeshProUGUI powerText;
+        [SerializeField] private Slider pointSlider;
 
         private void Awake()
         {
@@ -98,13 +98,15 @@ namespace JHT
         {
             if (curWeapon == null) return;
             
-            int requiredPoints = InventoryManager.Instance.GetRequiredPointsForLevelUp(curWeapon);
+            int requirePoint = InventoryManager.Instance.GetRequiredPointsForLevelUp(curWeapon);
+            int currentPoint = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum);
 
             // 기본 정보 업데이트
             weaponImage.sprite = curWeapon.itemIcon;
             nameText.text = curWeapon.itemName;
-            pointText.text = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum).ToString();
-            needPointText.text = requiredPoints.ToString();
+            pointText.text = $"{currentPoint} / {requirePoint}";
+            pointSlider.value = Mathf.Min((float)currentPoint / requirePoint, 1);
+
             if (curWeapon.itemStar >= 5)
             {
                 levelText.text = "LV. MAX";
@@ -147,7 +149,7 @@ namespace JHT
             starUpBtn.interactable = canStarUp;
 
             // 레벨업 버튼 활성화 로직 (성급업이 가능하지 않을 때만 활성화)
-            bool hasEnoughPoints = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum) >= requiredPoints;
+            bool hasEnoughPoints = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum) >= requirePoint;
             bool isMaxLevel = curWeapon.ItemLevel >= 50;
             // levelUpBtn.interactable = hasEnoughPoints && !isMaxLevel && !canStarUp;
         }
