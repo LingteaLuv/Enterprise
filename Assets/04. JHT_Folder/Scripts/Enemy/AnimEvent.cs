@@ -14,4 +14,6 @@ public class AnimEvent : MonoBehaviour
     }
 
     public void AE_AttackHit() { normalFSM?.NormalMonsterAttack(); }
+    public void SKILL1_AttackHit() { normalFSM.Skill1MonsterAttack(); }
+    public void SKILL2_AttackHit() { normalFSM.Skill2MonsterAttack(); }
 }

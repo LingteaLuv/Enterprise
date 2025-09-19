@@ -1,5 +1,8 @@
 using System;
 using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 
@@ -36,10 +39,14 @@ namespace JHT
         [SerializeField] private Transform damageTextPos;
 
         private Coroutine takeDamageCor;
-        private Coroutine attackCor;
-        private WaitForSeconds attackDelayCount;
+        private float attackDelayCount;
 
         private bool _initialized;
+        public bool skill1Active;
+        public bool skill2Active;
+        public bool isAttacking;
+
+        private CancellationTokenSource[] token;
 
         private float curHP;
         public float CurHP { get { return curHP; } set { curHP = value; OnChangeHp?.Invoke(curHP); } }
@@ -53,6 +60,8 @@ namespace JHT
         public readonly int IDLE = Animator.StringToHash("IDLE");
         public readonly int MOVE = Animator.StringToHash("MOVE");
         public readonly int ATTACK = Animator.StringToHash("ATTACK");
+        public readonly int SKILL1 = Animator.StringToHash("SKILL1");
+        public readonly int SKILL2 = Animator.StringToHash("SKILL2");
         public readonly int DEATH = Animator.StringToHash("DEATH");
         #endregion
 
@@ -64,52 +73,78 @@ namespace JHT
 
         private IEnumerator StartSetting(JHT_BaseMonsterStat stat)
         {
+            // 풀에서 받은 이전의 값 정리
             _initialized = false;
             target = null;
+            isAttacking = false;
+
 
             yield return new WaitUntil(() => MonsterDataManager.Instance.IsPrefabLoadedFinish);
 
             yield return null;
 
+            // 초기 데이터 값 세팅
+
             monsterSO = stat.curSO;
             monsterStat = stat;
-
             OnChangeHp += ShowMonsterUI;
 
+            
             curHP = monsterStat.maxHp;
 
-            if (attackCor != null)
-            {
-                StopCoroutine(attackCor);
-                attackCor = null;
-            }
-
+            // 이전의 코루틴 정리
             if (takeDamageCor != null)
             {
                 StopCoroutine(takeDamageCor);
                 takeDamageCor = null;
             }
 
+            // 몬스터 데이터(프리팹) 가져오기
             if (MonsterDataManager.Instance.monsterPrefabDic.TryGetValue(monsterSO.ID.ToString(), out GameObject value))
             {
                 monsterPrefab = Instantiate(value, transform);
                 monsterPrefab.transform.localRotation = Quaternion.identity;
             }
 
+            //ResetTokens();
+            SetAnimSkill();
+            // 초기 상태 세팅
+            StateMachineInit();
+            MonsterScale(monsterStat);
 
-            attackDelayCount = new WaitForSeconds(monsterStat.attackDelay - 1);
+           
+        }
+        #region 초기설정
+        private void SetAnimSkill()
+        {
+            //공격 딜레이 설정
+            attackDelayCount = monsterStat.normalSkill.skillDelay - monsterStat.normalSkill.clip.length > 0 ?
+                monsterStat.normalSkill.skillDelay - monsterStat.normalSkill.clip.length : 1;
 
+            //스킬 초기화
+            if (monsterStat.normalSkill != null)
+            {
+                monsterStat.normalSkill.Init(monsterStat);
+            }
+
+            if (monsterStat.skill1 != null)
+            {
+                monsterStat.skill1.Init(monsterStat);
+            }
+
+            if (monsterStat.skill2 != null)
+            {
+                monsterStat.skill2.Init(monsterStat);
+            }
+
+            // 애니메이션 세팅
             animator = monsterPrefab.GetComponentInChildren<Animator>(true);
-            
+
             if (monsterStat.aoc != null)
             {
                 animator.runtimeAnimatorController = monsterStat.aoc;
                 //animator.SetFloat("AttackSpeed", monsterStat.attackSpeed);
             }
-            StateMachineInit();
-            MonsterScale(monsterStat);
-
-            head = monsterPrefab.transform.Find($"{monsterPrefab.name}/UnitRoot/Root/BodySet/P_Body/HeadSet/P_Head/P_Head/5_Head")?.GetComponent<SpriteRenderer>();
         }
 
         private void StateMachineInit()
@@ -119,8 +154,6 @@ namespace JHT
             stateMachine.stateDic.Add(MonsterState.MOVE, new Monster_Move(this));
             stateMachine.stateDic.Add(MonsterState.ATTACK, new Monster_Attack(this));
             stateMachine.stateDic.Add(MonsterState.DEATH, new Monster_Die(this));
-            stateMachine.stateDic.Add(MonsterState.SKILL1, new Monster_Skill1(this));
-            stateMachine.stateDic.Add(MonsterState.SKILL2, new Monster_Skill2(this));
 
             currentState = MonsterState.IDLE;
             stateMachine.curState = stateMachine.stateDic[MonsterState.IDLE];
@@ -150,12 +183,54 @@ namespace JHT
                     break;
             }
         }
+        private void ResetTokens()
+        {
+            token = new CancellationTokenSource[3];
 
+            // 기존 토큰 정리
+            for (int i = 0; i < token.Length; i++)
+            {
+                if (token[i] != null)
+                {
+                    token[i].Cancel();
+                    token[i].Dispose();
+                    token[i] = null;
+                }
+            }
 
+            if (monsterStat.normalSkill != null)
+                token[0] = new CancellationTokenSource();
+            else
+                token[0] = null;
+
+            if (monsterStat.skill1 != null)
+                token[1] = new CancellationTokenSource();
+            else
+                token[1] = null;
+
+            if (monsterStat.skill2 != null)
+                token[2] = new CancellationTokenSource();
+            else
+                token[2] = null;
+        }
+#endregion
+        
         protected virtual void OnDisable()
         {
             OnChangeHp -= ShowMonsterUI;
 
+            if (token != null)
+            {
+                for (int i = 0; i < token.Length; i++)
+                {
+                    if (token[i] != null)
+                    {
+                        token[i].Dispose();
+                        token[i] = null;
+                    }
+                }
+            }
+            
             //canAttack = false;
             //OnChangeAttack -= CanAttackCor;
         }
@@ -163,9 +238,6 @@ namespace JHT
         protected virtual void Update()
         {
             if (!_initialized) return;
-
-            if (currentState == MonsterState.DEATH)
-                return;
 
             if (stateMachine == null || stateMachine.curState == null) return;
 
@@ -201,18 +273,23 @@ namespace JHT
             ChangeAnim(IDLE, MonsterState.IDLE);
         }
 
-        public virtual void HandleAttack()
+        public virtual void HandleAttackAsync()
         {
             if (target == null)
                 return;
 
+            ResetTokens();
+
             ChangeAnim(ATTACK, MonsterState.ATTACK);
 
-            if (attackCor == null)
-            {
-                attackCor = StartCoroutine(AttackCor());
-            }
+            if (monsterStat.normalSkill != null)
+                _= Attack(attackDelayCount);
 
+            if (monsterStat.skill1 != null)
+                _ = Skill1CoolTime(monsterStat.skill1.skillDelay);
+            
+            if (monsterStat.skill2 != null) 
+                _ = Skill2CoolTime(monsterStat.skill2.skillDelay);
         }
 
         public virtual void HandleMove()
@@ -225,23 +302,78 @@ namespace JHT
 
         public virtual void HandleDie()
         {
-            currentState = MonsterState.DEATH;
             Die();
         }
 
-        private IEnumerator AttackCor()
+
+        private async UniTaskVoid Attack(float coolTime)
         {
+            skill2Active = false;
+            skill2Active = false;
+
             while (true)
             {
-                if (!animator) 
-                    yield break;
+                if (token[0] == null || token[0].Token.IsCancellationRequested) 
+                    return;
 
+                if (!animator)
+                    return;
+
+                await UniTask.WaitUntil(() => !skill1Active || !skill2Active, cancellationToken: token[0].Token);
+
+                isAttacking = true;
                 animator.Play(ATTACK, 0, 0f);
-                yield return new WaitForSeconds(1f);
+                Debug.LogError("NormalAttack");
+                await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.normalSkill.clip.length), cancellationToken: token[0].Token);
 
-                yield return attackDelayCount;
+                isAttacking = false;
+                await UniTask.Delay(TimeSpan.FromSeconds(coolTime), cancellationToken: token[0].Token);
+
             }
         }
+
+        private async UniTaskVoid Skill1CoolTime(float collTime)
+        {
+            if (animator == null || monsterStat.skill1 == null || token[1] == null)
+            {
+                await UniTask.WaitUntil(() => !skill1Active, cancellationToken: token[1].Token);
+                await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[1].Token);
+                await UniTask.WaitUntil(() => !isAttacking || !skill2Active, cancellationToken: token[1].Token);
+                skill1Active = true;
+                animator.Play("SKILL1",0, 0f);
+                Debug.LogError("Skill1Attack");
+                await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill1.clip.length), cancellationToken: token[1].Token);
+                skill2Active = false;
+            }
+            else
+            {
+                skill1Active = false;
+            }
+        }
+        //배열형식으로 사용
+        // Stopcoroutine을 사용해야할때 token사용해야됨
+        private async UniTaskVoid Skill2CoolTime(float collTime)
+        {
+            if (monsterStat.skill2 != null || monsterStat.skill2 == null || token[2] == null)
+            {
+                while (true)
+                {
+                    await UniTask.WaitUntil(() => !skill2Active, cancellationToken: token[2].Token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[2].Token);
+                    await UniTask.WaitUntil(() => !isAttacking || !skill1Active, cancellationToken: token[2].Token);
+                    skill2Active = true;
+                    animator.Play("SKILL2", 0, 0f);
+                    Debug.LogError("SKILL2Attack");
+                    await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill2.clip.length), cancellationToken: token[2].Token);
+                    skill2Active = false;
+                }
+            }
+            else
+            {
+                skill2Active = false;
+            }
+        }
+
 
         public void Rotate()
         {
@@ -320,6 +452,17 @@ namespace JHT
         {
             monsterSO = null;
 
+            Debug.LogError($"죽음");
+            if (token != null)
+            {
+                for (int i = 0; i < token.Length; i++)
+                {
+                    if (token[i] != null)
+                        token[i].Cancel();
+                }
+            }
+            
+
             monsterUI.gameObject.SetActive(false);
 
             ChangeAnim(DEATH, MonsterState.DEATH);
@@ -346,11 +489,18 @@ namespace JHT
             if (animator == null || curState == currentState)
                 return;
 
-            if (currentState == MonsterState.ATTACK && attackCor != null)
+            if (currentState == MonsterState.ATTACK && curState != currentState)
             {
-                StopCoroutine(attackCor);
-                attackCor = null;
+                for (int i = 0; i < token.Length; i++)
+                {
+                    if (token[i] != null)
+                    {
+                        token[i].Cancel();
+                        token[i].Dispose();
+                    }
+                }
             }
+
 
             currentState = curState;
 
