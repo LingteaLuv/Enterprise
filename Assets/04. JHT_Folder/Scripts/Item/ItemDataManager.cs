@@ -5,18 +5,19 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using System.Collections;
+using System.Linq;
 
 namespace JHT
 {
     public class ItemDataManager : Singleton<ItemDataManager>
     {
-        private const string WEAPON_LABEL = "ItemWeapon";
+        private const string WEAPON_LABEL = "Equips";
         private const string RELICS_LABEL = "ItemRelics";
         private const string LOOTTABLE_LABEL = "RootTable";
 
         public List<ItemWeaponSO> weaponList;
         public Dictionary<string, ItemWeaponSO> weaponDataDic;
-        
+
         public List<ItemRelicsSO> relicsList;
         public Dictionary<string, ItemRelicsSO> relicsDataDic;
 
@@ -32,7 +33,7 @@ namespace JHT
         public bool IsLootTableDataLoaded { get; private set; } = false;
 
         public JHT_DataDownLoader downLoader;
-        
+
         //데이터 로딩 완료시 호출
         public Action<bool> OnRelicsDataLoadFinish;
         public Action OnRelicInit;
@@ -63,53 +64,37 @@ namespace JHT
             lootTableList = new();
             lootTableDic = new();
 
-            ItemWeaponSO[] loadedWeapons = Resources.LoadAll<ItemWeaponSO>("EquipData");
-            LoadWeaponList(loadedWeapons);
+            // 어드레서블로 모든 데이터 비동기 로드 시작
+            weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>(WEAPON_LABEL);
+            relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>(RELICS_LABEL);
+            lootTableHandler = Addressables.LoadAssetsAsync<RelicsGachaLootTable>(LOOTTABLE_LABEL);
 
-            //weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>(WEAPON_LABEL);
-            relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>("ItemRelics");
-            lootTableHandler = Addressables.LoadAssetsAsync<RelicsGachaLootTable>("RootTable");
-
-            //yield return weaponHandle;
+            yield return weaponHandle;
             yield return relicsHandle;
             yield return lootTableHandler;
 
-            //LoadWeaponList(weaponHandle);
+            // 로드 완료된 데이터 처리
+            LoadWeaponList(weaponHandle);
             LoadRelicsList(relicsHandle);
             LoadLootTableList(lootTableHandler);
         }
+
         #region 장비
-        private void LoadWeaponList(ItemWeaponSO[] objs)
-        {
-            List<ItemWeaponSO> list = new();
-            foreach (var w in objs)
-            {
-                list.Add(w);
-            }
-
-            //List<ItemWeaponSO> sortList = list.OrderBy(w => w.itemNum).ToList();
-
-            for (int i = 0; i < list.Count; i++)
-            {
-                weaponList.Add(list[i]);
-            }
-
-            LoadWeaponFinish(weaponList);
-        }
         private void LoadWeaponList(AsyncOperationHandle<IList<ItemWeaponSO>> objs)
         {
-            List<ItemWeaponSO> list = new();
-            foreach(var w in objs.Result)
+            if (objs.Status != AsyncOperationStatus.Succeeded)
             {
-                list.Add(w);
+                Debug.LogError("무기 데이터 로드에 실패했습니다!");
+                return;
             }
 
-            //List<ItemWeaponSO> sortList = list.OrderBy(w => w.itemNum).ToList();
+            List<ItemWeaponSO> list = new List<ItemWeaponSO>(objs.Result);
 
-            for (int i =0; i < list.Count; i ++)
-            {
-                weaponList.Add(list[i]);
-            }
+            // 아이템 번호(itemNum) 기준으로 리스트 정렬
+            List<ItemWeaponSO> sortList = list.OrderBy(w => w.itemNum).ToList();
+
+            weaponList.Clear();
+            weaponList.AddRange(sortList);
 
             LoadWeaponFinish(weaponList);
         }
@@ -118,21 +103,23 @@ namespace JHT
         {
             weaponDataDic.Clear();
 
-            for (int i =0; i < list.Count; i++)
+            foreach (var item in list)
             {
-                if (!weaponDataDic.ContainsKey(list[i].itemName))
-                    weaponDataDic.Add(list[i].itemName, list[i]);
+                if (!weaponDataDic.ContainsKey(item.itemName))
+                {
+                    weaponDataDic.Add(item.itemName, item);
+                }
             }
 
-            IsDataLoaded = true; // 데이터 로딩 완료!
-            StartCoroutine(WeaponEndInit());
-            /*if (weaponHandle.Status == AsyncOperationStatus.Succeeded)
+            if (weaponHandle.Status == AsyncOperationStatus.Succeeded)
             {
                 //if (encyclopediaPanel == null)
                 //    encyclopediaPanel = FindObjectOfType<EncyclopediaPanel>();
+                IsDataLoaded = true; // 데이터 로딩 완료!
                 StartCoroutine(WeaponEndInit());
-            }*/
+            }
         }
+
         private IEnumerator WeaponEndInit()
         {
             yield return new WaitForEndOfFrame();
@@ -239,8 +226,7 @@ namespace JHT
             while (!IsLootTableDataLoaded)
                 yield return null;
 
-            //downLoader = new JHT_DataDownLoader();
-            
+            Debug.LogError($"루트테이블 csv");
             yield return downLoader.DownLootTableData();
             OnRelicsDataLoadFinish?.Invoke(true);
         }
@@ -261,6 +247,5 @@ namespace JHT
 
             return relicsDataDic;
         }
-
     }
 }
