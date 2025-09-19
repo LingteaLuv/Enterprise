@@ -49,7 +49,7 @@ namespace JHT
 
             // Enum
             monsterAttackRangeType = curSO.monsterAttackType;
-            attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack? 1f : 2f;
+            attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack? 1.2f : 1.8f;
 
             monsterCrewRole = curSO.monsterCrewRole;
 

@@ -100,10 +100,10 @@ namespace JHT
             fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position,
             Time.deltaTime * fsm.monsterStat.moveSpeed);
             fsm.Rotate();
-
+            
             float dist = Mathf.Abs(Vector2.Distance(fsm.target.transform.position, fsm.gameObject.transform.position));
 
-            if (dist < fsm.monsterStat.attackRange)
+            if (dist <= fsm.monsterStat.attackRange)
             {
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.ATTACK]);
             }
