@@ -2,14 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace DungeonSystem
-{
+{ 
     /// <summary>
     /// 구역 타입 정의
     /// </summary>
     public enum ZoneType
     {
-        NormalBattle,    // 일반 전투
-        EliteBattle,     // 엘리트 전투
+        NormalBattle,   // 일반 전투
+        EliteBattle,    // 엘리트 전투
         BossBattle,      // 보스 전투
         RestRoom,        // 휴식방
         TreasureRoom     // 보물방
@@ -69,31 +69,47 @@ namespace DungeonSystem
 
             // 첫 구역은 항상 일반 전투 구역
             zones.Add(new Zone(0, ZoneType.NormalBattle));
-            int TreasureRoomCount = 0;
+
+            // 보물방과 휴식방 카운트
+            int treasureRoomCount = 0;
+            int restRoomCount = 0;
+            int maxTreasureRooms = (stageId == 1 || stageId == 2) ? 1 : (stageId == 3 ? 2 : 0);
+            int maxRestRooms = 1;
 
             // 첫 구역과 마지막 두 구역을 제외한 나머지 구역 생성
             for (int i = 1; i < zoneCount - 2; i++)
             {
-                // 랜덤 구역 타입 변수
-                ZoneType randomType;
+                ZoneType randomType = RandomZoneBattle(); // 기본값으로 전투 구역 설정
+                bool roomDecided = false;
+                float rand = Random.Range(0f, 1f);
 
-                // 보물방이 2개 미만일 경우, 포함하여 랜덤 선택
-                if (TreasureRoomCount < 2)
+                // 보물방과 휴식방을 우선적으로 배치
+                if (treasureRoomCount < maxTreasureRooms)
                 {
-                    randomType = GetRandomZoneType();
-                }
-                else // 보물방이 2개 이상일 경우, 보물방 제외한 랜덤 선택
-                {
-                    randomType = GetRandomZoneTypeExcludingTreasureRoom();
-                }
-
-                // 보물방 개수 카운트
-                if (randomType == ZoneType.TreasureRoom)
-                {
-                    TreasureRoomCount++;
+                    if (rand < 0.33f) // 예시 확률: 25% 확률로 보물방
+                    {
+                        randomType = ZoneType.TreasureRoom;
+                        treasureRoomCount++;
+                        roomDecided = true;
+                    }
                 }
 
-                // 구역 추가
+                if (!roomDecided && restRoomCount < maxRestRooms)
+                {
+                    if (rand < 0.66f) // 예시 확률: 25% 확률로 휴식방
+                    {
+                        randomType = ZoneType.RestRoom;
+                        restRoomCount++;
+                        roomDecided = true;
+                    }
+                }
+
+                // 보물방과 휴식방이 결정되지 않았다면 전투 구역으로 설정
+                if (!roomDecided)
+                {
+                    randomType = RandomZoneBattle();
+                }
+
                 zones.Add(new Zone(i, randomType));
             }
 
@@ -105,29 +121,14 @@ namespace DungeonSystem
         }
 
         /// <summary>
-        /// 랜덤 구역 타입 결정, 추후 생성조건 추가하여 수정 필요
+        /// 전투방 랜덤 설정
         /// </summary>
-        private ZoneType GetRandomZoneType()
+        private ZoneType RandomZoneBattle()
         {
-            float rand = Random.Range(0f, 1f);
-
-            if (rand < 0.5f) return ZoneType.NormalBattle;      // 50%
-            else if (rand < 0.7f) return ZoneType.EliteBattle;  // 20%
-            else if (rand < 0.85f) return ZoneType.RestRoom;    // 15%
-            else return ZoneType.TreasureRoom;                  // 15%
-        }
-
-        /// <summary>
-        /// 랜덤 구역 타입 결정 (보물방 제외)
-        /// </summary>
-        /// <returns></returns>
-        private ZoneType GetRandomZoneTypeExcludingTreasureRoom()
-        {
-            float rand = Random.Range(0f, 1f);
-
-            if (rand < 0.55f) return ZoneType.NormalBattle;      // 55%
-            else if (rand < 0.8f) return ZoneType.EliteBattle;  // 25%
-            else return ZoneType.RestRoom;                      // 20%
+            // 전투방 랜덤 설정
+            float ran = Random.Range(0f, 1f);
+            if (ran < 0.6f) return ZoneType.NormalBattle;      // 60% 일반 전투
+            else return ZoneType.EliteBattle;                 // 40% 엘리트 전투
         }
 
         /// <summary>
@@ -164,12 +165,11 @@ namespace DungeonSystem
     /// <summary>
     /// 던전 스테이지_ 던전의 스테이지와 구역 관리
     /// </summary>
-    public class DungeonStage : MonoBehaviour
+    public class DungeonStage : Singleton<DungeonStage>
     {
         [Header("던전 설정")]
         [SerializeField] private int maxStages = 3;
-        [SerializeField] private int minZonesPerStage = 5;
-        [SerializeField] private int maxZonesPerStage = 7;
+        [SerializeField] private int maxZones = 7;
 
         [Header("현재 상태")]
         [SerializeField] private int currentStageIndex = 0; // 현재 스테이지 인덱스
@@ -193,8 +193,7 @@ namespace DungeonSystem
             // 스테이지 생성
             for (int i = 0; i < maxStages; i++)
             {
-                int zoneCount = Random.Range(minZonesPerStage, maxZonesPerStage + 1);
-                Stage newStage = new Stage(i, zoneCount);
+                Stage newStage = new Stage(i, maxZones);
 
                 stages.Add(newStage);
             }
@@ -221,29 +220,26 @@ namespace DungeonSystem
             return currentStage?.GetCurrentZone();
         }
 
-        /// <summary>
-        /// 구역 완료 처리
-        /// </summary>
-        [ContextMenu("구역 완료 처리")]
+        // 구역 완료 메서드
         public void CompleteCurrentZone()
         {
             Stage currentStage = GetCurrentStage();
-            Zone currentZone = GetCurrentZone();
-
-            if (currentStage != null && currentZone != null)
+            if (currentStage != null)
             {
-                currentStage.CompleteCurrentZone(); // 구역 완료 처리
-                OnZoneCompleted?.Invoke(currentZone.zoneType);
-
-                // 스테이지 완료 체크
-                if (currentStage.isCompleted)
+                Zone currentZone = currentStage.GetCurrentZone();
+                if (currentZone != null && !currentZone.isCompleted)
                 {
-                    Debug.Log($"스테이지 {currentStage.stageId} 완료!");
-                    MoveToNextStage();
-                }
-                else
-                {
-                    OnZoneChanged?.Invoke(GetCurrentZone());
+                    currentStage.CompleteCurrentZone();
+                    Debug.Log($"스테이지 {currentStage.stageId}의 구역 {currentZone.zoneId} 완료: {currentZone.zoneType}");
+                    OnZoneCompleted?.Invoke(currentZone.zoneType);
+                    // 구역 변경 이벤트 호출
+                    OnZoneChanged?.Invoke(currentStage.GetCurrentZone());
+                    // 스테이지 완료 시 다음 스테이지로 이동
+                    if (currentStage.isCompleted)
+                    {
+                        Debug.Log($"스테이지 {currentStage.stageId} 완료!");
+                        MoveToNextStage();
+                    }
                 }
             }
         }
