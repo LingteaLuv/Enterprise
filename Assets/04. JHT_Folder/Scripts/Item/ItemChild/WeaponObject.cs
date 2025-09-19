@@ -50,7 +50,6 @@ namespace JHT
             InventoryManager.Instance.OnUpCountItem += ItemLevelUp;
             OnAddStar += UpGradeItemForStar;
             */
-            rarity = sample.rarity;
             equipCategory = sample.equipCategory;
             equipType = sample.equipType;
             statType = sample.statType;

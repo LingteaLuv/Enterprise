@@ -16,7 +16,6 @@ namespace JHT
     [CreateAssetMenu(menuName = "Scriptable_Weapon", fileName = "Scriptable_Weapon/Weapon")]
     public class ItemWeaponSO : ItemSO
     {
-        public Rarity rarity; // 1, 2, 3성 등급
         public EquipCategory equipCategory; // 분류 - 무기 방패 갑옷
         public EquipType equipType; // 세부분류 - 무기) 칼 도끼 활 등
         public Stat statType; // 장비가 올려주는 스탯 이름
