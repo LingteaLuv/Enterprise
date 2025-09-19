@@ -107,8 +107,6 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         }
         monsterSkillList.Sort((a, b) => a.ID.CompareTo(b.ID));
 
-        Debug.LogError($"상태 : {monsterSkillHandle.Status}");
-
         if (monsterSkillHandle.Status == AsyncOperationStatus.Succeeded)
         {
             StartCoroutine(DownLoadSkillData());

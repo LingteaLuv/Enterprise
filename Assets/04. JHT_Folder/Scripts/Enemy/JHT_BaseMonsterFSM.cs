@@ -118,8 +118,8 @@ namespace JHT
         private void SetAnimSkill()
         {
             //공격 딜레이 설정
-            attackDelayCount = monsterStat.normalSkill.skillDelay - monsterStat.normalSkill.clip.length > 0 ?
-                monsterStat.normalSkill.skillDelay - monsterStat.normalSkill.clip.length : 1;
+            attackDelayCount = monsterStat.normalSkill.coolTime - monsterStat.normalSkill.clip.length > 0 ?
+                monsterStat.normalSkill.coolTime - monsterStat.normalSkill.clip.length : 1;
 
             //스킬 초기화
             if (monsterStat.normalSkill != null)
@@ -286,10 +286,10 @@ namespace JHT
                 _= Attack(attackDelayCount);
 
             if (monsterStat.skill1 != null)
-                _ = Skill1CoolTime(monsterStat.skill1.skillDelay);
+                _ = Skill1CoolTime(monsterStat.skill1.coolTime);
             
             if (monsterStat.skill2 != null) 
-                _ = Skill2CoolTime(monsterStat.skill2.skillDelay);
+                _ = Skill2CoolTime(monsterStat.skill2.coolTime);
         }
 
         public virtual void HandleMove()
@@ -452,7 +452,6 @@ namespace JHT
         {
             monsterSO = null;
 
-            Debug.LogError($"죽음");
             if (token != null)
             {
                 for (int i = 0; i < token.Length; i++)
@@ -500,7 +499,6 @@ namespace JHT
                     }
                 }
             }
-
 
             currentState = curState;
 

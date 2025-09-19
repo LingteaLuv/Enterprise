@@ -150,8 +150,7 @@ namespace JHT
                     so.skill1 = row[13];
                     so.cost = int.Parse(row[15]);
                     so.chaseRange = float.Parse(row[16]);
-                    //so.skillAttack1 = row[7];
-                    //so.buffSkill =row[8];
+                    so.moveSpeed = float.Parse(row[17]);
                 }
             }
         }
