@@ -35,6 +35,7 @@
               sampler2D _MainTex;
               sampler2D _Mask;
               float4 _MainTex_ST;
+              float4 _Color; // _Color 변수 선언 추가
 
               v2f vert (appdata v)
               {
@@ -51,6 +52,9 @@
 
                   // 마스크의 알파 값을 사용해서 원본 텍스처의 알파를 조절
                   col.a *= mask.a;
+
+                  // _Color의 알파 값을 최종 결과에 곱하여 전체 알파를 조절
+                  col.a *= _Color.a;
 
                   return col;
               }

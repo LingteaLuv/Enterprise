@@ -9,7 +9,6 @@ public class MonsterSkillSO : ScriptableObject
     public MonsterSkillAttackType monsterSkillAttackType;
     public MonsterSkillType skillType;
     public ETargetLogic targetLogic;
-    public float skillDelay;
     public int attackCount;
     public float damagePercent;
     public float buffTime;

@@ -46,8 +46,8 @@ public class PlayerCharacterData
         characterdata = so;
 
         // 아이콘
-        crewRoleIcon = GetIcon(so.crewRole);
-        factionIcon = GetIcon(so.faction);
+        crewRoleIcon = CrewroleIconManager.Instance.GetIcon(so.crewRole);
+        factionIcon = FactionIconManager.Instance.GetIcon(so.faction);
 
         characterStats = new Dictionary<Stat, float>();
         foreach (var stat in so.baseStats)
@@ -164,16 +164,16 @@ public class PlayerCharacterData
     /// <summary>
     /// 캐릭터 직업, 속성에 따라 아이콘을 업데이트합니다.
     /// </summary>
-    public Sprite GetIcon(CrewRole role)
-    {
-        string path = $"PSHTest/Icon/{role}";
-        return Resources.Load<Sprite>(path);
-    }
-    public Sprite GetIcon(Faction role)
-    {
-        string path = $"PSHTest/Icon/{role}";
-        return Resources.Load<Sprite>(path);
-    }
+    //public Sprite GetIcon(CrewRole role)
+    //{
+    //    string path = $"PSHTest/Icon/{role}";
+    //    return Resources.Load<Sprite>(path);
+    //}
+    //public Sprite GetIcon(Faction role)
+    //{
+    //    string path = $"PSHTest/Icon/{role}";
+    //    return Resources.Load<Sprite>(path);
+    //}
 
     public async UniTask Init(int crewId, int star)
     {
