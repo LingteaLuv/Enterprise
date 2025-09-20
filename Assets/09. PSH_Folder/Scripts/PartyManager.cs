@@ -94,6 +94,7 @@ public class PartyManager : Singleton<PartyManager>
             {
                 // 모델 프리팹을 방금 생성한 charObject의 자식으로 생성합니다.
                 Instantiate(modelPrefab, charObject.transform);
+                charObject.name = $"{data.characterdata.characterName}";
             }
 
             CombatCharacter combatChar = charObject.GetComponent<CombatCharacter>();
