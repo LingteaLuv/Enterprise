@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 
 /// <summary>
 /// 섬 이동, 배 이동, 전투 흐름을 통합 관리하는 매니저
@@ -273,7 +274,7 @@ public class IslandStageManager : MonoBehaviour
         });
         yield return new WaitUntil(() => done);
 
-        SetBattleField(index);
+        SetBattleField(0);
 
         //BattleManager.Instance?.StartBattle(currentIndex);
         BattleManager.Instance?.StartBattle(index);
@@ -305,8 +306,25 @@ public class IslandStageManager : MonoBehaviour
 
         for (int i = 0; i < battleFields.Count; i++)
         {
-            Debug.Log($"- battleField[{i}]: {battleFields[i].name} → {(i == index ? "활성화" : "비활성화")}");
-            battleFields[i].SetActive(i == index);
+            bool isTarget = (i == index);
+            GameObject field = battleFields[i];
+
+            field.SetActive(isTarget);
+            Debug.Log($"- battleField[{i}]: {field.name} → {(isTarget ? "활성화" : "비활성화")}");
+
+            if (isTarget)
+            {
+                // FadeIn 호출
+                var fade = field.GetComponent<BattleField>();
+                if (fade != null)
+                {
+                    fade.FadeIn(1f);  // 1초 동안 자연스럽게 등장
+                }
+                else
+                {
+                    Debug.LogWarning($"[SetBattleField] BattleField 컴포넌트를 찾을 수 없습니다: {field.name}");
+                }
+            }
         }
     }
 
@@ -356,4 +374,6 @@ public class IslandStageManager : MonoBehaviour
             Debug.Log($"플래그 제거 완료 - {island.name}");
         }
     }
+
+
 }

@@ -132,6 +132,7 @@ public class BattleManager : MonoBehaviour
             Debug.LogError("BattleFields 오브젝트를 찾을 수 없습니다.");
         }
         battleFields[0].gameObject.SetActive(true);
+        battleFields[0].FadeIn(1f); // 자연스럽게 등장
     }
 
     // 스킵 버튼 클릭 시 호출
@@ -196,9 +197,9 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log("전투 시작");
 
-        var field = battleFields[currentRoundIndex];
+        var field = battleFields[0];
 
-        SpawnEnemies(currentRoundIndex);
+        SpawnEnemies(0);
         SpawnPlayers(field);
         
 
