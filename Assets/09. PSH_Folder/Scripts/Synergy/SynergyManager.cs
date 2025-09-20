@@ -8,9 +8,9 @@ using System.Linq;
 public class SynergyManager : Singleton<SynergyManager>
 {
     // --- Private Fields --- //
-    private List<SynergySO> _allSynergies; // 로드된 모든 시너지 SO
-    private Dictionary<int, List<SynergySO>> _characterToSynergiesMap; // 캐릭터 ID를 Key로, 해당 캐릭터가 포함된 시너지 리스트를 Value로 갖는 맵
-    private List<SynergySO> _activeSynergies; // 현재 활성화된 시너지 리스트
+    [SerializeField] private List<SynergySO> _allSynergies; // 로드된 모든 시너지 SO
+    [SerializeField] private Dictionary<int, List<SynergySO>> _characterToSynergiesMap; // 캐릭터 ID를 Key로, 해당 캐릭터가 포함된 시너지 리스트를 Value로 갖는 맵
+    [SerializeField] private List<SynergySO> _activeSynergies; // 현재 활성화된 시너지 리스트
 
     protected override void Awake()
     {
@@ -25,13 +25,46 @@ public class SynergyManager : Singleton<SynergyManager>
         BuildSynergyMap();
     }
 
+    private void OnEnable()
+    {
+        // FormationManager의 임시 편성 변경 이벤트 구독
+        if (FormationManager.Instance != null)
+        {
+            FormationManager.Instance.OnTempFormationChanged += HandleTempFormationChange;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (FormationManager.Instance != null)
+        {
+            FormationManager.Instance.OnTempFormationChanged -= HandleTempFormationChange;
+        }
+    }
+
+    /// <summary>
+    /// 임시 편성 변경이 감지되었을 때 호출되는 핸들러
+    /// </summary>
+    private void HandleTempFormationChange()
+    {
+        Debug.Log("[SynergyManager] 임시 편성 변경이 감지되어 시너지 업데이트를 시작합니다.");
+        var tempFormation = FormationManager.Instance.TempFormation;
+
+        List<int> currentPartyIDs = tempFormation.Values
+                                          .SelectMany(list => list)
+                                          .Select(character => character.characterdata.characterID)
+                                          .ToList();
+
+        UpdateActiveSynergies(currentPartyIDs);
+    }
+
     /// <summary>
     /// Resources/Synergies 폴더에 있는 모든 SynergySO 에셋을 로드합니다.
     /// (어드레서블을 사용한다면 이 부분을 수정해주세요)
     /// </summary>
     private void LoadAllSynergies()
     {
-        _allSynergies = Resources.LoadAll<SynergySO>("Synergies").ToList();
+        _allSynergies = Resources.LoadAll<SynergySO>("SynergyData/Synergy").ToList();
         Debug.Log($"[SynergyManager] {_allSynergies.Count}개의 시너지 정보를 로드했습니다.");
     }
 
