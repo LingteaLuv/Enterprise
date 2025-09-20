@@ -165,7 +165,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             yield return WaitForLogin();
             if (_initialized) yield break;
             yield return Initialize();
-
         }
 
         private IEnumerator Initialize()
@@ -750,7 +749,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 Debug.LogError("inst = null");
                 return;
             }
-            
+            Debug.Log("inst not null");
             if (_questUI != null) return;
             if (QuestUI == null) return;
             // questUI에서 UIController를 받아옵니다
