@@ -7,6 +7,8 @@ using System.Linq;
 // 2. 파티 구성이 변경될 때마다 효율적으로 시너지를 확인하고 적용/해제합니다.
 public class SynergyManager : Singleton<SynergyManager>
 {
+    public static bool IsApplyingSynergy { get; private set; } = false;
+
     // --- Private Fields --- //
     [SerializeField] private List<SynergySO> _allSynergies; // 로드된 모든 시너지 SO
     [SerializeField] private Dictionary<int, List<SynergySO>> _characterToSynergiesMap; // 캐릭터 ID를 Key로, 해당 캐릭터가 포함된 시너지 리스트를 Value로 갖는 맵
@@ -56,6 +58,73 @@ public class SynergyManager : Singleton<SynergyManager>
                                           .ToList();
 
         UpdateActiveSynergies(currentPartyIDs);
+    }
+
+    /// <summary>
+    /// 전투 시작 시, 활성화된 모든 시너지 효과를 적용합니다.
+    /// </summary>
+    public void ApplySynergyEffectsForBattle()
+    {
+        var party = PartyManager.Instance?.ActiveParty;
+        if (party == null || party.Count == 0)
+        {
+            Debug.Log("[SynergyManager] 파티가 구성되지 않아 시너지 적용을 건너뜁니다.");
+            return;
+        }
+
+        // 1. 새로운 버프를 적용하기 전, 모든 파티원의 기존 시너지 버프를 전부 제거합니다.
+        Debug.Log("[SynergyManager] 기존 시너지 버프를 제거합니다...");
+        foreach (var member in party)
+        {
+            member.RemoveAllSynergyBuffs();
+        }
+
+        if (_activeSynergies == null || _activeSynergies.Count == 0)
+        {
+            Debug.Log("[SynergyManager] 활성화된 시너지가 없어 신규 효과 적용을 건너뜁니다.");
+            return;
+        }
+
+        // 2. 새로운 시너지 버프를 적용합니다.
+        Debug.Log($"[SynergyManager] {_activeSynergies.Count}개의 활성화된 시너지 효과를 새로 적용합니다.");
+        try
+        {
+            // 스위치를 켜서, 지금부터 적용되는 버프는 시너지 버프임을 알립니다.
+            IsApplyingSynergy = true;
+
+            foreach (var synergy in _activeSynergies)
+            {
+                if (synergy.buffToApply == null) continue;
+
+                var skill = synergy.buffToApply;
+                Debug.Log($"- 시너지 '{synergy.synergyName}'의 효과 '{skill.skillName}'을(를) 적용합니다.");
+
+                // "Self" 타겟 로직은 시너지 구성원 각자가 시전자가 되도록 특별 취급합니다.
+                if (skill.targetLogic == ETargetLogic.Self)
+                {
+                    var requiredIDs = new HashSet<int>(synergy.requiredCharacterIDs);
+                    var synergyMembers = party.Where(c => requiredIDs.Contains(c.CharacterStats.characterdata.characterID));
+                    foreach (var member in synergyMembers)
+                    {
+                        skill.Use(member, member); // 시전자와 대상을 모두 자기 자신으로 설정하여 스킬 사용
+                    }
+                }
+                else
+                {
+                    // 다른 모든 타겟 로직은 대표 시전자(선장) 한 명이 사용합니다.
+                    CombatCharacter caster = party.FirstOrDefault(c => c.CharacterStats.characterdata.crewRole == CrewRole.Captain) ?? party.FirstOrDefault();
+                    if (caster != null)
+                    {
+                        skill.Use(caster);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            // 모든 작업이 끝나면 스위치를 반드시 꺼줍니다.
+            IsApplyingSynergy = false;
+        }
     }
 
     /// <summary>

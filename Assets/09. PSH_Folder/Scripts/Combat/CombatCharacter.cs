@@ -8,16 +8,18 @@ using System.Linq;
 public class Buff
 {
     public Stat Stat { get; private set; }
-    public BuffType BuffType { get; private set; } // 버프 타입 추가
+    public BuffType BuffType { get; private set; }
     public float Value { get; private set; }
     public float Duration { get; set; }
+    public bool IsSynergyBuff { get; private set; } // 시너지로부터 온 버프인지 식별하는 꼬리표
 
-    public Buff(Stat stat, float value, float duration, BuffType buffType)
+    public Buff(Stat stat, float value, float duration, BuffType buffType, bool isSynergyBuff)
     {
         this.Stat = stat;
         this.Value = value;
         this.Duration = duration;
         this.BuffType = buffType;
+        this.IsSynergyBuff = isSynergyBuff;
     }
 }
 
@@ -122,14 +124,30 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
     /// </summary>
     public void ApplyBuff(Stat stat, float value, float duration, BuffType buffType)
     {
-        Buff newBuff = new Buff(stat, value, duration, buffType);
+        // SynergyManager의 static 플래그를 확인하여 시너지 버프 여부를 결정합니다.
+        bool isSynergy = SynergyManager.IsApplyingSynergy;
+        Buff newBuff = new Buff(stat, value, duration, buffType, isSynergy);
         activeBuffs.Add(newBuff);
-        Debug.Log($"'{charName}'에게 버프 적용: {stat}, 타입: {buffType}, 수치: {value}, 지속시간: {duration}초");
+        Debug.Log($"'{charName}'에게 버프 적용: {stat}, 타입: {buffType}, 수치: {value}, 지속시간: {duration}초, 시너지 버프: {isSynergy}");
 
         // 체력 관련 스탯이 변경되면 HealthSystem에 즉시 반영
         if (stat == Stat.Health)
         {
             healthSystem?.OnStatUpdate();
+        }
+    }
+
+    /// <summary>
+    /// 이 캐릭터에게 적용된 모든 시너지 버프를 제거합니다.
+    /// </summary>
+    public void RemoveAllSynergyBuffs()
+    {
+        int removedCount = activeBuffs.RemoveAll(buff => buff.IsSynergyBuff);
+        if (removedCount > 0)
+        {
+            Debug.Log($"'{charName}'의 시너지 버프 {removedCount}개를 제거했습니다.");
+            // 스탯 재계산이 필요한 경우, 여기서 관련 로직을 호출할 수 있습니다.
+            // 예: healthSystem?.OnStatUpdate();
         }
     }
 
