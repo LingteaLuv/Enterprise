@@ -12,7 +12,8 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     [Header("시작 캐릭터 설정")]
     [Tooltip("게임 시작 시 기본으로 지급할 캐릭터 목록")]
     public List<CharacterData> startingCharacters = new List<CharacterData>();
-
+    public List<CharacterData> allCharacters = new List<CharacterData>();
+    
     [Header("캐릭터 편성")]
     public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
     public const int MAX_FORMATION_SIZE = 5;
@@ -27,6 +28,13 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public Dictionary<int, PlayerCharacterData> OwnedCharacters = new Dictionary<int, PlayerCharacterData>();
     //public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
 
+    public class ParsingPlayerData
+    {
+        public int Level;
+        public int Soul;
+        public int Star;
+    }
+    
     private Dictionary<int, int> starUpgradeCosts;
     private const int STAR_UPGRADE_COST_1 = 20;
     private const int STAR_UPGRADE_COST_2 = 40;
@@ -46,7 +54,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     private bool isBatchUpdating = false;// 일괄 작업할 때 키는 불값
 
-    protected override void Awake()
+    protected async override void Awake()
     {
         base.Awake();
 
@@ -57,7 +65,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             { CrewRole.Cook, new List<PlayerCharacterData>() },
             { CrewRole.Captain, new List<PlayerCharacterData>() }
         };
-
+        await InitDatabase();
         InitializeUpgradeCosts();
     }
 
@@ -77,6 +85,21 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         };
     }
 
+    private async UniTask InitDatabase()
+    {
+        await DatabaseManager.Instance.LoadCharactersAsync((result) =>
+        {
+            foreach (var kvp in result)
+            {
+                int id = kvp.Key;
+                ParsingPlayerData data = kvp.Value;
+                PlayerCharacterData character = new PlayerCharacterData(id, data);
+
+                OwnedCharacters[id] = character;
+            }
+        });
+    }
+    
     private async UniTask GrantStartingCharacters()
     {
         Debug.Log("기본 지급 캐릭터가 있는지 확인합니다...");

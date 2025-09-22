@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using _05._CSJ_Folder.Scripts.Quest.Data;
+using Cysharp.Threading.Tasks;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
@@ -132,9 +133,9 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <summary>
     /// Firebase RTDB에서 다중 데이터(Custom class)를 불러오는 메서드
     /// </summary>
-    public async Task LoadFieldsAsync<T>(Action<T> callback) where T : class
+    public async Task LoadFieldsAsync<T>(string subPath, Action<T> callback) where T : class
     {
-        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child(typeof(T).Name);
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child(subPath);
         DataSnapshot snapshot = await dataRef.GetValueAsync();
 
         if (!snapshot.Exists || snapshot.Value == null) return;
@@ -158,6 +159,28 @@ public class DatabaseManager : Singleton<DatabaseManager>
         T newData = (T)Convert.ChangeType(snapshot.Value, typeof(T));
         callback(newData);
         return true;
+    }
+
+    public async UniTask LoadCharactersAsync(Action<Dictionary<int, PlayerDataManager.ParsingPlayerData>> callback)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child("StatusData").Child("Crew");
+        DataSnapshot snapshot = await dataRef.GetValueAsync();
+
+        if (!snapshot.Exists || snapshot.Value == null) return;
+
+        var result = new Dictionary<int, PlayerDataManager.ParsingPlayerData>();
+
+        foreach (var child in snapshot.Children)
+        {
+            if (int.TryParse(child.Key, out int characterId))
+            {
+                string json = child.GetRawJsonValue();
+                PlayerDataManager.ParsingPlayerData data = JsonUtility.FromJson<PlayerDataManager.ParsingPlayerData>(json);
+                result[characterId] = data;
+            }
+        }
+
+        callback(result);
     }
     
     #region Nickname

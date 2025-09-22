@@ -62,6 +62,31 @@ public class PlayerCharacterData
         battlePower = 0;
     }
 
+    public PlayerCharacterData(int id, PlayerDataManager.ParsingPlayerData data)
+    {
+        characterdata = PlayerDataManager.Instance.allCharacters.Find(c => c.characterID == id);
+
+        Level = new Property<int>(data.Level);
+        Soul = new Property<int>(data.Soul);
+        Star = new Property<int>(data.Star);
+
+        // 아이콘
+        crewRoleIcon = CrewroleIconManager.Instance.GetIcon(characterdata.crewRole);
+        factionIcon = FactionIconManager.Instance.GetIcon(characterdata.faction);
+
+        characterStats = new Dictionary<Stat, float>();
+        foreach (var stat in characterdata.baseStats)
+        {
+            characterStats[stat.statName] = stat.value;
+        }
+
+        // 장비 딕셔너리 초기화
+        equippedItems = new Dictionary<EquipCategory, WeaponObject>();
+
+        // 최초 스탯 계산. BasicStatManager가 준비되기 전에 호출될 수 있으므로 battlePower만 초기화합니다.
+        battlePower = 0;
+    }
+    
     /*public PlayerCharacterData(CharacterData so, GachaGrade grade)
     {
         characterdata = so;
