@@ -65,6 +65,43 @@ public class AuthManager : Singleton<AuthManager>
         return false;
     }
     
+    public async Task<bool> TestLogin()
+    {
+        if (_isClicked) return false;
+        _isClicked = true;
+        // 게스트 로그인 가능 여부 체크
+        if(FirebaseManager.Auth.CurrentUser != null)
+        {
+            //PopupManager.Instance.ShowOKPopup("게스트 로그인 불가", "OK", () => PopupManager.Instance.HidePopup());
+            Debug.LogError($"유저 UID : {FirebaseManager.Auth.CurrentUser.UserId}  " +
+                           $"/ 유저 닉네임 : {FirebaseManager.Auth.CurrentUser.DisplayName}");
+            _isClicked = false;
+            return false;
+        }
+        
+        string testId = "hagwhr2@naver.com";
+        string testPassword = "123456";
+        AuthResult testUser = await _auth.SignInWithEmailAndPasswordAsync(testId, testPassword);
+        FirebaseUser user = testUser.User;
+        if (user != null)
+        {
+            DatabaseManager.Instance.Init();
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gold", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gem", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/EnhancementStone", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/RelicsCoupon", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/RelicsPoint", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/CrewDrawTicket", 1000000000);
+            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/EquipDrawTicket", 1000000000);
+            
+            await DatabaseManager.Instance.SetNickname();
+            DataManager.Instance.SetLoginType("test");
+            LoginCompleted?.Invoke();
+        }
+        _isClicked = false;
+        return true;
+    }
+    
     /// <summary>
     /// 게스트 로그인 메서드, 익명 계정 생성 및 임시 닉네임 부여, DB저장
     /// </summary>
@@ -144,7 +181,7 @@ public class AuthManager : Singleton<AuthManager>
 
         if (user != null)
         {
-            await DatabaseManager.Instance.SetNickname(user.DisplayName);
+            await DatabaseManager.Instance.SetNickname(userTask.DisplayName);
             //await user.ReloadAsync();
             DataManager.Instance.SetLoginType(user.ProviderId);
             LoginCompleted?.Invoke();
@@ -257,7 +294,7 @@ public class AuthManager : Singleton<AuthManager>
             {
                 Debug.LogError($"구글 로그인 실패 / 원인: {task.Exception}");
     
-                //PopupManager.Instance.ShowOKPopup("구글 로그인 실패", "OK", () => PopupManager.Instance.HidePopup());
+                PopManager.Instance.ShowOKPopup("구글 로그인 실패", "OK", () => PopManager.Instance.HidePopup());
                 return false;
             }
     
@@ -270,15 +307,13 @@ public class AuthManager : Singleton<AuthManager>
             {
                 if (linkTask.IsCanceled)
                 {
-                    //PopupManager.Instance.ShowOKPopup("구글 계정으로 전환 취소", "OK", () => PopupManager.Instance.HidePopup());
+                    PopManager.Instance.ShowOKPopup("구글 계정으로 전환 취소", "OK", () => PopManager.Instance.HidePopup());
                     return false;
                 }
     
                 if (linkTask.IsFaulted)
                 {
-                    //PopupManager.Instance.ShowOKPopup("구글 계정으로 전환 실패", "OK", () => PopupManager.Instance.HidePopup());
-                    //GoogleSignIn.DefaultInstance.SignOut();
-                    //GoogleSignIn.DefaultInstance.Disconnect();
+                    PopManager.Instance.ShowOKPopup("구글 계정으로 전환 실패", "OK", () => PopManager.Instance.HidePopup());
                     return false;
                 }
                 string googleDisplayName = googleUser.DisplayName;

@@ -34,20 +34,10 @@ public class FirebaseManager : Singleton<FirebaseManager>
     private GoogleSignInConfiguration _configuration;
     public GoogleSignInConfiguration Configuration { get { return _configuration; } }
     
-    [SerializeField] private bool _isTest;
-    [SerializeField] private string _sceneName;
-    
     protected override async void Awake()
     {
         OnFirebaseReady = null;
         
-        if (_isTest)
-        {
-            OnFirebaseReady += async () =>
-            {
-                await TestLogin();
-            };
-        }
         // GoogleSignIn에 사용할 인증 설정 초기화
         _configuration = new GoogleSignInConfiguration
         {
@@ -74,22 +64,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
         Time.fixedDeltaTime = 1f / 60f;
     }
 
-    public async Task TestLogin()
-    {
-        string testId = "hagwhr2@naver.com";
-        string testPassword = "123456";
-        AuthResult testUser = await _auth.SignInWithEmailAndPasswordAsync(testId, testPassword);
-        _user = testUser.User;
-        if (_user != null)
-        {
-            Debug.Log("테스트 로그인 완료, 씬 전환");
-            DatabaseManager.Instance.Init();
-            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gold", 1000000000);
-            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gem", 1000000000);
-            await DatabaseManager.Instance.SaveFieldAsync($"CreditData/EnhancementStone", 1000000000);
-            SceneManager.LoadScene(_sceneName);
-        }
-    }
+    
     
     private IEnumerator InitFirebaseCoroutine()
     {
