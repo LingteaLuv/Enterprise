@@ -274,7 +274,7 @@ public class IslandStageManager : MonoBehaviour
         });
         yield return new WaitUntil(() => done);
 
-        SetBattleField(0);
+        SetBattleField(index);
 
         //BattleManager.Instance?.StartBattle(currentIndex);
         BattleManager.Instance?.StartBattle(index);
@@ -308,17 +308,18 @@ public class IslandStageManager : MonoBehaviour
         {
             bool isTarget = (i == index);
             GameObject field = battleFields[i];
-
             field.SetActive(isTarget);
-            Debug.Log($"- battleField[{i}]: {field.name} → {(isTarget ? "활성화" : "비활성화")}");
 
             if (isTarget)
             {
-                // FadeIn 호출
-                var fade = field.GetComponent<BattleField>();
-                if (fade != null)
+                var bf = field.GetComponent<BattleField>();
+                if (bf != null)
                 {
-                    fade.FadeIn(1f);  // 1초 동안 자연스럽게 등장
+                    bf.FadeIn(1f);
+
+                    // ✅ GridManager에 타일맵 갱신 요청
+                    GridManager.Instance.SetTilemaps(bf.BaseTilemap, bf.ObstacleTilemap);
+                    GridManager.Instance.CreateGrid(); // ← 꼭 새로 만들어야 반영됨
                 }
                 else
                 {

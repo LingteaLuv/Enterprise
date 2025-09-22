@@ -197,9 +197,9 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log("전투 시작");
 
-        var field = battleFields[0];
+        var field = battleFields[currentRoundIndex];
 
-        SpawnEnemies(0);
+        SpawnEnemies(currentRoundIndex);
         SpawnPlayers(field);
         
 

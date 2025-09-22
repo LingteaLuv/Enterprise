@@ -13388,6 +13388,99 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1128422907}
   m_CullTransparentMesh: 1
+--- !u!1001 &1129625496
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1901312791}
+    m_Modifications:
+    - target: {fileID: -108473235300952646, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: <BaseTilemap>k__BackingField
+      value: 
+      objectReference: {fileID: 1129625499}
+    - target: {fileID: -108473235300952646, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: <ObstacleTilemap>k__BackingField
+      value: 
+      objectReference: {fileID: 1129625498}
+    - target: {fileID: -108473235300952646, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: <PlayerSpawnPoint>k__BackingField
+      value: 
+      objectReference: {fileID: 1129625500}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5349914512447541077, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_Name
+      value: SnowIsland
+      objectReference: {fileID: 0}
+    - target: {fileID: 5349914512447541077, guid: ae190b3693d7510468618121c613540b, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ae190b3693d7510468618121c613540b, type: 3}
+--- !u!4 &1129625497 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4148020410501578635, guid: ae190b3693d7510468618121c613540b, type: 3}
+  m_PrefabInstance: {fileID: 1129625496}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1839735485 &1129625498 stripped
+Tilemap:
+  m_CorrespondingSourceObject: {fileID: 2522963251740629367, guid: ae190b3693d7510468618121c613540b, type: 3}
+  m_PrefabInstance: {fileID: 1129625496}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1839735485 &1129625499 stripped
+Tilemap:
+  m_CorrespondingSourceObject: {fileID: 4689535152617588518, guid: ae190b3693d7510468618121c613540b, type: 3}
+  m_PrefabInstance: {fileID: 1129625496}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1129625500 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6998531197643201900, guid: ae190b3693d7510468618121c613540b, type: 3}
+  m_PrefabInstance: {fileID: 1129625496}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1135728065
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17671,8 +17764,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 133fa9db0982b7b498656cbc23f44359, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilemap: {fileID: 2090938613}
-  ObstacleTilemap: {fileID: 2090938612}
   gridSizeX: 40
   gridSizeY: 40
 --- !u!4 &1532917239
@@ -21909,6 +22000,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2090938611}
+  - {fileID: 1129625497}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1910545473
@@ -23897,16 +23989,6 @@ PrefabInstance:
 --- !u!4 &2090938611 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2614566440719912370, guid: 214d96b69d841fc419aceb801ed64a82, type: 3}
-  m_PrefabInstance: {fileID: 2090938610}
-  m_PrefabAsset: {fileID: 0}
---- !u!1839735485 &2090938612 stripped
-Tilemap:
-  m_CorrespondingSourceObject: {fileID: 1589819756785488822, guid: 214d96b69d841fc419aceb801ed64a82, type: 3}
-  m_PrefabInstance: {fileID: 2090938610}
-  m_PrefabAsset: {fileID: 0}
---- !u!1839735485 &2090938613 stripped
-Tilemap:
-  m_CorrespondingSourceObject: {fileID: 5284537755182237065, guid: 214d96b69d841fc419aceb801ed64a82, type: 3}
   m_PrefabInstance: {fileID: 2090938610}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2098738991
