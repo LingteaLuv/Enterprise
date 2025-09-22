@@ -20,14 +20,18 @@ public class LoginUIController : UIController<LoginUIController.LoginUIType>
                 // 팝업 닫기 버튼
                 startPanel.OnTouchStartBtn = async () =>
                 {
-                    if (await AuthManager.Instance.AutoLogin())
+                    /*/*if (await AuthManager.Instance.AutoLogin())
                     {
                         HideUI(LoginUIType.StartPanel);
                         ShowUI(LoginUIType.InfoPanel);
                         Debug.Log("자동 로그인 성공");
-                    }
-                    else
+                    }#1#
+                    else*/
                     {
+                        if (FirebaseManager.Auth != null)
+                        {
+                            FirebaseManager.Auth.SignOut();
+                        }
                         HideUI(LoginUIType.StartPanel);
                         ShowUI(LoginUIType.LoginPanel);
                         Debug.Log("자동 로그인 실패 : 계정x , 게스트 계정");
