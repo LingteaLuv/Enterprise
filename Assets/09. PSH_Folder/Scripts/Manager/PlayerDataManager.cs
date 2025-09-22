@@ -23,8 +23,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public const int MAX_CHARACTER_LEVEL = 10;
     public BigInteger fixedLevelUpGoldCost = 1000;
     public BigInteger fixedLevelUpStoneCost = 20;
-
-    //todo석원 : DB 연동 - 레벨 성급, 장착 무기, 영혼 조각 개수
+    
     public Dictionary<int, PlayerCharacterData> OwnedCharacters = new Dictionary<int, PlayerCharacterData>();
     //public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
 
@@ -54,7 +53,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     private bool isBatchUpdating = false;// 일괄 작업할 때 키는 불값
 
-    protected async override void Awake()
+    protected override void Awake()
     {
         base.Awake();
 
@@ -79,10 +78,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             {
                 await GrantStartingCharacters();
                 // 게임 시작 시, PDM의 데이터를 직접 수정하는 자동 편성을 호출합니다.
-                AutoFormTeam();
                 Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
             }
-
+            AutoFormTeam();
             StartCoroutine(InitialCalculationCoroutine());
         };
     }

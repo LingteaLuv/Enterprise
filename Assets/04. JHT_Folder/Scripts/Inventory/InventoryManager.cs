@@ -9,7 +9,6 @@ namespace JHT
     {
         // todo석원 : DB연동 - 장비(key : itemNum, weaponList - 레벨, 성급) 
         public List<WeaponObject> weaponList;
-        // todo석원 : DB연동 - 유물(key : itemNum, RelicsList - 레어도, 레벨) 
         public List<RelicsObject> relicsList;
 
         [Header("유물재화")]
