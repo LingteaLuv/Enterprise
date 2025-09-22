@@ -31,26 +31,26 @@ namespace JHT
         public MonsterSkillSO skill2;
 
         public JHT_BaseMonsterStat(JHT_MonsterDataSO so, MonsterSkillSO normalSkill,
-            MonsterSkillSO skill1, MonsterSkillSO skill2)
+            MonsterSkillSO skill1, MonsterSkillSO skill2, float addStat)
         {
             // start Setting
             curSO = so;
-            maxHp = curSO.maxHp;
+            maxHp = curSO.maxHp * addStat;
 
             // Stat Setting
-            totalAttackPower = AttackCalculate(curSO);// * GlobalStageManager.Instance.currentStageIndex;
-            defense = curSO.defense;// * GlobalStageManager.Instance.currentStageIndex;
-            chaseRange = curSO.chaseRange;
-            moveSpeed = curSO.moveSpeed;
-            attackSpeed = curSO.attackSpeed;
+            totalAttackPower = AttackCalculate(curSO) * addStat;// * GlobalStageManager.Instance.currentStageIndex;
+            defense = curSO.defense * addStat;// * GlobalStageManager.Instance.currentStageIndex;
+            chaseRange = curSO.chaseRange * addStat;
+            moveSpeed = curSO.moveSpeed * addStat;
+            attackSpeed = curSO.attackSpeed * addStat;
 
             //sprite
             projectileSprite = curSO.projectileSprite;
 
             // Enum
             monsterAttackRangeType = curSO.monsterAttackType;
-            attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack? 1.2f : 1.8f;
-
+            attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack? 1f : 2f;
+            attackRange *= addStat;
             monsterCrewRole = curSO.monsterCrewRole;
 
             cost = curSO.cost;
