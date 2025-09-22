@@ -54,8 +54,12 @@ public class CurrencyManager : Singleton<CurrencyManager>
     [SerializeField] private string _initialGoldString;
     [SerializeField] private string _initialEnhancementStoneString;
     [SerializeField] private string _initialGemString;
+    [SerializeField] private string _initialRelicsCouponString;
+    [SerializeField] private string _initialRelicsPointString;
+    [SerializeField] private string _initialCrewDrawTicketString;
+    [SerializeField] private string _initialEquipDrawTicketString;
 
-    public Action<string, string, string> OnUpdateCurrency;
+    public Action<List<string>> OnUpdateCurrency;
     public Action OnCurrencyChanged;
     public bool IsFireBase;
     protected async override void Awake()
@@ -97,11 +101,39 @@ public class CurrencyManager : Singleton<CurrencyManager>
                 //Debug.LogWarning($"Gem DB 로드 {value}");
                 _initialGemString = value.ToString();
             });
+            
+            await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/RelicsCoupon", (value) =>
+            {
+                //Debug.LogWarning($"RelicsCoupon DB 로드 {value}");
+                _initialRelicsCouponString = value.ToString();
+            });
+            
+            await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/RelicsPoint", (value) =>
+            {
+                //Debug.LogWarning($"RelicsPoint DB 로드 {value}");
+                _initialRelicsPointString = value.ToString();
+            });
+            
+            await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/CrewDrawTicket", (value) =>
+            {
+                //Debug.LogWarning($"CrewDrawTicket DB 로드 {value}");
+                _initialCrewDrawTicketString = value.ToString();
+            });
+            
+            await DatabaseManager.Instance.LoadFieldAsync<int>($"{rootPath}/EquipDrawTicket", (value) =>
+            {
+                //Debug.LogWarning($"EquipDrawTicket DB 로드 {value}");
+                _initialEquipDrawTicketString = value.ToString();
+            });
         }
         // 인스펙터에서 설정된 초기 재화량을 적용합니다.
         AddCurrencyFromInspectorString(CurrencyType.Gold, _initialGoldString);
         AddCurrencyFromInspectorString(CurrencyType.EnhancementStone, _initialEnhancementStoneString);
         AddCurrencyFromInspectorString(CurrencyType.Gem, _initialGemString);
+        AddCurrencyFromInspectorString(CurrencyType.RelicsCoupon, _initialRelicsCouponString);
+        AddCurrencyFromInspectorString(CurrencyType.RelicsPoint, _initialRelicsPointString);
+        AddCurrencyFromInspectorString(CurrencyType.CrewDrawTicket, _initialCrewDrawTicketString);
+        AddCurrencyFromInspectorString(CurrencyType.EquipDrawTicket, _initialEquipDrawTicketString);
         UpdateCurrencyUI();
     }
 
@@ -210,7 +242,15 @@ public class CurrencyManager : Singleton<CurrencyManager>
         string s1 = $"gold : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gold])}";
         string s2 = $"stone : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EnhancementStone])}";
         string s3 = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.Gem])}";
-        OnUpdateCurrency?.Invoke(s1, s2, s3);
+        string s4 = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.RelicsCoupon])}";
+        string s5 = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.RelicsPoint])}";
+        string s6 = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.CrewDrawTicket])}";
+        string s7 = $"gem : {DataUtility.FormatNumber(currencyWallet[CurrencyType.EquipDrawTicket])}";
+        List<string> currency = new List<string>()
+        {
+            s1, s2, s3, s4, s5, s6, s7
+        };
+        OnUpdateCurrency?.Invoke(currency);
         OnCurrencyChanged?.Invoke();
     }
 

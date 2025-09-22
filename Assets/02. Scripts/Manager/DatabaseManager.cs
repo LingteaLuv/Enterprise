@@ -118,6 +118,17 @@ public class DatabaseManager : Singleton<DatabaseManager>
         callback(data);
     }
     
+    public void LoadFieldAsync<T>(string path, int async, Action<T> callback, bool init = false, T value = default)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(path);
+        dataRef.GetValueAsync().ContinueWithOnMainThread((task) =>
+        {
+            if (task.IsCanceled || task.IsFaulted) return;
+            T data = (T)Convert.ChangeType(task.Result.Value, typeof(T));
+            callback(data);
+        }); 
+    }
+    
     /// <summary>
     /// Firebase RTDB에서 다중 데이터(Custom class)를 불러오는 메서드
     /// </summary>
@@ -359,6 +370,26 @@ public class DatabaseManager : Singleton<DatabaseManager>
         {
             CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.EnhancementStone,
                 snapshot.Child("EnhancementStone").Value.ToString());
+        }
+        if (snapshot.Exists && snapshot.HasChild("RelicsCoupon"))
+        {
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.RelicsCoupon,
+                snapshot.Child("RelicsCoupon").Value.ToString());
+        }
+        if (snapshot.Exists && snapshot.HasChild("RelicsPoint"))
+        {
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.RelicsPoint,
+                snapshot.Child("RelicsPoint").Value.ToString());
+        }
+        if (snapshot.Exists && snapshot.HasChild("CrewDrawTicket"))
+        {
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.CrewDrawTicket,
+                snapshot.Child("CrewDrawTicket").Value.ToString());
+        }
+        if (snapshot.Exists && snapshot.HasChild("EquipDrawTicket"))
+        {
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.EquipDrawTicket,
+                snapshot.Child("EquipDrawTicket").Value.ToString());
         }
         OnChangedCreditData?.Invoke();
     }
