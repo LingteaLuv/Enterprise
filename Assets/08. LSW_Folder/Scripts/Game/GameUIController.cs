@@ -115,12 +115,12 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         CurrencyManager.Instance.UpdateCurrencyUI();
     }
 
-    private void UpdateText(string s1, string s2, string s3)
+    private void UpdateText(List<string> currency)
     {
         Debug.Log("Text 업데이트 호출");
-        _goldText.text = s1;
-        _stoneText.text = s2;
-        _gemText.text = s3;
+        _goldText.text = currency[0];
+        _stoneText.text = currency[1];
+        _gemText.text = currency[2];
     }
 
     private IEnumerator Delay()
