@@ -218,6 +218,15 @@ public class FormationManager : Singleton<FormationManager>
         {
             return false;
         }
+
+        // [추가] 편성 확정 시점에 SynergyManager에 최종 파티 정보를 전달하여 '전투용' 시너지를 업데이트합니다.
+        Debug.Log("[FormationManager] 편성이 확정되어 전투 시너지를 업데이트합니다.");
+        List<int> finalPartyIDs = tempFormation.Values
+                                             .SelectMany(list => list)
+                                             .Select(character => character.characterdata.characterID)
+                                             .ToList();
+        SynergyManager.Instance.ConfirmCombatSynergies(finalPartyIDs);
+
         PlayerDataManager.Instance.SetFormation(DeepCopyFormation(tempFormation));
         InitializeTempFormation();
         return true;
