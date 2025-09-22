@@ -7,6 +7,7 @@ public class HealthSystem : MonoBehaviour
     public float maxHealth;
 
     public event Action<float, float> OnHealthChanged;
+    public event Action OnDeath;
 
     // 자기 자신의 스탯 제공자 (IAttacker가 스탯 제공의 역할도 겸함)
     private IAttacker statProvider;
@@ -90,7 +91,7 @@ public class HealthSystem : MonoBehaviour
         {
             currentHealth = 0;
             Debug.Log($"💀 {statProvider.GetName()}이(가) 쓰러졌습니다.");
-            // TODO: 사망 처리 로직 호출
+            OnDeath?.Invoke();
         }
 
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
