@@ -3,6 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
+/// [신규] 버프가 어떤 종류의 효과를 발휘하는지 정의합니다.
+/// </summary>
+public enum BuffEffectType
+{
+    StatModifier,       // 캐릭터의 스탯(공격력, 방어력 등)을 직접 변경합니다.
+    ExtraDamageOnHit    // 기본 공격 시 추가 데미지를 부여합니다.
+}
+
+/// <summary>
 /// 지속 시간을 가지는 버프 정보를 저장하는 클래스입니다.
 /// </summary>
 public class Buff
@@ -11,22 +20,24 @@ public class Buff
     public BuffType BuffType { get; private set; }
     public float Value { get; private set; }
     public float Duration { get; set; }
-    public bool IsSynergyBuff { get; private set; } // 시너지로부터 온 버프인지 식별하는 꼬리표
+    public bool IsSynergyBuff { get; private set; }
+    public BuffEffectType EffectType { get; private set; }
 
-    public Buff(Stat stat, float value, float duration, BuffType buffType, bool isSynergyBuff)
+    public Buff(Stat stat, float value, float duration, BuffType buffType, bool isSynergyBuff, BuffEffectType effectType)
     {
         this.Stat = stat;
         this.Value = value;
         this.Duration = duration;
         this.BuffType = buffType;
         this.IsSynergyBuff = isSynergyBuff;
+        this.EffectType = effectType;
     }
 }
 
 [RequireComponent(typeof(HealthSystem))]
 public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
 {
-    public PlayerCharacterData CharacterStats { get; private set; } // 원본 데이터 참조
+    public PlayerCharacterData CharacterStats { get; private set; }
 
     [SerializeField] public string charName;
     // --- 전투 기본 스탯 (Initialize에서 복사) ---
@@ -45,7 +56,6 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
     [Header("보유 스킬")]
     public List<SkillSO> skills = new List<SkillSO>();
 
-    // --- 컴포넌트 참조 ---
     private HealthSystem healthSystem;
 
     void Awake()
@@ -71,27 +81,17 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
         baseCritChance = data.finalStats.GetValueOrDefault(Stat.CritChance, 0) / 100;
         baseCritDamage = data.finalStats.GetValueOrDefault(Stat.CritDamage, 0) / 100;
         baseAttackSpeed = data.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0) / 100;
-
-        //Debug.LogError($"{PartyManager.Instance.moveSpeed}");
         moveSpeed = PartyManager.Instance.moveSpeed;
-        attackRange = data.characterdata.atkRangeType == AtkRangeType.Ranged_Attack ?
-            PartyManager.Instance.attackRange : PartyManager.Instance.attackRange2;
-
-        // 버프 리스트 초기화
+        attackRange = data.characterdata.atkRangeType == AtkRangeType.Ranged_Attack ? PartyManager.Instance.attackRange : PartyManager.Instance.attackRange2;
         activeBuffs.Clear();
-
         Debug.Log($"'{charName}' 데이터 적용 완료.");
-
         if (healthSystem != null)
         {
             healthSystem.Initialize();
         }
-
-        // 스킬 등록
         RegisterSkills(data);
     }
 
-    // IDamageable 인터페이스 구현
     public void TakeDamage(IAttacker attacker, float powerRatio = 1f)
     {
         healthSystem.CalculateAndApplyDamage(attacker, powerRatio);
@@ -109,45 +109,46 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
             case Stat.CritDamage: baseValue = baseCritDamage; break;
             case Stat.AttackSpeed: baseValue = baseAttackSpeed; break;
         }
-
-        float flatBonus = activeBuffs.Where(b => b.Stat == stat && b.BuffType == BuffType.Flat).Sum(b => b.Value);
-        float percentBonus = activeBuffs.Where(b => b.Stat == stat && b.BuffType == BuffType.Percent).Sum(b => b.Value);
-
+        var statBuffs = activeBuffs.Where(b => b.EffectType == BuffEffectType.StatModifier && b.Stat == stat);
+        float flatBonus = statBuffs.Where(b => b.BuffType == BuffType.Flat).Sum(b => b.Value);
+        float percentBonus = statBuffs.Where(b => b.BuffType == BuffType.Percent).Sum(b => b.Value);
         float finalValue = (baseValue + flatBonus) * (1 + percentBonus);
-
         Debug.Log($"[CombatCharacter] {charName}의 {stat} 최종 스탯: {finalValue} (기본: {baseValue}, 고정 버프: {flatBonus}, 퍼센트 버프: {percentBonus})");
         return finalValue;
     }
 
-    /// <summary>
-    /// 새로운 버프를 캐릭터에게 적용합니다.
-    /// </summary>
+    public float GetOnHitDamageBonus()
+    {
+        return activeBuffs
+            .Where(b => b.EffectType == BuffEffectType.ExtraDamageOnHit)
+            .Sum(b => b.Value);
+    }
+
     public void ApplyBuff(Stat stat, float value, float duration, BuffType buffType)
     {
-        // SynergyManager의 static 플래그를 확인하여 시너지 버프 여부를 결정합니다.
         bool isSynergy = SynergyManager.IsApplyingSynergy;
-        Buff newBuff = new Buff(stat, value, duration, buffType, isSynergy);
+        Buff newBuff = new Buff(stat, value, duration, buffType, isSynergy, BuffEffectType.StatModifier);
         activeBuffs.Add(newBuff);
-        Debug.Log($"'{charName}'에게 버프 적용: {stat}, 타입: {buffType}, 수치: {value}, 지속시간: {duration}초, 시너지 버프: {isSynergy}");
-
-        // 체력 관련 스탯이 변경되면 HealthSystem에 즉시 반영
+        Debug.Log($"'{charName}'에게 스탯 버프 적용: {stat}, 타입: {buffType}, 수치: {value}, 지속시간: {duration}초, 시너지 버프: {isSynergy}");
         if (stat == Stat.Health)
         {
             healthSystem?.OnStatUpdate();
         }
     }
 
-    /// <summary>
-    /// 이 캐릭터에게 적용된 모든 시너지 버프를 제거합니다.
-    /// </summary>
+    public void ApplyOnHitDamageBuff(float value, float duration)
+    {
+        Buff newBuff = new Buff(Stat.Attack, value, duration, BuffType.Flat, false, BuffEffectType.ExtraDamageOnHit);
+        activeBuffs.Add(newBuff);
+        Debug.Log($"'{charName}'에게 추가 데미지 버프 적용: 수치: {value}, 지속시간: {duration}초");
+    }
+
     public void RemoveAllSynergyBuffs()
     {
         int removedCount = activeBuffs.RemoveAll(buff => buff.IsSynergyBuff);
         if (removedCount > 0)
         {
             Debug.Log($"'{charName}'의 시너지 버프 {removedCount}개를 제거했습니다.");
-            // 스탯 재계산이 필요한 경우, 여기서 관련 로직을 호출할 수 있습니다.
-            // 예: healthSystem?.OnStatUpdate();
         }
     }
 
@@ -157,7 +158,6 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
     private void ProcessBuffs()
     {
         if (activeBuffs.Count == 0) return;
-
         bool healthBuffRemoved = false;
 
         // 뒤에서부터 순회해야 안전하게 리스트 아이템을 삭제할 수 있습니다.
@@ -165,7 +165,6 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
         {
             Buff buff = activeBuffs[i];
             buff.Duration -= Time.deltaTime;
-
             if (buff.Duration <= 0)
             {
                 Debug.Log($"'{charName}'의 {buff.Stat} 버프 만료.");
@@ -202,9 +201,8 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
             baseCritChance = updatedData.finalStats.GetValueOrDefault(Stat.CritChance, 0);
             baseCritDamage = updatedData.finalStats.GetValueOrDefault(Stat.CritDamage, 0);
             baseAttackSpeed = updatedData.finalStats.GetValueOrDefault(Stat.AttackSpeed, 0);
-
             healthSystem?.OnStatUpdate();
-            RegisterSkills(updatedData); // 스킬 정보도 갱신
+            RegisterSkills(updatedData);
         }
     }
 
@@ -225,8 +223,6 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
                 Debug.Log($"'{charName}'에게 패시브 스킬 '{passiveSkill.skillName}'을(를) 등록했습니다.");
             }
         }
-
-        // TODO: 액티브 스킬 등 다른 스킬 ID가 있다면 여기에 추가로 등록하는 로직을 구현할 수 있습니다.
     }
 
     /// <param name="skillIndex">사용할 스킬의 리스트 인덱스</param>
@@ -248,7 +244,6 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
             Debug.LogError($"잘못된 스킬 인덱스: {skillIndex}");
             return;
         }
-
         SkillSO skillToUse = skills[skillIndex];
         if (skillToUse != null)
         {

@@ -83,7 +83,19 @@ public class HealthSystem : MonoBehaviour
             Debug.Log("✨ 치명타 발생! ✨");
         }
 
-        // 3. 최종 데미지 적용
+        // 3. [수정] 버프에 의한 추가 데미지를 계산에 포함합니다.
+        var attackerCombatChar = attacker as CombatCharacter;
+        if (attackerCombatChar != null)
+        {
+            float extraDamage = attackerCombatChar.GetOnHitDamageBonus();
+            if (extraDamage > 0)
+            {
+                finalDamage += extraDamage;
+                Debug.Log($"🔥 버프 효과! 추가 데미지 {extraDamage} 적용!");
+            }
+        }
+
+        // 4. 최종 데미지 적용
         currentHealth -= finalDamage;
         Debug.Log($"💥 {attacker.GetName()}이(가) {statProvider.GetName()}에게 {finalDamage:F1}의 데미지를 입혔습니다!");
 
