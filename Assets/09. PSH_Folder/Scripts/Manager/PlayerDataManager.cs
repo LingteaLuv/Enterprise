@@ -12,7 +12,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     [Header("시작 캐릭터 설정")]
     [Tooltip("게임 시작 시 기본으로 지급할 캐릭터 목록")]
     public List<CharacterData> startingCharacters = new List<CharacterData>();
-    public List<CharacterData> allCharacters = new List<CharacterData>();
+   
     
     [Header("캐릭터 편성")]
     public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
@@ -65,7 +65,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             { CrewRole.Cook, new List<PlayerCharacterData>() },
             { CrewRole.Captain, new List<PlayerCharacterData>() }
         };
-        await InitDatabase();
+        
         InitializeUpgradeCosts();
     }
 
@@ -73,6 +73,8 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         AuthManager.Instance.LoginCompleted += async () =>
         {
+            await InitDatabase();
+            
             if (OwnedCharacters.Count == 0)
             {
                 await GrantStartingCharacters();

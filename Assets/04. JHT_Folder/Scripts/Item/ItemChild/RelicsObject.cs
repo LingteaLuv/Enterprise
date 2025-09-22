@@ -24,24 +24,41 @@ namespace JHT
         public Sprite itemRarityImage;
         public ItemRarity curRarity;
         public PowerType itemPowerType;
-        public RelicsObject(ItemSO _so, ItemRarity _rarity, int level)
+        public RelicsObject(ItemSO so, ItemRarity rarity, int level)
         {
-            itemSO = _so;
-            ItemRelicsSO so = (ItemRelicsSO)itemSO;
+            itemSO = so;
+            ItemRelicsSO data = (ItemRelicsSO)itemSO;
 
-            itemPowerType = so.itemPowerType;
-            curRarity = _rarity;
+            itemPowerType = data.itemPowerType;
+            curRarity = rarity;
             itemLevel = level;
-            itemIcon = so.icon;
-            itemNum = so.itemNum;
-            itemName = so.itemName;
+            itemIcon = data.icon;
+            itemNum = data.itemNum;
+            itemName = data.itemName;
 
-            itemPower = SetPower(so,level); 
+            itemPower = SetPower(data,level); 
 
 
 
-            itemCost = so.cost[(int)curRarity - 1] * level;
-            itemRarityImage = so.rarityImage[(int)curRarity - 1];
+            itemCost = data.cost[(int)curRarity - 1] * level;
+            itemRarityImage = data.rarityImage[(int)curRarity - 1];
+        }
+        
+        public RelicsObject(int id, ItemRarity rarity, int level)
+        {
+            itemSO = DataManager.Instance.AllRelics.Find(r => r.itemNum == id);
+            ItemRelicsSO data = (ItemRelicsSO)itemSO;
+
+            itemPowerType = data.itemPowerType;
+            curRarity = rarity;
+            itemLevel = level;
+            itemIcon = data.icon;
+            itemNum = data.itemNum;
+            itemName = data.itemName;
+
+            itemPower = SetPower(data,level); 
+            itemCost = data.cost[(int)curRarity - 1] * level;
+            itemRarityImage = data.rarityImage[(int)curRarity - 1];
         }
 
         private float SetPower(ItemRelicsSO so,int level)

@@ -1,12 +1,9 @@
 using System.Collections.Generic;
+using JHT;
 using UnityEngine;
 
-public class DataManager : MonoBehaviour
+public class DataManager : Singleton<DataManager>
 {
-    
-
-    private void Awake()
-    {
-        
-    }
+    public List<ItemSO> AllRelics = new List<ItemSO>();
+    public List<CharacterData> AllCharacters = new List<CharacterData>();
 }

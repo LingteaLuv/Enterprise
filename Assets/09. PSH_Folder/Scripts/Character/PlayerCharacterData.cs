@@ -64,7 +64,7 @@ public class PlayerCharacterData
 
     public PlayerCharacterData(int id, PlayerDataManager.ParsingPlayerData data)
     {
-        characterdata = PlayerDataManager.Instance.allCharacters.Find(c => c.characterID == id);
+        characterdata = DataManager.Instance.AllCharacters.Find(c => c.characterID == id);
 
         Level = new Property<int>(data.Level);
         Soul = new Property<int>(data.Soul);
