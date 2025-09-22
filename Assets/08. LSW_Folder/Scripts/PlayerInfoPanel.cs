@@ -27,8 +27,8 @@ public class PlayerInfoPanel : MonoBehaviour
     
     private void OnEnable()
     {
-        _nicknameText.text = DataManager.Instance.Nickname;
-        _loginType.text = DataManager.Instance.LoginType.ToString();
+        _nicknameText.text = LoginManager.Instance.Nickname;
+        _loginType.text = LoginManager.Instance.LoginType.ToString();
     }
 
     private void OnDisable()
