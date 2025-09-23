@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -14,9 +15,9 @@ namespace JHT
         public const string itemRelicsURL = "https://docs.google.com/spreadsheets/d/1yrgwWQ_XijgUwjyUSkgDH9wji0oHuoYjEcmjZdZVGmg/export?format=csv"; //범위 설정 : &range=A2:B, 두번쨰시트 : &gid~~
         public const string lootTableURL = "https://docs.google.com/spreadsheets/d/13MgAe8F47N4GJRDn4vg4wGtn2Y31aOerQEQF096ox_g/export?format=csv";
         public const string monsterDataURL = "https://docs.google.com/spreadsheets/d/1PmzSVnMU8XB2xUcDjxwD2VnZMGChZEwb0RiKSioXa8Q/export?format=csv&gid=1883053582";
-        public const string monsterTableDataURL = "https://docs.google.com/spreadsheets/d/1VoQEEhbJ2EDee1ZxL99--B5VUV-qBRnSVTzkIGlpBEY/export?format=csv";
+        public const string monsterTableDataURL = "https://docs.google.com/spreadsheets/d/1W5YTINFy0XWnzm549uTDJL6Up4h81jeZhlc0A_9T_j8/export?format=csv&gid=1059773203";
         public const string skillDataURL = "https://docs.google.com/spreadsheets/d/1PmzSVnMU8XB2xUcDjxwD2VnZMGChZEwb0RiKSioXa8Q/export?format=csv&gid=1671130256";
-            
+       
         public event Action OnDataSetCompleted;
         public event Action OnMonsterDataTableSetCompleted;
         public event Action<List<MonsterSkillSO>> OnSkillDataSetCompleted;
@@ -40,7 +41,7 @@ namespace JHT
         {
             yield return null;
             yield return LoadDataCSV(monsterDataURL, SetData, 4);
-            yield return LoadDataCSV(monsterTableDataURL, SetMonsterTableData, 2);
+            yield return LoadDataCSV(monsterTableDataURL, SetMonsterTableData, 4);
 
             OnMonsterDataTableSetCompleted?.Invoke();
         }
@@ -167,14 +168,45 @@ namespace JHT
             {
                 int TableID = int.Parse(row[0]);
                 int readNum = int.Parse(row[1]);
-
                 JHT_MonsterDataTable so = Array.Find(parse, w => w.ID == TableID);
                 if (so != null)
                 {
-                    so.monsterReadForCSV[readNum - 1] = int.Parse(row[1]);
-                    so.monsterData[readNum - 1] = MonsterDataManager.Instance.monsterDataDic[row[2]];
-                    so.roundCount = int.Parse(row[3]);
-                    so.totalCost = int.Parse(row[4]);
+                    List<string> numArray = new List<string>(readNum * 3);
+
+                    if (so.monsterData.Count != numArray.Count)
+                    {
+
+                        for (int i = readNum; i > 0; i--)
+                        {
+                            if (readNum >= 10)
+                            {
+                                for (int j = 4; j >= 2; j--)
+                                {
+                                    numArray.Add(j.ToString() + "000" + i.ToString());
+                                }
+                            }
+                            else
+                            {
+                                for (int j = 4; j >= 2; j--)
+                                {
+                                    numArray.Add(j.ToString() + "0000" + i.ToString());
+                                }
+                            }
+                        }
+                    }
+
+                    if (so.monsterData.Count == numArray.Count)
+                    {
+                        for (int i = 0; i < numArray.Count; i++)
+                        {
+                            JHT_MonsterDataSO a = so.monsterData.Find(w => w.ID == MonsterDataManager.Instance.monsterDataDic[numArray[i]].ID);
+                            if (numArray[i] != a.ID.ToString())
+                                so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray[i]]);
+                        }
+                    }
+
+                    so.addStat = float.Parse(row[2]);
+                    //so.roundCount = int.Parse(row[3]);
                 }
             }
         }
