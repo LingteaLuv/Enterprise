@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 4655398051407419997}
   - component: {fileID: 5117368590764302865}
   - component: {fileID: 8034374073215820797}
+  - component: {fileID: 2588112242077828030}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -138,6 +139,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  giveAllCharactersForTest: 0
   startingCharacters:
   - {fileID: 11400000, guid: 04e894a30460a614598bf120b30d2418, type: 2}
   - {fileID: 11400000, guid: 2985c4716e4c9e44180c124c0bdd694b, type: 2}
@@ -189,3 +191,16 @@ MonoBehaviour:
   _tutorialSequence: {fileID: 11400000, guid: ddb13c502b804d144b074c7dc42943c6, type: 2}
   _routineSequence: {fileID: 11400000, guid: 4e28331580c7d0d4981facf21c9af6e0, type: 2}
   _temporaryQuest: {fileID: 11400000, guid: 382ae89cc57b74a4f849a465a866cb7b, type: 2}
+--- !u!114 &2588112242077828030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624125741546029507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 511435f5f25bf454ea5c6e88252b87e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1

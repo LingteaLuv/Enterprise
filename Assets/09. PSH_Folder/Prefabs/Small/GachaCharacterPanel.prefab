@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 4578471937786720154}
   - component: {fileID: 6028276784185109501}
   - component: {fileID: 4147880235266957391}
+  - component: {fileID: 1139333724991767138}
   m_Layer: 5
   m_Name: bg
   m_TagString: Untagged
@@ -193,7 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: af1468e5c525b564b852dd17fadc55fa, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -211,6 +212,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1139333724991767138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4529100474172907707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee158225ee1e59f4791627785501d950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentShaderType: 0
+  normalStrength: 5
+  normalSmoothing: 1
+  computingNormal: 0
 --- !u!1 &6205314021627336302
 GameObject:
   m_ObjectHideFlags: 0
@@ -222,6 +239,7 @@ GameObject:
   - component: {fileID: 7514854390369247358}
   - component: {fileID: 1673568490728041283}
   - component: {fileID: 6652062422749342179}
+  - component: {fileID: 3426354636474815108}
   m_Layer: 5
   m_Name: FrontFace
   m_TagString: Untagged
@@ -271,7 +289,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 94764558c5a3f8e4aa93daa40a535e7a, type: 2}
   m_Color: {r: 0.6415094, g: 0.63243145, b: 0.63243145, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -289,6 +307,22 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3426354636474815108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6205314021627336302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee158225ee1e59f4791627785501d950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentShaderType: 0
+  normalStrength: 5
+  normalSmoothing: 1
+  computingNormal: 0
 --- !u!1 &7455510813989405012
 GameObject:
   m_ObjectHideFlags: 0
@@ -356,6 +390,12 @@ MonoBehaviour:
   bg: {fileID: 4147880235266957391}
   nameText: {fileID: 7536855718393527035}
   crewRoleIcon: {fileID: 2213083368069896545}
+  mats:
+  - {fileID: 2100000, guid: af1468e5c525b564b852dd17fadc55fa, type: 2}
+  - {fileID: 2100000, guid: 96a002f3733921942972301b0dec91cf, type: 2}
+  - {fileID: 2100000, guid: 7f67c5e865a89d04c984db459e03a2b2, type: 2}
+  shineMat: {fileID: 2100000, guid: 94764558c5a3f8e4aa93daa40a535e7a, type: 2}
+  shineDuration: 0.5
   flipDuration: 0.5
 --- !u!1 &8044515662503087061
 GameObject:

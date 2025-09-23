@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -19,6 +20,14 @@ public class GachaCharacterPanel : MonoBehaviour
     public TextMeshProUGUI nameText;
     public Image crewRoleIcon;
 
+    [Header("머테리얼")]
+    [Tooltip("등급별 테두리 효과")]
+    public Material[] mats;
+    [Tooltip("반짝이 효과")]
+    public Material shineMat;
+    [Tooltip("반짝이 효과 애니메이션 시간")]
+    public float shineDuration = 0.5f;
+
     [Header("뒤집기 애니메이션 설정")]
     [Tooltip("뒤집기 애니메이션 시간")]
     public float flipDuration = 0.5f;
@@ -38,6 +47,13 @@ public class GachaCharacterPanel : MonoBehaviour
         {
             flipButton.onClick.AddListener(Flip);
         }
+
+        // 반짝이 효과 초기화
+        if (shineMat != null)
+        {
+            shineMat = new Material(shineMat);
+            characterImage.material = shineMat;
+        }
     }
 
     /// <summary>
@@ -51,10 +67,10 @@ public class GachaCharacterPanel : MonoBehaviour
         // 등급에 따라 배경색 변경
         switch ((int)grade)
         {
-            case 1: bg.color = Color.white; break;
-            case 2: bg.color = Color.blue; break;
-            case 3: bg.color = Color.magenta; break;
-            default: bg.color = Color.white; break;
+            case 1: bg.material = mats[0]; break;
+            case 2: bg.material = mats[1]; break;
+            case 3: bg.material = mats[2]; break;
+            default: bg.material = mats[0]; break;
         }
 
         crewRoleIcon.sprite = data.crewRoleIcon;
@@ -106,6 +122,23 @@ public class GachaCharacterPanel : MonoBehaviour
         hasFlipped = true;
         isFlipping = false;
         OnCardFlipped?.Invoke(); // 카드가 뒤집혔음을 알립니다.
+
+        // 반짝이 효과 애니메이션 시작
+        if (shineMat != null)
+        {
+            AnimateShineEffect(shineDuration);
+        }
+    }
+
+    private void AnimateShineEffect(float duration)
+    {
+        if (characterImage.material == null) return;
+
+        Material mat = characterImage.material;
+        mat.DOKill();
+        mat.SetFloat("_ShineLocation", 0);
+        mat.DOFloat(1f, "_ShineLocation", duration)
+            .SetEase(Ease.InOutCubic);
     }
 
     public event System.Action OnCardFlipped; // 카드가 뒤집혔을 때 호출될 이벤트

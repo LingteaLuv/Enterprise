@@ -6,9 +6,18 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class PlayerDataManager : Singleton<PlayerDataManager>
 {
+    [Header("테스트용")]
+    [Tooltip("체크 시, 게임 시작할 때 모든 캐릭터를 지급합니다.")]
+    public bool giveAllCharactersForTest = false;
+
     [Header("시작 캐릭터 설정")]
     [Tooltip("게임 시작 시 기본으로 지급할 캐릭터 목록")]
     public List<CharacterData> startingCharacters = new List<CharacterData>();
@@ -67,7 +76,14 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         {
             if (OwnedCharacters.Count == 0)
             {
-                await GrantStartingCharacters();
+                if (giveAllCharactersForTest)
+                {
+                    await GrantAllCharactersForTest();
+                }
+                else
+                {
+                    await GrantStartingCharacters();
+                }
                 // 게임 시작 시, PDM의 데이터를 직접 수정하는 자동 편성을 호출합니다.
                 AutoFormTeam();
                 Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
@@ -87,17 +103,68 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 
         Debug.Log($"{startingCharacters.Count}명의 기본 캐릭터를 지급합니다.");
+        var tasks = new List<UniTask>();
         foreach (CharacterData characterSO in startingCharacters)
         {
             if (characterSO != null)
             {
-                await AddCharacter(characterSO);
+                tasks.Add(AddCharacter(characterSO).AsUniTask());
             }
             else
             {
                 Debug.LogWarning("Starting Characters 리스트에 null인 항목이 있습니다.");
             }
         }
+        await UniTask.WhenAll(tasks);
+        Debug.Log("기본 캐릭터 지급이 완료되었습니다.");
+    }
+
+    private async UniTask GrantAllCharactersForTest()
+    {
+        Debug.Log("<color=yellow>[테스트] 모든 캐릭터를 지급합니다...</color>");
+        var tasks = new List<UniTask>();
+
+#if UNITY_EDITOR
+        Debug.Log("[테스트] 에디터 모드: AssetDatabase를 사용하여 모든 캐릭터를 로드합니다.");
+        string[] guids = UnityEditor.AssetDatabase.FindAssets("t:CharacterData");
+        Debug.Log($"[테스트] {guids.Length}개의 CharacterData 에셋을 찾았습니다.");
+
+        foreach (string guid in guids)
+        {
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+            CharacterData characterSO = UnityEditor.AssetDatabase.LoadAssetAtPath<CharacterData>(path);
+            if (characterSO != null)
+            {
+                tasks.Add(AddCharacter(characterSO).AsUniTask());
+            }
+        }
+#else
+        Debug.Log("[테스트] 빌드 모드: 어드레서블을 사용하여 모든 캐릭터를 로드합니다.");
+        var handle = Addressables.LoadAssetsAsync<CharacterData>("Characters", null);
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            var allCharacters = handle.Result;
+            Debug.Log($"[테스트] {allCharacters.Count}명의 캐릭터를 지급합니다.");
+            foreach (var characterSO in allCharacters)
+            {
+                if (characterSO != null)
+                {
+                    tasks.Add(AddCharacter(characterSO).AsUniTask());
+                }
+            }
+            Addressables.Release(handle);
+        }
+        else
+        {
+            Debug.LogError("[테스트] 캐릭터 에셋 로딩에 실패했습니다. 'Characters' 레이블을 확인해주세요.");
+            Addressables.Release(handle);
+        }
+#endif
+
+        await UniTask.WhenAll(tasks);
+        Debug.Log("<color=yellow>[테스트] 모든 캐릭터 지급이 완료되었습니다.</color>");
     }
 
     private IEnumerator InitialCalculationCoroutine()

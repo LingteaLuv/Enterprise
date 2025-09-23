@@ -23,13 +23,13 @@ public class GachaItemPanel : MonoBehaviour
     public TextMeshProUGUI pointText;
     public Slider pointSlider;
 
+    [Header("머테리얼")]
+    [Tooltip("등급별 테두리 효과")]
+    public Material[] mats;
+
     [Header("뒤집기 애니메이션 설정")]
     [Tooltip("뒤집기 애니메이션 시간")]
     public float flipDuration = 0.5f;
-
-    [Header("등급별 색상 설정")]
-    [Tooltip("PointTier의 Low, Mid, High 순서에 맞게 색상을 지정합니다.")]
-    public Color[] tierColors = new Color[3];
 
     private bool isFlipping = false;
     private bool hasFlipped = false;
@@ -71,9 +71,9 @@ public class GachaItemPanel : MonoBehaviour
         }
 
         // 강화 포인트 등급에 따라 배경색 설정
-        if (backgroundImage != null && tierColors.Length > (int)tier)
+        if (backgroundImage != null)
         {
-            backgroundImage.color = tierColors[(int)tier];
+            backgroundImage.material = mats[(int)tier];
         }
     }
 

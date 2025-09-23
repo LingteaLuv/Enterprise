@@ -7,6 +7,7 @@ public class HealthSystem : MonoBehaviour
     public float maxHealth;
 
     public event Action<float, float> OnHealthChanged;
+    public event Action OnDeath;
 
     // 자기 자신의 스탯 제공자 (IAttacker가 스탯 제공의 역할도 겸함)
     private IAttacker statProvider;
@@ -82,7 +83,19 @@ public class HealthSystem : MonoBehaviour
             Debug.Log("✨ 치명타 발생! ✨");
         }
 
-        // 3. 최종 데미지 적용
+        // 3. [수정] 버프에 의한 추가 데미지를 계산에 포함합니다.
+        var attackerCombatChar = attacker as CombatCharacter;
+        if (attackerCombatChar != null)
+        {
+            float extraDamage = attackerCombatChar.GetOnHitDamageBonus();
+            if (extraDamage > 0)
+            {
+                finalDamage += extraDamage;
+                Debug.Log($"🔥 버프 효과! 추가 데미지 {extraDamage} 적용!");
+            }
+        }
+
+        // 4. 최종 데미지 적용
         currentHealth -= finalDamage;
       //  Debug.Log($"💥 {attacker.GetName()}이(가) {statProvider.GetName()}에게 {finalDamage:F1}의 데미지를 입혔습니다!");
 
@@ -90,7 +103,7 @@ public class HealthSystem : MonoBehaviour
         {
             currentHealth = 0;
             Debug.Log($"💀 {statProvider.GetName()}이(가) 쓰러졌습니다.");
-            // TODO: 사망 처리 로직 호출
+            OnDeath?.Invoke();
         }
 
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
