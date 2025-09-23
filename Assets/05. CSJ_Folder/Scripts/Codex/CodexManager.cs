@@ -41,8 +41,10 @@ namespace _05._CSJ_Folder.Scripts.Codex
              
         }
         
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+            
             _instMap = new Dictionary<(Faction,CodexStd_Enum),List<CodexInstance>>();
             _receiveState = new Dictionary<(Faction, CodexStd_Enum), Dictionary<int, bool>>();
             
