@@ -113,7 +113,7 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
 
         float finalValue = (baseValue + flatBonus) * (1 + percentBonus);
 
-        Debug.Log($"[CombatCharacter] {charName}의 {stat} 최종 스탯: {finalValue} (기본: {baseValue}, 고정 버프: {flatBonus}, 퍼센트 버프: {percentBonus})");
+       // Debug.Log($"[CombatCharacter] {charName}의 {stat} 최종 스탯: {finalValue} (기본: {baseValue}, 고정 버프: {flatBonus}, 퍼센트 버프: {percentBonus})");
         return finalValue;
     }
 
@@ -204,7 +204,7 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
             if (passiveSkill != null)
             {
                 skills.Add(passiveSkill);
-                Debug.Log($"'{charName}'에게 패시브 스킬 '{passiveSkill.skillName}'을(를) 등록했습니다.");
+              //  Debug.Log($"'{charName}'에게 패시브 스킬 '{passiveSkill.skillName}'을(를) 등록했습니다.");
             }
         }
 
