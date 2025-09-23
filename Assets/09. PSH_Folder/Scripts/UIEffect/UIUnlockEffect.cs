@@ -1,11 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
-using System.Collections.Generic; // Dictionary를 사용하기 위해 필요해요!
+using System.Collections.Generic;
 using TMPro;
 
-// 밖에서도 이 이넘을 사용할 수 있도록 클래스 바깥에 정의해요!
-// 여기에 해금할 기능들을 쭉 추가해서 관리할 수 있어요.
 public enum UnlockableFeature
 {
     None,
@@ -14,18 +12,16 @@ public enum UnlockableFeature
     RelicGacha,
 }
 
-// [System.Serializable]을 붙여야 인스펙터에 예쁘게 보여요!
 [System.Serializable]
 public struct FeatureUIData
 {
-    public UnlockableFeature feature; // 어떤 기능인지
-    public string featureName;        // 표시될 기능의 이름
-    public Sprite featureIcon;        // 표시될 기능의 아이콘
+    public UnlockableFeature feature;
+    public string featureName;
+    public Sprite featureIcon;
 }
 
 /// <summary>
-/// [최종판] 기능 해금 시 나타나는 UI 효과를 담당하는 스크립트입니다.
-/// 해금할 기능의 데이터를 미리 저장해두고, enum 값으로 간단히 호출하여 사용합니다.
+/// [풀링 버전] 기능 해금 UI 효과를 담당합니다.
 /// </summary>
 public class UIUnlockEffect : MonoBehaviour
 {
@@ -37,15 +33,15 @@ public class UIUnlockEffect : MonoBehaviour
     public Image featureIconImage;
 
     [Header("해금 기능 데이터 목록")]
-    [Tooltip("여기에 해금될 기능들의 이름과 아이콘을 미리 설정해주세요.")]
     public List<FeatureUIData> featureDataList;
 
-    [Header("자동 재생 설정")]
-    [Tooltip("오브젝트가 활성화될 때 자동으로 재생할 기능입니다.")]
+    [Header("에디터 테스트 설정")]
+    [Tooltip("true로 설정하면, 프리팹을 켰을 때 아래 기능으로 자동 재생되어 테스트하기 편해요.")]
+    public bool playOnEnableForTest = false;
     public UnlockableFeature featureToPlayOnEnable;
 
-    // 빠른 조회를 위해 List를 Dictionary로 변환해서 저장할 거예요!
     private Dictionary<UnlockableFeature, FeatureUIData> featureDataDict;
+    private bool isInitialized = false;
 
     [Header("애니메이션 설정")]
     public float slideDuration = 0.5f;
@@ -61,7 +57,21 @@ public class UIUnlockEffect : MonoBehaviour
 
     void Awake()
     {
-        // --- 위치 계산 --- 
+        Initialize();
+    }
+
+    void OnEnable()
+    {
+        if (playOnEnableForTest)
+        {
+            PlayUnlockEffect(featureToPlayOnEnable);
+        }
+    }
+
+    private void Initialize()
+    {
+        if (isInitialized) return;
+
         if (panelRect != null)
         {
             panelOnScreenPosition = panelRect.anchoredPosition;
@@ -69,26 +79,27 @@ public class UIUnlockEffect : MonoBehaviour
             panelOffScreenRight = new Vector2(panelOnScreenPosition.x + offscreenDelta, panelOnScreenPosition.y);
             panelOffScreenLeft = new Vector2(panelOnScreenPosition.x - offscreenDelta, panelOnScreenPosition.y);
         }
-        if (lockShackleRect != null)
-        {
-            shackleStartPosition = lockShackleRect.anchoredPosition;
-        }
+        if (lockShackleRect != null) { shackleStartPosition = lockShackleRect.anchoredPosition; }
 
-        // --- 데이터 최적화 --- 
-        InitializeDictionary();
+        featureDataDict = new Dictionary<UnlockableFeature, FeatureUIData>();
+        foreach (var data in featureDataList)
+        {
+            if (!featureDataDict.ContainsKey(data.feature))
+            {
+                featureDataDict.Add(data.feature, data);
+            }
+        }
+        isInitialized = true;
     }
 
-    /// <summary>
-    /// 기능 해금 애니메이션을 재생합니다. 해금할 기능의 enum 값만 넘겨주세요!
-    /// </summary>
     public void PlayUnlockEffect(UnlockableFeature featureToUnlock)
     {
-        // 딕셔너리가 준비되었는지 다시 한번 확인해요! (에디터에서 테스트 시 안전장치)
-        if (featureDataDict == null || featureDataDict.Count == 0) { InitializeDictionary(); }
+        if (!isInitialized) Initialize();
 
         if (!featureDataDict.TryGetValue(featureToUnlock, out FeatureUIData data))
         {
-            Debug.LogError($"앗! '{featureToUnlock}'에 대한 기능 데이터가 리스트에 없어요! 인스펙터에서 추가했는지 확인해주세요!");
+            Debug.LogError($"앗! '{featureToUnlock}'에 대한 기능 데이터가 없어요!");
+            EffectPoolManager.Instance.ReturnToPool(gameObject);
             return;
         }
 
@@ -100,10 +111,11 @@ public class UIUnlockEffect : MonoBehaviour
 
     private void PlayAnimation(string featureName)
     {
-        // 이전 재생되던 트윈이 있다면 확실하게 종료시켜요.
         DOTween.Kill(transform, true);
 
         Sequence unlockSequence = DOTween.Sequence().SetTarget(transform);
+
+        // 1. 시작 상태 설정
         unlockSequence.AppendCallback(() =>
         {
             panelRect.anchoredPosition = panelOffScreenRight;
@@ -111,36 +123,36 @@ public class UIUnlockEffect : MonoBehaviour
             lockShackleRect.anchoredPosition = shackleStartPosition;
             Debug.Log($"'{featureName}' 기능 해금! 애니메이션을 시작합니다! ★_★");
         });
+
+        // 2. 자물쇠 페이드 인
         unlockSequence.Append(lockCanvasGroup.DOFade(1f, fadeDuration));
         unlockSequence.AppendInterval(0.1f);
+
+        // 3. 패널 슬라이드 인 & 자물쇠 잠금 해제
         unlockSequence.Append(panelRect.DOAnchorPos(panelOnScreenPosition, slideDuration).SetEase(Ease.OutQuad));
         unlockSequence.Join(lockShackleRect.DOAnchorPosY(shackleStartPosition.y + shackleMoveDistance, shackleUnlockDuration).SetEase(Ease.OutBack));
+
+        // 4. 잠시 대기
         unlockSequence.AppendInterval(stayDuration);
+
+        // 5. 패널 슬라이드 아웃 & 자물쇠 페이드 아웃
         unlockSequence.Append(panelRect.DOAnchorPos(panelOffScreenLeft, slideDuration).SetEase(Ease.InQuad));
         unlockSequence.Join(lockCanvasGroup.DOFade(0f, fadeDuration));
+
+        // 6. 종료 처리
         unlockSequence.OnComplete(() =>
         {
-            Debug.Log("애니메이션 끝! 오브젝트를 비활성화할게요!");
-            gameObject.SetActive(false);
+            Debug.Log("애니메이션 끝! 오브젝트를 풀에 반납합니다.");
+            EffectPoolManager.Instance.ReturnToPool(gameObject);
         });
-        unlockSequence.Play();
-    }
 
-    private void InitializeDictionary()
-    {
-        featureDataDict = new Dictionary<UnlockableFeature, FeatureUIData>();
-        foreach (var data in featureDataList)
-        {
-            if (!featureDataDict.ContainsKey(data.feature))
-            {
-                featureDataDict.Add(data.feature, data);
-            }
-        }
+        unlockSequence.Play();
     }
 
     [ContextMenu("테스트: 설정된 기능으로 애니메이션 재생")]
     private void PlayTestEffectFromInspector()
     {
+        if (!isInitialized) Initialize();
         PlayUnlockEffect(featureToPlayOnEnable);
     }
 }
