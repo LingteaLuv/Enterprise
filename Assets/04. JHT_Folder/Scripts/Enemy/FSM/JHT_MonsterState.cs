@@ -26,6 +26,9 @@ namespace JHT
             if (fsm.currentState == JHT_BaseMonsterFSM.MonsterState.DEATH)
                 return;
 
+            if(fsm.isStun)
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.STUN]);
+
             if (fsm.monsterStat != null  && fsm.CurHP <= 0)
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.DEATH]);
 
@@ -152,6 +155,32 @@ namespace JHT
                 return;
             }
 
+        }
+
+        public override void Exit()
+        {
+            base.Exit();
+        }
+    }
+
+    public class Monster_Stun : JHT_MonsterState
+    {
+        public Monster_Stun(JHT_BaseMonsterFSM _fsm) : base(_fsm)
+        {
+        }
+
+        public override void Enter()
+        {
+            base.Enter();
+            fsm.HandleStun();
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            //idle로 갔다가 이상이 생길경우 ATTACK으로 변경
+            if(!fsm.isStun)
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.IDLE]);
         }
 
         public override void Exit()

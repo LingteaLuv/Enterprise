@@ -3,75 +3,78 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 /// <summary>
-/// 타일맵 기반으로 A* 경로 탐색용 Node[,] 배열을 생성 및 관리
+/// 아이소매트릭 타일맵 기반 A* 경로 탐색용 Node 그리드 매니저
 /// </summary>
 public class GridManager : MonoBehaviour
 {
     public static GridManager Instance;
 
-    public Vector2 cellSize = new Vector2(1f, 0.5f);
+    private Tilemap tilemap;           // ← 외부 주입
+    private Tilemap obstacleTilemap;   // ← 외부 주입
+
+    [Header("그리드 크기 설정 (자동 생성됨)")]
     public int gridSizeX = 14;
     public int gridSizeY = 14;
-    private Vector3 originPosition;
-
-    [Header("타일맵 참조")]
-    [SerializeField] private Tilemap tilemap; // 타일맵을 인스펙터에서 Drag & Drop
 
     private Node[,] grid;
+    private Vector3Int gridOffset;
 
     private void Awake()
     {
         Instance = this;
     }
 
-    private void Start()
+    /// <summary>
+    /// 외부에서 타일맵 참조 설정
+    /// </summary>
+    public void SetTilemaps(Tilemap baseTilemap, Tilemap obstacleTilemap)
     {
-        originPosition = new Vector3(-gridSizeX * 0.5f * cellSize.x,
-                                 -gridSizeY * 0.5f * cellSize.y,
-                                 0f);
-        CreateGrid();
+        this.tilemap = baseTilemap;
+        this.obstacleTilemap = obstacleTilemap;
     }
 
-    public Vector2Int WorldToGridPos(Vector3 worldPosition)
-    {
-        int x = Mathf.RoundToInt((worldPosition.x - originPosition.x) / cellSize.x);
-        int y = Mathf.RoundToInt((worldPosition.y - originPosition.y) / cellSize.y);
-        return new Vector2Int(x, y);
-    }
-
+    /// <summary>
+    /// 현재 설정된 타일맵 기준으로 그리드 생성
+    /// </summary>
     public void CreateGrid()
     {
-        Debug.LogError("그리드 생성 호출됨");
+        if (tilemap == null)
+        {
+            Debug.LogError("[GridManager] tilemap이 설정되지 않았습니다.");
+            return;
+        }
+
+        Debug.Log("[GridManager] 그리드 생성 시작");
+
+        gridOffset = tilemap.cellBounds.min;
+        gridSizeX = tilemap.cellBounds.size.x;
+        gridSizeY = tilemap.cellBounds.size.y;
+
         grid = new Node[gridSizeX, gridSizeY];
 
         for (int x = 0; x < gridSizeX; x++)
         {
             for (int y = 0; y < gridSizeY; y++)
             {
-                Vector3 worldPoint = new Vector3(x * cellSize.x, y * cellSize.y, 0f) + originPosition;
+                Vector3Int cellPos = new Vector3Int(x + gridOffset.x, y + gridOffset.y, 0);
+                Vector3 worldPos = tilemap.GetCellCenterWorld(cellPos);
 
-                // 타일맵 기준 셀 좌표 얻기
-                Vector3Int cellPos = tilemap.WorldToCell(worldPoint);
-
-                // 타일이 존재하는지 여부 체크
                 bool walkable = tilemap.HasTile(cellPos);
+                if (obstacleTilemap != null && obstacleTilemap.HasTile(cellPos))
+                    walkable = false;
 
-                grid[x, y] = new Node(walkable, worldPoint, x, y);
+                grid[x, y] = new Node(walkable, worldPos, x, y);
             }
         }
 
-        //tilemap.gameObject.SetActive(false);
+        Debug.Log("[GridManager] 그리드 생성 완료");
     }
 
     public Node GetNodeFromWorldPos(Vector3 worldPosition)
     {
-        // z값 제거
-        worldPosition.z = 0f;
-
-        int x = Mathf.RoundToInt((worldPosition.x - originPosition.x) / cellSize.x);
-        int y = Mathf.RoundToInt((worldPosition.y - originPosition.y) / cellSize.y);
-
-        //Debug.Log($"월드 좌표: {worldPosition}, 계산된 그리드 좌표: ({x},{y})");
+        Vector3Int cellPos = tilemap.WorldToCell(worldPosition);
+        int x = cellPos.x - gridOffset.x;
+        int y = cellPos.y - gridOffset.y;
 
         if (x >= 0 && x < gridSizeX && y >= 0 && y < gridSizeY)
             return grid[x, y];
@@ -83,37 +86,52 @@ public class GridManager : MonoBehaviour
     {
         List<Node> neighbours = new();
 
-        for (int x = -1; x <= 1; x++)
+        for (int dx = -1; dx <= 1; dx++)
         {
-            for (int y = -1; y <= 1; y++)
+            for (int dy = -1; dy <= 1; dy++)
             {
-                if (x == 0 && y == 0) continue;
-                if (Mathf.Abs(x) + Mathf.Abs(y) > 1) continue; // 대각선 제외
+                if (dx == 0 && dy == 0) continue;
+                if (Mathf.Abs(dx) + Mathf.Abs(dy) > 1) continue;
 
-                int checkX = node.gridX + x;
-                int checkY = node.gridY + y;
+                int checkX = node.gridX + dx;
+                int checkY = node.gridY + dy;
 
                 if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY)
-                {
                     neighbours.Add(grid[checkX, checkY]);
-                }
             }
         }
 
         return neighbours;
     }
 
-   // 디버그용 경로 기즈모
-    /*private void OnDrawGizmos()
+    public Vector2Int WorldToGridPos(Vector3 worldPosition)
     {
-        if (grid != null)
+        Vector3Int cellPos = tilemap.WorldToCell(worldPosition);
+        return new Vector2Int(cellPos.x - gridOffset.x, cellPos.y - gridOffset.y);
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (grid == null) return;
+
+        foreach (Node n in grid)
         {
-            foreach (Node n in grid)
-            {
-                Gizmos.color = n.walkable ? Color.white : Color.red;
-                Vector3 gizmoSize = new Vector3(cellSize.x - 0.05f, cellSize.y - 0.05f, 0.1f);
-                Gizmos.DrawCube(n.worldPosition, gizmoSize);
-            }
+            if (n == null) continue;
+            Gizmos.color = n.walkable ? Color.white : Color.red;
+
+            float w = tilemap.cellSize.x * 0.5f;
+            float h = tilemap.cellSize.y * 0.5f;
+
+            Vector3[] verts = new Vector3[4];
+            verts[0] = n.worldPosition + new Vector3(0, h, 0);
+            verts[1] = n.worldPosition + new Vector3(w, 0, 0);
+            verts[2] = n.worldPosition + new Vector3(0, -h, 0);
+            verts[3] = n.worldPosition + new Vector3(-w, 0, 0);
+
+            Gizmos.DrawLine(verts[0], verts[1]);
+            Gizmos.DrawLine(verts[1], verts[2]);
+            Gizmos.DrawLine(verts[2], verts[3]);
+            Gizmos.DrawLine(verts[3], verts[0]);
         }
-    }*/
+    }
 }

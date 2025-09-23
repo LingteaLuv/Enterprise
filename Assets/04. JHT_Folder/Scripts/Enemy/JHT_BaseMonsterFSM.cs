@@ -9,18 +9,10 @@ using UnityEngine;
 
 namespace JHT
 {
-    // 상태 통일
-    public enum MonsterSkillCool
-    {
-        Normal,
-        Skill1,
-        Skill2
-    }
-
 
     public abstract class JHT_BaseMonsterFSM : JHT_PooledObject, IAttacker
     {
-        public enum MonsterState { IDLE, MOVE, ATTACK, DEATH, SKILL1, SKILL2 }
+        public enum MonsterState { IDLE, MOVE, ATTACK, DEATH, SKILL1, SKILL2, STUN }
 
         [Header("State")]
         public MonsterState currentState;
@@ -45,6 +37,7 @@ namespace JHT
         public bool skill1Active;
         public bool skill2Active;
         public bool isAttacking;
+        public bool isStun;
 
         private CancellationTokenSource[] token;
 
@@ -59,9 +52,10 @@ namespace JHT
 
         public readonly int IDLE = Animator.StringToHash("IDLE");
         public readonly int MOVE = Animator.StringToHash("MOVE");
-        public readonly int ATTACK = Animator.StringToHash("ATTACK");
-        public readonly int SKILL1 = Animator.StringToHash("SKILL1");
-        public readonly int SKILL2 = Animator.StringToHash("SKILL2");
+        public readonly int ATTACK = Animator.StringToHash("Monster_ATTACK");
+        public readonly int SKILL1 = Animator.StringToHash("Monster_SKILL1");
+        public readonly int SKILL2 = Animator.StringToHash("Monster_SKILL2");
+        public readonly int STUN = Animator.StringToHash("STUN");
         public readonly int DEATH = Animator.StringToHash("DEATH");
         #endregion
 
@@ -154,6 +148,7 @@ namespace JHT
             stateMachine.stateDic.Add(MonsterState.MOVE, new Monster_Move(this));
             stateMachine.stateDic.Add(MonsterState.ATTACK, new Monster_Attack(this));
             stateMachine.stateDic.Add(MonsterState.DEATH, new Monster_Die(this));
+            stateMachine.stateDic.Add(MonsterState.STUN, new Monster_Stun(this));
 
             currentState = MonsterState.IDLE;
             stateMachine.curState = stateMachine.stateDic[MonsterState.IDLE];
@@ -185,7 +180,7 @@ namespace JHT
         }
         private void ResetTokens()
         {
-            token = new CancellationTokenSource[3];
+            token = new CancellationTokenSource[4];
 
             // 기존 토큰 정리
             for (int i = 0; i < token.Length; i++)
@@ -300,15 +295,36 @@ namespace JHT
 
         }
 
+        public virtual void HandleStun()
+        {
+            ChangeAnim(STUN, MonsterState.STUN);
+        }
+
         public virtual void HandleDie()
         {
             Die();
         }
 
+        //스턴 기능 호출만 하면 됩니다.
+        public void ApplyStun(float duration)
+        {
+            isStun = true;
+            _ = StunSetting(duration);
+            ResetTokens();
+        }
+
+        private async UniTaskVoid StunSetting(float duration)
+        {
+            if (token[4] == null || token[4].Token.IsCancellationRequested)
+                return;
+
+            await UniTask.Delay(TimeSpan.FromSeconds(duration),cancellationToken: token[4].Token);
+            isStun = false;
+        }
 
         private async UniTaskVoid Attack(float coolTime)
         {
-            skill2Active = false;
+            skill1Active = false;
             skill2Active = false;
 
             while (true)
@@ -323,7 +339,7 @@ namespace JHT
 
                 isAttacking = true;
                 animator.Play(ATTACK, 0, 0f);
-                Debug.LogError("NormalAttack");
+                
                 await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.normalSkill.clip.length), cancellationToken: token[0].Token);
 
                 isAttacking = false;
@@ -334,16 +350,19 @@ namespace JHT
 
         private async UniTaskVoid Skill1CoolTime(float collTime)
         {
-            if (animator == null || monsterStat.skill1 == null || token[1] == null)
+            if (animator != null && monsterStat.skill1 != null && token[1] != null)
             {
-                await UniTask.WaitUntil(() => !skill1Active, cancellationToken: token[1].Token);
-                await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[1].Token);
-                await UniTask.WaitUntil(() => !isAttacking || !skill2Active, cancellationToken: token[1].Token);
-                skill1Active = true;
-                animator.Play("SKILL1",0, 0f);
-                Debug.LogError("Skill1Attack");
-                await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill1.clip.length), cancellationToken: token[1].Token);
-                skill2Active = false;
+                while (true)
+                {
+                    await UniTask.WaitUntil(() => !skill1Active, cancellationToken: token[1].Token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[1].Token);
+                    await UniTask.WaitUntil(() => !isAttacking || !skill2Active, cancellationToken: token[1].Token);
+                    skill1Active = true;
+                    animator.Play(SKILL1, 0, 0f);
+                    
+                    await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill1.clip.length), cancellationToken: token[1].Token);
+                    skill1Active = false;
+                }
             }
             else
             {
@@ -354,7 +373,7 @@ namespace JHT
         // Stopcoroutine을 사용해야할때 token사용해야됨
         private async UniTaskVoid Skill2CoolTime(float collTime)
         {
-            if (monsterStat.skill2 != null || monsterStat.skill2 == null || token[2] == null)
+            if (monsterStat.skill2 != null && monsterStat.skill2 != null && token[2] != null)
             {
                 while (true)
                 {
@@ -362,8 +381,8 @@ namespace JHT
                     await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[2].Token);
                     await UniTask.WaitUntil(() => !isAttacking || !skill1Active, cancellationToken: token[2].Token);
                     skill2Active = true;
-                    animator.Play("SKILL2", 0, 0f);
-                    Debug.LogError("SKILL2Attack");
+                    animator.Play(SKILL2, 0, 0f);
+                    
                     await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill2.clip.length), cancellationToken: token[2].Token);
                     skill2Active = false;
                 }

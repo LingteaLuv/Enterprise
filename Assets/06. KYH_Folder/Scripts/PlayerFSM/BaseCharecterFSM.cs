@@ -88,6 +88,6 @@ public abstract class BaseCharacterFSM : MonoBehaviour
     public void ChangeStateIdleForce()
     {
         currentState = State.Idle;
-        Debug.Log($"[FSM] {stats.charName} 상태 강제 리셋: Idle");
+      //  Debug.Log($"[FSM] {stats.charName} 상태 강제 리셋: Idle");
     }
 }
