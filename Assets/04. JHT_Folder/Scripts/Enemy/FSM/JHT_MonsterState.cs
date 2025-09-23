@@ -23,14 +23,15 @@ namespace JHT
 
         public override void Update()
         {
+            if (fsm.monsterStat != null && fsm.CurHP <= 0)
+                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.DEATH]);
+
             if (fsm.currentState == JHT_BaseMonsterFSM.MonsterState.DEATH)
                 return;
 
             if(fsm.isStun)
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.STUN]);
 
-            if (fsm.monsterStat != null  && fsm.CurHP <= 0)
-                fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.DEATH]);
 
         }
 
@@ -96,18 +97,19 @@ namespace JHT
 
             if (fsm.target == null)
             {
+                fsm.monsterSearch.StopRoutine();
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.IDLE]);
                 return;
             }
 
-            fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position,
-            Time.deltaTime * fsm.monsterStat.moveSpeed);
+            fsm.monsterSearch.SearchTarget();
             fsm.Rotate();
             
             float dist = Mathf.Abs(Vector2.Distance(fsm.target.transform.position, fsm.gameObject.transform.position));
 
             if (dist <= fsm.monsterStat.attackRange)
             {
+                fsm.monsterSearch.StopRoutine();
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.ATTACK]);
             }
 

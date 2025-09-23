@@ -13,23 +13,28 @@ MonoBehaviour:
   m_Name: 300018
   m_EditorClassIdentifier: 
   ID: 300018
-  monsterName: "\uC0AC\uB9D0 \uB9AC\uC544"
-  monsterAttackType: 0
-  monsterCrewRole: 3
-  enemyIcon: {fileID: 0}
-  maxHp: 9999
-  attackPower: 10
-  criticalAttackPower: 1
-  criticalPower: 1
-  defense: 1
+  monsterName: "\uBCA4\uD134"
   attackRange: 1
-  attackSpeed: 1
   attackDelay: 1
   chaseRange: 3
   moveSpeed: 1
-  cost: 1
+  monsterAttackType: 1
+  monsterCrewRole: 1
+  monsterStat:
+  - stat: 0
+    amount: 346
+  - stat: 1
+    amount: 2475
+  - stat: 2
+    amount: 20
+  - stat: 3
+    amount: 30
+  - stat: 4
+    amount: 200
+  - stat: 5
+    amount: 150
   projectileSprite: {fileID: 0}
   baseController: {fileID: 9100000, guid: ab210a1eb7a2ec94d85516f4355391ec, type: 2}
-  normalSkill: Monster_0_attack_normal
-  skill1: Monster_1_skill_normal
+  normalSkill: Monster_0_attack_bow
+  skill1: Monster_1_skill_bow
   skill2: 

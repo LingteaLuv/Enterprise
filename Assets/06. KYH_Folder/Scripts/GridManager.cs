@@ -16,7 +16,7 @@ public class GridManager : MonoBehaviour
     public int gridSizeX = 14;
     public int gridSizeY = 14;
 
-    private Node[,] grid;
+    public Node[,] grid;
     private Vector3Int gridOffset;
 
     private void Awake()
@@ -134,4 +134,5 @@ public class GridManager : MonoBehaviour
             Gizmos.DrawLine(verts[3], verts[0]);
         }
     }
+
 }

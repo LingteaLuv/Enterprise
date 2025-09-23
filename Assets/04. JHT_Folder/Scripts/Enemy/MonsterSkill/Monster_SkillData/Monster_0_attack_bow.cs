@@ -26,7 +26,7 @@ public class Monster_0_attack_bow : MonsterSkillSet
         //    obj.Init(targetPos, startPos, monsterStat.totalAttackPower, monsterStat.totalAttackPower,monsterStat.projectileSprite);
 
         float projectileSpeed = 1f;
-        obj.Init(fsm, targetPos, startPos, projectileSpeed, fsm.monsterStat.totalAttackPower, fsm.monsterStat.projectileSprite);
+        obj.Init(fsm, targetPos, startPos, projectileSpeed, fsm.monsterStat.monsterStats[Stat.Attack], fsm.monsterStat.projectileSprite);
         Debug.LogError("BowAttack Skill Set");
     }
 }

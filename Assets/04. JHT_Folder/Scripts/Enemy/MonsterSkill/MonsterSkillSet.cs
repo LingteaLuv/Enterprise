@@ -16,7 +16,7 @@ public class MonsterSkillSet
     {
         this.stat = stat;
         skillSO = _skillSO;
-        totalPower = stat.totalAttackPower;
+        totalPower = stat.monsterStats[Stat.Attack];
         skillType = skillSO.skillType;
         target = skillSO.targetLogic;
     }

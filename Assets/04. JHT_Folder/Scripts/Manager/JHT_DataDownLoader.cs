@@ -146,10 +146,13 @@ namespace JHT
                     so.monsterCrewRole = (CrewRole)Enum.Parse(typeof(CrewRole), row[2]);
                     so.monsterAttackType = (AtkRangeType)Enum.Parse(typeof(AtkRangeType), row[4]);
                     so.normalSkill = row[6];
-                    so.attackPower = float.Parse(row[7]);
-                    so.maxHp = float.Parse(row[8]);
+
+                    for (int i = 0; i < so.monsterStat.Count; i++)
+                    {
+                        so.monsterStat[i].stat = (Stat)i;
+                        so.monsterStat[i].amount = float.Parse(row[7+i]);
+                    }
                     so.skill1 = row[13];
-                    so.cost = int.Parse(row[15]);
                     so.chaseRange = float.Parse(row[16]);
                     so.moveSpeed = float.Parse(row[17]);
                 }
