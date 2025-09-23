@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace JHT
@@ -8,10 +9,8 @@ namespace JHT
     {
         public JHT_MonsterDataSO curSO;
 
-        public float maxHp;
-        public float totalAttackPower;
-        public float defense;
-        public float attackSpeed;
+        public Dictionary<Stat, float> monsterStats = new Dictionary<Stat, float>();
+
         public float attackRange;
         public float chaseRange;
         public float moveSpeed;
@@ -35,14 +34,15 @@ namespace JHT
         {
             // start Setting
             curSO = so;
-            maxHp = curSO.maxHp * addStat;
 
-            // Stat Setting
-            totalAttackPower = AttackCalculate(curSO) * addStat;// * GlobalStageManager.Instance.currentStageIndex;
-            defense = curSO.defense * addStat;// * GlobalStageManager.Instance.currentStageIndex;
+            foreach(var m in curSO.monsterStat)
+            {
+                monsterStats[m.stat] = m.amount * addStat * AttackCalculate(curSO);
+            }
+
             chaseRange = curSO.chaseRange * addStat;
+
             moveSpeed = curSO.moveSpeed * addStat;
-            attackSpeed = curSO.attackSpeed * addStat;
 
             //sprite
             projectileSprite = curSO.projectileSprite;
@@ -51,9 +51,9 @@ namespace JHT
             monsterAttackRangeType = curSO.monsterAttackType;
             attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack? 1f : 2f;
             attackRange *= addStat;
+
             monsterCrewRole = curSO.monsterCrewRole;
 
-            cost = curSO.cost;
             this.aoc = new AnimatorOverrideController(curSO.baseController);
 
             //Skill
@@ -70,54 +70,54 @@ namespace JHT
                 aoc["Monster_ATTACK"] = normalSkill.clip;
 
             if (skill1 != null)
-                aoc["Monster_SKILL1"] = skill1.clip;
+                aoc["Monster_1_Skill_Normal"] = skill1.clip;
 
             if(skill2 != null)
-                aoc["Monster_SKILL2"] = skill2.clip;
+                aoc["Monster_2_Skill_Normal"] = skill2.clip;
         }
 
         private float AttackCalculate(JHT_MonsterDataSO curSO)
         {
-            float total = 0;
+            float upPercent = 0;
 
             switch (monsterCrewRole)
             {
                 case CrewRole.Captain:
-                    total = curSO.attackPower;
+                    upPercent = 2;
                     break;
                 case CrewRole.Sailor:
-                    total = curSO.attackPower;
+                    upPercent = 1.5f;
                     break;
                 case CrewRole.Deckhand:
-                    total = curSO.attackPower;
+                    upPercent = 1;
                     break;
                 case CrewRole.Cook:
-                    total = curSO.attackPower;
+                    upPercent = 0.8f;
                     break;
             }
-            return total;
+            return upPercent;
         }
 
-        public float GetCurrentStat(Stat stat)
-        {
-            switch (stat)
-            {
-                case Stat.Attack:
-                    return this.totalAttackPower;
-                case Stat.Defense:
-                    return this.defense;
-                case Stat.CritChance:
-                    return 0; // 몬스터는 크리티컬이 없다고 가정
-                case Stat.CritDamage:
-                    return 1; // 몬스터는 크리티컬이 없다고 가정
-                case Stat.Health:
-                    return this.maxHp;
-                case Stat.AttackSpeed:
-                    return this.attackSpeed;
-                default:
-                    return 0;
-            }
+        //public float GetCurrentStat(Stat stat)
+        //{
+        //    switch (stat)
+        //    {
+        //        case Stat.Attack:
+        //            return characterStats[stat];
+        //        case Stat.Defense:
+        //            return this.defense;
+        //        case Stat.CritChance:
+        //            return 0; // 몬스터는 크리티컬이 없다고 가정
+        //        case Stat.CritDamage:
+        //            return 1; // 몬스터는 크리티컬이 없다고 가정
+        //        case Stat.Health:
+        //            return this.maxHp;
+        //        case Stat.AttackSpeed:
+        //            return this.attackSpeed;
+        //        default:
+        //            return 0;
+        //    }
 
-        }
+        //}
     }
 }

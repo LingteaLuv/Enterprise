@@ -22,5 +22,9 @@ public class Node
         this.worldPosition = new Vector3(worldPosition.x, worldPosition.y, 0f);
         this.gridX = gridX;
         this.gridY = gridY;
+        nodeVec = new Vector3Int(gridX, gridY);
     }
+
+    public Vector3Int nodeVec;
+    public Vector3Int targetPos;
 }

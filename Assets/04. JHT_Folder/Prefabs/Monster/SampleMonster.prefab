@@ -349,6 +349,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6753825981913469969}
   - component: {fileID: 1572445644008787276}
+  - component: {fileID: 881745005535393848}
   m_Layer: 7
   m_Name: SampleMonster
   m_TagString: Enemy
@@ -385,13 +386,48 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
+  monsterSearch: {fileID: 881745005535393848}
   targetLayer:
     serializedVersion: 2
     m_Bits: 64
   target: {fileID: 0}
   monsterSO: {fileID: 0}
+  monsterStat:
+    curSO: {fileID: 0}
+    maxHp: 0
+    totalAttackPower: 0
+    defense: 0
+    attackSpeed: 0
+    attackRange: 0
+    chaseRange: 0
+    moveSpeed: 0
+    cost: 0
+    projectileSprite: {fileID: 0}
+    monsterAttackRangeType: 0
+    monsterRarity: 0
+    monsterCrewRole: 0
+    aoc: {fileID: 0}
+    normalSkill: {fileID: 0}
+    skill1: {fileID: 0}
+    skill2: {fileID: 0}
   monsterPrefab: {fileID: 0}
   monsterUI: {fileID: 5445776065480494246}
-  curHP: 0
   damageTextPos: {fileID: 6803831390064297184}
-  canAttack: 0
+  skill1Active: 0
+  skill2Active: 0
+  isAttacking: 0
+  isStun: 0
+  animator: {fileID: 0}
+--- !u!114 &881745005535393848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4975594216215629071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5b898266ed04244fada805076a24d79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}

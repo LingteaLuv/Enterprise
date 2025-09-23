@@ -17,6 +17,7 @@ namespace JHT
         [Header("State")]
         public MonsterState currentState;
         public JHT_StateMachine stateMachine;
+        public MonstserSearch monsterSearch;
 
         [Header("Target")]
         public LayerMask targetLayer;
@@ -62,6 +63,7 @@ namespace JHT
 
         public virtual void Init(JHT_BaseMonsterStat stat)
         {
+            monsterSearch = GetComponent<MonstserSearch>();
             StartCoroutine(StartSetting(stat));
         }
 
@@ -84,7 +86,7 @@ namespace JHT
             OnChangeHp += ShowMonsterUI;
 
             
-            curHP = monsterStat.maxHp;
+            curHP = monsterStat.monsterStats[Stat.Health];
 
             // 이전의 코루틴 정리
             if (takeDamageCor != null)
@@ -180,7 +182,7 @@ namespace JHT
         }
         private void ResetTokens()
         {
-            token = new CancellationTokenSource[4];
+            token = new CancellationTokenSource[5];
 
             // 기존 토큰 정리
             for (int i = 0; i < token.Length; i++)
@@ -257,6 +259,7 @@ namespace JHT
                     if (d < monsterStat.chaseRange)
                     {
                         target = c.gameObject;
+                        monsterSearch.target = target.transform;
                         break;
                     }
                 }
@@ -393,26 +396,29 @@ namespace JHT
             }
         }
 
+        public void TakeDebuff(Stat stat, float duartion, float amount)
+        {
+            this.monsterStat.monsterStats[stat] -= this.monsterStat.monsterStats[stat] * (amount * 100);
+            _ = Debuff(duartion);
+        }
+
+        public async UniTask Debuff(float duartion)
+        {
+            // 이펙트 여기에 추가
+            await UniTask.Delay(TimeSpan.FromSeconds(duartion), cancellationToken: token[5].Token);
+            //이펙트 해제
+        }
 
         public void Rotate()
         {
-            if (target == null || monsterUI == null)
-                return;
+            if (target == null || monsterUI == null) return;
 
+            bool targetOnRight = target.transform.position.x > transform.position.x;
 
-            float direction = target.transform.position.x - transform.position.x;
-            RectTransform ui = monsterUI.GetComponent<RectTransform>();
+            transform.localRotation = Quaternion.Euler(0f, targetOnRight ? 180f : 0f, 0f);
 
-            if (direction < 0)
-            {
-                //gameObject.transform.localEulerAngles = new Vector3(transform.position.x, transform.position.y, transform.position.z);
-                ui.transform.localScale = new Vector3(1, 1, 1);
-            }
-            else
-            {
-                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
-                ui.transform.localScale = new Vector3(-1, 1, 1);
-            }
+            var ui = monsterUI.GetComponent<RectTransform>();
+            ui.localScale = new Vector3(targetOnRight ? -1f : 1f, 1f, 1f);
         }
 
         private void ApplyDamageEffects(float damage)
@@ -470,6 +476,7 @@ namespace JHT
         public void Outit()
         {
             monsterSO = null;
+            monsterSearch.StopRoutine();
 
             if (token != null)
             {
@@ -498,7 +505,7 @@ namespace JHT
                 return;
             curHP = value;
 
-            float percent = curHP / (float)monsterStat.maxHp;
+            float percent = curHP / (float)monsterStat.monsterStats[Stat.Health];
             monsterUI.GetComponentInChildren<JHT_UIMonster>().ChangeHP(percent);
         }
 
@@ -527,7 +534,7 @@ namespace JHT
         public float GetCurrentStat(Stat stat)
         {
             // BaseMonsterStat에 만든 함수를 호출해서 스탯을 가져와요.
-            return monsterStat.GetCurrentStat(stat);
+            return monsterStat.monsterStats[stat];
         }
 
         // --- IDamageable 인터페이스 구현 ---

@@ -193,12 +193,14 @@ namespace JHT
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
                 obj.Init(curMonsterCountList[i]);
                 obj.transform.position = posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
-                if (curRoundIndex / 2 != 0)
-                {
-                    obj.transform.localEulerAngles =
-                        new Vector3(obj.transform.localEulerAngles.x, 180, obj.transform.localEulerAngles.x);
-                }
+                //if (curRoundIndex / 2 != 0)
+                //{
+                //    obj.transform.localEulerAngles =
+                //        new Vector3(obj.transform.localEulerAngles.x, 180, obj.transform.localEulerAngles.x);
+                //}
             }
+
+            //MonsterPathFinder.Instance.DataSetting();
         }
 
 
@@ -333,108 +335,108 @@ namespace JHT
         #region cost로 몬스터 생성
         // 비동기식으로 다음 라운드의 적 미리 생성해두면 빠를듯
         // 현재 라운드의 totalCost를 통해 랜덤으로 몬스터 가져오기
-        public List<JHT_BaseMonsterStat> SetSpawnRound(int curRoundIndex)
-        {
-            int count = 0;
-            // 메모리 낭비아닌가?
-            List<JHT_BaseMonsterStat> dataList = new();
-            Dictionary<CrewRole, int> crewRoleCounter = new();
+        //public List<JHT_BaseMonsterStat> SetSpawnRound(int curRoundIndex)
+        //{
+        //    int count = 0;
+        //    // 메모리 낭비아닌가?
+        //    List<JHT_BaseMonsterStat> dataList = new();
+        //    Dictionary<CrewRole, int> crewRoleCounter = new();
 
-            float roundStart = Time.realtimeSinceStartup;
+        //    float roundStart = Time.realtimeSinceStartup;
 
-            // 다음 스테이지나 씬으로 연결
-            if (curRoundIndex > roundTable.roundCount)
-            {
-                return null;
-            }
+        //    // 다음 스테이지나 씬으로 연결
+        //    if (curRoundIndex > roundTable.roundCount)
+        //    {
+        //        return null;
+        //    }
 
-            while (count != 6)
-            {
-                int rand = UnityEngine.Random.Range(0, roundTable.monsterData.Count);
-                count += roundTable.monsterData[rand].cost;
+        //    while (count != 6)
+        //    {
+        //        int rand = UnityEngine.Random.Range(0, roundTable.monsterData.Count);
+        //        count += roundTable.monsterData[rand].cost;
 
-                //시간 경과가 마쳤음에도 랜덤값을 못뻈을경우
-                if (Time.realtimeSinceStartup - roundStart > 1f)
-                {
-                    for (int i = 0; i < roundTable.monsterData.Count; i++)
-                    {
-                        if (crewRoleCounter.TryGetValue(roundTable.monsterData[i].monsterCrewRole, out int value))
-                        {
-                            if (value < 2 && roundTable.monsterData[i].cost == 6 - count)
-                            {
-                                MonsterSkillSO normal = roundTable.monsterData[i].normalSkill == "" ?
-                                    null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].normalSkill];
+        //        //시간 경과가 마쳤음에도 랜덤값을 못뻈을경우
+        //        if (Time.realtimeSinceStartup - roundStart > 1f)
+        //        {
+        //            for (int i = 0; i < roundTable.monsterData.Count; i++)
+        //            {
+        //                if (crewRoleCounter.TryGetValue(roundTable.monsterData[i].monsterCrewRole, out int value))
+        //                {
+        //                    if (value < 2 && roundTable.monsterData[i].cost == 6 - count)
+        //                    {
+        //                        MonsterSkillSO normal = roundTable.monsterData[i].normalSkill == "" ?
+        //                            null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].normalSkill];
 
-                                MonsterSkillSO skill1 = roundTable.monsterData[i].skill1 == "" ?
-                                    null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].skill1];
+        //                        MonsterSkillSO skill1 = roundTable.monsterData[i].skill1 == "" ?
+        //                            null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].skill1];
 
-                                MonsterSkillSO skill2 = roundTable.monsterData[i].skill2 == "" ?
-                                    null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].skill2];
+        //                        MonsterSkillSO skill2 = roundTable.monsterData[i].skill2 == "" ?
+        //                            null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].skill2];
 
-                                JHT_BaseMonsterStat stat = new(roundTable.monsterData[i], normal, skill1, skill2, roundTable.addStat);
+        //                        JHT_BaseMonsterStat stat = new(roundTable.monsterData[i], normal, skill1, skill2, roundTable.addStat);
 
-                                dataList.Add(stat);
-                                break;
-                            }
-                        }
+        //                        dataList.Add(stat);
+        //                        break;
+        //                    }
+        //                }
 
-                    }
+        //            }
 
-                    break;
-                }
+        //            break;
+        //        }
 
 
-                if (count > 6)
-                {
-                    count -= roundTable.monsterData[rand].cost;
-                    count -= dataList[dataList.Count - 1].cost;
-                    dataList.RemoveAt(dataList.Count - 1);
-                    continue;
-                }
-                else
-                {
-                    if (crewRoleCounter.TryGetValue(roundTable.monsterData[rand].monsterCrewRole, out int value))
-                    {
-                        if (value >= 2)
-                        {
-                            //여기서 중복된 CrewRole이 2개보다 많을 때 다른애를 뽑기위해 진행
-                            count -= roundTable.monsterData[rand].cost;
-                            continue;
-                        }
+        //        if (count > 6)
+        //        {
+        //            count -= roundTable.monsterData[rand].cost;
+        //            count -= dataList[dataList.Count - 1].cost;
+        //            dataList.RemoveAt(dataList.Count - 1);
+        //            continue;
+        //        }
+        //        else
+        //        {
+        //            if (crewRoleCounter.TryGetValue(roundTable.monsterData[rand].monsterCrewRole, out int value))
+        //            {
+        //                if (value >= 2)
+        //                {
+        //                    //여기서 중복된 CrewRole이 2개보다 많을 때 다른애를 뽑기위해 진행
+        //                    count -= roundTable.monsterData[rand].cost;
+        //                    continue;
+        //                }
 
-                        crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = value + 1;
-                    }
-                    else
-                    {
-                        crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = 1;
-                    }
-                    MonsterSkillSO normal = roundTable.monsterData[rand].normalSkill == "" ?
-                        null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].normalSkill];
+        //                crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = value + 1;
+        //            }
+        //            else
+        //            {
+        //                crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = 1;
+        //            }
+        //            MonsterSkillSO normal = roundTable.monsterData[rand].normalSkill == "" ?
+        //                null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].normalSkill];
 
-                    MonsterSkillSO skill1 = roundTable.monsterData[rand].skill1 == "" ?
-                        null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill1];
+        //            MonsterSkillSO skill1 = roundTable.monsterData[rand].skill1 == "" ?
+        //                null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill1];
 
-                    MonsterSkillSO skill2 = roundTable.monsterData[rand].skill2 == "" ?
-                        null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill2];
+        //            MonsterSkillSO skill2 = roundTable.monsterData[rand].skill2 == "" ?
+        //                null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill2];
 
-                    JHT_BaseMonsterStat stat = new(roundTable.monsterData[rand], normal, skill1, skill2, roundTable.addStat);
+        //            JHT_BaseMonsterStat stat = new(roundTable.monsterData[rand], normal, skill1, skill2, roundTable.addStat);
 
-                    // 조건에 따라 Elite 나오게하기
-                    //if (roundIndex >= 5 && dataList.Find(a => a.monsterRarity == MonsterRarity.Elite) == null)
-                    //{
-                    //    stat.monsterRarity = MonsterRarity.Elite;
-                    //}
-                    //else
-                    //{
-                    //    stat.monsterRarity = MonsterRarity.Normal;
-                    //}
+        //            // 조건에 따라 Elite 나오게하기
+        //            //if (roundIndex >= 5 && dataList.Find(a => a.monsterRarity == MonsterRarity.Elite) == null)
+        //            //{
+        //            //    stat.monsterRarity = MonsterRarity.Elite;
+        //            //}
+        //            //else
+        //            //{
+        //            //    stat.monsterRarity = MonsterRarity.Normal;
+        //            //}
 
-                    dataList.Add(stat);
-                }
+        //            dataList.Add(stat);
+        //        }
 
-            }
-            return dataList;
-        }
+        //    }
+        //    return dataList;
+        //}
 
         #endregion
     }
