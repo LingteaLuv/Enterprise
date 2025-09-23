@@ -206,10 +206,29 @@ public class DatabaseManager : Singleton<DatabaseManager>
             }
             callback(result);
         });
-
-        
     }
     
+    public void LoadWeaponsAsync(Action<Dictionary<int, InventoryManager.ParsingWeaponData>> callback)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child("StatusData").Child("Weapon");
+        dataRef.GetValueAsync().ContinueWithOnMainThread((task) =>
+        {
+            if (!task.Result.Exists || task.Result.Value == null) return;
+
+            var result = new Dictionary<int, InventoryManager.ParsingWeaponData>();
+
+            foreach (var child in task.Result.Children)
+            {
+                if (int.TryParse(child.Key, out int weaponId))
+                {
+                    string json = child.GetRawJsonValue();
+                    InventoryManager.ParsingWeaponData data = JsonUtility.FromJson<InventoryManager.ParsingWeaponData>(json);
+                    result[weaponId] = data;
+                }
+            }
+            callback(result);
+        });
+    }
     #region Nickname
     
     /// <summary>
@@ -574,14 +593,26 @@ public class DatabaseManager : Singleton<DatabaseManager>
     {
         Init();
         var path = $"{_uid}/StatusData/Relic";
-        var crewData = new Dictionary<string, object>();
+        var relicData = new Dictionary<string, object>();
         
-        crewData[$"{path}/{data.itemNum}/Level"] = data.itemLevel;
-        crewData[$"{path}/{data.itemNum}/Rarity"] = data.curRarity.ToString();
+        relicData[$"{path}/{data.itemNum}/Level"] = data.itemLevel;
+        relicData[$"{path}/{data.itemNum}/Rarity"] = data.curRarity.ToString();
             
-        SaveFieldsAsync(crewData);
+        SaveFieldsAsync(relicData);
     }
 
+    public void SaveWeaponDataAsync(WeaponObject data)
+    {
+        Init();
+        var path = $"{_uid}/StatusData/Weapon";
+        var weaponData = new Dictionary<string, object>();
+        
+        weaponData[$"{path}/{data.itemNum}/Level"] = data.ItemLevel;
+        weaponData[$"{path}/{data.itemNum}/Rarity"] = data.curRarity.ToString();
+        weaponData[$"{path}/{data.itemNum}/Star"] = data.ItemStar;
+            
+        SaveFieldsAsync(weaponData);
+    }
     #region QuestCheck (AddedByCSJ)
     
     // reset 기준 UTC 기준 시간선; 기본인 9는 Kst인 UTC+09:00 기준입니다.

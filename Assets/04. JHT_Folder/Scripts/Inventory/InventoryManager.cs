@@ -40,6 +40,13 @@ namespace JHT
             public string Rarity;
         }
         
+        public class ParsingWeaponData
+        {
+            public int Level;
+            public string Rarity;
+            public int Star;
+        }
+        
         protected override void Awake()
         {
             base.Awake();
@@ -59,7 +66,7 @@ namespace JHT
 
         private void OnEnable()
         {
-             OnAddInventory += AddInventoryItem;
+            OnAddInventory += AddInventoryItem;
             OnRemoveInventory += RemoveInventoryIndex;
             OnChangeItem += AddRelicsItem;
             OnChangeAddItem += AddRelicsSolo;
@@ -312,6 +319,20 @@ namespace JHT
                     }
                 }
             });
+            
+            DatabaseManager.Instance.LoadWeaponsAsync((result) =>
+            {
+                foreach (var kvp in result)
+                {
+                    int id = kvp.Key;
+                    ParsingWeaponData data = kvp.Value;
+                    if (Enum.TryParse<ItemRarity>(data.Rarity, true, out ItemRarity rarity))
+                    {
+                        WeaponObject weapon = new WeaponObject(id, rarity, data.Level, data.Star);
+                        weaponList.Add(weapon);
+                    }
+                }
+            });
         }
 
         public WeaponObject AddItem(ItemWeaponSO item)
@@ -456,6 +477,7 @@ namespace JHT
             if (item.itemSO.itemType == ItemType.Equip)
             {
                 weaponList.Add((WeaponObject)item);
+                DatabaseManager.Instance.SaveWeaponDataAsync((WeaponObject)item);
                 OnAddItemForEncyclopedia?.Invoke(item);
             }
             else
