@@ -5,14 +5,16 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class PlayerInfoPanel : MonoBehaviour
+public class PlayerInfoPanel : UIBase
 {
     [SerializeField] private TextMeshProUGUI _nicknameText;
     [SerializeField] private TextMeshProUGUI _loginType;
     [SerializeField] private Button _linkBtn;
     [SerializeField] private Button _logoutBtn;
+    [SerializeField] private Button _exitBtn;
     
-
+    public Action OnTouchedExitBtn;
+    
     private void Start()
     {
         _linkBtn.onClick.AddListener(OnTouchLinkBtn);
@@ -23,6 +25,13 @@ public class PlayerInfoPanel : MonoBehaviour
         {
             _linkBtn.gameObject.SetActive(false);
         }
+        
+        _exitBtn.onClick.AddListener(() =>
+        {
+            OnTouchedExitBtn?.Invoke();
+            gameObject.SetActive(false);
+        });
+        gameObject.SetActive(false);
     }
     
     private void OnEnable()
