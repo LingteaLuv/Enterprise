@@ -61,7 +61,13 @@ public class LoginPanel : UIBase
     
     private async Task OnTouchTestLoginBtn()
     {
-        //OnLoginTried?.Invoke();
-        await FirebaseManager.Instance.TestLogin();
+        OnLoginTried?.Invoke();
+        if (await AuthManager.Instance.TestLogin())
+        {
+            Debug.Log("게스트 로그인 성공");
+            OnLoginCompleted?.Invoke();
+            return;
+        }
+        OnLoginFailed?.Invoke();
     }
 }

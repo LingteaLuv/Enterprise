@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using _05._CSJ_Folder.Scripts.Quest.Data;
+using Cysharp.Threading.Tasks;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Extensions;
+using JHT;
 using UnityEngine;
 
 public class DatabaseManager : Singleton<DatabaseManager>
@@ -56,32 +58,34 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <summary>
     /// Firebase RTDB에 다중 데이터(Dictionary)를 저장하는 메서드
     /// </summary>
-    public async Task SaveFieldsAsync(Dictionary<string, object> dictionary)
+    private void SaveFieldsAsync(Dictionary<string, object> dictionary)
     {
-        var task = FirebaseManager.DataReference.UpdateChildrenAsync(dictionary);
-        await task; 
-
-        if (task.IsCompletedSuccessfully)
+        FirebaseManager.DataReference.UpdateChildrenAsync(dictionary).ContinueWithOnMainThread((task) =>
         {
-            Debug.Log("데이터 저장 성공");
-        }
-        else
-        {
-            Debug.LogError("데이터 저장 실패");
-        }
+            if (task.IsCompletedSuccessfully)
+            {
+                Debug.Log("데이터 저장 성공");
+            }
+            else
+            {
+                Debug.LogError("데이터 저장 실패");
+            }
+        });
     }
     
     /// <summary>
     /// Firebase RTDB에 다중 데이터(Custom class)를 저장하는 메서드
     /// </summary>
-    public async Task SaveFieldsAsync<T>(T data) where T : class
+    public async Task SaveFieldsAsync<T>(string subPath, T data) where T : class
     {
         string json = JsonUtility.ToJson(data);
         Dictionary<string, object> dictionary= Utility.JsonToDict(json);
         
         if (dictionary == null) return;
         
-        var task = FirebaseManager.DataReference.Child(typeof(T).Name).UpdateChildrenAsync(dictionary);
+        string path = $"{_uid}/" + subPath;
+        
+        var task = FirebaseManager.DataReference.Child(path).UpdateChildrenAsync(dictionary);
         await task; 
 
         if (task.IsCompletedSuccessfully)
@@ -118,12 +122,23 @@ public class DatabaseManager : Singleton<DatabaseManager>
         callback(data);
     }
     
+    public void LoadFieldAsync<T>(string path, int async, Action<T> callback, bool init = false, T value = default)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(path);
+        dataRef.GetValueAsync().ContinueWithOnMainThread((task) =>
+        {
+            if (task.IsCanceled || task.IsFaulted) return;
+            T data = (T)Convert.ChangeType(task.Result.Value, typeof(T));
+            callback(data);
+        }); 
+    }
+    
     /// <summary>
     /// Firebase RTDB에서 다중 데이터(Custom class)를 불러오는 메서드
     /// </summary>
-    public async Task LoadFieldsAsync<T>(Action<T> callback) where T : class
+    public async Task LoadFieldsAsync<T>(string subPath, Action<T> callback) where T : class
     {
-        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child(typeof(T).Name);
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child(subPath);
         DataSnapshot snapshot = await dataRef.GetValueAsync();
 
         if (!snapshot.Exists || snapshot.Value == null) return;
@@ -147,6 +162,52 @@ public class DatabaseManager : Singleton<DatabaseManager>
         T newData = (T)Convert.ChangeType(snapshot.Value, typeof(T));
         callback(newData);
         return true;
+    }
+
+    public async UniTask LoadCharactersAsync(Action<Dictionary<int, PlayerDataManager.ParsingPlayerData>> callback)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child("StatusData").Child("Crew");
+        DataSnapshot snapshot = await dataRef.GetValueAsync();
+
+        if (!snapshot.Exists || snapshot.Value == null) return;
+
+        var result = new Dictionary<int, PlayerDataManager.ParsingPlayerData>();
+
+        foreach (var child in snapshot.Children)
+        {
+            if (int.TryParse(child.Key, out int characterId))
+            {
+                string json = child.GetRawJsonValue();
+                PlayerDataManager.ParsingPlayerData data = JsonUtility.FromJson<PlayerDataManager.ParsingPlayerData>(json);
+                result[characterId] = data;
+            }
+        }
+
+        callback(result);
+    }
+    
+    public void LoadRelicsAsync(Action<Dictionary<int, InventoryManager.ParsingRelicData>> callback)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child("StatusData").Child("Relic");
+        dataRef.GetValueAsync().ContinueWithOnMainThread((task) =>
+        {
+            if (!task.Result.Exists || task.Result.Value == null) return;
+
+            var result = new Dictionary<int, InventoryManager.ParsingRelicData>();
+
+            foreach (var child in task.Result.Children)
+            {
+                if (int.TryParse(child.Key, out int relicId))
+                {
+                    string json = child.GetRawJsonValue();
+                    InventoryManager.ParsingRelicData data = JsonUtility.FromJson<InventoryManager.ParsingRelicData>(json);
+                    result[relicId] = data;
+                }
+            }
+            callback(result);
+        });
+
+        
     }
     
     #region Nickname
@@ -197,6 +258,29 @@ public class DatabaseManager : Singleton<DatabaseManager>
             callback(null);
         }
     }
+    
+    public void LoadNickname(Action<string> callback)
+    {
+        _uid = FirebaseManager.Auth.CurrentUser.UserId;
+        DatabaseReference nicknameRef = FirebaseManager.DataReference.Child(_uid).Child("PublicData").Child("Nickname");
+        Debug.Log($"{_uid}");    
+        nicknameRef.GetValueAsync().ContinueWithOnMainThread((task)=>
+        {
+            if (task.IsCanceled || task.IsFaulted) return;
+
+            if (task.Result == null)
+            {
+                Debug.LogWarning("닉네임 데이터 없음");
+                callback(null);
+                return;
+            }
+            
+            string nickname = task.Result.ToString();
+            Debug.LogWarning($"닉네임 로드 성공 : {nickname}");
+            callback(nickname);
+        });
+    }
+    
     #endregion
 
     #region Time
@@ -337,6 +421,26 @@ public class DatabaseManager : Singleton<DatabaseManager>
             CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.EnhancementStone,
                 snapshot.Child("EnhancementStone").Value.ToString());
         }
+        if (snapshot.Exists && snapshot.HasChild("RelicsCoupon"))
+        {
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.RelicsCoupon,
+                snapshot.Child("RelicsCoupon").Value.ToString());
+        }
+        if (snapshot.Exists && snapshot.HasChild("RelicsPoint"))
+        {
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.RelicsPoint,
+                snapshot.Child("RelicsPoint").Value.ToString());
+        }
+        if (snapshot.Exists && snapshot.HasChild("CrewDrawTicket"))
+        {
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.CrewDrawTicket,
+                snapshot.Child("CrewDrawTicket").Value.ToString());
+        }
+        if (snapshot.Exists && snapshot.HasChild("EquipDrawTicket"))
+        {
+            CurrencyManager.Instance.AddCurrencyFromInspectorString(CurrencyType.EquipDrawTicket,
+                snapshot.Child("EquipDrawTicket").Value.ToString());
+        }
         OnChangedCreditData?.Invoke();
     }
     
@@ -454,7 +558,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
 
     #endregion
 
-    public async Task SaveCrewDataAsync(string subPath, PlayerCharacterData data)
+    public void SaveCrewDataAsync(string subPath, PlayerCharacterData data)
     {
         Init();
         var root = $"{_uid}/{subPath}";
@@ -463,7 +567,19 @@ public class DatabaseManager : Singleton<DatabaseManager>
         crewData[$"{root}/Level"] = data.Level;
         crewData[$"{root}/Star"] = data.Star;
             
-        await SaveFieldsAsync(crewData);
+        SaveFieldsAsync(crewData);
+    }
+    
+    public void SaveRelicDataAsync(RelicsObject data)
+    {
+        Init();
+        var path = $"{_uid}/StatusData/Relic";
+        var crewData = new Dictionary<string, object>();
+        
+        crewData[$"{path}/{data.itemNum}/Level"] = data.itemLevel;
+        crewData[$"{path}/{data.itemNum}/Rarity"] = data.curRarity.ToString();
+            
+        SaveFieldsAsync(crewData);
     }
 
     #region QuestCheck (AddedByCSJ)
@@ -815,7 +931,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         }
         
         // 해당 payload들을 딕셔너리로 저장
-        await SaveFieldsAsync(payload);
+        SaveFieldsAsync(payload);
     }
     
     /// <summary>

@@ -21,7 +21,8 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     [Header("시작 캐릭터 설정")]
     [Tooltip("게임 시작 시 기본으로 지급할 캐릭터 목록")]
     public List<CharacterData> startingCharacters = new List<CharacterData>();
-
+   
+    
     [Header("캐릭터 편성")]
     public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
     public const int MAX_FORMATION_SIZE = 5;
@@ -31,11 +32,17 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public const int MAX_CHARACTER_LEVEL = 10;
     public BigInteger fixedLevelUpGoldCost = 1000;
     public BigInteger fixedLevelUpStoneCost = 20;
-
-    //todo석원 : DB 연동 - 레벨 성급, 장착 무기, 영혼 조각 개수
+    
     public Dictionary<int, PlayerCharacterData> OwnedCharacters = new Dictionary<int, PlayerCharacterData>();
     //public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
 
+    public class ParsingPlayerData
+    {
+        public int Level;
+        public int Soul;
+        public int Star;
+    }
+    
     private Dictionary<int, int> starUpgradeCosts;
     private const int STAR_UPGRADE_COST_1 = 20;
     private const int STAR_UPGRADE_COST_2 = 40;
@@ -66,7 +73,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             { CrewRole.Cook, new List<PlayerCharacterData>() },
             { CrewRole.Captain, new List<PlayerCharacterData>() }
         };
-
+        
         InitializeUpgradeCosts();
     }
 
@@ -74,6 +81,8 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         AuthManager.Instance.LoginCompleted += async () =>
         {
+            await InitDatabase();
+            
             if (OwnedCharacters.Count == 0)
             {
                 if (giveAllCharactersForTest)
@@ -85,14 +94,28 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
                     await GrantStartingCharacters();
                 }
                 // 게임 시작 시, PDM의 데이터를 직접 수정하는 자동 편성을 호출합니다.
-                AutoFormTeam();
                 Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
             }
-
+            AutoFormTeam();
             StartCoroutine(InitialCalculationCoroutine());
         };
     }
 
+    private async UniTask InitDatabase()
+    {
+        await DatabaseManager.Instance.LoadCharactersAsync((result) =>
+        {
+            foreach (var kvp in result)
+            {
+                int id = kvp.Key;
+                ParsingPlayerData data = kvp.Value;
+                PlayerCharacterData character = new PlayerCharacterData(id, data);
+
+                OwnedCharacters[id] = character;
+            }
+        });
+    }
+    
     private async UniTask GrantStartingCharacters()
     {
         Debug.Log("기본 지급 캐릭터가 있는지 확인합니다...");

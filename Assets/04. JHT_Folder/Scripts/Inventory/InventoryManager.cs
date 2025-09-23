@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using Cysharp.Threading.Tasks;
 
 namespace JHT
 {
@@ -8,7 +9,6 @@ namespace JHT
     {
         // todo석원 : DB연동 - 장비(key : itemNum, weaponList - 레벨, 성급) 
         public List<WeaponObject> weaponList;
-        // todo석원 : DB연동 - 유물(key : itemNum, RelicsList - 레어도, 레벨) 
         public List<RelicsObject> relicsList;
 
         [Header("유물재화")]
@@ -34,6 +34,12 @@ namespace JHT
 
         public InventoryMode currentMode;
 
+        public class ParsingRelicData
+        {
+            public int Level;
+            public string Rarity;
+        }
+        
         protected override void Awake()
         {
             base.Awake();
@@ -44,6 +50,11 @@ namespace JHT
             if (relicsList == null)
                 relicsList = new();
 
+        }
+
+        private void Start()
+        {
+            AuthManager.Instance.LoginCompleted += InitDatabase;
         }
 
         private void OnEnable()
@@ -286,7 +297,22 @@ namespace JHT
 
         #endregion
 
-
+        private void InitDatabase()
+        {
+            DatabaseManager.Instance.LoadRelicsAsync((result) =>
+            {
+                foreach (var kvp in result)
+                {
+                    int id = kvp.Key;
+                    ParsingRelicData data = kvp.Value;
+                    if (Enum.TryParse<ItemRarity>(data.Rarity, true, out ItemRarity rarity))
+                    {
+                        RelicsObject relic = new RelicsObject(id, rarity, data.Level);
+                        relicsList.Add(relic);
+                    }
+                }
+            });
+        }
 
         public WeaponObject AddItem(ItemWeaponSO item)
         {
@@ -330,6 +356,7 @@ namespace JHT
             {
                 DestroyRelics(obj2);
                 relicsList.Add(obj1);
+                DatabaseManager.Instance.SaveRelicDataAsync(obj1);
                 OnChangePanel?.Invoke(obj1);
                 PlayerDataManager.Instance.RecalculateAllCharacterStats();
             }
@@ -337,6 +364,7 @@ namespace JHT
             {
                 DestroyRelics(obj1);
                 relicsList.Add(obj2);
+                DatabaseManager.Instance.SaveRelicDataAsync(obj2);
                 OnChangePanel?.Invoke(obj2);
                 PlayerDataManager.Instance.RecalculateAllCharacterStats();
             }
@@ -433,6 +461,7 @@ namespace JHT
             else
             {
                 relicsList.Add((RelicsObject)item);
+                DatabaseManager.Instance.SaveRelicDataAsync((RelicsObject)item);
                 OnAddItemForEncyclopedia?.Invoke(item);
             }
         }
