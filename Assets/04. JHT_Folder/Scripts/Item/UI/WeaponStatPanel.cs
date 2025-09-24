@@ -107,7 +107,7 @@ namespace JHT
             pointText.text = $"{currentPoint} / {requirePoint}";
             pointSlider.value = Mathf.Min((float)currentPoint / requirePoint, 1);
 
-            if (curWeapon.itemStar >= 5)
+            if (curWeapon.ItemStar >= 5)
             {
                 levelText.text = "LV. MAX";
             }

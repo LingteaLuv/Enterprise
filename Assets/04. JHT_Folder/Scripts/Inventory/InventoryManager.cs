@@ -92,7 +92,7 @@ namespace JHT
         public void AddEnhancementPointsToEquipment(int itemNum, int amount)
         {
             WeaponObject weapon = weaponList.Find(x => x.itemNum == itemNum);
-            if (weapon.itemStar >= 5)
+            if (weapon.ItemStar >= 5)
             {
                 equipmentFragments += amount;
             }
