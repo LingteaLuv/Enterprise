@@ -4,7 +4,7 @@ using UnityEngine;
 public class Monster_0_attack_bow : MonsterSkillSet
 {
     public Monster_0_attack_bow(JHT_BaseMonsterStat stat, MonsterSkillSO _skillSO) : base(stat, _skillSO) { }
-
+    
     public override void UseSkill(JHT_BaseMonsterFSM fsm)
     {
         if (fsm.target == null) return;
