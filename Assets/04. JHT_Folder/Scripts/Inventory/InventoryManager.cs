@@ -7,7 +7,6 @@ namespace JHT
 {
     public class InventoryManager : Singleton<InventoryManager>
     {
-        // todo석원 : DB연동 - 장비(key : itemNum, weaponList - 레벨, 성급) 
         public List<WeaponObject> weaponList;
         public List<RelicsObject> relicsList;
 

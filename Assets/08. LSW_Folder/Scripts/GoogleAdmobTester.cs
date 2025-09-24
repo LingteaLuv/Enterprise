@@ -21,7 +21,6 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
             Debug.LogError("모바일 광고 초기화 실패");
             return;
         }
-        Debug.LogError("광고 초기화 성공");
         LoadAdTest();
     }
 
@@ -36,7 +35,6 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
                 _loadedAd = null;
                 return;
             }
-            Debug.LogError("로딩 성공");
             _loadedAd = ad;
             _loadedAd.OnAdFullScreenContentClosed -= LoadAd;
             _loadedAd.OnAdFullScreenContentClosed += LoadAd;
@@ -54,7 +52,6 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
                 _rewardedInterstitialAd = null;
                 return;
             }
-            Debug.LogError("로딩 성공");
             _rewardedInterstitialAd = ad;
             _rewardedInterstitialAd.OnAdFullScreenContentClosed -= LoadAdTest;
             _rewardedInterstitialAd.OnAdFullScreenContentClosed += LoadAdTest;
