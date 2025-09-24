@@ -1,11 +1,10 @@
-
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 /// <summary>
-/// 단일 캐릭터의 체력바 UI를 관리합니다.
-/// 아이콘, 슬라이더 등의 UI 요소를 업데이트합니다.
+/// 단일 캐릭터의 체력바 및 스킬 쿨타임 UI를 관리합니다.
 /// </summary>
 public class HealthBarDisplay : MonoBehaviour
 {
@@ -14,11 +13,15 @@ public class HealthBarDisplay : MonoBehaviour
     [SerializeField] private Slider healthSlider;
     [SerializeField] private TextMeshProUGUI healthText; // 체력 숫자를 표시할 텍스트
     [SerializeField] private TextMeshProUGUI nameText; // 캐릭 이름을 표시할 텍스트
+    [SerializeField] private Image skillCooldownImage; // 스킬 쿨타임 표시 이미지
+    [SerializeField] private TextMeshProUGUI skillCooldownText; // 스킬 쿨타임 텍스트
 
     private HealthSystem healthSystem;
+    private MeleeCharacter meleeCharacter;
+    private Coroutine cooldownCoroutine;
 
     /// <summary>
-    /// 특정 CombatCharacter를 대상으로 체력바를 초기화합니다.
+    /// 특정 CombatCharacter를 대상으로 UI를 초기화합니다.
     /// </summary>
     public void Initialize(CombatCharacter character)
     {
@@ -46,13 +49,28 @@ public class HealthBarDisplay : MonoBehaviour
         if (healthSystem != null)
         {
             healthSystem.OnHealthChanged += UpdateHealthBar;
-            // 초기 체력으로 한 번 업데이트
             UpdateHealthBar(healthSystem.currentHealth, healthSystem.maxHealth);
         }
         else
         {
             Debug.LogError($"[HealthBarDisplay] {character.name}에서 HealthSystem을 찾을 수 없습니다.");
-            gameObject.SetActive(false);
+        }
+
+        // MeleeCharacter 참조 및 스킬 사용 이벤트 구독
+        meleeCharacter = character.GetComponent<MeleeCharacter>();
+        if (meleeCharacter != null)
+        {
+            meleeCharacter.OnSkillUsed += HandleSkillUsed;
+        }
+
+        // 쿨타임 UI 초기화
+        if (skillCooldownImage != null)
+        {
+            skillCooldownImage.fillAmount = 0;
+        }
+        if (skillCooldownText != null)
+        {
+            skillCooldownText.text = "";
         }
     }
 
@@ -75,13 +93,57 @@ public class HealthBarDisplay : MonoBehaviour
     }
 
     /// <summary>
-    /// 이 오브젝트가 파괴될 때 이벤트 구독을 해제합니다.
+    /// MeleeCharacter의 OnSkillUsed 이벤트에 의해 호출됩니다.
     /// </summary>
+    private void HandleSkillUsed(SkillSO skill)
+    {
+        if (skill != null && skill.cooldown > 0)
+        {
+            if (cooldownCoroutine != null)
+            {
+                StopCoroutine(cooldownCoroutine);
+            }
+            cooldownCoroutine = StartCoroutine(CooldownCoroutine(skill.cooldown));
+        }
+    }
+
+    /// <summary>
+    /// 스킬 쿨타임 UI를 업데이트하는 코루틴입니다.
+    /// </summary>
+    private IEnumerator CooldownCoroutine(float cooldown)
+    {
+        if (skillCooldownImage == null) yield break;
+
+        float timer = cooldown;
+        skillCooldownImage.fillAmount = 1;
+
+        while (timer > 0)
+        {
+            timer -= Time.deltaTime;
+            skillCooldownImage.fillAmount = timer / cooldown;
+            if (skillCooldownText != null)
+            {
+                skillCooldownText.text = Mathf.Ceil(timer).ToString("F0");
+            }
+            yield return null;
+        }
+
+        skillCooldownImage.fillAmount = 0;
+        if (skillCooldownText != null)
+        {
+            skillCooldownText.text = "";
+        }
+    }
+
     private void OnDestroy()
     {
         if (healthSystem != null)
         {
             healthSystem.OnHealthChanged -= UpdateHealthBar;
+        }
+        if (meleeCharacter != null)
+        {
+            meleeCharacter.OnSkillUsed -= HandleSkillUsed;
         }
     }
 }
