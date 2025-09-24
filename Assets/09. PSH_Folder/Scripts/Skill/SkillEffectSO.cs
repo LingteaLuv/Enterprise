@@ -2,16 +2,44 @@
 using UnityEngine;
 
 /// <summary>
-/// 모든 스킬 효과의 기반이 되는 추상 ScriptableObject입니다.
-/// 이 클래스를 상속받아 다양한 스킬 효과를 구현합니다.
+/// 모든 스킬 효과의 기반이 되는 ScriptableObject입니다.
+/// 이 클래스를 상속받아 다양한 스킬 효과를 구현하며, 공통 로직을 포함할 수 있습니다.
 /// </summary>
-public abstract class SkillEffectSO : ScriptableObject
+public class SkillEffectSO : ScriptableObject
 {
+    [Header("효과 비주얼")]
+    [Tooltip("효과가 적용될 때 대상의 위치에 생성될 이펙트 프리팹")]
+    public GameObject effectPrefab;
+
     /// <summary>
     /// 스킬 효과를 대상에게 적용합니다.
+    /// 자식 클래스에서 이 메소드를 override하여 구체적인 효과를 구현합니다.
     /// </summary>
-    /// <param name="caster">스킬을 시전한 주체</param>
-    /// <param name="target">스킬의 대상이 되는 주체</param>
-    public abstract void ApplyEffect(IAttacker caster, IDamageable target);
+    public virtual void ApplyEffect(IAttacker caster, IDamageable target)
+    {
+        if (caster == null || target == null)
+        {
+            Debug.LogWarning($"[{name}] Caster 또는 Target이 null이므로 효과를 적용할 수 없습니다.");
+            return;
+        }
+
+        // 공통 로직: 비주얼 이펙트 생성
+        SpawnVisualEffect(target);
+    }
+
+    /// <summary>
+    /// 설정된 effectPrefab을 대상의 위치에 생성합니다.
+    /// </summary>
+    protected virtual void SpawnVisualEffect(IDamageable target)
+    {
+        if (effectPrefab == null) return;
+
+        Transform targetTransform = (target as Component)?.transform;
+        if (targetTransform != null)
+        {
+            // 이펙트 지속시간은 2초를 기본값으로 설정합니다.
+            EffectPoolManager.Instance.SpawnEffect(effectPrefab, targetTransform.position, Quaternion.identity, 2f);
+        }
+    }
 }
 
