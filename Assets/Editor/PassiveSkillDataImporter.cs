@@ -69,7 +69,6 @@ public class PassiveSkillDataImporter
                         buffEffect.duration = paramFloat2;
                         EditorUtility.SetDirty(buffEffect);
                         break;
-
                     case "Heal":
                         HealEffectSO healEffect = AssetDatabase.LoadAssetAtPath<HealEffectSO>(assetPath) ?? CreateAsset<HealEffectSO>(assetPath);
                         healEffect.healAmount = paramFloat1;
@@ -81,6 +80,15 @@ public class PassiveSkillDataImporter
                         damageEffect.hitCount = (int)paramFloat2;
                         damageEffect.delayBetweenHits = (int)paramFloat3;
                         EditorUtility.SetDirty(damageEffect);
+                        break;
+                    case "Stun":
+                        StunEffectSO stunEffect = AssetDatabase.LoadAssetAtPath<StunEffectSO>(assetPath) ?? CreateAsset<StunEffectSO>(assetPath);
+                        stunEffect.duration = paramFloat1;
+                        break;
+                    case "ExtraDamageBuff":
+                        ApplyExtraDamageBuffEffectSO extraEffect = AssetDatabase.LoadAssetAtPath<ApplyExtraDamageBuffEffectSO>(assetPath) ?? CreateAsset<ApplyExtraDamageBuffEffectSO>(assetPath);
+                        extraEffect.damageValue = paramFloat1;
+                        extraEffect.duration = paramFloat2;
                         break;
                 }
             }
