@@ -1,6 +1,7 @@
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
+using UnityEngine;
 
 public enum ETargetLogic
 {
@@ -77,6 +78,8 @@ public class SkillSO : ScriptableObject
     private List<IDamageable> FindOffensiveTargets(CombatCharacter caster, IDamageable primaryTarget)
     {
         List<IDamageable> targets = new List<IDamageable>();
+        var allEnemies = FindAllEnemies(caster);
+
         switch (targetLogic)
         {
             case ETargetLogic.PrimaryTarget:
@@ -86,27 +89,35 @@ public class SkillSO : ScriptableObject
                 }
                 else // 주 타겟이 없으면, 대신 가장 가까운 적을 찾아요.
                 {
-                    var closest = FindAllEnemies(caster).FirstOrDefault();
+                    var closest = allEnemies.FirstOrDefault();
                     if (closest != null) targets.Add(closest);
                 }
                 break;
 
             case ETargetLogic.ClosestEnemy:
-                var closestEnemy = FindAllEnemies(caster).FirstOrDefault();
+                var closestEnemy = allEnemies.FirstOrDefault();
                 if (closestEnemy != null) targets.Add(closestEnemy);
                 break;
 
             case ETargetLogic.LowestHealthEnemy:
-                var lowestEnemy = FindAllEnemies(caster)
-                    .OrderBy(e => (e as Component).GetComponent<HealthSystem>()?.currentHealth ?? float.MaxValue)
+                var lowestEnemy = allEnemies
+                    .OrderBy(e => (e as Component).GetComponent<HealthSystem>()?.currentHealth ?? (e as JHT.JHT_BaseMonsterFSM)?.CurHP ?? float.MaxValue)
                     .FirstOrDefault();
                 if (lowestEnemy != null) targets.Add(lowestEnemy);
                 break;
 
             case ETargetLogic.AllEnemiesInRadius:
-                var enemiesInRadius = FindAllEnemies(caster)
+                var enemiesInRadius = allEnemies
                     .Where(e => Vector3.Distance(caster.transform.position, (e as MonoBehaviour).transform.position) <= skillRadius);
                 targets.AddRange(enemiesInRadius);
+                break;
+
+            // 역할 기반으로 '적'을 찾는 로직
+            case ETargetLogic.AllAllies_ByRole:
+                var enemiesWithRole = allEnemies
+                    .OfType<JHT.JHT_BaseMonsterFSM>() // 적(몬스터)만 필터링
+                    .Where(fsm => fsm.monsterStat != null && fsm.monsterStat.monsterCrewRole == targetRole);
+                targets.AddRange(enemiesWithRole);
                 break;
         }
         return targets;
