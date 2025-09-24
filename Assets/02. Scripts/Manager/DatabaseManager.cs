@@ -291,7 +291,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
                 return;
             }
             
-            string nickname = task.Result.ToString();
+            string nickname = task.Result.Value.ToString();
             Debug.LogWarning($"닉네임 로드 성공 : {nickname}");
             callback(nickname);
         });

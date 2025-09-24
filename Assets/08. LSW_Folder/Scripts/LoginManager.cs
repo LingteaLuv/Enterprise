@@ -23,6 +23,7 @@ public class LoginManager : Singleton<LoginManager>
         DatabaseManager.Instance.LoadNickname((nickname) =>
         {
             Nickname = nickname;
+            Debug.LogError($"[LoginManager] Nickname : {Nickname}");
         });
     }
     
