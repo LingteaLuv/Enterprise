@@ -1,3 +1,4 @@
+using JHT;
 using UnityEngine;
 
 /// <summary>
@@ -20,13 +21,13 @@ public class StunEffectSO : SkillEffectSO
         if (targetMonoBehaviour == null) return;
 
         // 대상의 FSM(상태 머신)을 가져옵니다. 적도 스턴을 쓴다면 태그에 따라 FSM 컴포넌트를 가져오는 코드 추가
-        var fsm = targetMonoBehaviour.GetComponent<BaseCharacterFSM>();
+        var fsm = targetMonoBehaviour.GetComponent<JHT_BaseMonsterFSM>();
         if (fsm != null)
         {
             Debug.Log($"{targetMonoBehaviour.name}에게 {duration}초 동안 스턴 효과를 적용합니다!");
             
             // FSM에 스턴 상태를 N초간 적용하라고 명령합니다.
-            // fsm.ApplyStun(duration);
+            fsm.ApplyStun(duration);
         }
     }
 }
