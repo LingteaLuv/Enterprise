@@ -18,7 +18,7 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     public List<JHT_MonsterDataSO> monsterDataList;
     public List<GameObject> monsterPrefabList;
     public List<MonsterSkillSO> monsterSkillList;
-    public AnimatorController animatorController;
+    public RuntimeAnimatorController animatorController;
 
     public Dictionary<int, JHT_MonsterDataTable> monsterTableDic;
     public Dictionary<string, JHT_MonsterDataSO> monsterDataDic;
@@ -81,7 +81,7 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         monsterPrefabDic = new();
         monsterSkillDic = new();
 
-        var handle = Addressables.LoadAssetAsync<AnimatorController>("Assets/04. JHT_Folder/Animator/JHT_Monster_Animator.controller");
+        var handle = Addressables.LoadAssetAsync<RuntimeAnimatorController>("Assets/04. JHT_Folder/Animator/JHT_Monster_Animator.controller");
         monsterTableHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataTable>("MonsterSpawnRoundTable");
         monsterDataHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataSO>("MonsterData");
         monsterPrefabHandle = Addressables.LoadAssetsAsync<GameObject>("MonsterPrefab");
