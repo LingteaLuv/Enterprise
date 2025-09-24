@@ -92,7 +92,6 @@ public class MonstserSearch : MonoBehaviour
     {
         //if (repathRoutine != null)
         //    StopCoroutine(repathRoutine);
-        Debug.LogError("죽음");
         if (moveRoutine != null)
         {
             StopCoroutine(moveRoutine);
