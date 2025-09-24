@@ -29,6 +29,10 @@ namespace JHT
         public int ItemStar { get { return itemStar.Value; } set { itemStar.Value = value; OnChangeStar?.Invoke(itemStar.Value); } }
         public Action<int> OnChangeStar;
 
+        public Property<int> enhancementPoint;
+        public int EnhancementPoint { get { return enhancementPoint.Value; } set { enhancementPoint.Value = value; OnChangePoint?.Invoke(enhancementPoint.Value); } }
+        public Action<int> OnChangePoint;
+        
         private bool isUpgrade;
         public bool IsUpgrade { get { return isUpgrade; } set { isUpgrade = value; OnUpgrade?.Invoke(isUpgrade); } }
         public event Action<bool> OnUpgrade;
@@ -52,12 +56,17 @@ namespace JHT
             {
                 await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{itemNum}/Star", value);
             });
+            enhancementPoint = new Property<int>(0);
+            enhancementPoint.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{itemNum}/Point", value);
+            });
             equipCategory = sample.equipCategory;
             equipType = sample.equipType;
             statType = sample.statType;
         }
 
-        public WeaponObject(int id, int level, int star)
+        public WeaponObject(int id, int level, int star, int point)
         {
             itemSO = DataManager.Instance.AllWeapons.Find(r => r.itemNum == id);
             ItemWeaponSO data = (ItemWeaponSO)itemSO;
@@ -71,6 +80,11 @@ namespace JHT
             itemStar.OnChanged += (async (value) =>
             {
                 await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{id}/Star", value);
+            });
+            enhancementPoint = new Property<int>(point);
+            enhancementPoint.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{itemNum}/Point", value);
             });
             itemIcon = data.icon;
             itemNum = data.itemNum;

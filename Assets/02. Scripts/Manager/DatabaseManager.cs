@@ -22,8 +22,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
     public void Init()
     {
         _user = FirebaseManager.Auth.CurrentUser;
-        Debug.Log($"_user : {_user}");
-        Debug.Log($"_uid : {_user.UserId}");
         _uid = _user.UserId;
     }
 
@@ -607,6 +605,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         var weaponData = new Dictionary<string, object>();
         
         weaponData[$"{path}/{data.itemNum}/Level"] = data.ItemLevel;
+        weaponData[$"{path}/{data.itemNum}/Point"] = data.EnhancementPoint;
         weaponData[$"{path}/{data.itemNum}/Star"] = data.ItemStar;
             
         SaveFieldsAsync(weaponData);
