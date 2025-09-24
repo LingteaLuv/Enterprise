@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// 캐릭터 가챠 연출의 각 배경 요소를 설정하기 위한 클래스입니다.
@@ -30,9 +31,7 @@ public class CharacterGachaDirector : MonoBehaviour
     public GachaAnimElement ship;
 
     [Header("연출 핵심 요소")]
-    [Tooltip("임시 로프 이미지. 나중에 애니메이션으로 교체될 수 있습니다.")]
     public Image ropeImage;
-    [Tooltip("전체 연출을 담고 있는 부모 오브젝트. 줌 효과에 사용됩니다.")]
     public RectTransform container;
 
     [Header("애니메이션 설정")]
@@ -40,13 +39,44 @@ public class CharacterGachaDirector : MonoBehaviour
     public float zoomDuration = 1f;
     public float zoomScale = 1.2f;
     public float ropeThrowDuration = 0.5f;
+    public float endDelay = 1f; // 연출이 모두 끝난 후, 사라지기 전까지의 대기 시간
 
     private Sequence mainSequence;
+    private Dictionary<RectTransform, Vector2> _initialPositions;
+    private bool _isInitialized = false;
+
+    void Awake()
+    {
+        InitializePositions();
+    }
 
     /// <summary>
-    /// 가챠 연출을 시작합니다.
+    /// 모든 연출 요소의 초기 위치를 저장합니다。
     /// </summary>
-    /// <param name="onComplete">연출이 모두 끝났을 때 호출될 콜백 함수</param>
+    private void InitializePositions()
+    {
+        if (_isInitialized) return;
+
+        _initialPositions = new Dictionary<RectTransform, Vector2>();
+        StoreInitialPosition(sky);
+        StoreInitialPosition(waves);
+        StoreInitialPosition(sunLight);
+        StoreInitialPosition(ship);
+
+        if (container != null) _initialPositions[container] = container.anchoredPosition;
+        if (ropeImage != null) _initialPositions[ropeImage.rectTransform] = ropeImage.rectTransform.anchoredPosition;
+
+        _isInitialized = true;
+    }
+
+    private void StoreInitialPosition(GachaAnimElement element)
+    {
+        if (element != null && element.image != null)
+        {
+            _initialPositions[element.image.rectTransform] = element.image.rectTransform.anchoredPosition;
+        }
+    }
+
     public void Play(Action onComplete = null)
     {
         SetupInitialState();
@@ -60,30 +90,41 @@ public class CharacterGachaDirector : MonoBehaviour
                 .SetEase(Ease.OutBack)
                 .OnStart(() => ropeImage.gameObject.SetActive(true))
         );
-        mainSequence.OnComplete(() => {
+
+        // 마지막에 여운을 남기기 위한 딜레이 추가
+        mainSequence.AppendInterval(endDelay);
+
+        mainSequence.OnComplete(() =>
+        {
             Debug.Log("가챠 연출 완료!");
             onComplete?.Invoke();
         });
     }
 
+    /// <summary>
+    /// 연출 시작 전, 모든 요소를 초기 상태 및 위치로 리셋합니다。
+    /// </summary>
     private void SetupInitialState()
     {
-        // 모든 관련 오브젝트의 트윈을 중지합니다.
-        KillTween(ship);
+        if (!_isInitialized) InitializePositions();
 
-        if (mainSequence != null && mainSequence.IsActive())
+        // 모든 트윈 중지
+        if (mainSequence != null && mainSequence.IsActive()) mainSequence.Kill();
+        foreach (var pair in _initialPositions)
         {
-            mainSequence.Kill();
+            if (pair.Key != null) pair.Key.DOKill();
         }
 
+        // 모든 요소의 위치를 저장된 초기 위치로 리셋
+        foreach (var pair in _initialPositions)
+        {
+            if (pair.Key != null) pair.Key.anchoredPosition = pair.Value;
+        }
+
+        // 기타 상태 리셋
         container.localScale = Vector3.one;
         ropeImage.gameObject.SetActive(false);
         ropeImage.transform.localScale = Vector3.zero;
-    }
-
-    private void KillTween(GachaAnimElement element)
-    {
-        if (element != null && element.image != null) element.image.transform.DOKill();
     }
 
     private void StartBackgroundAnimation()
@@ -101,20 +142,16 @@ public class CharacterGachaDirector : MonoBehaviour
     private void ApplyElementAnimation(GachaAnimElement element)
     {
         if (element == null || element.image == null || element.moveDuration <= 0) return;
+        if (!_initialPositions.TryGetValue(element.image.rectTransform, out Vector2 startPos)) return;
 
-        // 시작 위치를 기록해 둡니다.
-        Vector2 startPos = element.image.rectTransform.anchoredPosition;
-        // 최종 목표 위치를 계산합니다.
         Vector2 targetPos = startPos + new Vector2(element.moveDistanceX, element.moveDistanceY);
 
         // DOTween을 사용하여 왕복 애니메이션을 설정합니다.
         element.image.rectTransform.DOAnchorPos(targetPos, element.moveDuration)
             .SetLoops(-1, LoopType.Yoyo)
-            .SetEase(Ease.InOutSine)
-            .SetId(element.image.gameObject); // Kill을 위해 ID 부여
+            .SetEase(Ease.InOutSine);
     }
 
-    // 에디터 테스트용
     [ContextMenu("Test Play Animation")]
     private void TestPlay()
     {
