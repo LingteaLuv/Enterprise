@@ -38,7 +38,8 @@ public class MonsterSkillSO : ScriptableObject
                 monsterSkillSet = new Monster_shotswordattack_1(stat, this);
                 break;
             case MonsterSkillAttackType.Monster_1_skill_normal:
-
+                monsterSkillSet = new Monster_1_skill_normal(stat, this);
+                break;
             case MonsterSkillAttackType.Monster_1_skill_magic:
                 monsterSkillSet = new Monster_1_skill_magic(stat, this);
                 break;

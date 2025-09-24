@@ -7,15 +7,16 @@ namespace JHT
     [System.Serializable]
     public class JHT_BaseMonsterStat
     {
+        [Header("베이스")]
         public JHT_MonsterDataSO curSO;
-
+        public string monsterName;
         public Dictionary<Stat, float> monsterStats = new Dictionary<Stat, float>();
 
+        [Header("스탯")]
         public float attackRange;
         public float chaseRange;
         public float moveSpeed;
 
-        public int cost;
 
         public Sprite projectileSprite;
 
@@ -34,8 +35,9 @@ namespace JHT
         {
             // start Setting
             curSO = so;
+            monsterName = curSO.monsterName;
 
-            foreach(var m in curSO.monsterStat)
+            foreach (var m in curSO.monsterStat)
             {
                 monsterStats[m.stat] = m.amount * addStat * AttackCalculate(curSO);
             }

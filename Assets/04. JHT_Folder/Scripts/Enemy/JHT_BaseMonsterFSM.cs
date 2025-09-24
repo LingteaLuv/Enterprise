@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
@@ -10,7 +12,7 @@ using UnityEngine;
 namespace JHT
 {
 
-    public abstract class JHT_BaseMonsterFSM : JHT_PooledObject, IAttacker
+    public abstract class JHT_BaseMonsterFSM : JHT_PooledObject, IAttacker, IDamageable
     {
         public enum MonsterState { IDLE, MOVE, ATTACK, DEATH, SKILL1, SKILL2, STUN }
 
@@ -45,6 +47,8 @@ namespace JHT
         private float curHP;
         public float CurHP { get { return curHP; } set { curHP = value; OnChangeHp?.Invoke(curHP); } }
         public Action<float> OnChangeHp;
+
+        [SerializeField] private List<Buff> activeBuffs = new List<Buff>();
 
         #region Animator
 
@@ -396,17 +400,35 @@ namespace JHT
             }
         }
 
-        public void TakeDebuff(Stat stat, float duartion, float amount)
+        // 버프 적용시 넣을 함수
+        public void ApplyBuff(Stat stat, float value, float duration, BuffType buffType)
         {
-            this.monsterStat.monsterStats[stat] -= this.monsterStat.monsterStats[stat] * (amount * 100);
-            _ = Debuff(duartion);
+            bool isSynergy = SynergyManager.IsApplyingSynergy;
+            Buff newBuff = new Buff(stat, value, duration, buffType, isSynergy, BuffEffectType.StatModifier);
+            activeBuffs.Add(newBuff);
+            _ = Debuff(stat, duration, value, newBuff);
+
         }
 
-        public async UniTask Debuff(float duartion)
+        public async UniTask Debuff(Stat stat, float duration, float amount, Buff newBuff)
         {
+            if (stat == Stat.Health)
+            {
+                CurHP += CurHP * (amount / 100);
+            }
+
+            this.monsterStat.monsterStats[stat] += this.monsterStat.monsterStats[stat] * (amount / 100);
             // 이펙트 여기에 추가
-            await UniTask.Delay(TimeSpan.FromSeconds(duartion), cancellationToken: token[5].Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: token[5].Token);
             //이펙트 해제
+            this.monsterStat.monsterStats[stat] -= this.monsterStat.monsterStats[stat] * (amount * 100);
+
+            if (stat == Stat.Health)
+            {
+                CurHP -= CurHP * (amount / 100);
+            }
+
+            activeBuffs.Remove(newBuff);
         }
 
         public void Rotate()
@@ -533,8 +555,22 @@ namespace JHT
         // --- IAttacker 인터페이스 구현 ---
         public float GetCurrentStat(Stat stat)
         {
-            // BaseMonsterStat에 만든 함수를 호출해서 스탯을 가져와요.
-            return monsterStat.monsterStats[stat];
+            float baseValue = 0;
+            switch (stat)
+            {
+                case Stat.Attack: baseValue = monsterStat.monsterStats[Stat.Attack]; break;
+                case Stat.Health: baseValue = monsterStat.monsterStats[Stat.Health]; break;
+                case Stat.Defense: baseValue = monsterStat.monsterStats[Stat.Defense]; break;
+                case Stat.CritChance: baseValue = monsterStat.monsterStats[Stat.CritChance]; break;
+                case Stat.CritDamage: baseValue = monsterStat.monsterStats[Stat.CritDamage]; break;
+                case Stat.AttackSpeed: baseValue = monsterStat.monsterStats[Stat.AttackSpeed]; break;
+            }
+            var statBuffs = activeBuffs.Where(b => b.EffectType == BuffEffectType.StatModifier && b.Stat == stat);
+            float flatBonus = statBuffs.Where(b => b.BuffType == BuffType.Flat).Sum(b => b.Value);
+            float percentBonus = statBuffs.Where(b => b.BuffType == BuffType.Percent).Sum(b => b.Value);
+            float finalValue = (baseValue + flatBonus) * (1 + percentBonus);
+
+            return finalValue;
         }
 
         // --- IDamageable 인터페이스 구현 ---
@@ -555,5 +591,7 @@ namespace JHT
 
             ApplyDamageEffects(finalDamage);
         }
+
+
     }
 }
