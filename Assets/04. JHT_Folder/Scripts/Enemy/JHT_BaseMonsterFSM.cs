@@ -343,8 +343,11 @@ namespace JHT
 
                 await UniTask.WaitUntil(() => !skill1Active || !skill2Active, cancellationToken: token[0].Token);
 
+                if (animator != null)
+                {
+                    animator.Play(ATTACK, 0, 0f);
+                }
                 isAttacking = true;
-                animator.Play(ATTACK, 0, 0f);
                 
                 await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.normalSkill.clip.length), cancellationToken: token[0].Token);
 
@@ -363,8 +366,11 @@ namespace JHT
                     await UniTask.WaitUntil(() => !skill1Active, cancellationToken: token[1].Token);
                     await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[1].Token);
                     await UniTask.WaitUntil(() => !isAttacking || !skill2Active, cancellationToken: token[1].Token);
+
                     skill1Active = true;
-                    animator.Play(SKILL1, 0, 0f);
+
+                    if (animator != null)
+                        animator.Play(SKILL1, 0, 0f);
                     
                     await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill1.clip.length), cancellationToken: token[1].Token);
                     skill1Active = false;
@@ -386,8 +392,10 @@ namespace JHT
                     await UniTask.WaitUntil(() => !skill2Active, cancellationToken: token[2].Token);
                     await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[2].Token);
                     await UniTask.WaitUntil(() => !isAttacking || !skill1Active, cancellationToken: token[2].Token);
+
                     skill2Active = true;
-                    animator.Play(SKILL2, 0, 0f);
+                    if (animator != null)
+                        animator.Play(SKILL2, 0, 0f);
                     
                     await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill2.clip.length), cancellationToken: token[2].Token);
                     skill2Active = false;

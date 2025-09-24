@@ -102,7 +102,7 @@ public class ChoosePopUp : MonoBehaviour
         item1RarityImg.sprite = relicsObj1.itemRarityImage;
 
         item1Power = so.startPower[(int)relicsObj1.curRarity - 1] + so.upPower[(int)relicsObj1.curRarity - 1] * relicsObj1.itemLevel;
-        item1PowerText.text = $"{item1Power.ToString()}";
+        item1PowerText.text = $"{item1Power.ToString("N1")}";
         item1PowerTypeText.text = $"{relicsObj1.itemPowerType.ToString()} : ";
 
         item1RarityText.text = $"{relicsObj1.curRarity}";
@@ -120,7 +120,7 @@ public class ChoosePopUp : MonoBehaviour
         item2RarityImg.sprite = relicsObj2.itemRarityImage;
 
         item2Power = so.startPower[(int)relicsObj2.curRarity - 1] + so.upPower[(int)relicsObj2.curRarity - 1] * relicsObj2.itemLevel;
-        item2PowerText.text = $"{item2Power.ToString()}";
+        item2PowerText.text = $"{item2Power.ToString("N1")}";
         item2PowerTypeText.text = $"{relicsObj2.itemPowerType.ToString()} : ";
 
         item2RarityText.text = $"{relicsObj2.curRarity}";
@@ -226,7 +226,7 @@ public class ChoosePopUp : MonoBehaviour
         if (compare == 0)
             compareText.text = "";
         else
-            compareText.text = $"{Mathf.Abs(compare)}";
+            compareText.text = $"{Mathf.Abs(compare).ToString("N1")}";
     }
 
     private void ChooseItem(bool value)
