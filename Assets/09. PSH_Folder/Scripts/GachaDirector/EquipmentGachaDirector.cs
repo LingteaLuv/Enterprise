@@ -13,7 +13,6 @@ public class EquipmentGachaDirector : MonoBehaviour
     public RectTransform container;
     public Image hammerImage;
     public Image weaponImage;
-    public ParticleSystem sparkParticleSystem;
 
     [Header("연출 흐름 설정")]
     public float startDelay = 1f;
@@ -36,9 +35,12 @@ public class EquipmentGachaDirector : MonoBehaviour
     private Dictionary<Transform, Vector3> _initialScales;
     private bool _isInitialized = false;
 
+    ImageMaterialChanger materialChanger;
+
     void Awake()
     {
         InitializeTransforms();
+        materialChanger = weaponImage.gameObject.GetComponent<ImageMaterialChanger>();
     }
 
     private void InitializeTransforms()
@@ -101,9 +103,8 @@ public class EquipmentGachaDirector : MonoBehaviour
             mainSequence.Join(hammerImage.rectTransform.DOAnchorPosY(hammerInitialY + hammerStrikeMoveDistanceY, singleStrikeTime * 0.3f).SetEase(Ease.InQuad));
             mainSequence.AppendCallback(() => {
                 if (weaponImage != null) weaponImage.transform.DOShakePosition(weaponShakeDuration, new Vector3(weaponShakeStrength, 0, 0), 10, 90, false, true);
-                if (sparkParticleSystem != null) sparkParticleSystem.Play();
+                if (materialChanger != null) materialChanger.AddEffect(EffectType.ForgeFlare, .2f);
             });
-            mainSequence.Append(hammerImage.rectTransform.DOAnchorPosY(hammerInitialY, singleStrikeTime * 0.3f));
         }
 
         float totalStrikeDuration = strikeDuration * strikeCount;
