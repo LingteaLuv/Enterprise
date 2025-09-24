@@ -7,6 +7,7 @@ public enum EffectType
     Hit,  // 피격
     Stun, // 스턴
     Freeze, // 빙결
+    ForgeFlare, // 장비 뽑기 연출
     // 나중에 추가
 }
 
@@ -27,6 +28,8 @@ public class EffectMaterialManager : Singleton<EffectMaterialManager>
 
     protected override void Awake()
     {
+        base.Awake();
+
         // 리스트를 딕셔너리로 변환해서 검색 속도를 빠르게 만들어줘요.
         materialDictionary = new Dictionary<EffectType, Material>();
         foreach (var pair in effectMaterials)
