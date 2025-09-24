@@ -7,7 +7,6 @@ namespace JHT
 {
     public class InventoryManager : Singleton<InventoryManager>
     {
-        // todo석원 : DB연동 - 장비(key : itemNum, weaponList - 레벨, 성급) 
         public List<WeaponObject> weaponList;
         public List<RelicsObject> relicsList;
 
@@ -40,6 +39,12 @@ namespace JHT
             public string Rarity;
         }
         
+        public class ParsingWeaponData
+        {
+            public int Level;
+            public int Star;
+        }
+        
         protected override void Awake()
         {
             base.Awake();
@@ -59,7 +64,7 @@ namespace JHT
 
         private void OnEnable()
         {
-             OnAddInventory += AddInventoryItem;
+            OnAddInventory += AddInventoryItem;
             OnRemoveInventory += RemoveInventoryIndex;
             OnChangeItem += AddRelicsItem;
             OnChangeAddItem += AddRelicsSolo;
@@ -86,7 +91,7 @@ namespace JHT
         public void AddEnhancementPointsToEquipment(int itemNum, int amount)
         {
             WeaponObject weapon = weaponList.Find(x => x.itemNum == itemNum);
-            if (weapon.itemStar >= 5)
+            if (weapon.ItemStar >= 5)
             {
                 equipmentFragments += amount;
             }
@@ -312,6 +317,17 @@ namespace JHT
                     }
                 }
             });
+            
+            DatabaseManager.Instance.LoadWeaponsAsync((result) =>
+            {
+                foreach (var kvp in result)
+                {
+                    int id = kvp.Key;
+                    ParsingWeaponData data = kvp.Value;
+                    WeaponObject weapon = new WeaponObject(id, data.Level, data.Star);
+                    weaponList.Add(weapon);
+                }
+            });
         }
 
         public WeaponObject AddItem(ItemWeaponSO item)
@@ -456,6 +472,7 @@ namespace JHT
             if (item.itemSO.itemType == ItemType.Equip)
             {
                 weaponList.Add((WeaponObject)item);
+                DatabaseManager.Instance.SaveWeaponDataAsync((WeaponObject)item);
                 OnAddItemForEncyclopedia?.Invoke(item);
             }
             else

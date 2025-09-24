@@ -48,7 +48,7 @@ namespace JHT
                 obj.OnChangeLevel += UpCountAction;
                 obj.OnChangeStar += UpStar;
                 itemDetail.onClick.AddListener(ShowItem);
-                UpStar(obj.itemStar);
+                UpStar(obj.ItemStar);
             }
         }
 
@@ -86,7 +86,7 @@ namespace JHT
             if (weaponObject == null) return;
 
             nameText.text = weaponObject.itemName;
-            if (weaponObject.itemStar >= 5)
+            if (weaponObject.ItemStar >= 5)
             {
                 levelText.text = "Lv. MAX";
             }

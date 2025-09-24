@@ -40,7 +40,6 @@ public class LoginManager : Singleton<LoginManager>
                 LoginType = LoginTypeEnum.GooglePlay;
                 break;
             default :
-                Debug.LogError($"대체 무슨 방식으로 로그인을 한 걸까 이 녀석 : {type}");
                 break;
         } 
     }
