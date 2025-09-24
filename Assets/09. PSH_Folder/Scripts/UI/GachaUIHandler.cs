@@ -34,6 +34,10 @@ public class GachaUIHandler : UIBase
     public Button relicsProbabilityBtn;
     public RelicsProbability relicsUpgradePanel;
 
+    [Header("가챠 연출")]
+    [Tooltip("캐릭터 가챠 시 재생할 연출 프리팹")]
+    public GameObject characterGachaDirectorPrefab;
+
     [Header("결과 UI")]
     [Tooltip("뽑기 결과 화면 UI를 연결하세요.")]
     public GachaListUI gachaListPanel;
@@ -169,12 +173,8 @@ public class GachaUIHandler : UIBase
 
         int totalCost = manager.singleGachaCost * count;
         string itemType = "아이템";
-        bool isCharacterGacha = false;
-        if (typeof(T) == typeof(PlayerCharacterData))
-        {
-            itemType = "캐릭터";
-            isCharacterGacha = true;
-        }
+        bool isCharacterGacha = typeof(T) == typeof(PlayerCharacterData);
+        if (isCharacterGacha) itemType = "캐릭터";
         else if (typeof(T) == typeof(ItemObject)) itemType = "장비";
 
         string currencyName = GetCurrencyNameInKorean(manager.currencyType);
@@ -183,11 +183,24 @@ public class GachaUIHandler : UIBase
             $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?",
             onConfirm: () =>
             {
+                // [수정] 연출 재생과 결과 표시를 동시에 진행합니다.
+                if (isCharacterGacha && characterGachaDirectorPrefab != null)
+                {
+                    CharacterGachaDirector director = EffectPoolManager.Instance.SpawnObject<CharacterGachaDirector>(characterGachaDirectorPrefab);
+                    if (director != null)
+                    {
+                        // 연출이 끝나면 스스로 풀에 반납되도록 콜백만 설정하고 바로 다음 로직으로 넘어갑니다.
+                        director.Play(onComplete: () =>
+                        {
+                            EffectPoolManager.Instance.ReturnToPool(director.gameObject);
+                        });
+                    }
+                }
+
+                // 연출 유무와 관계없이, 실제 뽑기 로직과 결과 표시는 즉시 실행합니다.
                 if (manager.PerformMultipleGacha(count))
                 {
                     Debug.Log($"UI 버튼 클릭으로 {itemType} {count}회 뽑기를 실행했습니다.");
-
-                    // Manager가 결과 표시를 담당하므로, 여기서는 퀘스트 신호만 보냅니다.
                     if (isCharacterGacha)
                     {
                         QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
