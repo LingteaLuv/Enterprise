@@ -27,6 +27,6 @@ public class Monster_0_attack_magic : MonsterSkillSet
 
         float projectileSpeed = 1f;
         obj.Init(fsm, targetPos, startPos, projectileSpeed, fsm.monsterStat.monsterStats[Stat.Attack], fsm.monsterStat.projectileSprite);
-        Debug.Log("MagicAttack Skill Set");
+        //Debug.LogError($"MagicAttack Damage : {fsm.monsterStat.monsterStats[Stat.Attack]}");
     }
 }

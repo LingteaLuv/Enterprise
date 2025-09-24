@@ -10,6 +10,6 @@ public class Monster_1_skill_normal : MonsterSkillSet
     public override void UseSkill(JHT_BaseMonsterFSM fsm)
     {
 
-        Debug.LogError("Monster_1_skill_normal Set");
+        //Debug.LogError("Monster_1_skill_normal Set");
     }
 }
