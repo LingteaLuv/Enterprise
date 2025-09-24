@@ -1,7 +1,7 @@
-using UnityEngine;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 /// <summary>
 /// 스킬 이펙트 등 자주 생성되고 파괴되는 게임 오브젝트를 위한 범용 오브젝트 풀 매니저입니다.
@@ -12,49 +12,46 @@ public class EffectPoolManager : Singleton<EffectPoolManager>
 {
     private Dictionary<GameObject, Queue<GameObject>> _poolDictionary;
     private List<GameObject> _activeObjects;
+    private static Canvas _mainCanvas; // 캔버스 캐싱을 위한 변수
 
     protected override void Awake()
     {
         base.Awake();
         _poolDictionary = new Dictionary<GameObject, Queue<GameObject>>();
         _activeObjects = new List<GameObject>();
+        _mainCanvas = GameObject.Find("Canvas").GetComponent<Canvas>();
     }
 
     /// <summary>
     /// [신규] 지정된 프리팹을 풀에서 가져와 컴포넌트를 반환합니다.
     /// 이 버전은 자동 반납 기능이 없으므로, 사용 후 수동으로 ReturnToPool을 호출해야 합니다.
     /// </summary>
-    public T SpawnObject<T>(GameObject prefab, Vector3 position, Quaternion rotation) where T : Component
+    public T SpawnObject<T>(GameObject prefab) where T : Component
     {
         if (prefab == null)
         {
             Debug.LogWarning("스폰하려는 프리팹이 null입니다.");
             return null;
         }
-
-        if (!_poolDictionary.ContainsKey(prefab))
+        if (prefab.GetComponent<RectTransform>() == null)
         {
-            _poolDictionary[prefab] = new Queue<GameObject>();
+            Debug.LogError($"'{prefab.name}'은 UI 프리팹이 아니므로 SpawnObject를 사용할 수 없습니다. 일반 오브젝트는 SpawnEffect를 사용해주세요.");
+            return null;
         }
 
-        GameObject objectToSpawn;
+        GameObject objectToSpawn = GetPooledObject(prefab);
 
-        if (_poolDictionary[prefab].Count > 0)
+        if (_mainCanvas == null)
         {
-            objectToSpawn = _poolDictionary[prefab].Dequeue();
-        }
-        else
-        {
-            objectToSpawn = Instantiate(prefab);
-            var pooledComp = objectToSpawn.AddComponent<PooledObject>();
-            pooledComp.Prefab = prefab;
+            Debug.LogError("씬에서 Canvas를 찾을 수 없습니다. UI 오브젝트를 스폰할 수 없습니다.");
+            ReturnToPool(objectToSpawn);
+            return null;
         }
 
-        objectToSpawn.transform.SetParent(null);
-        objectToSpawn.transform.position = position;
-        objectToSpawn.transform.rotation = rotation;
+        objectToSpawn.transform.SetParent(_mainCanvas.transform, false);
+        objectToSpawn.transform.localScale = Vector3.one;
+
         objectToSpawn.SetActive(true);
-
         _activeObjects.Add(objectToSpawn);
 
         T component = objectToSpawn.GetComponent<T>();
