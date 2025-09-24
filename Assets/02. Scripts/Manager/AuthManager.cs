@@ -200,7 +200,7 @@ public class AuthManager : Singleton<AuthManager>
         PlayGamesPlatform.Activate();
         var tcs = new TaskCompletionSource<bool>();
 
-        async void RequestServerSide()
+        void RequestServerSide()
         {
             PlayGamesPlatform.Instance.RequestServerSideAccess(true, async code =>
             {

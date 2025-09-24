@@ -65,9 +65,9 @@ namespace JHT
             lootTableDic = new();
 
             // 어드레서블로 모든 데이터 비동기 로드 시작
-            weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>(WEAPON_LABEL);
-            relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>(RELICS_LABEL);
-            lootTableHandler = Addressables.LoadAssetsAsync<RelicsGachaLootTable>(LOOTTABLE_LABEL);
+            weaponHandle = Addressables.LoadAssetsAsync<ItemWeaponSO>("Equips");
+            relicsHandle = Addressables.LoadAssetsAsync<ItemRelicsSO>("ItemRelics");
+            lootTableHandler = Addressables.LoadAssetsAsync<RelicsGachaLootTable>("RootTable");
 
             yield return weaponHandle;
             yield return relicsHandle;

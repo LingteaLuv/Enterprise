@@ -34,7 +34,7 @@ public class FirebaseManager : Singleton<FirebaseManager>
     private GoogleSignInConfiguration _configuration;
     public GoogleSignInConfiguration Configuration { get { return _configuration; } }
     
-    protected override async void Awake()
+    protected override void Awake()
     {
         OnFirebaseReady = null;
         

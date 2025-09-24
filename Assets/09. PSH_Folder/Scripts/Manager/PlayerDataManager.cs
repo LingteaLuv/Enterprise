@@ -77,7 +77,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         InitializeUpgradeCosts();
     }
 
-    private async void Start()
+    private void Start()
     {
         AuthManager.Instance.LoginCompleted += async () =>
         {
@@ -163,7 +163,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 #else
         Debug.Log("[테스트] 빌드 모드: 어드레서블을 사용하여 모든 캐릭터를 로드합니다.");
-        var handle = Addressables.LoadAssetsAsync<CharacterData>("Characters", null);
+        var handle = Addressables.LoadAssetsAsync<CharacterData>("Characters");
         await handle.Task;
 
         if (handle.Status == AsyncOperationStatus.Succeeded)
@@ -340,7 +340,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         return true;
     }*/
 
-    public async UniTask<bool> TryUpgradeCharacterStar(PlayerCharacterData playerCharData)
+    public bool TryUpgradeCharacterStar(PlayerCharacterData playerCharData)
     {
         if (playerCharData == null) { Debug.LogError("업그레이드할 캐릭터 데이터가 null입니다."); return false; }
         int characterId = playerCharData.characterdata.characterID;
