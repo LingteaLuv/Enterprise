@@ -46,7 +46,7 @@ public class Testeatset : MonoBehaviour
     void ShowNewMapUnlockEffect()
     {
         // 3. 풀 매니저의 새로운 함수로 이펙트를 스폰하고, UIUnlockEffect 컴포넌트를 직접 받아옵니다.
-        UIUnlockEffect effect = EffectPoolManager.Instance.SpawnObject<UIUnlockEffect>(unlockEffectPrefab, Vector3.zero, Quaternion.identity);
+        UIUnlockEffect effect = EffectPoolManager.Instance.SpawnObject<UIUnlockEffect>(unlockEffectPrefab);
 
         if (effect != null)
         {
