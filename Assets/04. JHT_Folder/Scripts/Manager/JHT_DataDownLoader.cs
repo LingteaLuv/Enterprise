@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Unity.VisualScripting;
+using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -152,9 +153,12 @@ namespace JHT
                         so.monsterStat[i].stat = (Stat)i;
                         so.monsterStat[i].amount = float.Parse(row[7+i]);
                     }
+                    so.monsterStat[0].amount = float.Parse(row[17]);
                     so.skill1 = row[13];
                     so.chaseRange = float.Parse(row[16]);
                     so.moveSpeed = float.Parse(row[17]);
+                    Debug.LogError($"{row[18]}");
+                    so.baseController = Resources.Load<AnimatorController>($"{row[18]}");
                 }
             }
         }
