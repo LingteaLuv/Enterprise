@@ -214,7 +214,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
         dataRef.GetValueAsync().ContinueWithOnMainThread((task) =>
         {
             if (!task.Result.Exists || task.Result.Value == null) return;
-
             var result = new Dictionary<int, InventoryManager.ParsingWeaponData>();
 
             foreach (var child in task.Result.Children)
@@ -608,7 +607,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
         var weaponData = new Dictionary<string, object>();
         
         weaponData[$"{path}/{data.itemNum}/Level"] = data.ItemLevel;
-        weaponData[$"{path}/{data.itemNum}/Rarity"] = data.curRarity.ToString();
         weaponData[$"{path}/{data.itemNum}/Star"] = data.ItemStar;
             
         SaveFieldsAsync(weaponData);

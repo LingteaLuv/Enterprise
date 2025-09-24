@@ -43,7 +43,6 @@ namespace JHT
         public class ParsingWeaponData
         {
             public int Level;
-            public string Rarity;
             public int Star;
         }
         
@@ -326,11 +325,8 @@ namespace JHT
                 {
                     int id = kvp.Key;
                     ParsingWeaponData data = kvp.Value;
-                    if (Enum.TryParse<ItemRarity>(data.Rarity, true, out ItemRarity rarity))
-                    {
-                        WeaponObject weapon = new WeaponObject(id, rarity, data.Level, data.Star);
-                        weaponList.Add(weapon);
-                    }
+                    WeaponObject weapon = new WeaponObject(id, data.Level, data.Star);
+                    weaponList.Add(weapon);
                 }
             });
         }

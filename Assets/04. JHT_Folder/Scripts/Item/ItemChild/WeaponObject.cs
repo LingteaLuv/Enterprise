@@ -55,12 +55,11 @@ namespace JHT
             statType = sample.statType;
         }
 
-        public WeaponObject(int id, ItemRarity rarity, int level, int star)
+        public WeaponObject(int id, int level, int star)
         {
             itemSO = DataManager.Instance.AllWeapons.Find(r => r.itemNum == id);
             ItemWeaponSO data = (ItemWeaponSO)itemSO;
             
-            curRarity = rarity;
             itemLevel = level;
             itemStar = star;
             itemIcon = data.icon;
