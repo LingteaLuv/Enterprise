@@ -11,6 +11,7 @@ public class PassiveSkillDataImporter
     private static string CSV_PATH = "/CSVData/";
     private static string SKILL_SO_PATH = "Assets/Resources/SkillData/PassiveSkills/";
     private static string EFFECT_SO_PATH = "Assets/Resources/SkillData/PassiveEffects/";
+    private const string EFFECT_PREFAB_ASSET_PATH = "Assets/09. PSH_Folder/SkillEffect/"; // 이펙트 프리팹 에셋 경로
 
     [MenuItem("Tools/Import Data/PassiveSkill")]
     public static void ParseGameData()
@@ -35,6 +36,9 @@ public class PassiveSkillDataImporter
             return;
         }
 
+        // 프리팹 경로 확인 및 생성
+        if (!Directory.Exists(EFFECT_PREFAB_ASSET_PATH)) Directory.CreateDirectory(EFFECT_PREFAB_ASSET_PATH);
+
         string[] lines = File.ReadAllLines(filePath);
         if (lines.Length <= 1) return;
 
@@ -42,7 +46,6 @@ public class PassiveSkillDataImporter
 
         for (int i = 1; i < lines.Length; i++)
         {
-            // ✨ 변경점: 새로운 Split 함수 사용!
             string[] fields = SplitCsvLine(lines[i]);
 
             try
@@ -50,7 +53,9 @@ public class PassiveSkillDataImporter
                 string effectID = GetString(fields, headerMap, "EffectID");
                 if (string.IsNullOrEmpty(effectID)) continue;
 
+                // 공통 파라미터 읽기
                 string effectType = GetString(fields, headerMap, "EffectType");
+                string prefabName = GetString(fields, headerMap, "EffectPrefab_Name");
                 string paramString1 = GetString(fields, headerMap, "Param_String1");
                 string paramString2 = GetString(fields, headerMap, "Param_String2");
                 float paramFloat1 = GetFloat(fields, headerMap, "Param_Float1");
@@ -58,6 +63,7 @@ public class PassiveSkillDataImporter
                 float paramFloat3 = GetFloat(fields, headerMap, "Param_Float3");
 
                 string assetPath = EFFECT_SO_PATH + effectID + ".asset";
+                SkillEffectSO skillEffect = null; // 모든 타입을 담을 공통 변수
 
                 switch (effectType)
                 {
@@ -67,29 +73,57 @@ public class PassiveSkillDataImporter
                         buffEffect.buffType = GetEnum<BuffType>(paramString2);
                         buffEffect.buffValue = paramFloat1;
                         buffEffect.duration = paramFloat2;
-                        EditorUtility.SetDirty(buffEffect);
+                        skillEffect = buffEffect;
                         break;
                     case "Heal":
                         HealEffectSO healEffect = AssetDatabase.LoadAssetAtPath<HealEffectSO>(assetPath) ?? CreateAsset<HealEffectSO>(assetPath);
                         healEffect.healAmount = paramFloat1;
-                        EditorUtility.SetDirty(healEffect);
+                        skillEffect = healEffect;
                         break;
                     case "Damage":
                         DamageEffectSO damageEffect = AssetDatabase.LoadAssetAtPath<DamageEffectSO>(assetPath) ?? CreateAsset<DamageEffectSO>(assetPath);
                         damageEffect.powerRatio = paramFloat1;
                         damageEffect.hitCount = (int)paramFloat2;
                         damageEffect.delayBetweenHits = (int)paramFloat3;
-                        EditorUtility.SetDirty(damageEffect);
+                        skillEffect = damageEffect;
                         break;
                     case "Stun":
                         StunEffectSO stunEffect = AssetDatabase.LoadAssetAtPath<StunEffectSO>(assetPath) ?? CreateAsset<StunEffectSO>(assetPath);
                         stunEffect.duration = paramFloat1;
+                        skillEffect = stunEffect;
                         break;
                     case "ExtraDamageBuff":
                         ApplyExtraDamageBuffEffectSO extraEffect = AssetDatabase.LoadAssetAtPath<ApplyExtraDamageBuffEffectSO>(assetPath) ?? CreateAsset<ApplyExtraDamageBuffEffectSO>(assetPath);
                         extraEffect.damageValue = paramFloat1;
                         extraEffect.duration = paramFloat2;
+                        skillEffect = extraEffect;
                         break;
+                }
+
+                // 공통 로직: 프리팹 연결
+                if (skillEffect != null)
+                {
+                    if (!string.IsNullOrEmpty(prefabName))
+                    {
+                        string prefabPath = EFFECT_PREFAB_ASSET_PATH + prefabName + ".prefab";
+                        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+                        if (prefab != null)
+                        {
+                            skillEffect.effectPrefab = prefab;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[PassiveSkillParser] 이펙트 프리팹을 찾을 수 없습니다: {prefabPath}");
+                            skillEffect.effectPrefab = null; // 못찾으면 필드를 null로 설정
+                        }
+                    }
+                    else
+                    {
+                        skillEffect.effectPrefab = null; // CSV에 이름이 없으면 null로 설정
+                    }
+
+                    EditorUtility.SetDirty(skillEffect);
                 }
             }
             catch (Exception ex)
