@@ -54,7 +54,6 @@ MonoBehaviour:
   container: {fileID: 3895234725805766840}
   hammerImage: {fileID: 3759554949543434166}
   weaponImage: {fileID: 4023018072573837948}
-  sparkParticleSystem: {fileID: 3821567691415608318, guid: a9a0f3efb99eadf4aaefdd6b16c5b6ef, type: 3}
   startDelay: 1
   zoomScale: 1.5
   strikeCount: 3
@@ -225,6 +224,7 @@ GameObject:
   - component: {fileID: 272478660020608950}
   - component: {fileID: 4852137816673491417}
   - component: {fileID: 4023018072573837948}
+  - component: {fileID: 260118383811581710}
   m_Layer: 5
   m_Name: Weapon
   m_TagString: Untagged
@@ -289,3 +289,15 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &260118383811581710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7407804038474637744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4793228497fbd3b44963f9cd0dbac661, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
