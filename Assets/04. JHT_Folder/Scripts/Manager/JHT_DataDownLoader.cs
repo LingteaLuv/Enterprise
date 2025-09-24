@@ -3,9 +3,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -157,8 +159,10 @@ namespace JHT
                     so.skill1 = row[13];
                     so.chaseRange = float.Parse(row[16]);
                     so.moveSpeed = float.Parse(row[17]);
-                    Debug.LogError($"{row[18]}");
-                    so.baseController = Resources.Load<AnimatorController>($"{row[18]}");
+                    
+                    
+                    so.baseController = MonsterDataManager.Instance.animatorController;
+                    //so.projectileSprite = Resources.Load<Sprite>($"{row[19]}");
                 }
             }
         }

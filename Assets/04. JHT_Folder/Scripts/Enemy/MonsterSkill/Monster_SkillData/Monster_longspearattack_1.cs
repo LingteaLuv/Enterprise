@@ -10,6 +10,6 @@ public class Monster_longspearattack_1 : MonsterSkillSet
     public override void UseSkill(JHT_BaseMonsterFSM fsm)
     {
         
-        Debug.LogError("Monster_longspearattack_1 Set");
+        //Debug.LogError("Monster_longspearattack_1 Set");
     }
 }
