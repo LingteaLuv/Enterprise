@@ -16,6 +16,8 @@ public class StunEffectSO : SkillEffectSO
     /// </summary>
     public override void ApplyEffect(IAttacker caster, IDamageable target)
     {
+        base.ApplyEffect(caster, target);
+
         // IDamageable에서 MonoBehaviour를 가져와 컴포넌트에 접근합니다.
         var targetMonoBehaviour = target as MonoBehaviour;
         if (targetMonoBehaviour == null) return;

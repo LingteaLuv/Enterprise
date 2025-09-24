@@ -8,6 +8,8 @@ public class HealEffectSO : SkillEffectSO
 
     public override void ApplyEffect(IAttacker caster, IDamageable target)
     {
+        base.ApplyEffect(caster, target);
+
         // BaseCharecterFSM에 있는 Heal 함수를 호출해요.
         var targetFSM = target as HealthSystem;
         if (targetFSM != null)
