@@ -53,6 +53,26 @@ public class DatabaseManager : Singleton<DatabaseManager>
         }
     }
 
+    public void SaveField(string tempPath, object value)
+    {
+        Dictionary<string, object> dictionary = new Dictionary<string, object>();
+        string path = $"{_uid}/" + tempPath;
+        dictionary[path] = value;
+
+        FirebaseManager.DataReference.UpdateChildrenAsync(dictionary).ContinueWithOnMainThread((task) =>
+        {
+            if (task.IsCompletedSuccessfully)
+            {
+                Debug.Log("데이터 저장 성공");
+            }
+            else
+            {
+                Debug.LogError("데이터 저장 실패");
+            }
+        });
+    }
+    
+
     /// <summary>
     /// Firebase RTDB에 다중 데이터(Dictionary)를 저장하는 메서드
     /// </summary>
@@ -226,6 +246,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             callback(result);
         });
     }
+    
     #region Nickname
     
     /// <summary>

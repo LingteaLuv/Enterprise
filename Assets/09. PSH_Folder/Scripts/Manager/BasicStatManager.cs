@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Cysharp.Threading.Tasks;
+using JHT;
 using UnityEngine;
 
 public class BasicStatManager : Singleton<BasicStatManager>
@@ -16,12 +18,25 @@ public class BasicStatManager : Singleton<BasicStatManager>
     private Dictionary<BasicStatType, int> _playerBasicStatLevels = new Dictionary<BasicStatType, int>();
     private Dictionary<BasicStatType, BasicStatData> _statDefinitionsMap = new Dictionary<BasicStatType, BasicStatData>();
 
+    public class ParsingStatData
+    {
+        public int Attack;
+        public int Defense;
+        public int Health;
+    }
+    
     protected override void Awake()
     {
         base.Awake();
-
         InitializeStatDefinitions();
-        LoadPlayerBasicStatLevels();
+    }
+
+    private void Start()
+    {
+        AuthManager.Instance.LoginCompleted += async () =>
+        {
+            await LoadPlayerBasicStatLevels();
+        };
     }
 
     private void InitializeStatDefinitions()
@@ -41,8 +56,15 @@ public class BasicStatManager : Singleton<BasicStatManager>
         }
     }
 
-    private void LoadPlayerBasicStatLevels()
+    private async UniTask LoadPlayerBasicStatLevels()
     {
+        await DatabaseManager.Instance.LoadFieldsAsync<ParsingStatData>("StatusData/Stat", (result) =>
+        {
+            _playerBasicStatLevels.Add(BasicStatType.Attack, result.Attack);
+            _playerBasicStatLevels.Add(BasicStatType.Defense, result.Defense);
+            _playerBasicStatLevels.Add(BasicStatType.Health, result.Health);
+        });
+        
         foreach (BasicStatType type in Enum.GetValues(typeof(BasicStatType)))
         {
             if (!_playerBasicStatLevels.ContainsKey(type))
@@ -114,6 +136,7 @@ public class BasicStatManager : Singleton<BasicStatManager>
         }
 
         _playerBasicStatLevels[type] += levelsToGain;
+        DatabaseManager.Instance.SaveField($"StatusData/Stat/{type.ToString()}", _playerBasicStatLevels[type]);
         Debug.Log($"기본 스탯 '{type}' 레벨업! (Lv.{_playerBasicStatLevels[type] - levelsToGain} -> Lv.{_playerBasicStatLevels[type]})");
 
         // 기본 스탯 변경 이벤트 발생
