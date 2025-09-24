@@ -67,8 +67,20 @@ public class PlayerCharacterData
         characterdata = DataManager.Instance.AllCharacters.Find(c => c.characterID == id);
 
         Level = new Property<int>(data.Level);
+        Level.OnChanged += (async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{id}/Level", value);
+        });
         Soul = new Property<int>(data.Soul);
+        Soul.OnChanged += (async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{id}/Soul", value);
+        });
         Star = new Property<int>(data.Star);
+        Star.OnChanged += (async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{id}/Star", value);
+        });
 
         // 아이콘
         crewRoleIcon = CrewroleIconManager.Instance.GetIcon(characterdata.crewRole);

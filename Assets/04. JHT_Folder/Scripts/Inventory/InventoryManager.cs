@@ -81,7 +81,6 @@ namespace JHT
 
         #region 수현님코드
         // ▼▼▼ 강화 포인트 관련 코드 수정 ▼▼▼
-        // todo석원 : 장비 DB 연동 - 강화 포인트
         //public Dictionary<int, int> equipmentEnhancementPoints = new Dictionary<int, int>();
         public Action<int, int> OnEquipmentEnhancementPointsChanged; // itemNum, newPoints
         public const int MAX_EQUIPMENT_LEVEL = 10;
