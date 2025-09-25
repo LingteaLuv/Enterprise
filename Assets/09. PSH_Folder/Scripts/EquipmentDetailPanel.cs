@@ -90,9 +90,9 @@ public class EquipmentDetailPanel : MonoBehaviour
         if (currentWeapon == null || currentCharacter == null) return;
 
         // Check if the item is equipped by another character
-        if (!string.IsNullOrEmpty(currentWeapon.EquippedByCharacterId))
+        if (!string.IsNullOrEmpty(currentWeapon.EquippedByCharacterId.Value))
         {
-            if (int.TryParse(currentWeapon.EquippedByCharacterId, out int ownerId) && ownerId != currentCharacter.characterdata.characterID)
+            if (int.TryParse(currentWeapon.EquippedByCharacterId.Value, out int ownerId) && ownerId != currentCharacter.characterdata.characterID)
             {
                 if (PlayerDataManager.Instance.OwnedCharacters.TryGetValue(ownerId, out PlayerCharacterData owner))
                 {

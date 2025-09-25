@@ -41,6 +41,7 @@ namespace JHT
         
         public class ParsingWeaponData
         {
+            public string CrewId;
             public int Level;
             public int Point;
             public int Star;
@@ -328,9 +329,10 @@ namespace JHT
                 {
                     int id = kvp.Key;
                     ParsingWeaponData data = kvp.Value;
-                    WeaponObject weapon = new WeaponObject(id, data.Level, data.Star, data.Point);
+                    WeaponObject weapon = new WeaponObject(id, data.CrewId, data.Level, data.Star, data.Point);
                     weaponList.Add(weapon);
                 }
+                DataManager.Instance.OnWeaponReady.Invoke();
             });
         }
 

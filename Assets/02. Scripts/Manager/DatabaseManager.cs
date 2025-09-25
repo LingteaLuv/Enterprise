@@ -247,6 +247,21 @@ public class DatabaseManager : Singleton<DatabaseManager>
         });
     }
     
+    public void LoadEquipsAsync(int id, Action<Dictionary<string, object>> callback)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child($"StatusData/Crew/{id}/Equips");
+        dataRef.GetValueAsync().ContinueWithOnMainThread((task) =>
+        {
+            if (!task.Result.Exists || task.Result.Value == null)
+            {
+                callback(new Dictionary<string, object>());
+                return;
+            }
+            Dictionary<string, object> result = task.Result.Value as Dictionary<string, object>;
+            callback(result);
+        });
+    }
+    
     #region Nickname
     
     /// <summary>

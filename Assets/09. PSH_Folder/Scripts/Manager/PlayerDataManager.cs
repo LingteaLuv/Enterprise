@@ -80,7 +80,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     private void Start()
     {
-        AuthManager.Instance.LoginCompleted += async () =>
+        DataManager.Instance.OnWeaponReady += async () =>
         {
             await InitDatabase();
             
@@ -424,9 +424,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 
         PlayerCharacterData oldOwner = null;
-        if (!string.IsNullOrEmpty(newItem.EquippedByCharacterId))
+        if (!string.IsNullOrEmpty(newItem.EquippedByCharacterId.Value))
         {
-            if (int.TryParse(newItem.EquippedByCharacterId, out int ownerId) && OwnedCharacters.TryGetValue(ownerId, out oldOwner))
+            if (int.TryParse(newItem.EquippedByCharacterId.Value, out int ownerId) && OwnedCharacters.TryGetValue(ownerId, out oldOwner))
             {
                 if (oldOwner != character)
                 {
@@ -436,14 +436,15 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 
         EquipCategory category = newItem.equipCategory;
-
+        string itemCategory = category.ToString();
         if (character.equippedItems.ContainsKey(category))
         {
             UnequipItem(character, category, false);
         }
 
         character.equippedItems[category] = newItem;
-        newItem.EquippedByCharacterId = character.characterdata.characterID.ToString();
+        DatabaseManager.Instance.SaveField($"StatusData/Crew/{character.characterdata.characterID}/Equips/{itemCategory}", newItem.itemNum);
+        newItem.EquippedByCharacterId.Value = character.characterdata.characterID.ToString();
 
         Debug.Log($"{character.characterdata.characterName}이(가) {newItem.itemName}을(를) {category} 슬롯에 장착했습니다.");
 
@@ -473,8 +474,11 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
         Debug.Log($"{character.characterdata.characterName}의 {category} 슬롯에서 {itemToUnequip.itemName} 장착을 해제합니다.");
 
-        itemToUnequip.EquippedByCharacterId = null;
+        itemToUnequip.EquippedByCharacterId.Value = "";
         character.equippedItems.Remove(category);
+        
+        string itemCategory = category.ToString();
+        DatabaseManager.Instance.SaveField($"StatusData/Crew/{character.characterdata.characterID}/Equips/{itemCategory}", null);
 
         if (triggerUpdate)
         {
