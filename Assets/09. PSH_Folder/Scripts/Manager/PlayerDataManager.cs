@@ -24,6 +24,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
    
     
     [Header("캐릭터 편성")]
+    //Todo석원 : DB 연동
     public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
     public const int MAX_FORMATION_SIZE = 5;
     public BigInteger teamBattlePower;
@@ -77,9 +78,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         InitializeUpgradeCosts();
     }
 
-    private async void Start()
+    private void Start()
     {
-        AuthManager.Instance.LoginCompleted += async () =>
+        DataManager.Instance.OnWeaponReady += async () =>
         {
             await InitDatabase();
             
@@ -163,7 +164,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 #else
         Debug.Log("[테스트] 빌드 모드: 어드레서블을 사용하여 모든 캐릭터를 로드합니다.");
-        var handle = Addressables.LoadAssetsAsync<CharacterData>("Characters", null);
+        var handle = Addressables.LoadAssetsAsync<CharacterData>("Characters");
         await handle.Task;
 
         if (handle.Status == AsyncOperationStatus.Succeeded)
@@ -340,7 +341,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         return true;
     }*/
 
-    public async UniTask<bool> TryUpgradeCharacterStar(PlayerCharacterData playerCharData)
+    public bool TryUpgradeCharacterStar(PlayerCharacterData playerCharData)
     {
         if (playerCharData == null) { Debug.LogError("업그레이드할 캐릭터 데이터가 null입니다."); return false; }
         int characterId = playerCharData.characterdata.characterID;
@@ -423,9 +424,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 
         PlayerCharacterData oldOwner = null;
-        if (!string.IsNullOrEmpty(newItem.EquippedByCharacterId))
+        if (!string.IsNullOrEmpty(newItem.EquippedByCharacterId.Value))
         {
-            if (int.TryParse(newItem.EquippedByCharacterId, out int ownerId) && OwnedCharacters.TryGetValue(ownerId, out oldOwner))
+            if (int.TryParse(newItem.EquippedByCharacterId.Value, out int ownerId) && OwnedCharacters.TryGetValue(ownerId, out oldOwner))
             {
                 if (oldOwner != character)
                 {
@@ -435,14 +436,15 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
 
         EquipCategory category = newItem.equipCategory;
-
+        string itemCategory = category.ToString();
         if (character.equippedItems.ContainsKey(category))
         {
             UnequipItem(character, category, false);
         }
 
         character.equippedItems[category] = newItem;
-        newItem.EquippedByCharacterId = character.characterdata.characterID.ToString();
+        DatabaseManager.Instance.SaveField($"StatusData/Crew/{character.characterdata.characterID}/Equips/{itemCategory}", newItem.itemNum);
+        newItem.EquippedByCharacterId.Value = character.characterdata.characterID.ToString();
 
         Debug.Log($"{character.characterdata.characterName}이(가) {newItem.itemName}을(를) {category} 슬롯에 장착했습니다.");
 
@@ -472,8 +474,11 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
         Debug.Log($"{character.characterdata.characterName}의 {category} 슬롯에서 {itemToUnequip.itemName} 장착을 해제합니다.");
 
-        itemToUnequip.EquippedByCharacterId = null;
+        itemToUnequip.EquippedByCharacterId.Value = "";
         character.equippedItems.Remove(category);
+        
+        string itemCategory = category.ToString();
+        DatabaseManager.Instance.SaveField($"StatusData/Crew/{character.characterdata.characterID}/Equips/{itemCategory}", null);
 
         if (triggerUpdate)
         {

@@ -69,7 +69,8 @@ public class PlayerInfoPanel : UIBase
     
     private void OnTouchLogoutBtn()
     {
-        AuthManager.Instance.Logout();
-        SceneManager.LoadScene("LoginScene");
+        //AuthManager.Instance.Logout();
+        Utility.OnDestroyAll.Invoke();
+        SceneTransitionManager.Instance.LoadSceneWithLoading("LoginScene", 2f);
     }
 }

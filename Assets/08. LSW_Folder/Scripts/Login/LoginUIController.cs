@@ -18,7 +18,7 @@ public class LoginUIController : UIController<LoginUIController.LoginUIType>
             if (ui is StartPanel startPanel)
             {
                 // 팝업 닫기 버튼
-                startPanel.OnTouchStartBtn = async () =>
+                startPanel.OnTouchStartBtn = () =>
                 {
                     /*/*if (await AuthManager.Instance.AutoLogin())
                     {

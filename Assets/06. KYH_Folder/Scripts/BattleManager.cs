@@ -223,8 +223,17 @@ public class BattleManager : MonoBehaviour
                 return;
             }
         }
-        JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[(GlobalStageManager.Instance.CurrentStageIndex.Value - 1)],
-            (GlobalStageManager.Instance.CurrentStageIndex.Value - 1));
+
+        if (GlobalStageManager.Instance.CurrentStageIndex == null)
+        {
+            JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[0], 0);
+        }
+        else
+        {
+            JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[(GlobalStageManager.Instance.CurrentStageIndex.Value - 1)],
+                (GlobalStageManager.Instance.CurrentStageIndex.Value - 1));
+        }
+        
 
         IsStageEnd = false;
 
@@ -251,7 +260,7 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log("전투 시작");
 
-        var field = battleFields[currentRoundIndex];
+        var field = battleFields[GlobalStageManager.Instance.CurrentStageIndex.Value];
 
         SpawnEnemies(currentRoundIndex);
         SpawnPlayers(field);

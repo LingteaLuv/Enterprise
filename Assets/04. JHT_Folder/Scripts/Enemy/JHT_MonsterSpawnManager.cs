@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace JHT
 {
@@ -28,7 +29,7 @@ namespace JHT
         Dictionary<AtkRangeType, AnimatorOverrideController> aocDic;
 
 
-        public int islandIndex;
+        public int stageIndex;
         public int roundIndex;
 
         private bool isMonsterDataSetReady;
@@ -110,22 +111,26 @@ namespace JHT
             // 현재 스테이지만 로드할지 아니면 전체 다 로드할지 - 현재는 전체 다 로드함
             for (int i = 0; i < monsterDataManager.monsterTableList.Count; i++)
             {
-                stageDic.Add(i, monsterDataManager.monsterTableList[i]);
+                if(!stageDic.ContainsKey(i))
+                {
+                    stageDic.Add(i, monsterDataManager.monsterTableList[i]);
+                };
             }
         }
 
 
-        public void ChangeIsland(BattleField field, int _islandIndex)
+        public void ChangeIsland(BattleField field, int _stageIndex)
         {
+            DataStageLoad();
             roundIndex = 0;
-            if (_islandIndex < 0)
+            if (_stageIndex < 0)
                 return;
 
             if (posList.Count > 0)
                 posList.Clear();
 
-            islandIndex = _islandIndex;
-            roundTable = stageDic[_islandIndex];
+            stageIndex = _stageIndex;
+            roundTable = stageDic[_stageIndex];
 
 
             for (int i = 0; i < monsterSamplePos.Count; i++)

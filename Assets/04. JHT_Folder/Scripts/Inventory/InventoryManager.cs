@@ -41,7 +41,9 @@ namespace JHT
         
         public class ParsingWeaponData
         {
+            public string CrewId;
             public int Level;
+            public int Point;
             public int Star;
         }
         
@@ -80,8 +82,7 @@ namespace JHT
 
         #region 수현님코드
         // ▼▼▼ 강화 포인트 관련 코드 수정 ▼▼▼
-        // todo석원 : 장비 DB 연동 - 강화 포인트
-        public Dictionary<int, int> equipmentEnhancementPoints = new Dictionary<int, int>();
+        //public Dictionary<int, int> equipmentEnhancementPoints = new Dictionary<int, int>();
         public Action<int, int> OnEquipmentEnhancementPointsChanged; // itemNum, newPoints
         public const int MAX_EQUIPMENT_LEVEL = 10;
 
@@ -97,26 +98,29 @@ namespace JHT
             }
             else
             {
-                if (equipmentEnhancementPoints.ContainsKey(itemNum))
+                /*if (equipmentEnhancementPoints.ContainsKey(itemNum))
                 {
                     equipmentEnhancementPoints[itemNum] += amount;
                 }
                 else
                 {
                     equipmentEnhancementPoints.Add(itemNum, amount);
-                }
-                Debug.Log($"장비 ID: {itemNum} 에 강화 포인트 {amount} 추가! (총 {equipmentEnhancementPoints[itemNum]} 포인트)");
-                OnEquipmentEnhancementPointsChanged?.Invoke(itemNum, equipmentEnhancementPoints[itemNum]);
+                }*/
+                weapon.enhancementPoint.Value += amount;
+                Debug.Log($"장비 ID: {itemNum} 에 강화 포인트 {amount} 추가! (총 {weapon.enhancementPoint.Value} 포인트)");
+                OnEquipmentEnhancementPointsChanged?.Invoke(itemNum, weapon.enhancementPoint.Value);
             }
         }
         
         public int GetEnhancementPoints(int itemNum)
         {
-            if (equipmentEnhancementPoints.ContainsKey(itemNum))
+            /*if (equipmentEnhancementPoints.ContainsKey(itemNum))
             {
                 return equipmentEnhancementPoints[itemNum];
             }
-            return 0;
+            return 0;*/
+            WeaponObject weapon = weaponList.Find(x => x.itemNum == itemNum);
+            return weapon.enhancementPoint.Value;
         }
 
         /// <summary>
@@ -204,7 +208,8 @@ namespace JHT
 
                 // 남은 장비 포인트가 있다면 장비 조각으로 전환
                 equipmentFragments += GetEnhancementPoints(itemNum);
-                equipmentEnhancementPoints[itemNum] = 0;
+                //equipmentEnhancementPoints[itemNum] = 0;
+                weapon.enhancementPoint.Value = 0;
             }
             else
             {
@@ -324,9 +329,10 @@ namespace JHT
                 {
                     int id = kvp.Key;
                     ParsingWeaponData data = kvp.Value;
-                    WeaponObject weapon = new WeaponObject(id, data.Level, data.Star);
+                    WeaponObject weapon = new WeaponObject(id, data.CrewId, data.Level, data.Star, data.Point);
                     weaponList.Add(weapon);
                 }
+                DataManager.Instance.OnWeaponReady.Invoke();
             });
         }
 

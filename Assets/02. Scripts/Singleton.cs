@@ -9,6 +9,9 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     [SerializeField]
     private bool _dontDestroyOnLoad = true;
     
+    [SerializeField]
+    protected bool _isStatic = true;
+    
     private static T _instance;
     public static T Instance
     {
@@ -43,6 +46,8 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
     protected virtual void Awake()
     {
+        Utility.OnDestroyAll += DestroyOnSelf;
+        
         if (_instance == null)
         {
             _instance = this as T;
@@ -64,9 +69,19 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
     protected virtual void OnDestroy()
     {
+        Utility.OnDestroyAll -= DestroyOnSelf;
+        
         if (_instance == this)
         {
             _isShootingDown = true;
+        }
+    }
+
+    private void DestroyOnSelf()
+    {
+        if (gameObject != null && _isStatic)
+        {
+            Destroy(gameObject);
         }
     }
 }

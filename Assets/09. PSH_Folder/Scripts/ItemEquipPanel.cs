@@ -77,10 +77,10 @@ namespace JHT // 동일한 네임스페이스 사용
         {
             if (equippedByPanel == null) return;
 
-            if (!string.IsNullOrEmpty(weaponObject.EquippedByCharacterId))
+            if (!string.IsNullOrEmpty(weaponObject.EquippedByCharacterId.Value))
             {
                 equippedByPanel.SetActive(true);
-                if (int.TryParse(weaponObject.EquippedByCharacterId, out int charId) && PlayerDataManager.Instance != null)
+                if (int.TryParse(weaponObject.EquippedByCharacterId.Value, out int charId) && PlayerDataManager.Instance != null)
                 {
                     if (PlayerDataManager.Instance.OwnedCharacters.TryGetValue(charId, out PlayerCharacterData owner))
                     {

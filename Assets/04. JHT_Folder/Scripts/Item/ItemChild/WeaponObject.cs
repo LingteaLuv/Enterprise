@@ -12,11 +12,12 @@ namespace JHT
         public ItemRarity curRarity;
 
         public Rarity rarity;
-        public string EquippedByCharacterId { get; set; } = null; // 장착한 캐릭터의 ID
         public EquipCategory equipCategory; // 분류 - 무기 방패 갑옷
         public EquipType equipType; // 세부분류 - 무기) 칼 도끼 활 등
         public Stat statType;
 
+        public Property<string> EquippedByCharacterId;
+        
         private float itemPower;
         public float ItemPower { get { return itemPower; } set { itemPower = value; OnChangePower?.Invoke(itemPower); } }
         public Action<float> OnChangePower;
@@ -29,6 +30,10 @@ namespace JHT
         public int ItemStar { get { return itemStar.Value; } set { itemStar.Value = value; OnChangeStar?.Invoke(itemStar.Value); } }
         public Action<int> OnChangeStar;
 
+        public Property<int> enhancementPoint;
+        public int EnhancementPoint { get { return enhancementPoint.Value; } set { enhancementPoint.Value = value; OnChangePoint?.Invoke(enhancementPoint.Value); } }
+        public Action<int> OnChangePoint;
+        
         private bool isUpgrade;
         public bool IsUpgrade { get { return isUpgrade; } set { isUpgrade = value; OnUpgrade?.Invoke(isUpgrade); } }
         public event Action<bool> OnUpgrade;
@@ -42,6 +47,13 @@ namespace JHT
             itemName = sample.itemName;
             itemNum = sample.itemNum;
             itemSO = sample;
+
+            EquippedByCharacterId = new Property<string>("");
+            EquippedByCharacterId.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{itemNum}/CrewId", value);
+            });
+            
             itemLevel = new Property<int>(0);
             itemLevel.OnChanged += (async (value) =>
             {
@@ -52,16 +64,33 @@ namespace JHT
             {
                 await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{itemNum}/Star", value);
             });
+            enhancementPoint = new Property<int>(0);
+            enhancementPoint.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{itemNum}/Point", value);
+            });
             equipCategory = sample.equipCategory;
             equipType = sample.equipType;
             statType = sample.statType;
         }
 
-        public WeaponObject(int id, int level, int star)
+        public WeaponObject(int id, string crewId, int level, int star, int point)
         {
             itemSO = DataManager.Instance.AllWeapons.Find(r => r.itemNum == id);
             ItemWeaponSO data = (ItemWeaponSO)itemSO;
-            
+
+            if (!string.IsNullOrEmpty(crewId))
+            {
+                EquippedByCharacterId = new Property<string>(crewId);
+            }
+            else
+            {
+                EquippedByCharacterId = new Property<string>("");
+            }
+            EquippedByCharacterId.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{id}/CrewId", value);
+            });
             itemLevel = new Property<int>(level);
             itemLevel.OnChanged += (async (value) =>
             {
@@ -71,6 +100,11 @@ namespace JHT
             itemStar.OnChanged += (async (value) =>
             {
                 await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{id}/Star", value);
+            });
+            enhancementPoint = new Property<int>(point);
+            enhancementPoint.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{id}/Point", value);
             });
             itemIcon = data.icon;
             itemNum = data.itemNum;

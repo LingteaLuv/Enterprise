@@ -22,8 +22,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
     public void Init()
     {
         _user = FirebaseManager.Auth.CurrentUser;
-        Debug.Log($"_user : {_user}");
-        Debug.Log($"_uid : {_user.UserId}");
         _uid = _user.UserId;
     }
 
@@ -54,6 +52,26 @@ public class DatabaseManager : Singleton<DatabaseManager>
             Debug.LogError("데이터 저장 실패");
         }
     }
+
+    public void SaveField(string tempPath, object value)
+    {
+        Dictionary<string, object> dictionary = new Dictionary<string, object>();
+        string path = $"{_uid}/" + tempPath;
+        dictionary[path] = value;
+
+        FirebaseManager.DataReference.UpdateChildrenAsync(dictionary).ContinueWithOnMainThread((task) =>
+        {
+            if (task.IsCompletedSuccessfully)
+            {
+                Debug.Log("데이터 저장 성공");
+            }
+            else
+            {
+                Debug.LogError("데이터 저장 실패");
+            }
+        });
+    }
+    
 
     /// <summary>
     /// Firebase RTDB에 다중 데이터(Dictionary)를 저장하는 메서드
@@ -228,6 +246,22 @@ public class DatabaseManager : Singleton<DatabaseManager>
             callback(result);
         });
     }
+    
+    public void LoadEquipsAsync(int id, Action<Dictionary<string, object>> callback)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child($"StatusData/Crew/{id}/Equips");
+        dataRef.GetValueAsync().ContinueWithOnMainThread((task) =>
+        {
+            if (!task.Result.Exists || task.Result.Value == null)
+            {
+                callback(new Dictionary<string, object>());
+                return;
+            }
+            Dictionary<string, object> result = task.Result.Value as Dictionary<string, object>;
+            callback(result);
+        });
+    }
+    
     #region Nickname
     
     /// <summary>
@@ -293,8 +327,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
                 return;
             }
             
-            string nickname = task.Result.ToString();
-            Debug.LogWarning($"닉네임 로드 성공 : {nickname}");
+            string nickname = task.Result.Value.ToString();
             callback(nickname);
         });
     }
@@ -607,6 +640,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         var weaponData = new Dictionary<string, object>();
         
         weaponData[$"{path}/{data.itemNum}/Level"] = data.ItemLevel;
+        weaponData[$"{path}/{data.itemNum}/Point"] = data.EnhancementPoint;
         weaponData[$"{path}/{data.itemNum}/Star"] = data.ItemStar;
             
         SaveFieldsAsync(weaponData);

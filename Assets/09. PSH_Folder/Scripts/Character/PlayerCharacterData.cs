@@ -1,3 +1,4 @@
+using System;
 using JHT;
 using System.Collections.Generic;
 using System.Numerics;
@@ -67,8 +68,20 @@ public class PlayerCharacterData
         characterdata = DataManager.Instance.AllCharacters.Find(c => c.characterID == id);
 
         Level = new Property<int>(data.Level);
+        Level.OnChanged += (async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{id}/Level", value);
+        });
         Soul = new Property<int>(data.Soul);
+        Soul.OnChanged += (async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{id}/Soul", value);
+        });
         Star = new Property<int>(data.Star);
+        Star.OnChanged += (async (value) =>
+        {
+            await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{id}/Star", value);
+        });
 
         // 아이콘
         crewRoleIcon = CrewroleIconManager.Instance.GetIcon(characterdata.crewRole);
@@ -79,9 +92,23 @@ public class PlayerCharacterData
         {
             characterStats[stat.statName] = stat.value;
         }
-
-        // 장비 딕셔너리 초기화
+        
         equippedItems = new Dictionary<EquipCategory, WeaponObject>();
+
+        DatabaseManager.Instance.LoadEquipsAsync(id, (result) =>
+        {
+            foreach (var kvp in result)
+            {
+                //string category = kvp.Key;    
+                int itemId = Convert.ToInt32(kvp.Value); 
+                WeaponObject equip = InventoryManager.Instance.weaponList.Find(w => w.itemNum == itemId);
+                if (equip != null)
+                {
+                    equippedItems.Add(equip.equipCategory, equip);
+                }
+            }
+        });
+        // 장비 딕셔너리 초기화
 
         // 최초 스탯 계산. BasicStatManager가 준비되기 전에 호출될 수 있으므로 battlePower만 초기화합니다.
         battlePower = 0;

@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using JHT;
-using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -81,7 +80,7 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         monsterPrefabDic = new();
         monsterSkillDic = new();
 
-        var handle = Addressables.LoadAssetAsync<RuntimeAnimatorController>("Assets/04. JHT_Folder/Animator/JHT_Monster_Animator.controller");
+        var handle = Addressables.LoadAssetAsync<RuntimeAnimatorController>("MonsterAnimController");
         monsterTableHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataTable>("MonsterSpawnRoundTable");
         monsterDataHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataSO>("MonsterData");
         monsterPrefabHandle = Addressables.LoadAssetsAsync<GameObject>("MonsterPrefab");

@@ -193,8 +193,6 @@ namespace JHT
                 if (token[i] != null)
                 {
                     token[i].Cancel();
-                    token[i].Dispose();
-                    token[i] = null;
                 }
             }
 
@@ -218,20 +216,18 @@ namespace JHT
         protected virtual void OnDisable()
         {
             OnChangeHp -= ShowMonsterUI;
-
+        
             if (token != null)
             {
                 for (int i = 0; i < token.Length; i++)
                 {
                     if (token[i] != null)
                     {
-                        token[i]?.Cancel();
-                        token[i]?.Dispose();
+                        token[i].Dispose();
                         token[i] = null;
                     }
                 }
             }
-            
             //canAttack = false;
             //OnChangeAttack -= CanAttackCor;
         }
