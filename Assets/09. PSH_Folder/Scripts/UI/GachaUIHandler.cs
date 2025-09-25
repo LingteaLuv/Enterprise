@@ -93,12 +93,14 @@ public class GachaUIHandler : UIBase
         //relicTicketCountText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon));
     }
 
-    private void Start()
+    private void Awake()
     {
         // 가챠매니저 연결
         characterGachaManager = FindAnyObjectByType<CharacterGachaManager>();
         equipmentGachaManager = FindAnyObjectByType<EquipmentGachaManager>();
-
+    }
+    private void Start()
+    {
         // 탭 버튼 이벤트 연결
         charButton.onClick.AddListener(OnClick_CharTab);
         equipButton.onClick.AddListener(OnClick_EquipTab);
