@@ -300,32 +300,48 @@ public class IslandStageManager : MonoBehaviour
     /// <summary>
     /// 현재 인덱스에 해당하는 전투 필드만 활성화
     /// </summary>
-    private void SetBattleField(int index)
+    private void SetBattleField(int islandIndex)
     {
-        Debug.Log($"[SetBattleField] index={index}");
+        int stageIndex = GlobalStageManager.Instance.CurrentStageIndex.Value - 1;
 
-        for (int i = 0; i < battleFields.Count; i++)
+        Debug.Log($"[SetBattleField] stage={stageIndex}, island={islandIndex}");
+
+        // BattleFields 오브젝트 찾아서 모든 섬 비활성화
+        GameObject battleFieldsRoot = GameObject.Find("BattleFields");
+        if (battleFieldsRoot == null)
         {
-            bool isTarget = (i == index);
-            GameObject field = battleFields[i];
-            field.SetActive(isTarget);
+            Debug.LogError("[SetBattleField] BattleFields 오브젝트를 찾을 수 없습니다.");
+            return;
+        }
 
-            if (isTarget)
+        // 모든 섬 비활성화
+        foreach (Transform child in battleFieldsRoot.transform)
+        {
+            child.gameObject.SetActive(false);
+        }
+
+        // 현재 스테이지에 해당하는 섬 프리팹만 활성화
+        if (stageIndex < battleFieldsRoot.transform.childCount)
+        {
+            Transform island = battleFieldsRoot.transform.GetChild(stageIndex);
+            island.gameObject.SetActive(true);
+
+            // GridManager 타일맵 갱신
+            var bf = island.GetComponent<BattleField>();
+            if (bf != null)
             {
-                var bf = field.GetComponent<BattleField>();
-                if (bf != null)
-                {
-                    bf.FadeIn(1f);
-
-                    // ✅ GridManager에 타일맵 갱신 요청
-                    GridManager.Instance.SetTilemaps(bf.BaseTilemap, bf.ObstacleTilemap);
-                    GridManager.Instance.CreateGrid(); // ← 꼭 새로 만들어야 반영됨
-                }
-                else
-                {
-                    Debug.LogWarning($"[SetBattleField] BattleField 컴포넌트를 찾을 수 없습니다: {field.name}");
-                }
+                bf.FadeIn(1f); // 연출
+                GridManager.Instance.SetTilemaps(bf.BaseTilemap, bf.ObstacleTilemap);
+                GridManager.Instance.CreateGrid(); // 그리드 재생성 필수
             }
+            else
+            {
+                Debug.LogWarning($"[SetBattleField] BattleField 컴포넌트를 찾을 수 없습니다: {island.name}");
+            }
+        }
+        else
+        {
+            Debug.LogError($"[SetBattleField] stageIndex {stageIndex}가 BattleFields 자식 수보다 큽니다.");
         }
     }
 

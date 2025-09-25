@@ -48,6 +48,8 @@ public class BattleManager : MonoBehaviour
 
     private bool isInitialized = false;
 
+    private bool isHandlingDefeat = false;
+
     [SerializeField] private AllHealthBarsPanel allHealthBarsPanel;
 
     #region JHT
@@ -66,15 +68,19 @@ public class BattleManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // 씬 로드 시 초기화 연결
         SceneManager.sceneLoaded += OnSceneLoaded;
         OnStageEnd += SetBattleStop;
+
+        PlayerDataManager.Instance.OnFormationSaved += OnPartyFormationSaved;
     }
+
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
         OnStageEnd -= SetBattleStop;
+
+        PlayerDataManager.Instance.OnFormationSaved -= OnPartyFormationSaved;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -131,8 +137,56 @@ public class BattleManager : MonoBehaviour
         {
             Debug.LogError("BattleFields 오브젝트를 찾을 수 없습니다.");
         }
-        battleFields[0].gameObject.SetActive(true);
-        battleFields[0].FadeIn(1f); // 자연스럽게 등장
+      //  battleFields[0].gameObject.SetActive(true);
+      //  battleFields[0].FadeIn(1f); // 자연스럽게 등장
+    }
+
+    private void OnPartyFormationSaved()
+    {
+        RefreshCameraTargets();
+
+        // 보완 조건: 스테이지 클리어 후에는 재시작 금지
+        if (IsStageEnd)
+        {
+            Debug.LogWarning("[BattleManager] 이미 스테이지 클리어됨. 전투 재시작 불가");
+            return;
+        }
+
+        // 보완 조건: 패배 처리 중이면 전투 재시작 방지
+        if (isHandlingDefeat)
+        {
+            Debug.LogWarning("[BattleManager] 패배 처리 중... 전투 재시작 차단됨");
+            return;
+        }
+
+        // 전투 중이면 멈추고 다시 시작
+        if (battleRoutine != null)
+        {
+            Debug.Log("[BattleManager] 기존 전투 중단 후 재시작");
+            StopCoroutine(battleRoutine);
+            battleRoutine = null;
+            ClearEnemies();
+            ClearPlayers();
+        }
+
+        // 현재 라운드 기준으로 전투 재시작
+        StartBattle(currentRoundIndex);
+    }
+
+    private void RefreshCameraTargets()
+    {
+        if (cameraFollow == null)
+            cameraFollow = Camera.main?.GetComponent<CameraFollow>();
+
+        if (cameraFollow != null)
+        {
+            var playerTransforms = PartyManager.Instance.GetAllPartyMembers()
+                .Select(p => p.transform)
+                .ToList();
+
+            cameraFollow.SetTargets(playerTransforms);
+            Debug.Log("[BattleManager] OnFormationSaved → CameraFollow SetTargets 갱신 완료");
+        }
     }
 
     // 스킵 버튼 클릭 시 호출
@@ -368,11 +422,15 @@ public class BattleManager : MonoBehaviour
     // 패배 시 연출 및 리셋 처리
     private IEnumerator HandleDefeat()
     {
+        isHandlingDefeat = true;
+
         ScreenScrollEffectManager.Instance.ShowScrollEffect("패배했습니다. 첫번째 섬부터 재도전합니다.", () => { });
 
         yield return new WaitForSeconds(1f);
 
         IslandStageManager.Instance.ResetStageAfterDefeat();
+
+        isHandlingDefeat = false;
     }
 
     // 적 제거

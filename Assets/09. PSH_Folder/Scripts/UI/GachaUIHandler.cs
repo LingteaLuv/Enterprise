@@ -39,6 +39,7 @@ public class GachaUIHandler : UIBase
     public RelicsProbability relicsUpgradePanel;
     public TextMeshProUGUI gemCountText3;
     public TextMeshProUGUI relicTicketCountText;
+    //public RelicsProbability relicsUpgradePanel;
 
     [Header("가챠 연출")]
     [Tooltip("캐릭터 가챠 시 재생할 연출 프리팹")]
@@ -377,11 +378,12 @@ public class GachaUIHandler : UIBase
 
     }
 
-    private void ShowUpgradeGachaPanel()
-    {
-        relicsUpgradePanel.gameObject.SetActive(true);
-        relicsUpgradePanel.Init(relicsGachaManager);
-    }
+    // 유물 등급
+    //private void ShowUpgradeGachaPanel()
+    //{
+    //    relicsUpgradePanel.gameObject.SetActive(true);
+    //    relicsUpgradePanel.Init(relicsGachaManager);
+    //}
 
     //private void OnDestroy()
     //{
