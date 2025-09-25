@@ -64,23 +64,23 @@ public class RelicsProbability : MonoBehaviour
 
         if (manager.relicsUpgradeCost > InventoryManager.Instance.RelicsPoints)
         {
-            UIManager.Instance.ShowToast(
+            PopManager.Instance.ShowOKPopup(
                 $"유물 재화가 {manager.relicsUpgradeCost - InventoryManager.Instance.RelicsPoints}만큼 부족합니다");
 
             StartCoroutine(WaitCoroutine());
         }
         else
         {
-            UIManager.Instance.ShowConfirm(
-            "정말 업그레이드 하시겠습니까?",
-            () =>
-            {
-                _manager.relicsTablelevel += 1;
-                curTableLevel = _manager.relicsTablelevel;
-                InventoryManager.Instance.RelicsPoints -= _manager.relicsUpgradeCost;
-                OnUpgradeProbability?.Invoke();
-                StartCoroutine(WaitCoroutine());
-            });
+            //UIManager.Instance.ShowConfirm(
+            //"정말 업그레이드 하시겠습니까?",
+            //() =>
+            //{
+            //    _manager.relicsTablelevel += 1;
+            //    curTableLevel = _manager.relicsTablelevel;
+            //    InventoryManager.Instance.RelicsPoints -= _manager.relicsUpgradeCost;
+            //    OnUpgradeProbability?.Invoke();
+            //    StartCoroutine(WaitCoroutine());
+            //});
         }
     }
 
