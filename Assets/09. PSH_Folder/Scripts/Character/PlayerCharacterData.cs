@@ -159,7 +159,7 @@ public class PlayerCharacterData
             if (r.itemPowerType == PowerType.Attack)
                 finalStats[(Stat)r.itemPowerType] += r.itemPower;
             else
-                finalStats[(Stat)r.itemPowerType] *= r.itemPower;
+                finalStats[(Stat)r.itemPowerType] *= r.itemPower / 100;
         }
 
 
