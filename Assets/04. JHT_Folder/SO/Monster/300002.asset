@@ -14,20 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 300002
   monsterName: "\uACE0\uBE14\uB9B0 \uC591\uC544\uCE58"
+  attackRange: 0
+  attackDelay: 0
+  chaseRange: 3
+  moveSpeed: 1
   monsterAttackType: 0
   monsterCrewRole: 1
-  enemyIcon: {fileID: 0}
-  maxHp: 0
-  attackPower: 0
-  criticalAttackPower: 0
-  criticalPower: 0
-  defense: 0
-  attackRange: 0
-  attackSpeed: 0
-  attackDelay: 0
-  chaseRange: 0
-  moveSpeed: 0
-  cost: 0
+  monsterStat:
+  - stat: 0
+    amount: 335
+  - stat: 1
+    amount: 2477
+  - stat: 2
+    amount: 15
+  - stat: 3
+    amount: 28
+  - stat: 4
+    amount: 191
+  - stat: 5
+    amount: 145
   projectileSprite: {fileID: 0}
   baseController: {fileID: 9100000, guid: ab210a1eb7a2ec94d85516f4355391ec, type: 2}
   normalSkill: Monster_shotswordattack_1

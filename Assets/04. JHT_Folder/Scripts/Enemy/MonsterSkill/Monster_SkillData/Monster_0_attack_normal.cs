@@ -21,6 +21,6 @@ public class Monster_0_attack_normal : MonsterSkillSet
 
             }
         }
-        Debug.LogError("NormalAttack Skill Set");
+        //Debug.LogError($"Monster_0_attack_normal Damage : {fsm.monsterStat.monsterStats[Stat.Attack]}");
     }
 }

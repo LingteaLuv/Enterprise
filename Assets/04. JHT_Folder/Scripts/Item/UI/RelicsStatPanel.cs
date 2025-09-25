@@ -19,7 +19,7 @@ namespace JHT
             ItemRelicsSO so = (ItemRelicsSO)curRelics.itemSO;
 
             relicsImage.sprite = relics.itemSO.icon;
-            powerText.text = relics.itemPower.ToString();
+            powerText.text = relics.itemPower.ToString("N1");
             levelText.text = relics.itemLevel.ToString();
             powerTypeText.text = relics.itemPowerType.ToString();
         }

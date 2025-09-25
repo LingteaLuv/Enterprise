@@ -21,12 +21,12 @@ namespace JHT
         public float ItemPower { get { return itemPower; } set { itemPower = value; OnChangePower?.Invoke(itemPower); } }
         public Action<float> OnChangePower;
 
-        private int itemLevel;
-        public int ItemLevel { get { return itemLevel;} set { itemLevel = value;  OnChangeLevel?.Invoke(itemLevel); } }
+        private Property<int> itemLevel;
+        public int ItemLevel { get { return itemLevel.Value;} set { itemLevel.Value = value;  OnChangeLevel?.Invoke(itemLevel.Value); } }
         public Action<int> OnChangeLevel;
 
-        public int itemStar;
-        public int ItemStar { get { return itemStar; } set { itemStar = value; OnChangeStar?.Invoke(itemStar); } }
+        private Property<int> itemStar;
+        public int ItemStar { get { return itemStar.Value; } set { itemStar.Value = value; OnChangeStar?.Invoke(itemStar.Value); } }
         public Action<int> OnChangeStar;
 
         private bool isUpgrade;
@@ -42,19 +42,45 @@ namespace JHT
             itemName = sample.itemName;
             itemNum = sample.itemNum;
             itemSO = sample;
-            /*
-            curRarity = rarity;
-            ItemStar = (int)rarity;
-            ItemPower = sample.upPowerPercent[itemStar] * itemLevel;
-            curPower = itemPower;
-            InventoryManager.Instance.OnUpCountItem += ItemLevelUp;
-            OnAddStar += UpGradeItemForStar;
-            */
+            itemLevel = new Property<int>(0);
+            itemLevel.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{itemNum}/Level", value);
+            });
+            itemStar = new Property<int>(0);
+            itemStar.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{itemNum}/Star", value);
+            });
             equipCategory = sample.equipCategory;
             equipType = sample.equipType;
             statType = sample.statType;
         }
 
+        public WeaponObject(int id, int level, int star)
+        {
+            itemSO = DataManager.Instance.AllWeapons.Find(r => r.itemNum == id);
+            ItemWeaponSO data = (ItemWeaponSO)itemSO;
+            
+            itemLevel = new Property<int>(level);
+            itemLevel.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{id}/Level", value);
+            });
+            itemStar = new Property<int>(star);
+            itemStar.OnChanged += (async (value) =>
+            {
+                await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Weapon/{id}/Star", value);
+            });
+            itemIcon = data.icon;
+            itemNum = data.itemNum;
+            itemName = data.itemName;
+
+            equipCategory = data.equipCategory;
+            equipType = data.equipType;
+            statType = data.statType;
+        }
+        
         // 레벨이 오를경우
         public void ItemLevelUp(WeaponObject obj)
         {
@@ -65,9 +91,9 @@ namespace JHT
             }
 
             ItemWeaponSO so = (ItemWeaponSO)obj.itemSO;
-            ItemLevel++;
+            itemLevel.Value++;
 
-            if (itemLevel > so.maxLevelInCurStar[itemStar])
+            if (itemLevel.Value > so.maxLevelInCurStar[itemStar.Value])
             {
                 Debug.Log($"아이템이 현재 등급{itemStar} 최대 레벨");
                 return;
@@ -81,7 +107,7 @@ namespace JHT
         public void UpCountWeapon()
         {
             ItemWeaponSO so = (ItemWeaponSO)itemSO;
-            ItemPower += so.upPowerPercent[itemStar];
+            ItemPower += so.upPowerPercent[itemStar.Value];
             CheckUpgrade(so);
         }
 
@@ -89,18 +115,18 @@ namespace JHT
         {
             ItemWeaponSO so = (ItemWeaponSO)itemSO;
 
-            itemLevel -= so.maxLevelInCurStar[itemStar];
-            ItemStar += 1;
+            itemLevel.Value -= so.maxLevelInCurStar[itemStar.Value];
+            itemStar.Value += 1;
             curRarity += (int)curRarity + 1;
-            if (itemLevel > 0)
+            if (itemLevel.Value > 0)
             {
-                ItemPower = itemLevel >= so.maxLevelInCurStar[itemStar] ?
-                    so.upPowerPercent[itemStar] * so.maxLevelInCurStar[itemStar] :
-                    so.upPowerPercent[itemStar] * itemLevel;
+                ItemPower = itemLevel.Value >= so.maxLevelInCurStar[itemStar.Value] ?
+                    so.upPowerPercent[itemStar.Value] * so.maxLevelInCurStar[itemStar.Value] :
+                    so.upPowerPercent[itemStar.Value] * itemLevel.Value;
             }
             else
             {
-                ItemPower = so.upPowerPercent[itemStar];
+                ItemPower = so.upPowerPercent[itemStar.Value];
             }
             ItemLevel = this.ItemLevel;
             CheckUpgrade(so);
@@ -108,7 +134,7 @@ namespace JHT
 
         private void CheckUpgrade(ItemWeaponSO so)
         {
-            if (itemLevel >= so.maxLevelInCurStar[itemStar])
+            if (itemLevel.Value >= so.maxLevelInCurStar[itemStar.Value])
                 IsUpgrade = true;
             else
                 IsUpgrade = false;

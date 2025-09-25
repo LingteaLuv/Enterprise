@@ -4,7 +4,7 @@ using UnityEngine;
 public class Monster_0_attack_bow : MonsterSkillSet
 {
     public Monster_0_attack_bow(JHT_BaseMonsterStat stat, MonsterSkillSO _skillSO) : base(stat, _skillSO) { }
-
+    
     public override void UseSkill(JHT_BaseMonsterFSM fsm)
     {
         if (fsm.target == null) return;
@@ -26,7 +26,7 @@ public class Monster_0_attack_bow : MonsterSkillSet
         //    obj.Init(targetPos, startPos, monsterStat.totalAttackPower, monsterStat.totalAttackPower,monsterStat.projectileSprite);
 
         float projectileSpeed = 1f;
-        obj.Init(fsm, targetPos, startPos, projectileSpeed, fsm.monsterStat.totalAttackPower, fsm.monsterStat.projectileSprite);
-        Debug.LogError("BowAttack Skill Set");
+        obj.Init(fsm, targetPos, startPos, projectileSpeed, fsm.monsterStat.monsterStats[Stat.Attack], fsm.monsterStat.projectileSprite);
+        //Debug.LogError($"BowAttack Damage : {fsm.monsterStat.monsterStats[Stat.Attack]}");
     }
 }

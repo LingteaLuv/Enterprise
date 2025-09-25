@@ -1,7 +1,8 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -10,13 +11,14 @@ using UnityEngine;
 namespace JHT
 {
 
-    public abstract class JHT_BaseMonsterFSM : JHT_PooledObject, IAttacker
+    public abstract class JHT_BaseMonsterFSM : JHT_PooledObject, IAttacker, IDamageable
     {
         public enum MonsterState { IDLE, MOVE, ATTACK, DEATH, SKILL1, SKILL2, STUN }
 
         [Header("State")]
         public MonsterState currentState;
         public JHT_StateMachine stateMachine;
+        public MonstserSearch monsterSearch;
 
         [Header("Target")]
         public LayerMask targetLayer;
@@ -45,6 +47,8 @@ namespace JHT
         public float CurHP { get { return curHP; } set { curHP = value; OnChangeHp?.Invoke(curHP); } }
         public Action<float> OnChangeHp;
 
+        [SerializeField] private List<Buff> activeBuffs = new List<Buff>();
+
         #region Animator
 
         [Header("Anim")]
@@ -62,6 +66,7 @@ namespace JHT
 
         public virtual void Init(JHT_BaseMonsterStat stat)
         {
+            monsterSearch = GetComponent<MonstserSearch>();
             StartCoroutine(StartSetting(stat));
         }
 
@@ -84,7 +89,7 @@ namespace JHT
             OnChangeHp += ShowMonsterUI;
 
             
-            curHP = monsterStat.maxHp;
+            curHP = monsterStat.monsterStats[Stat.Health];
 
             // 이전의 코루틴 정리
             if (takeDamageCor != null)
@@ -180,7 +185,7 @@ namespace JHT
         }
         private void ResetTokens()
         {
-            token = new CancellationTokenSource[4];
+            token = new CancellationTokenSource[5];
 
             // 기존 토큰 정리
             for (int i = 0; i < token.Length; i++)
@@ -257,6 +262,7 @@ namespace JHT
                     if (d < monsterStat.chaseRange)
                     {
                         target = c.gameObject;
+                        monsterSearch.target = target.transform;
                         break;
                     }
                 }
@@ -337,8 +343,11 @@ namespace JHT
 
                 await UniTask.WaitUntil(() => !skill1Active || !skill2Active, cancellationToken: token[0].Token);
 
+                if (animator != null)
+                {
+                    animator.Play(ATTACK, 0, 0f);
+                }
                 isAttacking = true;
-                animator.Play(ATTACK, 0, 0f);
                 
                 await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.normalSkill.clip.length), cancellationToken: token[0].Token);
 
@@ -357,8 +366,11 @@ namespace JHT
                     await UniTask.WaitUntil(() => !skill1Active, cancellationToken: token[1].Token);
                     await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[1].Token);
                     await UniTask.WaitUntil(() => !isAttacking || !skill2Active, cancellationToken: token[1].Token);
+
                     skill1Active = true;
-                    animator.Play(SKILL1, 0, 0f);
+
+                    if (animator != null)
+                        animator.Play(SKILL1, 0, 0f);
                     
                     await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill1.clip.length), cancellationToken: token[1].Token);
                     skill1Active = false;
@@ -380,8 +392,10 @@ namespace JHT
                     await UniTask.WaitUntil(() => !skill2Active, cancellationToken: token[2].Token);
                     await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[2].Token);
                     await UniTask.WaitUntil(() => !isAttacking || !skill1Active, cancellationToken: token[2].Token);
+
                     skill2Active = true;
-                    animator.Play(SKILL2, 0, 0f);
+                    if (animator != null)
+                        animator.Play(SKILL2, 0, 0f);
                     
                     await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill2.clip.length), cancellationToken: token[2].Token);
                     skill2Active = false;
@@ -393,26 +407,47 @@ namespace JHT
             }
         }
 
+        // 버프 적용시 넣을 함수
+        public void ApplyBuff(Stat stat, float value, float duration, BuffType buffType)
+        {
+            bool isSynergy = SynergyManager.IsApplyingSynergy;
+            Buff newBuff = new Buff(stat, value, duration, buffType, isSynergy, BuffEffectType.StatModifier);
+            activeBuffs.Add(newBuff);
+            _ = Debuff(stat, duration, value, newBuff);
+
+        }
+
+        public async UniTask Debuff(Stat stat, float duration, float amount, Buff newBuff)
+        {
+            if (stat == Stat.Health)
+            {
+                CurHP += CurHP * (amount / 100);
+            }
+
+            this.monsterStat.monsterStats[stat] += this.monsterStat.monsterStats[stat] * (amount / 100);
+            // 이펙트 여기에 추가
+            await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: token[5].Token);
+            //이펙트 해제
+            this.monsterStat.monsterStats[stat] -= this.monsterStat.monsterStats[stat] * (amount * 100);
+
+            if (stat == Stat.Health)
+            {
+                CurHP -= CurHP * (amount / 100);
+            }
+
+            activeBuffs.Remove(newBuff);
+        }
 
         public void Rotate()
         {
-            if (target == null || monsterUI == null)
-                return;
+            if (target == null || monsterUI == null) return;
 
+            bool targetOnRight = target.transform.position.x > transform.position.x;
 
-            float direction = target.transform.position.x - transform.position.x;
-            RectTransform ui = monsterUI.GetComponent<RectTransform>();
+            transform.localRotation = Quaternion.Euler(0f, targetOnRight ? 180f : 0f, 0f);
 
-            if (direction < 0)
-            {
-                //gameObject.transform.localEulerAngles = new Vector3(transform.position.x, transform.position.y, transform.position.z);
-                ui.transform.localScale = new Vector3(1, 1, 1);
-            }
-            else
-            {
-                gameObject.transform.localEulerAngles = new Vector3(transform.position.x, 180, transform.position.z);
-                ui.transform.localScale = new Vector3(-1, 1, 1);
-            }
+            var ui = monsterUI.GetComponent<RectTransform>();
+            ui.localScale = new Vector3(targetOnRight ? -1f : 1f, 1f, 1f);
         }
 
         private void ApplyDamageEffects(float damage)
@@ -470,6 +505,7 @@ namespace JHT
         public void Outit()
         {
             monsterSO = null;
+            monsterSearch.StopRoutine();
 
             if (token != null)
             {
@@ -498,7 +534,7 @@ namespace JHT
                 return;
             curHP = value;
 
-            float percent = curHP / (float)monsterStat.maxHp;
+            float percent = curHP / (float)monsterStat.monsterStats[Stat.Health];
             monsterUI.GetComponentInChildren<JHT_UIMonster>().ChangeHP(percent);
         }
 
@@ -526,8 +562,22 @@ namespace JHT
         // --- IAttacker 인터페이스 구현 ---
         public float GetCurrentStat(Stat stat)
         {
-            // BaseMonsterStat에 만든 함수를 호출해서 스탯을 가져와요.
-            return monsterStat.GetCurrentStat(stat);
+            float baseValue = 0;
+            switch (stat)
+            {
+                case Stat.Attack: baseValue = monsterStat.monsterStats[Stat.Attack]; break;
+                case Stat.Health: baseValue = monsterStat.monsterStats[Stat.Health]; break;
+                case Stat.Defense: baseValue = monsterStat.monsterStats[Stat.Defense]; break;
+                case Stat.CritChance: baseValue = monsterStat.monsterStats[Stat.CritChance]; break;
+                case Stat.CritDamage: baseValue = monsterStat.monsterStats[Stat.CritDamage]; break;
+                case Stat.AttackSpeed: baseValue = monsterStat.monsterStats[Stat.AttackSpeed]; break;
+            }
+            var statBuffs = activeBuffs.Where(b => b.EffectType == BuffEffectType.StatModifier && b.Stat == stat);
+            float flatBonus = statBuffs.Where(b => b.BuffType == BuffType.Flat).Sum(b => b.Value);
+            float percentBonus = statBuffs.Where(b => b.BuffType == BuffType.Percent).Sum(b => b.Value);
+            float finalValue = (baseValue + flatBonus) * (1 + percentBonus);
+
+            return finalValue;
         }
 
         // --- IDamageable 인터페이스 구현 ---
@@ -548,5 +598,7 @@ namespace JHT
 
             ApplyDamageEffects(finalDamage);
         }
+
+
     }
 }
