@@ -46,6 +46,7 @@ public class GachaUIHandler : UIBase
     public RelicsGachaListUI relicsGachaListPanel;
     [SerializeField] private RelicsPoints relicsPoints;
 
+
     public override void ResetPanel()
     {
         base.ResetPanel();
@@ -59,6 +60,9 @@ public class GachaUIHandler : UIBase
         if (equipPanel != null) equipPanel.SetActive(false);
         if (relicPanel != null) relicPanel.SetActive(false);
 
+        // 기본 탭 버튼 UI 업데이트
+        UpdateTabButtonUI(charButton);
+
         Debug.Log("GachaUIHandler가 리셋되어, 모든 결과창을 닫고 기본 탭으로 돌립니다.");
     }
 
@@ -69,13 +73,16 @@ public class GachaUIHandler : UIBase
         UpdateCharacterPityText();
     }
 
-    // 캐릭터 뽑기 버튼 이벤트 연결
     private void Start()
     {
+        // 가챠매니저 연결
+        characterGachaManager = FindAnyObjectByType<CharacterGachaManager>();
+        equipmentGachaManager = FindAnyObjectByType<EquipmentGachaManager>();
+
         // 탭 버튼 이벤트 연결
-        charButton.onClick.AddListener(() => { charPanel.SetActive(true); equipPanel.SetActive(false); relicPanel.SetActive(false); UpdateCharacterPityText(); });
-        equipButton.onClick.AddListener(() => { charPanel.SetActive(false); equipPanel.SetActive(true); relicPanel.SetActive(false); });
-        relicButton.onClick.AddListener(() => { charPanel.SetActive(false); equipPanel.SetActive(false); relicPanel.SetActive(true); });
+        charButton.onClick.AddListener(OnClick_CharTab);
+        equipButton.onClick.AddListener(OnClick_EquipTab);
+        relicButton.onClick.AddListener(OnClick_RelicTab);
 
         // 캐릭터 뽑기 버튼 이벤트 연결
         charSingleBtn.onClick.AddListener(OnClick_CharacterGacha_Single);
@@ -93,6 +100,9 @@ public class GachaUIHandler : UIBase
 
         // 천장 카운트 UI 갱신 이벤트 구독
         CharacterGachaManager.OnGachaPityChanged += UpdateCharacterPityText;
+
+        // 초기 탭 상태 설정 (캐릭터 탭)
+        OnClick_CharTab();
     }
 
     private void OnDestroy()
@@ -100,6 +110,70 @@ public class GachaUIHandler : UIBase
         // 천장 카운트 UI 갱신 이벤트 구독 해제
         CharacterGachaManager.OnGachaPityChanged -= UpdateCharacterPityText;
     }
+
+    #region 탭 버튼 관리
+    private void OnClick_CharTab()
+    {
+        charPanel.SetActive(true);
+        equipPanel.SetActive(false);
+        relicPanel.SetActive(false);
+        UpdateCharacterPityText();
+        UpdateTabButtonUI(charButton);
+    }
+
+    private void OnClick_EquipTab()
+    {
+        charPanel.SetActive(false);
+        equipPanel.SetActive(true);
+        relicPanel.SetActive(false);
+        UpdateTabButtonUI(equipButton);
+    }
+
+    private void OnClick_RelicTab()
+    {
+        charPanel.SetActive(false);
+        equipPanel.SetActive(false);
+        relicPanel.SetActive(true);
+        UpdateTabButtonUI(relicButton);
+    }
+
+    /// <summary>
+    /// 탭 버튼의 UI 상태(폰트 크기, 이미지 활성화)를 업데이트하여 선택된 탭을 강조합니다.
+    /// </summary>
+    /// <param name="selectedButton">현재 선택된 버튼</param>
+    private void UpdateTabButtonUI(Button selectedButton)
+    {
+        Button[] tabButtons = { charButton, equipButton, relicButton };
+
+        foreach (var button in tabButtons)
+        {
+            // 버튼 자식의 TextMeshProUGUI 컴포넌트를 찾습니다.
+            TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
+            // 버튼 자체의 Image 컴포넌트를 찾습니다.
+            Image buttonImage = button.GetComponent<Image>();
+
+            bool isSelected = (button == selectedButton);
+
+            if (buttonText != null)
+            {
+                buttonText.fontSize = isSelected ? 60 : 45;
+            }
+            else
+            {
+                Debug.LogWarning($"{button.name}에서 TextMeshProUGUI 컴포넌트를 찾을 수 없습니다.");
+            }
+
+            if (buttonImage != null)
+            {
+                buttonImage.enabled = isSelected;
+            }
+            else
+            {
+                Debug.LogWarning($"{button.name}에서 Image 컴포넌트를 찾을 수 없습니다.");
+            }
+        }
+    }
+    #endregion
 
 
     #region 캐릭터 뽑기 함수
@@ -289,5 +363,5 @@ public class GachaUIHandler : UIBase
     //private void OnDestroy()
     //{
     //    InventoryManager.Instance.OnChangeRelicsPoints -= ShowRelicsPoint;
-    //} 
+    //}
 }
