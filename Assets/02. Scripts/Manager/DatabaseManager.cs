@@ -115,6 +115,17 @@ public class DatabaseManager : Singleton<DatabaseManager>
             Debug.LogError("데이터 저장 실패");
         }
     }
+
+    public void SaveFormationData(string subPath, PlayerDataManager.ParsingFormationData data)
+    {
+        string path = $"{_uid}/" + subPath;
+        FirebaseManager.DataReference.Child(path).SetRawJsonValueAsync(JsonUtility.ToJson(data))
+            .ContinueWithOnMainThread(
+                (task) =>
+                {
+                    if (task.IsCanceled || task.IsFaulted) return;
+                });
+    }
     
     /// <summary>
     /// Firebase RTDB에서 단일 데이터를 불러오는 메서드
@@ -261,7 +272,21 @@ public class DatabaseManager : Singleton<DatabaseManager>
             callback(result);
         });
     }
-    
+
+    public void LoadFormationAsync(Action<List<object>> callback)
+    {
+        DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child($"StateData/Formation");
+        dataRef.GetValueAsync().ContinueWithOnMainThread((task) =>
+        {
+            if (!task.Result.Exists || task.Result.Value == null)
+            {
+                callback(new List<object>());
+                return;
+            }
+            List<object> result = task.Result.Value as List<object>;
+            callback(result);
+        });
+    }
     #region Nickname
     
     /// <summary>

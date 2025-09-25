@@ -10,4 +10,5 @@ public class DataManager : Singleton<DataManager>
     public List<ItemSO> AllWeapons = new List<ItemSO>();
 
     public Action OnWeaponReady;
+    public Action OnCrewReady;
 }
