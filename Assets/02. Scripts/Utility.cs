@@ -1,12 +1,16 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Firebase.Auth;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 // 전역적으로 사용되는 메서드를 모아두는 Utility class
 public static class Utility
 {
+    public static Action OnDestroyAll;
+    
     public static string DictToJson1(Dictionary<string, object> dict)
     {
         StringBuilder builder = new StringBuilder();

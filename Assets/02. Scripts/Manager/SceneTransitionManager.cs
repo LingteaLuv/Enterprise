@@ -27,13 +27,14 @@ public class SceneTransitionManager : Singleton<SceneTransitionManager>
     /// <summary>
     /// 씬을 비동기로 로드 (일반씬 -> 로딩씬 -> 목표씬)
     /// </summary>
-    public void LoadSceneWithLoading(string loadingSceneName, string targetSceneName)
+    public void LoadSceneWithLoading(string targetSceneName, float minLoadingTime)
     {
         // 현재 로딩 중인 씬이 있는지 체크
         if (_asyncLoad != null && !_asyncLoad.isDone) return;
 
         _targetSceneName = targetSceneName;
-        StartCoroutine(LoadTwoSceneCoroutine(loadingSceneName));
+        _minLoadingTime = minLoadingTime;
+        StartCoroutine(LoadSceneCoroutineWithMinTime());
     }
 
     /// <summary>
@@ -72,6 +73,18 @@ public class SceneTransitionManager : Singleton<SceneTransitionManager>
         yield return StartCoroutine(LoadingLoadSceneCoroutine(_targetSceneName, _minLoadingTime));
     }
 
+    /// <summary>
+    /// 일반 -> 로딩씬 -> 목표씬 순차 코루틴 (최소 로드시간 보장)
+    /// </summary>
+    private IEnumerator LoadSceneCoroutineWithMinTime()
+    {
+        // 1) 로딩씬 바로 로드
+        yield return StartCoroutine(LoadingLoadSceneCoroutine("LoadingScene", _minLoadingTime));
+
+        // 2) 목표씬은 최소 로드시간 보장 후 로드
+        yield return StartCoroutine(LoadSceneCoroutine(_targetSceneName));
+    }
+    
     /// <summary>
     /// 씬 로딩 코루틴
     /// </summary>
