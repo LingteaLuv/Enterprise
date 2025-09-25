@@ -8,12 +8,12 @@ int,string,string,string,string,string,string,enum<int>,enum<int>,float,float (s
 51005,투-창,린따오,네이비 챵,-,-,-,AtkSpeed_Up,Target_PositionBack,0.1,10,20010,30005,,,,Supportive,AllAllies_ByRole,Cook,SYB2SPD,이루 시키무,10007
 51006,우린 방패면 충분해,노로노아 노로,캡지 슈르트,-,-,-,Defence_Up,Target_Caster,0.1,20,20002,20005,,,,Supportive,Self,Captain,SYB2DEF,카일 발켄,10008
 51007,미스터 마법사?,미스터 웅,미스터 노미누,-,-,-,Atk_Down,Target_PositionFront,0.1,10,30009,30010,,,,Supportive,AllAllies_ByRole,Deckhand,SYD2ATK,붉은 망토,10009
-51008,장난꾸러기,카루,재민이,-,-,-,Extra_Atk,Target_Caster,0.1,10,30016,30017,,,,Supportive,Self,Captain,SYD2,캡틴 준,10010
+51008,장난꾸러기,카루,재민이,-,-,-,Extra_Atk,Target_Caster,0.1,10,30016,30017,,,,Supportive,Self,Captain,ExDB,캡틴 준,10010
 51009,전장을 누빈 전우,가론 헤일런,로웰 하스트,-,-,-,MaxHealth_Up,Target_Caster,0.1,20,20008,30014,,,,Supportive,Self,Captain,SYB2HP,비르키르 세바르손,20001
 51010,가진거 내놔,고블린 양아치,그린후드,-,-,-,Defence_Down,Target_PositionFront,0.1,10,30002,40009,,,,Supportive,AllAllies_ByRole,Deckhand,SYD2DEF,노로노아 노로,20002
 51011,든든한 한끼,올든,올리버,-,-,-,MaxHealth_Up,Target_PositionFront,0.1,20,40008,40011,,,,Supportive,AllAllies_ByRole,Deckhand,SYB2HP,경일수염,20003
-51012,낮잠이 필요해,디비 잔스,세렌,-,-,-,Stunned,Target_PositionMiddle,0.1,5,10004,40012,,,,Offensive,AllAllies_ByRole,Sailor,SYD2,꾸르잠 쟈스,20004
-51013,우린 복수가 목표,붉은 망토,래빗,-,-,-,Extra_Atk,Target_Caster,0.1,10,10009,20013,,,,Supportive,Self,Captain,SYD2,캡지 슈르트,20005
+51012,낮잠이 필요해,디비 잔스,세렌,-,-,-,Stunned,Target_PositionMiddle,0.1,5,10004,40012,,,,Offensive,AllAllies_ByRole,Sailor,STUN5,꾸르잠 쟈스,20004
+51013,우린 복수가 목표,붉은 망토,래빗,-,-,-,Extra_Atk,Target_Caster,0.1,10,10009,20013,,,,Supportive,Self,Captain,ExDB,캡지 슈르트,20005
 51014,귀차니즘,버므부 욘제나,레온 하버스,-,-,-,AtkSpeed_Down,Target_Team,0.1,10,30007,30015,,,,Supportive,AllAllies,Captain,SYD2SPD,현부 버민,20006
 51015,서로 다른 치료 방법,김원미,메리,-,-,-,MaxHealth_Up,Target_PositionMiddle,0.1,20,40005,40010,,,,Supportive,AllAllies_ByRole,Sailor,SYB2HP,범구리 호킨슨,20007
 51016,집에 보내줘,벤턴,네이비 셰푸,-,-,-,Defence_Down,Target_PositionRear,0.1,10,30018,40006,,,,Supportive,AllAllies_ByRole,Captain,SYD2DEF,가론 헤일런,20008
@@ -26,25 +26,25 @@ int,string,string,string,string,string,string,enum<int>,enum<int>,float,float (s
 51023,도끼는 소중해,비르키르 세바르손,우드,-,-,-,AtkSpeed_Up,Target_PositionBack,0.1,10,20001,20012,,,,Supportive,AllAllies_ByRole,Cook,SYB2SPD,고블린 양아치,30002
 51024,한 실력하네,재민이,레온 하버스,-,-,-,Atk_Up,Target_Caster,0.1,10,30017,30015,,,,Supportive,Self,Captain,SYB2ATK,도로 LONG,30003
 51025,친절한 상담사,우렁총각,메리,-,-,-,MaxHealth_Up,Target_PositionRear,0.1,20,40002,40010,,,,Supportive,AllAllies_ByRole,Captain,SYB2HP,팔 피낫스,30004
-51026,심해단,디비 잔스,머맨 창병,머맨 궁병,-,-,Stunned,Target_PositionFront,0.2,5,10004,30006,30011,,,Offensive,AllAllies_ByRole,Deckhand,SYD3,네이비 챵,30005
+51026,심해단,디비 잔스,머맨 창병,머맨 궁병,-,-,Stunned,Target_PositionFront,0.2,5,10004,30006,30011,,,Offensive,AllAllies_ByRole,Deckhand,STUN5,네이비 챵,30005
 51027,용병 출신단,가론 헤일런,로웰 하스트,레온 하버스,-,-,Defence_Up,Target_Caster,0.2,20,20008,30014,30015,,,Supportive,Self,Captain,SYB3DEF,머맨 창병,30006
 51028,네이비 트리오,네이비 샷,네이비 슝,네이비 챵,-,-,Atk_Up,Target_Caster,0.2,10,10006,30012,30005,,,Supportive,Self,Captain,SYB3ATK,버므부 욘제나,30007
-51029,화살은 늘 적중해,캡틴 준,로웰 하스트,벤턴,-,-,Extra_Atk,Target_Caster,0.2,10,10010,30014,30018,,,Supportive,Self,Captain,SYD3,지누스 천,30008
+51029,화살은 늘 적중해,캡틴 준,로웰 하스트,벤턴,-,-,Extra_Atk,Target_Caster,0.2,10,10010,30014,30018,,,Supportive,Self,Captain,ExDB,지누스 천,30008
 51030,이 생선 먹을 수 있나,머맨 창병,고로 포크스타인,머맨 궁병,-,-,MaxHealth_Up,Target_PositionMiddle,0.2,20,30006,40001,30011,,,Supportive,AllAllies_ByRole,Sailor,SYB3HP,미스터 웅,30009
 51031,동물 특공대,버니맨,범구리 호킨슨,래빗,-,-,AtkSpeed_Down,Target_PositionMiddle,0.2,10,30001,20007,20013,,,Supportive,AllAllies_ByRole,Sailor,SYD3SPD,미스터 노미누,30010
 51032,독특한 존재들,사말 리아,도로 LONG,팔 피낫스,-,-,Atk_Up,Target_PositionMiddle,0.2,10,10001,30003,30004,,,Supportive,AllAllies_ByRole,Sailor,SYB3ATK,머맨 궁병,30011
 51033,건들면 물어요,팔 피낫스,바카스,버니맨,-,-,Defence_Down,Target_PositionFront,0.2,10,30004,20009,30001,,,Supportive,AllAllies_ByRole,Deckhand,SYD3DEF,네이비 슝,30012
 51034,맞출때까지 쏜다,머맨 궁병,재키 스펙로우,네이비 샷,-,-,AtkSpeed_Up,Target_Caster,0.2,10,30011,30013,10006,,,Supportive,Self,Captain,SYB3SPD,재키 스펙로우,30013
-51035,한 떄 이름 좀 날림,카일 발켄,경일수염,고로 포크스타인,-,-,Extra_Atk,Target_PositionBack,0.3,10,10008,20003,40001,,,Supportive,AllAllies_ByRole,Cook,SYD3,로웰 하스트,30014
+51035,한 떄 이름 좀 날림,카일 발켄,경일수염,고로 포크스타인,-,-,Extra_Atk,Target_PositionBack,0.3,10,10008,20003,40001,,,Supportive,AllAllies_ByRole,Cook,ExDB,로웰 하스트,30014
 51036,네이비 총 출동,네이비 샷,네이비 슝,네이비 챵,네이비 셰푸,-,Atk_Up,Target_Caster,0.3,10,10006,30012,30005,40006,,Supportive,Self,Captain,SYB4ATK,레온 하버스,30015
 51037,도끼파,붉은 망토,비르키르 세바르손,김원미,우드,-,AtkSpeed_Up,Target_Caster,0.3,10,10009,20001,40005,20012,,Supportive,Self,Captain,SYB4SPD,카루,30016
 51038,우린 활로 싸워,캡틴 준,현부 버민,재키 스펙로우,네이비 슝,-,AtkSpeed_Down,Target_PositionFront,0.3,10,10010,20006,30013,30012,,Supportive,AllAllies_ByRole,Deckhand,SYD4SPD,재민이,30017
 51039,한 실력 하는데,사말 리아,린따오,레온 하버스,미스터 웅,-,Defence_Down,Target_PositionFront,0.3,10,10001,20010,30015,30009,,Supportive,AllAllies_ByRole,Deckhand,SYD4DEF,벤턴,30018
-51040,전 직장 동료,카일 발켄,네이비 슝,네이비 챵,네이비 셰푸,-,Extra_Atk,Target_Caster,0.3,10,10008,30012,30005,40006,,Supportive,Self,Captain,SYD4,씨꾸꾸,30019
+51040,전 직장 동료,카일 발켄,네이비 슝,네이비 챵,네이비 셰푸,-,Extra_Atk,Target_Caster,0.3,10,10008,30012,30005,40006,,Supportive,Self,Captain,ExDB,씨꾸꾸,30019
 51041,악명 높은 와인정장단,이루 시키무,꾸르잠 쟈스,씨꾸꾸,노에르 성,외르케 부르거,AtkSpeed_Up,Target_Team,0.4,10,10007,20004,30019,30020,40003,Supportive,AllAllies,Captain,SYB5SPD,노에르 성,30020
 51042,세레나 모험단,세레나 발하이트,가론 헤일런,로웰 하스트,레온 하버스,메리,Atk_Up,Target_Team,0.4,10,10002,20008,30014,30015,40010,Supportive,AllAllies,Captain,SYB5ATK,고로 포크스타인,40001
 51043,마왕 파티,자크 벨디아,다르켄,벤턴,카루,인텔리 파이어,Defence_Down,Target_Team,0.4,10,10003,20011,30018,30016,40004,Supportive,AllAllies,Captain,SYD5DEF,우렁총각,40002
-51044,괴물들만 모임,디비 잔스,바카스,머맨 창병,머맨 궁병,핸섬 가이 파크,Stunned,Target_Team,0.4,5,10004,20009,30006,30011,40007,Offensive,AllAllies,Captain,SYD5,외르케 부르거,40003
+51044,괴물들만 모임,디비 잔스,바카스,머맨 창병,머맨 궁병,핸섬 가이 파크,Stunned,Target_Team,0.4,5,10004,20009,30006,30011,40007,Offensive,AllAllies,Captain,STUN5,외르케 부르거,40003
 51045,이 조합 쉽지 않아,사말 리아,노로노아 노로,도로 LONG,재키 스펙로우,고로 포크스타인,Defence_Up,Target_Team,0.4,20,10001,20002,30003,30013,40001,Supportive,AllAllies,Captain,SYB5DEF,인텔리 파이어,40004
 ,,,,,,,,,,,,,,,,,,,,김원미,40005
 ,,,,,,,,,,,,,,,,,,,,네이비 셰푸,40006

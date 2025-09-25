@@ -20,6 +20,8 @@ public class MeleeCharacter : BaseCharacterFSM
     private float repathCooldown = 1f;
     private float lastRepathTime = -999f;
 
+    public event System.Action<SkillSO> OnSkillUsed;
+
     protected override void Start()
     {
         base.Start();
@@ -166,7 +168,10 @@ public class MeleeCharacter : BaseCharacterFSM
 
         var primaryTarget = target.GetComponent<IDamageable>();
         if (primaryTarget != null)
+        {
             skill.Use(stats, primaryTarget);
+            OnSkillUsed?.Invoke(skill);
+        }
 
         lastSkillTime = Time.time;
 

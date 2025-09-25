@@ -183,6 +183,17 @@ public class CharacterScrollViewUI : UIBase
             FormationManager.Instance.InitializeTempFormation();
         }
 
+        // 편성 모드에 따라 ButtonDragHandler 활성화/비활성화
+        foreach (var panel in panelPool)
+        {
+            var dragHandler = panel.GetComponent<ButtonDragHandler>();
+            if (dragHandler != null)
+            {
+                // 편성 모드일 때는 비활성화, 아닐 때는 활성화
+                dragHandler.enabled = !isFormationMode;
+            }
+        }
+
         UpdateFormationButtonVisuals();
         RefreshUI();
         formationPanel.SetActive(isFormationMode);
