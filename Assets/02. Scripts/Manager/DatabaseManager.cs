@@ -313,7 +313,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
             }
             
             string nickname = task.Result.Value.ToString();
-            Debug.LogWarning($"닉네임 로드 성공 : {nickname}");
             callback(nickname);
         });
     }

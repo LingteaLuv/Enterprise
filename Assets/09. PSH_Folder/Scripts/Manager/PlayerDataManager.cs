@@ -24,6 +24,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
    
     
     [Header("캐릭터 편성")]
+    //Todo석원 : DB 연동
     public Dictionary<CrewRole, List<PlayerCharacterData>> formation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
     public const int MAX_FORMATION_SIZE = 5;
     public BigInteger teamBattlePower;

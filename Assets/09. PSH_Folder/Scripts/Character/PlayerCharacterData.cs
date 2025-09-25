@@ -32,6 +32,7 @@ public class PlayerCharacterData
     public Dictionary<Stat, float> characterStats = new Dictionary<Stat, float>();
 
     [Header("장비")]
+    //todo석원 : DB 연동
     public Dictionary<EquipCategory, WeaponObject> equippedItems = new Dictionary<EquipCategory, WeaponObject>();
 
     //[Header("유물")]
