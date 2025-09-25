@@ -16,7 +16,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
             if (questUI is not null || temporaryQuestController is not null) 
                 QuestManager.Instance.BindUI(questUI, temporaryQuestController);
 
-            if (CodexManager.Instance is null) return;
+            //if (CodexManager.Instance is null) return;
             if (codexUIController is null) return;
             CodexManager.Instance.BindUI(codexUIController);
         }
