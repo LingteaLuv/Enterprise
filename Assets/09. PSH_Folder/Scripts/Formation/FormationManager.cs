@@ -228,6 +228,11 @@ public class FormationManager : Singleton<FormationManager>
         SynergyManager.Instance.ConfirmCombatSynergies(finalPartyIDs);
 
         PlayerDataManager.Instance.SetFormation(DeepCopyFormation(tempFormation));
+        PlayerDataManager.ParsingFormationData data = new PlayerDataManager.ParsingFormationData();
+        
+        data.Formation = finalPartyIDs;
+        DatabaseManager.Instance.SaveFormationData("StateData", data);
+        
         InitializeTempFormation();
         return true;
     }

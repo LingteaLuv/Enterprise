@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using JHT;
 using System.Collections;
@@ -43,6 +44,11 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         public int Soul;
         public int Star;
     }
+
+    public class ParsingFormationData
+    {
+        public List<int> Formation;
+    }
     
     private Dictionary<int, int> starUpgradeCosts;
     private const int STAR_UPGRADE_COST_1 = 20;
@@ -66,7 +72,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     protected override void Awake()
     {
         base.Awake();
-
+        
         formation = new Dictionary<CrewRole, List<PlayerCharacterData>>
         {
             { CrewRole.Deckhand, new List<PlayerCharacterData>() },
@@ -97,8 +103,28 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
                 // 게임 시작 시, PDM의 데이터를 직접 수정하는 자동 편성을 호출합니다.
                 Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
             }
-            AutoFormTeam();
-            StartCoroutine(InitialCalculationCoroutine());
+        };
+        
+        DataManager.Instance.OnCrewReady += () =>
+        {
+            DatabaseManager.Instance.LoadFormationAsync((result) =>
+            {
+                if (result.Count == 0)
+                {
+                    AutoFormTeam();
+                }
+                else
+                {
+                    foreach (object crewId in result)
+                    {
+                        int id = Convert.ToInt32(crewId);
+                        PlayerCharacterData crew = OwnedCharacters[id];
+                        formation[crew.characterdata.crewRole].Add(crew);
+                        Debug.LogError($"{id}, {crew.characterdata.characterName}");
+                    }
+                }
+                StartCoroutine(InitialCalculationCoroutine());
+            });
         };
     }
 
@@ -114,6 +140,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
                 OwnedCharacters[id] = character;
             }
+            DataManager.Instance.OnCrewReady.Invoke();
         });
     }
     
