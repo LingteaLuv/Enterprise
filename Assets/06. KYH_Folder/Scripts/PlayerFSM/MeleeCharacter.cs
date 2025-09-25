@@ -4,28 +4,43 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// 근접 캐릭터 FSM (BaseCharacterFSM 상속)
+/// - A* 경로 기반 이동
+/// - 일반 공격 및 스킬 처리
+/// - FSM 상태 전환 및 대상 탐색 루프 포함
+/// </summary>
 public class MeleeCharacter : BaseCharacterFSM
 {
+    // 타겟 Transform (현재 추적 중인 적)
     private Transform target;
+
+    // 코루틴 핸들 (중복 방지용)
     private Coroutine findTargetRoutine;
     private Coroutine moveRoutine;
+
+    // 애니메이터 및 SPUM 캐릭터 애니메이션 관리
     private Animator animator;
     private SPUM_Prefabs spum;
+
+    // 현재 이동 경로 (A* 결과)
     private List<Vector3> currentPath;
 
+    // 스킬 쿨다운 관련
     private float skillCooldown;
     private float lastSkillTime = -999f;
     private bool isSkillReady => Time.time >= lastSkillTime + skillCooldown;
 
+    // 경로 재탐색 쿨타임 관련
     private float repathCooldown = 1f;
     private float lastRepathTime = -999f;
 
+    // 외부 스킬 사용 알림용 이벤트
     public event System.Action<SkillSO> OnSkillUsed;
 
     protected override void Start()
     {
         base.Start();
-        skillCooldown = stats.skills.FirstOrDefault()?.cooldown ?? 5f;
 
         animator = GetComponentInChildren<Animator>();
         if (animator == null)
@@ -37,6 +52,7 @@ public class MeleeCharacter : BaseCharacterFSM
 
         StartFindTargetLoop();
     }
+
 
     protected override void OnEnable()
     {
@@ -50,6 +66,7 @@ public class MeleeCharacter : BaseCharacterFSM
         StopFindTargetLoop();
     }
 
+    // Idle 상태 처리
     protected override void HandleIdle()
     {
         animator.SetBool("0_Idle", false);
@@ -69,6 +86,7 @@ public class MeleeCharacter : BaseCharacterFSM
             ChangeState(State.Move);
     }
 
+    // Move 상태 처리
     protected override void HandleMove()
     {
         animator.SetBool("1_Move", true);
@@ -99,6 +117,7 @@ public class MeleeCharacter : BaseCharacterFSM
         }
     }
 
+    // Attack 상태 처리
     protected override void HandleAttack()
     {
         if (attackRoutine == null && currentState == State.Attack)
@@ -108,16 +127,18 @@ public class MeleeCharacter : BaseCharacterFSM
         }
     }
 
+    // Skill 상태 처리
     protected override void HandleSkill()
     {
-        Debug.Log("스킬 사용 루틴 진입");
         if (attackRoutine == null && currentState == State.Skill)
         {
+            Debug.Log("스킬 사용 루틴 진입");
             UpdateLookByTarget();
             attackRoutine = StartCoroutine(SkillRoutine());
         }
     }
 
+    // 일반 공격 루틴 (지속)
     private IEnumerator AttackRoutine()
     {
         while (true)
@@ -134,13 +155,13 @@ public class MeleeCharacter : BaseCharacterFSM
                 yield break;
             }
 
-            animator.SetTrigger("8_normal");
+            animator.SetTrigger("8_normal"); // 일반 공격 애니메이션
 
             var targetScript = target.GetComponent<JHT_BaseMonsterFSM>();
             if (targetScript != null)
             {
                 float attackPower = stats.GetCurrentStat(Stat.Attack);
-                targetScript.TakeDamage(stats);
+                targetScript.TakeDamage(stats); // 데미지 적용
             }
 
             float delay = 1f / stats.GetCurrentStat(Stat.AttackSpeed);
@@ -148,6 +169,7 @@ public class MeleeCharacter : BaseCharacterFSM
         }
     }
 
+    // 스킬 루틴 (단발성)
     private IEnumerator SkillRoutine()
     {
         var skill = stats.skills.FirstOrDefault();
@@ -160,26 +182,25 @@ public class MeleeCharacter : BaseCharacterFSM
         animator.SetTrigger("2_Attack");
 
         var primaryTarget = target.GetComponent<IDamageable>();
-
         if (primaryTarget != null)
         {
             skill.Use(stats, primaryTarget);
             OnSkillUsed?.Invoke(skill);
-
-            Debug.Log($"[SkillRoutine] {gameObject.name} 가 {primaryTarget} 에게 스킬 피해 을(를) 입혔습니다.");
+            Debug.Log($"[SkillRoutine] {gameObject.name} 가 {primaryTarget} 에게 스킬 피해를 입혔습니다.");
         }
 
         lastSkillTime = Time.time;
-
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.5f); // 스킬 연출 대기
 
         attackRoutine = null;
 
+        // 상태 복귀
         if (!IsTargetValid()) ChangeState(State.Idle);
         else if (IsTargetInAttackRange()) ChangeState(State.Attack);
         else ChangeState(State.Move);
     }
 
+    // 타겟 방향에 따라 좌우 반전
     private void UpdateLookByTarget()
     {
         if (target == null) return;
@@ -193,6 +214,7 @@ public class MeleeCharacter : BaseCharacterFSM
         transform.localScale = (moveDir.x > 0) ? new Vector3(-1, 1, 1) : new Vector3(1, 1, 1);
     }
 
+    // 목표까지 경로 재계산 (A* 사용)
     private void RecalculatePathToTarget()
     {
         if (!IsTargetValid()) return;
@@ -227,6 +249,7 @@ public class MeleeCharacter : BaseCharacterFSM
         ChangeState(State.Idle);
     }
 
+    // 대상 자동 탐색 루프 시작
     private void StartFindTargetLoop()
     {
         if (findTargetRoutine != null) StopCoroutine(findTargetRoutine);
@@ -242,6 +265,7 @@ public class MeleeCharacter : BaseCharacterFSM
         }
     }
 
+    // 가장 가까운 적 지속 탐색
     private IEnumerator FindTargetLoop()
     {
         WaitForSeconds wait = new WaitForSeconds(0.5f);
@@ -260,6 +284,7 @@ public class MeleeCharacter : BaseCharacterFSM
         }
     }
 
+    // A* 경로 따라 이동
     private IEnumerator FollowPath()
     {
         foreach (var targetPos in currentPath)
@@ -283,7 +308,7 @@ public class MeleeCharacter : BaseCharacterFSM
                 }
 
                 Vector3 moveDir = (fixedTargetPos - transform.position).normalized;
-                UpdateLookByMovement(moveDir); // ← 이동 방향으로 바라보도록 처리
+                UpdateLookByMovement(moveDir);
 
                 float moveSpeed = PartyManager.Instance.moveSpeed;
                 transform.position = Vector3.MoveTowards(
@@ -299,23 +324,44 @@ public class MeleeCharacter : BaseCharacterFSM
         currentPath = null;
 
         if (IsTargetValid())
-            ChangeState(IsTargetInAttackRange() ? State.Attack : State.Move);
+        {
+            if (IsTargetInAttackRange())
+            {
+                ChangeState(State.Attack);
+            }
+            else
+            {
+                Vector3 fixedTargetPos = target.position;
+
+                Vector3 moveDir = (fixedTargetPos - transform.position).normalized;
+                UpdateLookByMovement(moveDir);
+
+                float moveSpeed = PartyManager.Instance.moveSpeed;
+                transform.position = Vector3.MoveTowards(
+                    transform.position, fixedTargetPos,
+                    moveSpeed * Time.deltaTime
+                );
+
+                transform.position = new Vector3(transform.position.x, transform.position.y, 0f);
+                yield return null;
+                ChangeState(State.Move);
+            }
+        }
         else
             ChangeState(State.Idle);
     }
 
+    // 가장 가까운 적 탐색
     private void FindClosestEnemy()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        if (enemies == null || enemies.Length == 0)
-            return;
+        if (enemies == null || enemies.Length == 0) return;
 
         float minDist = float.MaxValue;
         Transform best = null;
 
-        for (int i = 0; i < enemies.Length; i++)
+        foreach (var e in enemies)
         {
-            GameObject e = enemies[i];
             if (e == null) continue;
 
             var monster = e.GetComponent<JHT_BaseMonsterFSM>();
@@ -332,24 +378,21 @@ public class MeleeCharacter : BaseCharacterFSM
         target = best;
     }
 
+    // 현재 타겟 외에 새로운 적 탐색
     private bool FindNextBestEnemy()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        if (enemies == null || enemies.Length == 0)
-            return false;
+        if (enemies == null || enemies.Length == 0) return false;
 
         float minDist = float.MaxValue;
         Transform best = null;
 
-        for (int i = 0; i < enemies.Length; i++)
+        foreach (var e in enemies)
         {
-            GameObject e = enemies[i];
-            if (e == null) continue;
+            if (e == null || e.transform == target) continue;
 
             var monster = e.GetComponent<JHT_BaseMonsterFSM>();
             if (monster == null || monster.CurHP <= 0) continue;
-
-            if (target != null && e.transform == target) continue;
 
             float dist = Vector3.Distance(transform.position, e.transform.position);
             if (dist < minDist)
@@ -363,6 +406,7 @@ public class MeleeCharacter : BaseCharacterFSM
         return target != null;
     }
 
+    // 타겟 유효성 검사
     private bool IsTargetValid()
     {
         bool valid = target != null && !target.Equals(null) &&
@@ -377,6 +421,7 @@ public class MeleeCharacter : BaseCharacterFSM
         return true;
     }
 
+    // 공격 사거리 내에 있는지 확인
     private bool IsTargetInAttackRange()
     {
         if (!IsTargetValid()) return false;
@@ -384,6 +429,7 @@ public class MeleeCharacter : BaseCharacterFSM
         return Vector3.Distance(transform.position, target.position) <= attackRange + 0.1f;
     }
 
+    // 사거리 시각화 (디버깅용)
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
