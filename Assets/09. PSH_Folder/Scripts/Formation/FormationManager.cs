@@ -70,7 +70,7 @@ public class FormationManager : Singleton<FormationManager>
             // 규칙 2: 역할별 최대 인원 초과 불가
             if (tempFormation[role].Count >= roleLimits[role])
             {
-                PopManager.Instance.ShowOKPopup($"{role} 역할은 최대 {roleLimits[role]}명까지만 배치할 수 있습니다.");
+                PopManager.Instance.ShowOKPopup($"{GetRoleName(role)} 역할은 최대 {roleLimits[role]}명까지만 배치할 수 있습니다.");
                 return;
             }
 
@@ -107,7 +107,7 @@ public class FormationManager : Singleton<FormationManager>
         {
             if (tempFormation.ContainsKey(roleLimit.Key) && tempFormation[roleLimit.Key].Count > roleLimit.Value)
             {
-                errorMessage = $"{roleLimit.Key} 역할은 최대 {roleLimit.Value}명까지만 배치할 수 있습니다.";
+                errorMessage = $"{GetRoleName(roleLimit.Key)} 역할은 최대 {roleLimit.Value}명까지만 배치할 수 있습니다.";
                 return false;
             }
         }
@@ -263,5 +263,22 @@ public class FormationManager : Singleton<FormationManager>
             entry => entry.Key,
             entry => new List<PlayerCharacterData>(entry.Value)
         );
+    }
+
+    private string GetRoleName(CrewRole role)
+    {
+        switch (role)
+        {
+            case CrewRole.Captain:
+                return "선장";
+            case CrewRole.Deckhand:
+                return "갑판장";
+            case CrewRole.Sailor:
+                return "선원";
+            case CrewRole.Cook:
+                return "요리사";
+            default:
+                return role.ToString();
+        }
     }
 }

@@ -16,6 +16,8 @@ public class DamageEffectSO : SkillEffectSO
 
     public override void ApplyEffect(IAttacker caster, IDamageable target)
     {
+        base.ApplyEffect(caster, target);
+
         CombatCharacter casterCharacter = caster as CombatCharacter;
         if (casterCharacter == null) return;
 

@@ -34,6 +34,12 @@ public class GachaUIHandler : UIBase
     public Button relicsProbabilityBtn;
     public RelicsProbability relicsUpgradePanel;
 
+    [Header("가챠 연출")]
+    [Tooltip("캐릭터 가챠 시 재생할 연출 프리팹")]
+    public GameObject characterGachaDirectorPrefab;
+    [Tooltip("장비 가챠 시 재생할 연출 프리팹")]
+    public GameObject equipmentGachaDirectorPrefab;
+
     [Header("결과 UI")]
     [Tooltip("뽑기 결과 화면 UI를 연결하세요.")]
     public GachaListUI gachaListPanel;
@@ -169,13 +175,11 @@ public class GachaUIHandler : UIBase
 
         int totalCost = manager.singleGachaCost * count;
         string itemType = "아이템";
-        bool isCharacterGacha = false;
-        if (typeof(T) == typeof(PlayerCharacterData))
-        {
-            itemType = "캐릭터";
-            isCharacterGacha = true;
-        }
-        else if (typeof(T) == typeof(ItemObject)) itemType = "장비";
+        bool isCharacterGacha = typeof(T) == typeof(PlayerCharacterData);
+        bool isEquipmentGacha = typeof(T) == typeof(ItemObject);
+
+        if (isCharacterGacha) itemType = "캐릭터";
+        else if (isEquipmentGacha) itemType = "장비";
 
         string currencyName = GetCurrencyNameInKorean(manager.currencyType);
 
@@ -183,16 +187,34 @@ public class GachaUIHandler : UIBase
             $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?",
             onConfirm: () =>
             {
+                // 캐릭터 가챠 연출
+                if (isCharacterGacha && characterGachaDirectorPrefab != null)
+                {
+                    CharacterGachaDirector director = EffectPoolManager.Instance.SpawnObject<CharacterGachaDirector>(characterGachaDirectorPrefab);
+                    if (director != null)
+                    {
+                        director.Play(onComplete: () => { EffectPoolManager.Instance.ReturnToPool(director.gameObject); });
+                    }
+                }
+                // 장비 가챠 연출
+                else if (isEquipmentGacha && equipmentGachaDirectorPrefab != null)
+                {
+                    EquipmentGachaDirector director = EffectPoolManager.Instance.SpawnObject<EquipmentGachaDirector>(equipmentGachaDirectorPrefab);
+                    if (director != null)
+                    {
+                        director.Play(onComplete: () => { EffectPoolManager.Instance.ReturnToPool(director.gameObject); });
+                    }
+                }
+
+                // 연출 유무와 관계없이, 실제 뽑기 로직과 결과 표시는 즉시 실행
                 if (manager.PerformMultipleGacha(count))
                 {
                     Debug.Log($"UI 버튼 클릭으로 {itemType} {count}회 뽑기를 실행했습니다.");
-
-                    // Manager가 결과 표시를 담당하므로, 여기서는 퀘스트 신호만 보냅니다.
                     if (isCharacterGacha)
                     {
                         QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
                     }
-                    else if (itemType == "장비")
+                    else if (isEquipmentGacha)
                     {
                         QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
                     }

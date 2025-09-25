@@ -17,6 +17,8 @@ public class BuffEffectSO : SkillEffectSO
 
     public override void ApplyEffect(IAttacker caster, IDamageable target)
     {
+        base.ApplyEffect(caster, target);
+
         CombatCharacter targetCharacter = target as CombatCharacter;
         if (targetCharacter != null)
         {

@@ -63,7 +63,7 @@ public class SynergyImporter
                 if (!IsCombinationValid(type, logic))
                 {
                     Debug.LogError($"[CSV 파싱 유효성 오류] 스킬 ID: {skillID} - TargetType '{type}'과 TargetLogic '{logic}'은 잘못된 조합입니다. CSV 파일을 확인해주세요!");
-                    continue; // 잘못된 데이터는 건너뛰기
+                    //continue; // 잘못된 데이터는 건너뛰기
                 }
 
                 // --- 검사를 통과한 데이터만 최종 할당 ---

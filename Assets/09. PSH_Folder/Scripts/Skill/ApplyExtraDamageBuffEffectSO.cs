@@ -11,6 +11,8 @@ public class ApplyExtraDamageBuffEffectSO : SkillEffectSO
 
     public override void ApplyEffect(IAttacker caster, IDamageable target)
     {
+        base.ApplyEffect(caster, target);
+
         var targetCombatChar = (target as Component)?.GetComponent<CombatCharacter>();
         if (targetCombatChar != null)
         {
