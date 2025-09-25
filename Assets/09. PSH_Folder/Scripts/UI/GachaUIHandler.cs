@@ -21,11 +21,15 @@ public class GachaUIHandler : UIBase
     public Button charSingleBtn;
     public Button charMultipleBtn;
     public TextMeshProUGUI gachaPityCountText;
+    public TextMeshProUGUI gemCountText;
+    public TextMeshProUGUI charTicketCountText;
 
     [Header("장비 뽑기")]
     public EquipmentGachaManager equipmentGachaManager;
     public Button equipSingleBtn;
     public Button equipMultipleBtn;
+    public TextMeshProUGUI gemCountText2;
+    public TextMeshProUGUI equipTicketCountText;
 
     [Header("유물 뽑기")]
     public RelicsGachaManager relicsGachaManager;
@@ -33,6 +37,8 @@ public class GachaUIHandler : UIBase
     public Button specialRelicsSingleBtn;
     public Button relicsProbabilityBtn;
     public RelicsProbability relicsUpgradePanel;
+    public TextMeshProUGUI gemCountText3;
+    public TextMeshProUGUI relicTicketCountText;
 
     [Header("가챠 연출")]
     [Tooltip("캐릭터 가챠 시 재생할 연출 프리팹")]
@@ -71,6 +77,20 @@ public class GachaUIHandler : UIBase
         base.RefreshUI();
         // UI가 활성화될 때마다 천장 텍스트를 갱신합니다.
         UpdateCharacterPityText();
+
+        // 재화 텍스트 연결
+        gemCountText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.Gem).ToString();
+        gemCountText2.text = CurrencyManager.Instance.GetCurrency(CurrencyType.Gem).ToString();
+        gemCountText3.text = CurrencyManager.Instance.GetCurrency(CurrencyType.Gem).ToString();
+        charTicketCountText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.CrewDrawTicket).ToString();
+        equipTicketCountText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.EquipDrawTicket).ToString();
+        relicTicketCountText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon).ToString();
+        //gemCountText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.Gem));
+        //gemCountText2.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.Gem));
+        //gemCountText3.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.Gem));
+        //charTicketCountText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.CrewDrawTicket));
+        //equipTicketCountText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.EquipDrawTicket));
+        //relicTicketCountText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon));
     }
 
     private void Start()
