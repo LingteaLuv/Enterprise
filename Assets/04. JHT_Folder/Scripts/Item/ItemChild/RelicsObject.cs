@@ -38,7 +38,6 @@ namespace JHT
 
             itemPower = SetPower(data,level); 
             
-            itemCost = data.cost[(int)curRarity - 1] * level;
             itemRarityImage = data.rarityImage[(int)curRarity - 1];
         }
         
@@ -54,8 +53,7 @@ namespace JHT
             itemNum = data.itemNum;
             itemName = data.itemName;
 
-            itemPower = SetPower(data,level); 
-            itemCost = data.cost[(int)curRarity - 1] * level;
+            itemPower = SetPower(data,level);
             itemRarityImage = data.rarityImage[(int)curRarity - 1];
         }
 

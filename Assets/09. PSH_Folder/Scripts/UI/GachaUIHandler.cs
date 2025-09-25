@@ -32,7 +32,7 @@ public class GachaUIHandler : UIBase
     public Button relicsSingleBtn;
     public Button specialRelicsSingleBtn;
     public Button relicsProbabilityBtn;
-    public RelicsProbability relicsUpgradePanel;
+    //public RelicsProbability relicsUpgradePanel;
 
     [Header("결과 UI")]
     [Tooltip("뽑기 결과 화면 UI를 연결하세요.")]
@@ -83,7 +83,7 @@ public class GachaUIHandler : UIBase
         relicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Single);
         specialRelicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Special);
         relicsPoints.Init(relicsGachaManager);
-        relicsProbabilityBtn.onClick.AddListener(ShowUpgradeGachaPanel);
+        //relicsProbabilityBtn.onClick.AddListener(ShowUpgradeGachaPanel);
 
         // 천장 카운트 UI 갱신 이벤트 구독
         CharacterGachaManager.OnGachaPityChanged += UpdateCharacterPityText;
@@ -258,11 +258,12 @@ public class GachaUIHandler : UIBase
 
     }
 
-    private void ShowUpgradeGachaPanel()
-    {
-        relicsUpgradePanel.gameObject.SetActive(true);
-        relicsUpgradePanel.Init(relicsGachaManager);
-    }
+    // 유물 등급
+    //private void ShowUpgradeGachaPanel()
+    //{
+    //    relicsUpgradePanel.gameObject.SetActive(true);
+    //    relicsUpgradePanel.Init(relicsGachaManager);
+    //}
 
     //private void OnDestroy()
     //{
