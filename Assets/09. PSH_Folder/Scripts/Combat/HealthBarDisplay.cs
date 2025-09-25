@@ -10,15 +10,28 @@ public class HealthBarDisplay : MonoBehaviour
 {
     [Header("UI 컴포넌트")]
     [SerializeField] private Image characterIcon;
-    [SerializeField] private Slider healthSlider;
+    [SerializeField] private Image healthFillImage; // 체력바 채우기 이미지
     [SerializeField] private TextMeshProUGUI healthText; // 체력 숫자를 표시할 텍스트
     [SerializeField] private TextMeshProUGUI nameText; // 캐릭 이름을 표시할 텍스트
     [SerializeField] private Image skillCooldownImage; // 스킬 쿨타임 표시 이미지
     [SerializeField] private TextMeshProUGUI skillCooldownText; // 스킬 쿨타임 텍스트
+    [SerializeField] private TextMeshProUGUI charLevelText;
 
     private HealthSystem healthSystem;
     private MeleeCharacter meleeCharacter;
     private Coroutine cooldownCoroutine;
+    private PlayerCharacterData _playerCharacterData; // 레벨 업데이트를 위한 PlayerCharacterData 참조
+
+    /// <summary>
+    /// 캐릭터 레벨 텍스트를 업데이트합니다.
+    /// </summary>
+    private void UpdateCharacterLevelText(int newLevel)
+    {
+        if (charLevelText != null)
+        {
+            charLevelText.text = $"레벨 {newLevel}";
+        }
+    }
 
     /// <summary>
     /// 특정 CombatCharacter를 대상으로 UI를 초기화합니다.
@@ -42,6 +55,18 @@ public class HealthBarDisplay : MonoBehaviour
         if (nameText != null && character.CharacterStats?.characterdata?.characterName != null)
         {
             nameText.text = character.CharacterStats.characterdata.characterName;
+        }
+
+        // 레벨 설정
+        _playerCharacterData = character.CharacterStats; // PlayerCharacterData 참조 저장
+        if (_playerCharacterData != null)
+        {
+            _playerCharacterData.Level.OnChanged += UpdateCharacterLevelText; // 레벨 변경 이벤트 구독
+            UpdateCharacterLevelText(_playerCharacterData.Level.Value); // 초기 레벨 텍스트 설정
+        }
+        else
+        {
+            Debug.LogError($"[HealthBarDisplay] {character.name}에서 PlayerCharacterData를 찾을 수 없습니다.");
         }
 
         // HealthSystem 참조 및 이벤트 구독
@@ -79,10 +104,10 @@ public class HealthBarDisplay : MonoBehaviour
     /// </summary>
     private void UpdateHealthBar(float current, float max)
     {
-        if (healthSlider != null)
+        if (healthFillImage != null)
         {
             // max가 0일 경우의 나눗셈 오류 방지
-            healthSlider.value = (max > 0) ? (current / max) : 0;
+            healthFillImage.fillAmount = (max > 0) ? (current / max) : 0;
         }
 
         // 체력 숫자 텍스트 업데이트
@@ -144,6 +169,10 @@ public class HealthBarDisplay : MonoBehaviour
         if (meleeCharacter != null)
         {
             meleeCharacter.OnSkillUsed -= HandleSkillUsed;
+        }
+        if (_playerCharacterData != null)
+        {
+            _playerCharacterData.Level.OnChanged -= UpdateCharacterLevelText; // 레벨 변경 이벤트 구독 해제
         }
     }
 }
