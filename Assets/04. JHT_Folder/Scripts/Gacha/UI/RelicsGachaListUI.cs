@@ -1,7 +1,8 @@
-    using JHT;
 using System;
-using System.Collections;
-using Unity.VisualScripting;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using JHT;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,62 +18,66 @@ public class RelicsGachaListUI : MonoBehaviour
     //[Header("Button")]
     //[SerializeField] private Button closeButton;
 
+    [SerializeField] private RelicsProductAnim productAnim;
+    [SerializeField] private Image fadeImg;
+    Sequence sequenceFadeIn;
+    Sequence sequenceFadeOut;
 
+    CancellationTokenSource token;
 
     public void Init(RelicsGachaManager relicsGachaManager)
     {
         relicsGachaManager.OnChooseItem -= ShowChooseItem;
         relicsGachaManager.OnChooseItem += ShowChooseItem;
-        //closeButton.onClick.AddListener(ClosePanel);
 
-        //ClearChildren(relicsItemParent);
-
-        //StartCoroutine(DisplayPanel(relicsGachaManager));
+        if (token != null)
+        {
+            token?.Cancel();
+            token?.Dispose();
+            token = null;
+        }
+        else
+        {
+            token = new CancellationTokenSource();
+        }
     }
 
-    //private IEnumerator DisplayPanel(RelicsGachaManager relicsGachaManager)
-    //{
-    //    yield return new WaitUntil(() =>
-    //    relicsGachaManager.relicsResult != null &&
-    //    relicsGachaManager.rarityResult != ItemRarity.None &&
-    //    relicsGachaManager.levelResult > 0);
-    //
-    //    choosePopup.gameObject.SetActive(true);
-    //    choosePopup.Init(relicsGachaManager)
-    //
-    //    //RelicsGachaItemPanel panel = Instantiate(relicsPanelItem);
-    //    //panel.transform.SetParent(relicsItemParent);
-    //    //panel.Init(relicsGachaManager);
-    //    
-    //}
-
-    //private void ClosePanel()
-    //{
-    //    if(this.gameObject.activeSelf)
-    //    {
-    //        if(choosePopup.gameObject.activeSelf)
-    //            choosePopup.gameObject.SetActive(false);
-    //
-    //        closeButton.onClick.RemoveListener(ClosePanel);
-    //        gameObject.SetActive(false);
-    //    }
-    //}
-
-    private void ClearChildren(Transform parent)
+    public void OnDisable()
     {
-        if (parent == null) return;
-        for (int i = parent.childCount - 1; i >= 0; i--)
-        {
-            var child = parent.GetChild(i);
-            if (child != null) 
-                Destroy(child.gameObject);
-        }
+        sequenceFadeIn.Kill();
+        sequenceFadeOut.Kill();
+
+        token?.Cancel();
+        token?.Dispose();
+        token = null;
+    }
+
+    public async UniTask OutIt()
+    {
+        fadeImg.gameObject.SetActive(true);
+        sequenceFadeIn = DOTween.Sequence().SetAutoKill(false).Append(fadeImg.DOFade(1.0f, 1)).Append(fadeImg.DOFade(0.0f, 2));
+        await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token.Token);
+        productAnim.gameObject.SetActive(false);
+        await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token.Token);
+        fadeImg.gameObject.SetActive(false);
     }
 
     private void ShowChooseItem(RelicsObject obj1, RelicsObject obj2)
     {
+        ShowChooseItemAsync(obj1, obj2).Forget();
+    }
+
+    private async UniTask ShowChooseItemAsync(RelicsObject obj1, RelicsObject obj2)
+    {
+        sequenceFadeIn = DOTween.Sequence().SetAutoKill(false).Append(fadeImg.DOFade(1.0f, 1)).Append(fadeImg.DOFade(0.0f, 1));
+
+        await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token.Token);
         choosePopup.gameObject.SetActive(true);
         choosePopup.Init(obj1, obj2);
+        productAnim.gameObject.SetActive(true);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token.Token);
+        fadeImg.gameObject.SetActive(false);
     }
 
 }

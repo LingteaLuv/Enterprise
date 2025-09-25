@@ -8,7 +8,7 @@ namespace JHT
 {
     public class JHT_DataDownLoader
     {
-        public const string itemRelicsURL = "https://docs.google.com/spreadsheets/d/1yrgwWQ_XijgUwjyUSkgDH9wji0oHuoYjEcmjZdZVGmg/export?format=csv"; //범위 설정 : &range=A2:B, 두번쨰시트 : &gid~~
+        public const string itemRelicsURL = "https://docs.google.com/spreadsheets/d/1yrgwWQ_XijgUwjyUSkgDH9wji0oHuoYjEcmjZdZVGmg/export?format=csv&gid=1891336971"; //범위 설정 : &range=A2:B, 두번쨰시트 : &gid~~
         public const string lootTableURL = "https://docs.google.com/spreadsheets/d/13MgAe8F47N4GJRDn4vg4wGtn2Y31aOerQEQF096ox_g/export?format=csv";
         public const string monsterDataURL = "https://docs.google.com/spreadsheets/d/1PmzSVnMU8XB2xUcDjxwD2VnZMGChZEwb0RiKSioXa8Q/export?format=csv&gid=1883053582";
         public const string monsterTableDataURL = "https://docs.google.com/spreadsheets/d/1W5YTINFy0XWnzm549uTDJL6Up4h81jeZhlc0A_9T_j8/export?format=csv&gid=1059773203";
@@ -92,9 +92,8 @@ namespace JHT
                     so.desc = row[2];
                     so.icon = Resources.Load<Sprite>(row[3]);
                     so.itemPowerType = (PowerType)Enum.Parse(typeof(PowerType), row[5]);
-                    so.upPower[rarity - 1] = float.Parse(row[6]);
                     so.startPower[rarity - 1] = float.Parse(row[8]);
-                    so.cost[rarity - 1] = float.Parse(row[7]);
+                    so.upPower[rarity - 1] = (float.Parse(row[6]) - so.startPower[rarity - 1])/100;
                     
                     //so.rarityImage[rarity-1] = Resources.Load<Sprite>(row[8]);
                 }
