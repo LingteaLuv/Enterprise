@@ -98,6 +98,7 @@ public class GachaUIHandler : UIBase
         // 가챠매니저 연결
         characterGachaManager = FindAnyObjectByType<CharacterGachaManager>();
         equipmentGachaManager = FindAnyObjectByType<EquipmentGachaManager>();
+        relicsGachaManager = FindAnyObjectByType<RelicsGachaManager>();
     }
     private void Start()
     {
@@ -118,7 +119,7 @@ public class GachaUIHandler : UIBase
         relicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Single);
         specialRelicsSingleBtn.onClick.AddListener(OnClick_RelicsGacha_Special);
         relicsPoints.Init(relicsGachaManager);
-        relicsProbabilityBtn.onClick.AddListener(ShowUpgradeGachaPanel);
+        //relicsProbabilityBtn.onClick.AddListener(ShowUpgradeGachaPanel);
 
         // 천장 카운트 UI 갱신 이벤트 구독
         CharacterGachaManager.OnGachaPityChanged += UpdateCharacterPityText;
