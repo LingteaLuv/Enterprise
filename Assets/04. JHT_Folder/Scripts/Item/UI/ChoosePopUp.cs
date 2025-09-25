@@ -154,8 +154,12 @@ public class ChoosePopUp : MonoBehaviour
     {
         if (relicsObj1 != null)
         {
-            UIManager.Instance.ShowConfirm("정말 이 아이템을 선택 하시겠습니까?", () =>
+            PopManager.Instance.ShowOKCancelPopup(
+            "정말 이 아이템을 선택 하시겠습니까?",
+            "확인", // 왼쪽 버튼 텍스트
+            () =>
             {
+                // 확인 눌렀을 때 실행
                 InventoryManager.Instance.OnChangeItem?.Invoke(relicsObj1, relicsObj2, selectMyItem);
 
                 gameObject.SetActive(false);
@@ -163,7 +167,10 @@ public class ChoosePopUp : MonoBehaviour
 
                 relicsObj1 = null;
                 relicsObj2 = null;
-            });
+            },
+            "취소", // 오른쪽 버튼 텍스트
+            null    // 취소 눌렀을 때 아무 것도 안 하려면 null
+        );
         }
         else
         {

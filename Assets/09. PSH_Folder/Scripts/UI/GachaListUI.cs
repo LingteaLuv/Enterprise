@@ -137,6 +137,18 @@ public class GachaListUI : MonoBehaviour
     }
     private void ClosePanel()
     {
+        // GachaUIHandler를 찾아 UI 새로고침을 요청합니다.
+        GachaUIHandler gachaUI = FindObjectOfType<GachaUIHandler>();
+        if (gachaUI != null)
+        {
+            gachaUI.RefreshUI();
+            Debug.Log("뽑기 결과창이 닫히면서 메인 UI를 새로고침합니다.");
+        }
+        else
+        {
+            Debug.LogWarning("씬에서 GachaUIHandler를 찾을 수 없어 UI를 새로고침하지 못했습니다!");
+        }
+
         gameObject.SetActive(false);
     }
 

@@ -28,8 +28,8 @@ public class PopManager : Singleton<PopManager>
     /// <param name="rightText">오른쪽 버튼에 띄울 텍스트입니다. 미작성 시 Cancel 이 출력됩니다.</param>
     /// <param name="onRightClick">오른쪽 버튼을 눌렀을 때, 실행할 액션입니다. 매개변수가 없는 함수를 호출하셔도 되고, 화살표 함수를 사용하셔도 됩니다.</param>
     public void ShowOKCancelPopup(string message,
-                          string leftText = "OK", Action onLeftClick = null,
-                          string rightText = "Cancel", Action onRightClick = null)
+                          string leftText = "네", Action onLeftClick = null,
+                          string rightText = "아니오", Action onRightClick = null)
     {
         if (_popupPanel == null) {
             return;
