@@ -71,7 +71,7 @@ public class BattleManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
         OnStageEnd += SetBattleStop;
 
-        PlayerDataManager.Instance.OnFormationSaved += OnPartyFormationSaved;
+        PartyManager.OnPartyReady += OnPartyFormationSaved;
     }
 
 
@@ -80,7 +80,7 @@ public class BattleManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
         OnStageEnd -= SetBattleStop;
 
-        PlayerDataManager.Instance.OnFormationSaved -= OnPartyFormationSaved;
+        PartyManager.OnPartyReady -= OnPartyFormationSaved;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -141,7 +141,7 @@ public class BattleManager : MonoBehaviour
       //  battleFields[0].FadeIn(1f); // 자연스럽게 등장
     }
 
-    private void OnPartyFormationSaved()
+    private void OnPartyFormationSaved(List<CombatCharacter> party)
     {
         RefreshCameraTargets();
 
@@ -442,6 +442,8 @@ public class BattleManager : MonoBehaviour
                 Destroy(enemy);
         }*/
         spawnedEnemies.Clear();
+
+        Debug.Log("몬스터 제거됨");
     }
 
     // 플레이어 제거
@@ -456,6 +458,8 @@ public class BattleManager : MonoBehaviour
             }
         }
         currentPlayers.Clear();
+
+        Debug.Log("플레이어 제거됨");
     }
 
 }
