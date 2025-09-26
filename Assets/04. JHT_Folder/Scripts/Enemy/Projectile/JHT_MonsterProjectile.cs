@@ -15,6 +15,7 @@ public class JHT_MonsterProjectile : JHT_PooledObject
     Coroutine startCor;
     public void Init(IAttacker owner, Vector2 _targetPos, Vector2 monsterPos,float projectileSpeed, float power, Sprite baseMonsterSprite)
     {
+        // target이 체력 0이 돼도 같은 타겟에게 계속 날라가서 효과 적용함
         if (baseMonsterSprite == null || rigid == null)
         {
             Release();

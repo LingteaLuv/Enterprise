@@ -62,8 +62,8 @@ namespace JHT
                 return;
             }
 
-            float dist = Mathf.Abs(Vector2.Distance(fsm.target.transform.position,
-                    fsm.gameObject.transform.position));
+            float dist = Vector2.Distance(fsm.target.transform.position,
+                    fsm.gameObject.transform.position);
 
             if (dist < fsm.monsterStat.chaseRange)
             {
@@ -105,7 +105,7 @@ namespace JHT
             fsm.monsterSearch.SearchTarget();
             fsm.Rotate();
             
-            float dist = Mathf.Abs(Vector2.Distance(fsm.target.transform.position, fsm.gameObject.transform.position));
+            float dist = Vector2.Distance(fsm.target.transform.position, fsm.gameObject.transform.position);
 
             if (dist <= fsm.monsterStat.attackRange)
             {
@@ -150,8 +150,8 @@ namespace JHT
 
             fsm.Rotate();
 
-            if (Mathf.Abs(Vector2.Distance(fsm.target.transform.position,
-                fsm.gameObject.transform.position)) > fsm.monsterStat.attackRange + safeZone)
+            if (Vector2.Distance(fsm.target.transform.position,
+                fsm.gameObject.transform.position) > fsm.monsterStat.attackRange + safeZone)
             {
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.MOVE]);
                 return;

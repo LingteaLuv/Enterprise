@@ -1,3 +1,5 @@
+
+using System.Collections.Generic;
 using JHT;
 using UnityEngine;
 
@@ -6,56 +8,66 @@ public class MonsterSkillSO : ScriptableObject
 {
     public int ID;
     public string skillName;
-    public MonsterSkillAttackType monsterSkillAttackType;
-    public MonsterSkillType skillType;
+
+
+    [Header("타겟 설정")]
+    public ESkillTargetType skillTargetType;
     public ETargetLogic targetLogic;
-    public int attackCount;
-    public float damagePercent;
-    public float buffTime;
+    public CrewRole targetRole;
+    public MonsterSkillAttackType monsterSkillAttackType;
+
     public float coolTime;
     public AnimationClip clip;
 
     //몬스터 생성 초기에 초기화 시켜야함
     public MonsterSkillSet monsterSkillSet;
 
+    //모든 스탯 증가일때 스탯마다 스킬을 다 넣어야하기 떄문에 list로
+    public List<SkillEffectSO> effects = new List<SkillEffectSO>();
+
     public void Init(JHT_BaseMonsterStat stat)
     {
         switch (monsterSkillAttackType)
         {
             case MonsterSkillAttackType.Monster_0_attack_normal:
-                monsterSkillSet = new Monster_0_attack_normal(stat, this);
+                monsterSkillSet = new Monster_0_attack_normal(this);
                 break;
             case MonsterSkillAttackType.Monster_0_attack_bow:
-                monsterSkillSet = new Monster_0_attack_bow(stat, this);
+                monsterSkillSet = new Monster_0_attack_bow(this);
                 break;
             case MonsterSkillAttackType.Monster_0_attack_magic:
-                monsterSkillSet = new Monster_0_attack_magic(stat, this);
+                monsterSkillSet = new Monster_0_attack_magic(this);
                 break;
             case MonsterSkillAttackType.Monster_longspearattack_1:
-                monsterSkillSet = new Monster_longspearattack_1(stat, this);
+                monsterSkillSet = new Monster_longspearattack_1(this);
                 break;
             case MonsterSkillAttackType.Monster_shotswordattack_1:
-                monsterSkillSet = new Monster_shotswordattack_1(stat, this);
+                monsterSkillSet = new Monster_shotswordattack_1(this);
                 break;
             case MonsterSkillAttackType.Monster_1_skill_normal:
-                monsterSkillSet = new Monster_1_skill_normal(stat, this);
+                monsterSkillSet = new Monster_1_skill_normal(this);
                 break;
             case MonsterSkillAttackType.Monster_1_skill_magic:
-                monsterSkillSet = new Monster_1_skill_magic(stat, this);
+                monsterSkillSet = new Monster_1_skill_magic(this);
                 break;
             case MonsterSkillAttackType.Monster_1_skill_bow:
-                monsterSkillSet = new Monster_1_skill_bow(stat, this);
+                monsterSkillSet = new Monster_1_skill_bow(this);
                 break;
             default:
-                monsterSkillSet = new MonsterSkillSet(stat, this);
+                monsterSkillSet = new MonsterSkillSet(this);
                 break;
         }
+
+        
     }
 
     public void Use(JHT_BaseMonsterFSM fsm)
     {
+
         monsterSkillSet.UseSkill(fsm);
     }
+
+
 }
 
 public enum MonsterSkillType

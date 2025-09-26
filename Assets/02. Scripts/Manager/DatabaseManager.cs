@@ -242,7 +242,11 @@ public class DatabaseManager : Singleton<DatabaseManager>
         DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child("StatusData").Child("Weapon");
         dataRef.GetValueAsync().ContinueWithOnMainThread((task) =>
         {
-            if (!task.Result.Exists || task.Result.Value == null) return;
+            if (!task.Result.Exists || task.Result.Value == null)
+            {
+                callback(new Dictionary<int, InventoryManager.ParsingWeaponData>());
+                return;
+            }
             var result = new Dictionary<int, InventoryManager.ParsingWeaponData>();
 
             foreach (var child in task.Result.Children)
