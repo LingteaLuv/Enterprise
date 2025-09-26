@@ -41,7 +41,9 @@ namespace JHT
         public bool isAttacking;
         public bool isStun;
 
-        private CancellationTokenSource[] token;
+        private CancellationTokenSource[] Atoken;
+        private CancellationTokenSource Stoken;
+        private List<CancellationTokenSource> Btoken;
 
         private float curHP;
         public float CurHP { get { return curHP; } set { curHP = value; OnChangeHp?.Invoke(curHP); } }
@@ -183,51 +185,69 @@ namespace JHT
                     break;
             }
         }
-        private void ResetTokens()
+        private void ResetATokens()
         {
-            token = new CancellationTokenSource[5];
+            Atoken = new CancellationTokenSource[3];
 
-            // 기존 토큰 정리
-            for (int i = 0; i < token.Length; i++)
+            // 기존 공격 토큰 정리
+            for (int i = 0; i < Atoken.Length; i++)
             {
-                if (token[i] != null)
+                if (Atoken[i] != null)
                 {
-                    token[i].Cancel();
+                    Atoken[i].Cancel();
                 }
             }
 
             if (monsterStat.normalSkill != null)
-                token[0] = new CancellationTokenSource();
+                Atoken[0] = new CancellationTokenSource();
             else
-                token[0] = null;
+                Atoken[0] = null;
 
             if (monsterStat.skill1 != null)
-                token[1] = new CancellationTokenSource();
+                Atoken[1] = new CancellationTokenSource();
             else
-                token[1] = null;
+                Atoken[1] = null;
 
             if (monsterStat.skill2 != null)
-                token[2] = new CancellationTokenSource();
+                Atoken[2] = new CancellationTokenSource();
             else
-                token[2] = null;
+                Atoken[2] = null;
         }
 #endregion
         
         protected virtual void OnDisable()
         {
             OnChangeHp -= ShowMonsterUI;
-        
-            if (token != null)
+
+            if (Atoken != null)
             {
-                for (int i = 0; i < token.Length; i++)
+                for (int i = 0; i < Atoken.Length; i++)
                 {
-                    if (token[i] != null)
+                    if (Atoken[i] != null)
                     {
-                        token[i].Dispose();
-                        token[i] = null;
+                        Atoken[i].Dispose();
+                        Atoken[i] = null;
                     }
                 }
             }
+
+            if (Btoken != null && Btoken.Count > 0)
+            {
+                for (int i = 0; i < Btoken.Count; i++)
+                {
+                    Btoken[i].Cancel();
+                    Btoken[i].Dispose();
+                    Btoken[i] = null;
+                }
+            }
+
+            if (Stoken != null)
+            {
+                Stoken.Cancel();
+                Stoken.Dispose();
+                Stoken = null;
+            }
+
             //canAttack = false;
             //OnChangeAttack -= CanAttackCor;
         }
@@ -254,7 +274,7 @@ namespace JHT
                         continue;
                     }
 
-                    float d = Mathf.Abs(Vector2.Distance(c.gameObject.transform.position, transform.position));
+                    float d = Vector2.Distance(c.gameObject.transform.position, transform.position);
 
                     if (d < monsterStat.chaseRange)
                     {
@@ -276,7 +296,7 @@ namespace JHT
             if (target == null)
                 return;
 
-            ResetTokens();
+            ResetATokens();
 
             ChangeAnim(ATTACK, MonsterState.ATTACK);
 
@@ -311,19 +331,27 @@ namespace JHT
         //스턴 기능 호출만 하면 됩니다.
         public void ApplyStun(float duration)
         {
+            if (Stoken != null)
+            {
+                Stoken.Cancel();
+                Stoken.Dispose();
+                Stoken = null;
+            }
+
             isStun = true;
+
+            Stoken = new();
             StunSetting(duration).Forget();
-            ResetTokens();
         }
 
         private async UniTaskVoid StunSetting(float duration)
         {
             try
             {
-                if (token[4] == null || token[4].Token.IsCancellationRequested)
+                if (Stoken == null || Stoken.Token.IsCancellationRequested)
                     return;
 
-                await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: token[4].Token);
+                await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: Stoken.Token);
                 isStun = false;
             }
             catch (OperationCanceledException) { }
@@ -338,13 +366,13 @@ namespace JHT
 
                 while (true)
                 {
-                    if (token[0] == null || token[0].Token.IsCancellationRequested)
+                    if (Atoken[0] == null || Atoken[0].Token.IsCancellationRequested)
                         return;
 
                     if (!animator)
                         return;
 
-                    await UniTask.WaitUntil(() => !skill1Active || !skill2Active, cancellationToken: token[0].Token);
+                    await UniTask.WaitUntil(() => !skill1Active || !skill2Active, cancellationToken: Atoken[0].Token);
 
                     if (animator != null)
                     {
@@ -352,10 +380,10 @@ namespace JHT
                     }
                     isAttacking = true;
 
-                    await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.normalSkill.clip.length), cancellationToken: token[0].Token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.normalSkill.clip.length), cancellationToken: Atoken[0].Token);
 
                     isAttacking = false;
-                    await UniTask.Delay(TimeSpan.FromSeconds(coolTime), cancellationToken: token[0].Token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(coolTime), cancellationToken: Atoken[0].Token);
 
                 }
             }
@@ -366,20 +394,20 @@ namespace JHT
         {
             try
             {
-                if (animator != null && monsterStat.skill1 != null && token[1] != null)
+                if (animator != null && monsterStat.skill1 != null && Atoken[1] != null)
                 {
                     while (true)
                     {
-                        await UniTask.WaitUntil(() => !skill1Active, cancellationToken: token[1].Token);
-                        await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[1].Token);
-                        await UniTask.WaitUntil(() => !isAttacking || !skill2Active, cancellationToken: token[1].Token);
+                        await UniTask.WaitUntil(() => !skill1Active, cancellationToken: Atoken[1].Token);
+                        await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: Atoken[1].Token);
+                        await UniTask.WaitUntil(() => !isAttacking || !skill2Active, cancellationToken: Atoken[1].Token);
 
                         skill1Active = true;
 
                         if (animator != null)
                             animator.Play(SKILL1, 0, 0f);
 
-                        await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill1.clip.length), cancellationToken: token[1].Token);
+                        await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill1.clip.length), cancellationToken: Atoken[1].Token);
                         skill1Active = false;
                     }
                 }
@@ -396,19 +424,19 @@ namespace JHT
         {
             try
             {
-                if (monsterStat.skill2 != null && monsterStat.skill2 != null && token[2] != null)
+                if (monsterStat.skill2 != null && monsterStat.skill2 != null && Atoken[2] != null)
                 {
                     while (true)
                     {
-                        await UniTask.WaitUntil(() => !skill2Active, cancellationToken: token[2].Token);
-                        await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: token[2].Token);
-                        await UniTask.WaitUntil(() => !isAttacking || !skill1Active, cancellationToken: token[2].Token);
+                        await UniTask.WaitUntil(() => !skill2Active, cancellationToken: Atoken[2].Token);
+                        await UniTask.Delay(TimeSpan.FromSeconds(collTime), cancellationToken: Atoken[2].Token);
+                        await UniTask.WaitUntil(() => !isAttacking || !skill1Active, cancellationToken: Atoken[2].Token);
 
                         skill2Active = true;
                         if (animator != null)
                             animator.Play(SKILL2, 0, 0f);
 
-                        await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill2.clip.length), cancellationToken: token[2].Token);
+                        await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill2.clip.length), cancellationToken: Atoken[2].Token);
                         skill2Active = false;
                     }
                 }
@@ -420,40 +448,73 @@ namespace JHT
             catch (OperationCanceledException) { }
         }
 
-        // 버프 적용시 넣을 함수
-        public void ApplyBuff(Stat stat, float value, float duration, BuffType buffType)
-        {
-            bool isSynergy = SynergyManager.IsApplyingSynergy;
-            Buff newBuff = new Buff(stat, value, duration, buffType, isSynergy, BuffEffectType.StatModifier);
-            activeBuffs.Add(newBuff);
-            Debuff(stat, duration, value, newBuff).Forget(); 
 
-        }
-
+        // 디버프
         public async UniTask Debuff(Stat stat, float duration, float amount, Buff newBuff)
         {
             try
             {
+                this.monsterStat.monsterStats[stat] += this.monsterStat.monsterStats[stat] * (amount / 100);
+
                 if (stat == Stat.Health)
                 {
                     CurHP += CurHP * (amount / 100);
                 }
 
-                this.monsterStat.monsterStats[stat] += this.monsterStat.monsterStats[stat] * (amount / 100);
                 // 이펙트 여기에 추가
-                await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: token[5].Token);
+                await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: Btoken[Btoken.Count-1].Token);
                 //이펙트 해제
-                this.monsterStat.monsterStats[stat] -= this.monsterStat.monsterStats[stat] * (amount * 100);
 
                 if (stat == Stat.Health)
                 {
                     CurHP -= CurHP * (amount / 100);
                 }
 
+                this.monsterStat.monsterStats[stat] -= this.monsterStat.monsterStats[stat] * (amount * 100);
+
+                //이부분을 어덯게 처리해야할지 물어보기!
+                for (int i = 0; i < Btoken.Count; i++)
+                {
+                    if (Btoken[i].Token.Equals(this))
+                    {
+                        Btoken.Remove(Btoken[i]);
+                        Btoken[i].Cancel();
+                        Btoken[i].Dispose();
+                        Btoken = null;
+                    }
+                }
                 activeBuffs.Remove(newBuff);
             }
             catch (OperationCanceledException) { }
         }
+
+
+        // 버프
+        public void ApplyBuff(Stat stat, float value, float duration, BuffType buffType)
+        {
+            Buff newBuff = new Buff(stat, value, duration, buffType, false, BuffEffectType.StatModifier);
+            activeBuffs.Add(newBuff);
+
+            Btoken.Add(new CancellationTokenSource());
+
+            Debuff(stat, duration, value, newBuff).Forget();
+        }
+
+        public float GetOnHitDamageBonus()
+        {
+            return activeBuffs
+                .Where(b => b.EffectType == BuffEffectType.ExtraDamageOnHit)
+                .Sum(b => b.Value);
+        }
+
+        public void ApplyOnHitDamageBuff(float value, float duration)
+        {
+            Buff newBuff = new Buff(Stat.Attack, value, duration, BuffType.Flat, false, BuffEffectType.ExtraDamageOnHit);
+            activeBuffs.Add(newBuff);
+        }
+
+
+
 
         public void Rotate()
         {
@@ -524,15 +585,33 @@ namespace JHT
             monsterSO = null;
             monsterSearch.StopRoutine();
 
-            if (token != null)
+            if (Atoken != null)
             {
-                for (int i = 0; i < token.Length; i++)
+                for (int i = 0; i < Atoken.Length; i++)
                 {
-                    if (token[i] != null)
-                        token[i].Cancel();
+                    if (Atoken[i] != null)
+                        Atoken[i].Cancel();
                 }
             }
             
+            if (Btoken != null && Btoken.Count > 0)
+            {
+                for (int i = 0; i < Btoken.Count; i++)
+                {
+
+                    Btoken.Remove(Btoken[i]);
+                    Btoken[i].Cancel();
+                    Btoken[i].Dispose();
+                    Btoken = null;
+                }
+            }
+
+            if (Stoken != null)
+            {
+                Stoken.Cancel();
+                Stoken.Dispose();
+                Stoken = null;
+            }
 
             monsterUI.gameObject.SetActive(false);
 
@@ -562,12 +641,11 @@ namespace JHT
 
             if (currentState == MonsterState.ATTACK && curState != currentState)
             {
-                for (int i = 0; i < token.Length; i++)
+                for (int i = 0; i < Atoken.Length; i++)
                 {
-                    if (token[i] != null)
+                    if (Atoken[i] != null)
                     {
-                        token[i].Cancel();
-                        token[i].Dispose();
+                        Atoken[i].Cancel();
                     }
                 }
             }

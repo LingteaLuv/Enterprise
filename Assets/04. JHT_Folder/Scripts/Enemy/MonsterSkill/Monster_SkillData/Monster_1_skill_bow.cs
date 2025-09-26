@@ -3,12 +3,12 @@ using UnityEngine;
 
 public class Monster_1_skill_bow : MonsterSkillSet
 {
-    public Monster_1_skill_bow(JHT_BaseMonsterStat stat, MonsterSkillSO _skillSO) : base(stat, _skillSO)
+    public Monster_1_skill_bow(MonsterSkillSO _skillSO) : base(_skillSO)
     {
     }
-    public override void UseSkill(JHT_BaseMonsterFSM fsm)
+    public override void UseSkill(IAttacker caster, IDamageable primaryTarget = null)
     {
 
-        Debug.LogError("Monster_1_skill_bow Set");
+        
     }
 }
