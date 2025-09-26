@@ -226,12 +226,13 @@ public class BattleManager : MonoBehaviour
 
         if (GlobalStageManager.Instance.CurrentStageIndex == null)
         {
+            // 딕셔너리가 세팅안되는 상황
             JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[0], 0);
         }
         else
         {
-            JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[(GlobalStageManager.Instance.CurrentStageIndex.Value - 1)],
-                (GlobalStageManager.Instance.CurrentStageIndex.Value - 1));
+            JHT_MonsterSpawnManager.Instance.ChangeIsland(battleFields[(GlobalStageManager.Instance.CurrentStageIndex.Value-1)],
+                (GlobalStageManager.Instance.CurrentStageIndex.Value-1));
         }
         
 

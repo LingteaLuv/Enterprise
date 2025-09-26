@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -37,7 +38,10 @@ namespace JHT
         {
             yield return null;
             yield return LoadDataCSV(monsterDataURL, SetData, 4);
-            yield return LoadDataCSV(monsterTableDataURL, SetMonsterTableData, 4);
+            yield return LoadDataCSV(monsterTableDataURL, rows => {
+                try { SetMonsterTableData(rows); }
+                catch (Exception e) { Debug.LogException(e); }
+            }, 4);
 
             OnMonsterDataTableSetCompleted?.Invoke();
         }
@@ -164,6 +168,11 @@ namespace JHT
 
         private void SetMonsterTableData(string[][] data)
         {
+            SetMonsterTable(data).Forget();
+        }
+
+        private async UniTask SetMonsterTable(string[][] data)
+        {
             JHT_MonsterDataTable[] parse = new JHT_MonsterDataTable[MonsterDataManager.Instance.monsterTableList.Count];
             for (int i = 0; i < MonsterDataManager.Instance.monsterTableList.Count; i++)
             {
@@ -173,49 +182,67 @@ namespace JHT
             foreach (var row in data)
             {
                 int TableID = int.Parse(row[0]);
-                int readNum = int.Parse(row[1]);
+                int readNum1 = int.Parse(row[1]);
+                int readNum2 = int.Parse(row[2]);
+                int readNum3 = int.Parse(row[3]);
+
                 JHT_MonsterDataTable so = Array.Find(parse, w => w.ID == TableID);
                 if (so != null)
                 {
-                    List<string> numArray = new List<string>(readNum * 3);
+                    List<string> numArray1 = new List<string>(readNum1);
+                    List<string> numArray2 = new List<string>(readNum2);
+                    List<string> numArray3 = new List<string>(readNum3);
 
-                    if (so.monsterData.Count != numArray.Count)
+                    numArray1 = await TableDataReader(1,readNum1);
+                    numArray2 = await TableDataReader(2,readNum2);
+                    numArray3 = await TableDataReader(3,readNum3);
+
+                    if (so.monsterData.Count != (readNum1 + readNum2 + readNum3))
                     {
-
-                        for (int i = readNum; i > 0; i--)
-                        {
-                            if (readNum >= 10)
-                            {
-                                for (int j = 4; j >= 2; j--)
-                                {
-                                    numArray.Add(j.ToString() + "000" + i.ToString());
-                                }
-                            }
-                            else
-                            {
-                                for (int j = 4; j >= 2; j--)
-                                {
-                                    numArray.Add(j.ToString() + "0000" + i.ToString());
-                                }
-                            }
-                        }
-                    }
-
-                    if (so.monsterData.Count != numArray.Count)
-                    {
-
                         so.monsterData.Clear();
-                        for (int i = 0; i < numArray.Count; i++)
+                        for (int i = 0; i < numArray1.Count; i++)
                         {
-                            so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray[i]]);
+                            so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray1[i]]);
+                        }
+                        for (int i = 0; i < numArray2.Count; i++)
+                        {
+                            so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray2[i]]);
+                        }
+                        for (int i = 0; i < numArray3.Count; i++)
+                        {
+                            so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray3[i]]);
                         }
                     }
 
-                    so.addStat = float.Parse(row[2]);
+
                     so.roundCount = int.Parse(row[4]);
+                    so.addStat = float.Parse(row[5]);
                     //so.roundCount = int.Parse(row[3]);
                 }
             }
+        }
+
+        private async UniTask<List<string>> TableDataReader(int num,int readNum)
+        {
+            List<string> list = new List<string>();
+            
+            for (int i = readNum; i > 0; i--)
+            {
+                if (i >= 10)
+                {
+
+                    list.Add(num.ToString() + "000" + i.ToString());
+                    
+                }
+                else
+                {
+                    
+                    list.Add(num.ToString() + "0000" + i.ToString());
+                    
+                }
+            }
+            await UniTask.Yield();
+            return list;
         }
 
         public void SetSKillData(string[][] data)
