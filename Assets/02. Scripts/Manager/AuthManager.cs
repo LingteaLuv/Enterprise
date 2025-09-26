@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Firebase.Auth;
 using Firebase.Extensions;
@@ -35,7 +36,7 @@ public class AuthManager : Singleton<AuthManager>
     /// 이전 로그인이 구글 로그인인 경우 자동 로그인 플로우 실행
     /// </summary>
     /// <returns></returns>
-    public async Task<bool> AutoLogin()
+    public async UniTask<bool> AutoLogin()
     {
         FirebaseUser user = _auth.CurrentUser;
         if (_auth != null && user != null)
@@ -51,16 +52,21 @@ public class AuthManager : Singleton<AuthManager>
                 return false;
             }
             
-            if (user.IsAnonymous)
+            /*if (user.IsAnonymous)
             {
                 await DatabaseManager.Instance.DeleteDataAsync();
                 await user.DeleteAsync();
                 _auth.SignOut();
                 return false;
+            }*/
+
+            FirebaseUser currentUser = FirebaseManager.Auth.CurrentUser;
+            if (currentUser != null)
+            {
+                LoginManager.Instance.SetLoginType(user.ProviderId);
+                LoginCompleted?.Invoke();
+                return true;
             }
-            LoginManager.Instance.SetLoginType(user.ProviderId);
-            LoginCompleted?.Invoke();
-            return true;
         }
         return false;
     }
@@ -127,6 +133,8 @@ public class AuthManager : Singleton<AuthManager>
         if (user != null)
         {
             //await user.ReloadAsync();
+            await GiveCurrency();
+            
             await DatabaseManager.Instance.SetNickname();
             LoginManager.Instance.SetLoginType("anonymous");
             LoginCompleted?.Invoke();
@@ -181,6 +189,8 @@ public class AuthManager : Singleton<AuthManager>
 
         if (user != null)
         {
+            await GiveCurrency();
+            
             await DatabaseManager.Instance.SetNickname(userTask.DisplayName);
             //await user.ReloadAsync();
             LoginManager.Instance.SetLoginType(user.ProviderId);
@@ -265,6 +275,8 @@ public class AuthManager : Singleton<AuthManager>
 
         if (user != null)
         {
+            await GiveCurrency();
+            
             await DatabaseManager.Instance.SetNickname(user.DisplayName);
             //await user.ReloadAsync();
             LoginManager.Instance.SetLoginType(user.ProviderId);
@@ -331,6 +343,17 @@ public class AuthManager : Singleton<AuthManager>
     
     #endregion
 
+    private async UniTask GiveCurrency()
+    {
+        DatabaseManager.Instance.Init();
+        await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gold", 1000000000);
+        await DatabaseManager.Instance.SaveFieldAsync($"CreditData/Gem", 1000000000);
+        await DatabaseManager.Instance.SaveFieldAsync($"CreditData/EnhancementStone", 1000000000);
+        await DatabaseManager.Instance.SaveFieldAsync($"CreditData/RelicsCoupon", 1000000000);
+        await DatabaseManager.Instance.SaveFieldAsync($"CreditData/RelicsPoint", 1000000000);
+        await DatabaseManager.Instance.SaveFieldAsync($"CreditData/CrewDrawTicket", 1000000000);
+        await DatabaseManager.Instance.SaveFieldAsync($"CreditData/EquipDrawTicket", 1000000000);
+    }
     
     #region Logout&DeleteAccount
     

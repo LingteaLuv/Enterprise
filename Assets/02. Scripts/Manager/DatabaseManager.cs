@@ -167,6 +167,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// </summary>
     public async Task LoadFieldsAsync<T>(string subPath, Action<T> callback) where T : class
     {
+        Init();
         DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child(subPath);
         DataSnapshot snapshot = await dataRef.GetValueAsync();
 
