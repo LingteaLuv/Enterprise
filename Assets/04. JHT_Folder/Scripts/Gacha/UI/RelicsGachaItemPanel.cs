@@ -13,7 +13,7 @@ public class RelicsGachaItemPanel : MonoBehaviour
     private PowerType curPowerType;
 
     [Header("UI")]
-    [SerializeField] private Image rarityImage;
+    [SerializeField] private Sprite rarityImage;
     [SerializeField] private Image itemImage;
     [SerializeField] private TextMeshProUGUI powerText;
     [SerializeField] private TextMeshProUGUI powerTypeText;
@@ -28,7 +28,7 @@ public class RelicsGachaItemPanel : MonoBehaviour
         curPowerType = relicsGachaManager.relicsResult.itemPowerType;
 
         curPower = curSO.startPower[(int)curRarity - 1] + curSO.upPower[(int)curRarity - 1] * curLevel;
-        rarityImage.sprite = curSO.rarityImage[(int)curRarity - 1];
+        rarityImage = curSO.rarityImage[(int)curRarity - 1];
 
         powerText.text = curPower.ToString();
         powerTypeText.text = curPowerType.ToString();

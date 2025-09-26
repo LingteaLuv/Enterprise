@@ -9,9 +9,10 @@ namespace JHT
 
         public Dictionary<CrewRole, int> monsterCrewCountDic = new()
         {
-            { CrewRole.Cook,  0 },
-            { CrewRole.Sailor,   2 }, 
-            { CrewRole.Deckhand, 4 }, 
+            { CrewRole.Deckhand, 0 },
+            { CrewRole.Sailor,   2 },
+            { CrewRole.Cook,  4 },
+            { CrewRole.Captain, 8}
         };
 
         public List<CrewRole> checkList;
