@@ -89,19 +89,20 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         DataManager.Instance.OnWeaponReady += async () =>
         {
             await InitDatabase();
-            
             if (OwnedCharacters.Count == 0)
             {
                 if (giveAllCharactersForTest)
                 {
                     await GrantAllCharactersForTest();
+                    DataManager.Instance.OnCrewReady.Invoke();
                 }
                 else
                 {
                     await GrantStartingCharacters();
+                    DataManager.Instance.OnCrewReady.Invoke();
                 }
                 // 게임 시작 시, PDM의 데이터를 직접 수정하는 자동 편성을 호출합니다.
-                Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
+                //Debug.Log("기본 캐릭터 지급 완료. 자동 편성을 시작합니다.");
             }
         };
         
@@ -120,7 +121,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
                         int id = Convert.ToInt32(crewId);
                         PlayerCharacterData crew = OwnedCharacters[id];
                         formation[crew.characterdata.crewRole].Add(crew);
-                        Debug.LogError($"{id}, {crew.characterdata.characterName}");
+                        //Debug.LogError($"{id}, {crew.characterdata.characterName}");
                     }
                 }
                 StartCoroutine(InitialCalculationCoroutine());
@@ -140,7 +141,6 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
                 OwnedCharacters[id] = character;
             }
-            DataManager.Instance.OnCrewReady.Invoke();
         });
     }
     
