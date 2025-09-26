@@ -1,15 +1,8 @@
-using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Unity.VisualScripting;
-using UnityEditor.Animations;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace JHT
 {
@@ -17,10 +10,10 @@ namespace JHT
     {
         public const string itemRelicsURL = "https://docs.google.com/spreadsheets/d/1yrgwWQ_XijgUwjyUSkgDH9wji0oHuoYjEcmjZdZVGmg/export?format=csv&gid=1891336971"; //범위 설정 : &range=A2:B, 두번쨰시트 : &gid~~
         public const string lootTableURL = "https://docs.google.com/spreadsheets/d/13MgAe8F47N4GJRDn4vg4wGtn2Y31aOerQEQF096ox_g/export?format=csv";
-        public const string monsterDataURL = "https://docs.google.com/spreadsheets/d/1PmzSVnMU8XB2xUcDjxwD2VnZMGChZEwb0RiKSioXa8Q/export?format=csv&gid=1883053582";
+        public const string monsterDataURL = "https://docs.google.com/spreadsheets/d/1YVvWgG0PJYlX51LqkHn7emFqH58TzSgl7KFRFzwL1aU/export?format=csv&gid=1334569449";
         public const string monsterTableDataURL = "https://docs.google.com/spreadsheets/d/1W5YTINFy0XWnzm549uTDJL6Up4h81jeZhlc0A_9T_j8/export?format=csv&gid=1059773203";
-        public const string skillDataURL = "https://docs.google.com/spreadsheets/d/1PmzSVnMU8XB2xUcDjxwD2VnZMGChZEwb0RiKSioXa8Q/export?format=csv&gid=1671130256";
-       
+        public const string skillDataURL = "https://docs.google.com/spreadsheets/d/1YVvWgG0PJYlX51LqkHn7emFqH58TzSgl7KFRFzwL1aU/export?format=csv";
+        
         public event Action OnDataSetCompleted;
         public event Action OnMonsterDataTableSetCompleted;
         public event Action<List<MonsterSkillSO>> OnSkillDataSetCompleted;
@@ -147,7 +140,7 @@ namespace JHT
                     so.monsterName = row[1]; 
                     so.monsterCrewRole = (CrewRole)Enum.Parse(typeof(CrewRole), row[2]);
                     so.monsterAttackType = (AtkRangeType)Enum.Parse(typeof(AtkRangeType), row[4]);
-                    so.normalSkill = row[6];
+                    so.normalSkill = int.Parse(row[5]);
 
                     for (int i = 0; i < so.monsterStat.Count; i++)
                     {
@@ -155,9 +148,12 @@ namespace JHT
                         so.monsterStat[i].amount = float.Parse(row[7+i]);
                     }
                     so.monsterStat[0].amount = float.Parse(row[17]);
-                    so.skill1 = row[13];
-                    so.chaseRange = float.Parse(row[16]);
-                    so.moveSpeed = float.Parse(row[17]);
+                    so.normalSkill = int.Parse(row[5]);
+                    so.skill1 = int.Parse(row[15]);
+                    so.skill2 = -1;
+                    //so.skill2
+                    so.chaseRange = float.Parse(row[18]);
+                    so.moveSpeed = float.Parse(row[19]);
                     
                     
                     so.baseController = MonsterDataManager.Instance.animatorController;
@@ -205,17 +201,18 @@ namespace JHT
                         }
                     }
 
-                    if (so.monsterData.Count == numArray.Count)
+                    if (so.monsterData.Count != numArray.Count)
                     {
+
+                        so.monsterData.Clear();
                         for (int i = 0; i < numArray.Count; i++)
                         {
-                            JHT_MonsterDataSO a = so.monsterData.Find(w => w.ID == MonsterDataManager.Instance.monsterDataDic[numArray[i]].ID);
-                            if (numArray[i] != a.ID.ToString())
-                                so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray[i]]);
+                            so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray[i]]);
                         }
                     }
 
                     so.addStat = float.Parse(row[2]);
+                    so.roundCount = int.Parse(row[4]);
                     //so.roundCount = int.Parse(row[3]);
                 }
             }
@@ -236,9 +233,15 @@ namespace JHT
                 MonsterSkillSO so = Array.Find(parse, w => w.ID == skillID);
                 if (so != null)
                 {
-                    so.skillName = row[1];
-                    so.monsterSkillAttackType = (MonsterSkillAttackType)Enum.Parse(typeof(MonsterSkillAttackType), row[1]);
-                    so.coolTime = float.Parse(row[5]);
+                    so.skillTargetType = (ESkillTargetType)Enum.Parse(typeof(ESkillTargetType), row[3]);
+                    so.skillName = row[6];
+                    so.targetLogic = (ETargetLogic)Enum.Parse(typeof(ETargetLogic), row[4]);
+                    so.targetRole = (CrewRole)Enum.Parse(typeof(CrewRole), row[5]);
+                    so.coolTime = float.Parse(row[7]);
+                    so.clip = Resources.Load<AnimationClip>(row[13]);
+
+                    if(so.effects.Count <= 0)
+                        so.effects.Add(Resources.Load<SkillEffectSO>($"SkillData/PassiveEffects/{row[8]}"));
                 }
             }
         }

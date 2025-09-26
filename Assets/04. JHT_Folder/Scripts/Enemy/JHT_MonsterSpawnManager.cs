@@ -25,8 +25,6 @@ namespace JHT
         public Dictionary<int, JHT_MonsterDataTable> stageDic;
         public List<JHT_MonsterSetManager> posList;
         public List<JHT_BaseMonsterStat> curMonsterCountList;
-        Dictionary<AtkRangeType, AnimatorOverrideController> aocDic;
-
 
         public int islandIndex;
         public int roundIndex;
@@ -79,7 +77,6 @@ namespace JHT
         {
             stageDic = new();
             posList = new();
-            aocDic = new();
             curMonsterCountList = new();
 
             isMonsterDataSetReady = false;
@@ -169,7 +166,7 @@ namespace JHT
         // curStageIndex를 ++을 통해 round를 구별해줄거임
         private IEnumerator ChangeRoundCor(int curRoundIndex)
         {
-            while (!(isMonsterDataSetReady && isSkillSetReady) || roundTable == null)
+            while (!isMonsterDataSetReady || !isSkillSetReady || roundTable == null)
             {
                 yield return null;
             }
@@ -193,14 +190,9 @@ namespace JHT
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
                 obj.Init(curMonsterCountList[i]);
                 obj.transform.position = posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
-                //if (curRoundIndex / 2 != 0)
-                //{
-                //    obj.transform.localEulerAngles =
-                //        new Vector3(obj.transform.localEulerAngles.x, 180, obj.transform.localEulerAngles.x);
-                //}
+                
             }
 
-            //MonsterPathFinder.Instance.DataSetting();
         }
 
 
@@ -212,7 +204,7 @@ namespace JHT
 
             float roundStart = Time.realtimeSinceStartup;
 
-            // 다음 스테이지나 씬으로 연결
+            // 다음 스테이지나 씬으로 연결 **************************************************** 제발
             if (curRoundIndex > roundTable.roundCount)
             {
                 return null;
@@ -233,13 +225,13 @@ namespace JHT
                             {
                                 if (data < 2)
                                 {
-                                    MonsterSkillSO n = roundTable.monsterData[i].normalSkill == "" ?
+                                    MonsterSkillSO n = roundTable.monsterData[i].normalSkill == -1 ?
                                         null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].normalSkill];
 
-                                    MonsterSkillSO s1 = roundTable.monsterData[i].skill1 == "" ?
+                                    MonsterSkillSO s1 = roundTable.monsterData[i].skill1 == -1 ?
                                         null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].skill1];
 
-                                    MonsterSkillSO s2 = roundTable.monsterData[i].skill2 == "" ?
+                                    MonsterSkillSO s2 = roundTable.monsterData[i].skill2 == -1 ?
                                         null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].skill2];
 
                                     JHT_BaseMonsterStat s = new(roundTable.monsterData[i], n, s1, s2, roundTable.addStat);
@@ -273,13 +265,13 @@ namespace JHT
                 {
                     crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = 1;
                 }
-                MonsterSkillSO normal = roundTable.monsterData[rand].normalSkill == "" ?
+                MonsterSkillSO normal = roundTable.monsterData[rand].normalSkill == -1 ?
                     null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].normalSkill];
 
-                MonsterSkillSO skill1 = roundTable.monsterData[rand].skill1 == "" ?
+                MonsterSkillSO skill1 = roundTable.monsterData[rand].skill1 == -1 ?
                     null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill1];
 
-                MonsterSkillSO skill2 = roundTable.monsterData[rand].skill2 == "" ?
+                MonsterSkillSO skill2 = roundTable.monsterData[rand].skill2 == -1 ?
                     null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill2];
 
                 JHT_BaseMonsterStat stat = new(roundTable.monsterData[rand], normal, skill1, skill2, roundTable.addStat);

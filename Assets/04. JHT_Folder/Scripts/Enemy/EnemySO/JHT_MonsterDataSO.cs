@@ -22,9 +22,9 @@ public class JHT_MonsterDataSO : ScriptableObject
 
     public RuntimeAnimatorController baseController;
     
-    public string normalSkill;
-    public string skill1;
-    public string skill2;
+    public int normalSkill = -1;
+    public int skill1 = -1;
+    public int skill2 = -1;
 }
 
 [System.Serializable]

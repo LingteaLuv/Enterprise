@@ -3,10 +3,12 @@ using UnityEngine;
 
 public class Monster_0_attack_bow : MonsterSkillSet
 {
-    public Monster_0_attack_bow(JHT_BaseMonsterStat stat, MonsterSkillSO _skillSO) : base(stat, _skillSO) { }
+    public Monster_0_attack_bow(MonsterSkillSO _skillSO) : base(_skillSO) { }
     
-    public override void UseSkill(JHT_BaseMonsterFSM fsm)
+    public override void UseSkill(IAttacker caster, IDamageable primaryTarget = null)
     {
+        JHT_BaseMonsterFSM fsm = caster as JHT_BaseMonsterFSM;
+
         if (fsm.target == null) return;
 
         IDamageable targetDamageable = fsm.target.GetComponent<IDamageable>();
@@ -27,6 +29,6 @@ public class Monster_0_attack_bow : MonsterSkillSet
 
         float projectileSpeed = 1f;
         obj.Init(fsm, targetPos, startPos, projectileSpeed, fsm.monsterStat.monsterStats[Stat.Attack], fsm.monsterStat.projectileSprite);
-        //Debug.LogError($"BowAttack Damage : {fsm.monsterStat.monsterStats[Stat.Attack]}");
+        
     }
 }

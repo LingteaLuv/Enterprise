@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,6 +29,7 @@ namespace JHT
         public MonsterSkillSO skill1;
         public MonsterSkillSO skill2;
 
+
         public JHT_BaseMonsterStat(JHT_MonsterDataSO so, MonsterSkillSO normalSkill,
             MonsterSkillSO skill1, MonsterSkillSO skill2, float addStat)
         {
@@ -39,7 +39,12 @@ namespace JHT
 
             foreach (var m in curSO.monsterStat)
             {
-                monsterStats[m.stat] = m.amount * addStat * AttackCalculate(curSO);
+                if (m.stat == Stat.CritDamage || m.stat == Stat.AttackSpeed || m.stat == Stat.CritChance)
+                {
+                    monsterStats[m.stat] = m.amount * addStat * AttackCalculate(curSO)/ 100;
+                }
+                else
+                    monsterStats[m.stat] = m.amount * addStat * AttackCalculate(curSO);
             }
 
             chaseRange = curSO.chaseRange * addStat;
@@ -51,7 +56,7 @@ namespace JHT
 
             // Enum
             monsterAttackRangeType = curSO.monsterAttackType;
-            attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack? 1f : 2f;
+            attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack ? 1f : 2f;
             attackRange *= addStat;
 
             monsterCrewRole = curSO.monsterCrewRole;
@@ -68,13 +73,13 @@ namespace JHT
 
         private void AnimSetting()
         {
-            if(normalSkill != null)
+            if (normalSkill != null)
                 aoc["Monster_ATTACK"] = normalSkill.clip;
 
             if (skill1 != null)
                 aoc["Monster_1_Skill_Normal"] = skill1.clip;
 
-            if(skill2 != null)
+            if (skill2 != null)
                 aoc["Monster_2_Skill_Normal"] = skill2.clip;
         }
 

@@ -2,18 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using JHT;
-using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class MonsterDataManager : Singleton<MonsterDataManager>
 {
-    private const string MONSTERTABLE_LABEL = "MonsterSpawnRoundTable";
-    private const string MONSTERDATA_LABEL = "MonsterData";
-    private const string MONSTERPREFAB_LABEL = "MonsterPrefab";
-    private const string MONSTERSKILL_LABEL = "MonsterSkill"; 
-
     public List<JHT_MonsterDataTable> monsterTableList;
     public List<JHT_MonsterDataSO> monsterDataList;
     public List<GameObject> monsterPrefabList;
@@ -23,7 +17,8 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     public Dictionary<int, JHT_MonsterDataTable> monsterTableDic;
     public Dictionary<string, JHT_MonsterDataSO> monsterDataDic;
     public Dictionary<string, GameObject> monsterPrefabDic;
-    public Dictionary<string,  MonsterSkillSO> monsterSkillDic;
+    //public Dictionary<string,  MonsterSkillSO> monsterSkillDic;
+    public Dictionary<int, MonsterSkillSO> monsterSkillDic;
     
 
     private AsyncOperationHandle<IList<JHT_MonsterDataTable>> monsterTableHandle;
@@ -129,9 +124,9 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
             }
 
 
-            if (!monsterSkillDic.ContainsKey(list[i].skillName))
+            if (!monsterSkillDic.ContainsKey(list[i].ID))
             {
-                monsterSkillDic.Add(list[i].skillName, list[i]);
+                monsterSkillDic.Add(list[i].ID, list[i]);
             }
         }
 

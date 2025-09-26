@@ -12,9 +12,12 @@ public class JHT_DamageBox : JHT_PooledObject
 
 
     private WaitForSeconds TextDestroyTime = new WaitForSeconds(1.5f);
+
+    
     public void ShowDamageText(float value)
     {
         StartCoroutine(StartShowText(DataUtility.FormatNumber(value)));
+        hitBoxText.rectTransform.anchoredPosition = new Vector2(0, 0);
     }
 
 
@@ -22,7 +25,8 @@ public class JHT_DamageBox : JHT_PooledObject
     {
         hitBoxText.text = value;
         hitBoxText.color = Color.red;
-        hitBoxText.DOFade(0f, 2f);
+        hitBoxText.DOFade(0f, 1f);
+        hitBoxText.GetComponent<RectTransform>().DOAnchorPosY(0.5f,1f);
 
         yield return TextDestroyTime;
         Release();
