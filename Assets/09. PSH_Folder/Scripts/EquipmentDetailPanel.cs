@@ -77,12 +77,33 @@ public class EquipmentDetailPanel : MonoBehaviour
         itemLevelText.text = $"Lv. {currentWeapon.ItemLevel}";
 
         ItemWeaponSO weaponSO = (ItemWeaponSO)currentWeapon.itemSO;
-        itemStatsText.text = $"{weaponSO.statType} {InventoryManager.Instance.GetWeaponStat(currentWeapon.itemNum)}% 증가";
+        itemStatsText.text = $"{EnumToText(weaponSO.statType)} {InventoryManager.Instance.GetWeaponStat(currentWeapon.itemNum)}% 증가";
 
         bool isEquippedByCurrent = currentCharacter.equippedItems.TryGetValue(currentCategory, out var equipped) && equipped == currentWeapon;
 
         equipButton.gameObject.SetActive(!isEquippedByCurrent);
         unequipButton.gameObject.SetActive(isEquippedByCurrent);
+    }
+
+    private string EnumToText(Stat stat)
+    {
+        switch (stat)
+        {
+            case Stat.Attack:
+                return "공격력";
+            case Stat.Health:
+                return "체력";
+            case Stat.Defense:
+                return "방어력";
+            case Stat.CritChance:
+                return "치명타 확률";
+            case Stat.CritDamage:
+                return "치명타 피해";
+            case Stat.AttackSpeed:
+                return "공격 속도";
+            default:
+                return "";
+        }
     }
 
     private void OnEquip()
