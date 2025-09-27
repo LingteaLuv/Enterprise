@@ -27,13 +27,13 @@ public class CharacterPanelUI : MonoBehaviour
     public Image crewRoleIcon;
     public Image factionIcon;
 
-    private RedDotController redDotController; // 레드닷 컨트롤러 참조
+    // private RedDotController redDotController; // 레드닷 컨트롤러 참조
     public PlayerCharacterData currentPlayerCharData { get; private set; } // 이 패널이 표시하는 캐릭터 데이터
 
     private void Awake()
     {
         // 자식 오브젝트에서 RedDotController를 자동으로 찾아 할당합니다.
-        redDotController = GetComponentInChildren<RedDotController>(true);
+        // redDotController = GetComponentInChildren<RedDotController>(true);
     }
 
     private void Start()
@@ -67,10 +67,10 @@ public class CharacterPanelUI : MonoBehaviour
         UpdateIcon();
 
         // 레드닷 컨트롤러를 통해 알림 상태를 업데이트합니다.
-        if (redDotController != null)
-        {
-            redDotController.CheckNotifications(currentPlayerCharData);
-        }
+        //if (redDotController != null)
+        //{
+        //    redDotController.CheckNotifications(currentPlayerCharData);
+        //}
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public class CharacterPanelUI : MonoBehaviour
     {
         for (int i = 0; i < starImages.Length; i++)
         {
-            starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
+            starImages[i].color = (i < currentStars) ? Color.white : Color.black;
         }
     }
 
