@@ -19,6 +19,7 @@ public class FormationSlotUI : MonoBehaviour
 
     [Header("캐릭터 표시 세트 (2명)")]
     public CharacterDisplaySet[] displaySets = new CharacterDisplaySet[2];
+    [SerializeField] private float modelYOffset = -0.5f; // 캐릭터 모델 Y축 위치 보정값
 
     private bool _isInitialized = false;
 
@@ -81,6 +82,7 @@ public class FormationSlotUI : MonoBehaviour
                 set.DisplayImage.gameObject.SetActive(true);
 
                 Vector3 spawnPos = set.RenderCamera.transform.position + set.RenderCamera.transform.forward * 10f;
+                spawnPos.y += modelYOffset; // Y축 위치 보정
                 set.SpawnedCharacter = Instantiate(prefabToInstantiate, spawnPos, set.RenderCamera.transform.rotation, set.RenderCamera.transform);
             }
         }
