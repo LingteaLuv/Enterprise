@@ -1,3 +1,4 @@
+using DG.Tweening;
 using JHT;
 using System;
 using TMPro;
@@ -16,25 +17,25 @@ public class ChoosePopUp : MonoBehaviour
     [Header("Item1 information")]
     [SerializeField] private GameObject item1Panel;
     [SerializeField] private Image item1;
-    [SerializeField] private Image item1RarityImg;
-    [SerializeField] private Image item1RarityColor;
     [SerializeField] private Image item1SelectOutLine;
+    [SerializeField] private Image rarityPanel1;
     [SerializeField] private TextMeshProUGUI item1RarityText;
     [SerializeField] private TextMeshProUGUI item1PowerTypeText;
     [SerializeField] private TextMeshProUGUI item1PowerText;
     [SerializeField] private TextMeshProUGUI item1Name;
+    [SerializeField] private TextMeshProUGUI item1LevelText;
     private float item1Power;
 
-    [Header("Item2 information")]
+    [Header("Item2 information")]   
     [SerializeField] private Image item2;
-    [SerializeField] private Image item2RarityImg;
-    [SerializeField] private Image item2RarityColor;
     [SerializeField] private Image item2SelectOutLine;
+    [SerializeField] private Image rarityPanel2;
     [SerializeField] private TextMeshProUGUI item2RarityText;
     [SerializeField] private TextMeshProUGUI item2PowerTypeText;
     [SerializeField] private TextMeshProUGUI item2PowerText;
     [SerializeField] private TextMeshProUGUI compareText;
     [SerializeField] private TextMeshProUGUI item2Name;
+    [SerializeField] private TextMeshProUGUI item2LevelText;
     private float item2Power;
 
 
@@ -49,9 +50,7 @@ public class ChoosePopUp : MonoBehaviour
     public bool SelectMyItem { get { return selectMyItem; } set { selectMyItem = value; OnSelect?.Invoke(selectMyItem); } }
     private event Action<bool> OnSelect;
 
-    private RectTransform choosePanelScale;
-    
-    
+
     public void Init(RelicsObject obj1, RelicsObject obj2)
     {
         if (obj1 != null)
@@ -76,14 +75,15 @@ public class ChoosePopUp : MonoBehaviour
 
         CompareObj();
         selectButton.interactable = false;
+
+        item1SelectOutLine.GetComponent<Image>().DOFade(0, 0);
+        item2SelectOutLine.GetComponent<Image>().DOFade(0, 0);
     }
 
     private void OnDisable()
     {
-        if (item1Panel.activeSelf)
-            item1SelectOutLine.color = Color.white;
-
-        item2SelectOutLine.color = Color.white;
+        item1SelectOutLine.GetComponent<Image>().DOKill();
+        item2SelectOutLine.GetComponent<Image>().DOKill();
 
         OnSelect -= ChooseItem;
         item1Button.onClick.RemoveListener(ClickButton1);
@@ -99,14 +99,15 @@ public class ChoosePopUp : MonoBehaviour
         ItemRelicsSO so = (ItemRelicsSO)relicsObj1.itemSO;
 
         item1.sprite = so.icon;
-        item1RarityImg.sprite = relicsObj1.itemRarityImage;
-
+        rarityPanel1.color = SetItemRarityColor(relicsObj1);
         item1Power = so.startPower[(int)relicsObj1.curRarity - 1] + so.upPower[(int)relicsObj1.curRarity - 1] * relicsObj1.itemLevel;
-        item1PowerText.text = $"{item1Power.ToString("N1")}";
-        item1PowerTypeText.text = $"{relicsObj1.itemPowerType.ToString()} : ";
+        
+        item1PowerText.text = relicsObj1.itemPowerType == PowerType.Attack ? $"{relicsObj1.itemPower.ToString()}" 
+            : $"{relicsObj1.itemPower.ToString()} % ";
 
-        item1RarityText.text = $"{relicsObj1.curRarity}";
-        item1RarityColor.color = SetItemRarityColor(relicsObj1);
+        item1PowerTypeText.text = InventoryManager.Instance.SetItemPowerType(relicsObj1.itemPowerType);
+        item1LevelText.text = $"{relicsObj1.itemLevel}";
+        item1RarityText.text = InventoryManager.Instance.SetRarityKorean(relicsObj1);
 
         item1Name.text = relicsObj1.itemName;
     }
@@ -117,15 +118,17 @@ public class ChoosePopUp : MonoBehaviour
         ItemRelicsSO so = (ItemRelicsSO)relicsObj2.itemSO;
 
         item2.sprite = so.icon;
-        item2RarityImg.sprite = relicsObj2.itemRarityImage;
-
+        rarityPanel2.color = SetItemRarityColor(relicsObj2);
         item2Power = so.startPower[(int)relicsObj2.curRarity - 1] + so.upPower[(int)relicsObj2.curRarity - 1] * relicsObj2.itemLevel;
-        item2PowerText.text = $"{item2Power.ToString("N1")}";
-        item2PowerTypeText.text = $"{relicsObj2.itemPowerType.ToString()} : ";
+        Debug.LogError($"SO : {item2Power}");
+        Debug.LogError($"RElics : {relicsObj2.itemPower}");
 
-        item2RarityText.text = $"{relicsObj2.curRarity}";
+        item2PowerText.text = relicsObj2.itemPowerType == PowerType.Attack ? $"{relicsObj2.itemPower.ToString()}" : $"{relicsObj2.itemPower.ToString()} % ";
+        
+        item2PowerTypeText.text = InventoryManager.Instance.SetItemPowerType(relicsObj2.itemPowerType);
+        item2LevelText.text = $"{relicsObj2.itemLevel}";
+        item2RarityText.text = InventoryManager.Instance.SetRarityKorean(relicsObj2);
 
-        item2RarityColor.color = SetItemRarityColor(relicsObj2);
         item2Name.text = relicsObj2.itemName;
     }
 
@@ -202,6 +205,8 @@ public class ChoosePopUp : MonoBehaviour
         }
     }
 
+
+
     private void CompareObj()
     {
 
@@ -243,13 +248,13 @@ public class ChoosePopUp : MonoBehaviour
 
         if (value)
         {
-            item1SelectOutLine.color = Color.yellow;
-            item2SelectOutLine.color = Color.white;
+            item1SelectOutLine.GetComponent<Image>().DOFade(1, 0);
+            item2SelectOutLine.GetComponent<Image>().DOFade(0, 0);
         }
         else
         {
-            item2SelectOutLine.color = Color.yellow;
-            item1SelectOutLine.color = Color.white;
+            item1SelectOutLine.GetComponent<Image>().DOFade(0, 0);
+            item2SelectOutLine.GetComponent<Image>().DOFade(1, 0);
         }
     }
 }

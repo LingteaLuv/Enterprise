@@ -24,7 +24,7 @@ public class RelicsProductAnim : MonoBehaviour
     private CancellationTokenSource[] token = new CancellationTokenSource[3];
     RectTransform waveRT, shipRT, lightRT, chainRT, chainMaskRT, rewardRT;
 
-    Vector2 baseWaveSize, baseWavePos, baseShipSize, baseShipPos;
+    Vector2 baseWaveSize, baseWavePos, baseShipSize, baseShipPos, baseChainPos, baseMaskPos, baseRewardPos;
     Quaternion baselightRot, baseShipRot;
 
     Sequence sequenceFadeInOut;
@@ -41,13 +41,17 @@ public class RelicsProductAnim : MonoBehaviour
         rewardRT = reward.rectTransform;
 
         baseWaveSize = waveRT.sizeDelta;
-        baseWavePos = waveRT.anchoredPosition;
+        baseWavePos = new Vector2(0, -510f);
 
         baseShipSize = shipRT.sizeDelta;
-        baseShipPos = shipRT.anchoredPosition;
+        baseShipPos = new Vector2(0, -30f);
 
         baselightRot = lightRT.rotation;
         baseShipRot = shipRT.rotation;
+
+        //baseChainPos = chainRT.anchoredPosition;
+        //baseMaskPos = chainMask.GetComponent<RectTransform>().anchoredPosition;
+        //baseRewardPos = rewardRT.anchoredPosition;
 
 
         fadeImg = panelButton.GetComponent<Image>();
@@ -72,6 +76,7 @@ public class RelicsProductAnim : MonoBehaviour
 
         chainRT.sizeDelta = new Vector2(1000, 1000);
         chainRT.anchoredPosition = new Vector2(-75, 787);
+
         rewardRT.sizeDelta = new Vector2(500, 500);
         rewardRT.anchoredPosition = new Vector2(0, -700);
 
@@ -83,6 +88,10 @@ public class RelicsProductAnim : MonoBehaviour
 
         lightRT.rotation = baselightRot;
         shipRT.rotation = baseShipRot;
+
+        //chainRT.anchoredPosition = baseChainPos;
+        //chainMask.GetComponent<RectTransform>().anchoredPosition = baseMaskPos;
+        //rewardRT.anchoredPosition = baseRewardPos;
 
         inst = gameObject.GetComponentInParent<RelicsGachaListUI>();
     }
@@ -146,7 +155,7 @@ public class RelicsProductAnim : MonoBehaviour
             chainRT.DOAnchorPosY(787, 2f).SetDelay(2f);
 
             reward.gameObject.SetActive(true);
-            rewardRT.DOAnchorPosY(542, 2f).SetDelay(1f);
+            rewardRT.DOAnchorPosY(600, 2f).SetDelay(1f);
             rewardRT.DOShakeRotation(20, 4, 30);
 
 
