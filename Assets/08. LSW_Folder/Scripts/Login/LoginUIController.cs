@@ -18,15 +18,15 @@ public class LoginUIController : UIController<LoginUIController.LoginUIType>
             if (ui is StartPanel startPanel)
             {
                 // 팝업 닫기 버튼
-                startPanel.OnTouchStartBtn = () =>
+                startPanel.OnTouchStartBtn = async () =>
                 {
-                    /*/*if (await AuthManager.Instance.AutoLogin())
+                    if (await AuthManager.Instance.AutoLogin())
                     {
                         HideUI(LoginUIType.StartPanel);
                         ShowUI(LoginUIType.InfoPanel);
                         Debug.Log("자동 로그인 성공");
-                    }#1#
-                    else*/
+                    }
+                    else
                     {
                         if (FirebaseManager.Auth != null)
                         {

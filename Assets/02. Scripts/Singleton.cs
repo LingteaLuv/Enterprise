@@ -79,7 +79,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
     private void DestroyOnSelf()
     {
-        if (gameObject != null && _isStatic)
+        if (gameObject != null && !_isStatic)
         {
             Destroy(gameObject);
         }
