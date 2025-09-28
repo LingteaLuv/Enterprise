@@ -46,6 +46,9 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     [Header("별 이미지")]
     public Image[] starImages; // 별 이미지 배열
 
+    [Header("편성 정보")]
+    [SerializeField] private GameObject inFormationIndicator; // 편성 중임을 나타내는 UI 오브젝트
+
     [Header("캐릭터 렌더링")]
     [SerializeField] private RawImage characterRenderImage; // 3D 모델을 표시할 RawImage
     [SerializeField] private string renderCameraName = "CharacterInfoRenderCamera"; // 렌더링에 사용할 카메라 이름
@@ -225,6 +228,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             UpdateRoleFactionIcon(); // 직책, 소속 아이콘 업데이트
             UpdateStarUI(currentCharacterData.Star.Value); // 성급(별) UI 업데이트
             UpdateCharacterModel(); // 3D 모델 업데이트
+            UpdateInFormationIndicator(); // 편성 중인지 UI 업데이트
 
         }
         else
@@ -570,8 +574,20 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         }
     }
 
+    /// <summary>
+    /// 현재 캐릭터가 편성에 포함되어 있는지 확인하고 UI를 갱신합니다.
+    /// </summary>
+    private void UpdateInFormationIndicator()
+    {
+        if (currentCharacterData == null || inFormationIndicator == null) return;
+
+        bool isInFormation = PlayerDataManager.Instance.IsInFormation(currentCharacterData);
+        inFormationIndicator.SetActive(isInFormation);
+    }
+
     private void UpdateEquipmentIcons()
     {
+
         if (currentCharacterData == null) return;
 
         // 버튼 순서: 0:무기, 1:방패, 2:갑옷
