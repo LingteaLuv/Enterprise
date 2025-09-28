@@ -7,7 +7,8 @@ public class SoulStatPanel : MonoBehaviour
 {
     [SerializeField] private Image characterImage;
     [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private TextMeshProUGUI powerText;
+    [SerializeField] private TextMeshProUGUI descText;
+    [SerializeField] private TextMeshProUGUI countText;
     [SerializeField] private Button btn; // 강화창으로 바로 가기 버튼
     [SerializeField] private CharacterScrollViewUI characterScrollViewUI;
     [SerializeField] private TabBarController tabBarController;
@@ -22,7 +23,9 @@ public class SoulStatPanel : MonoBehaviour
     {
 
         characterImage.sprite = data.characterdata.characterSoul;
-        nameText.text = data.characterdata.characterName + "의 영혼조각";
+        nameText.text = $"{data.characterdata.characterName}의 영혼조각";
+        descText.text = $"{data.characterdata.characterName}의 영혼 조각이 들어있는 결정체. \n바라보고 있으면 빨려들어갈 것만 같다.";
+        countText.text = $"{data.Soul.Value}";
 
         btn.onClick.RemoveAllListeners();
         btn.onClick.AddListener(() => { 
