@@ -158,7 +158,7 @@ namespace JHT
         {
             for (int i = 0; i < starImages.Length; i++)
             {
-                starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
+                starImages[i].color = (i < currentStars) ? Color.white : Color.black;
             }
         }
     }
