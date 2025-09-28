@@ -28,8 +28,8 @@ namespace JHT
         [Header("DropDown")] 
         [SerializeField] private TMP_Dropdown weaponDropDown;
         [SerializeField] private TMP_Dropdown weaponNameDropdown;
-        [SerializeField] private TMP_Dropdown relicsDropDown;
-        [SerializeField] private TMP_Dropdown relicsNameDropdown;
+        //[SerializeField] private TMP_Dropdown relicsDropDown;
+        //[SerializeField] private TMP_Dropdown relicsNameDropdown;
         [SerializeField] private TMP_Dropdown soulDropDown;
         [SerializeField] private TMP_Dropdown soulNameDropdown;
         private List<string> weaponDropDownList;
@@ -39,6 +39,10 @@ namespace JHT
         private List<string> soulDropdownList;
         private List<string> soulNameDropdownList;
         private InventoryMode curMode;
+
+        [Header("재화")]
+        [SerializeField] private TextMeshProUGUI goldText;
+        [SerializeField] private TextMeshProUGUI EquipTicketText;
 
         private InventoryManager inventoryManager;
         private ItemEventManager itemEventManager;
@@ -60,6 +64,13 @@ namespace JHT
             Debug.Log("InventoryPanel이 리셋되어, 모든 상세창을 닫고 기본 탭으로 돌립니다.");
         }
 
+        public override void SetShow()
+        {
+            base.SetShow();
+
+            goldText.text = $"{CurrencyManager.Instance.GetCurrency(CurrencyType.Gold)}";
+            EquipTicketText.text = $"{CurrencyManager.Instance.GetCurrency(CurrencyType.EquipDrawTicket)}";
+        }
         private void Awake()
         {
             if (relicsPool == null)
@@ -164,15 +175,15 @@ namespace JHT
             relicsDropDownList = new();
             relicsNameDropdownList = new();
 
-            relicsDropDown.ClearOptions();
-            relicsNameDropdown.ClearOptions();
+            //relicsDropDown.ClearOptions();
+            //relicsNameDropdown.ClearOptions();
 
             relicsDropDownList.Add("레벨");
             relicsDropDownList.Add("희귀도");
 
-            relicsDropDown.AddOptions(relicsDropDownList);
+            //relicsDropDown.AddOptions(relicsDropDownList);
 
-            relicsDropDown.onValueChanged.AddListener(delegate { ChangeRelicsMode(relicsDropDown.value); });
+            //relicsDropDown.onValueChanged.AddListener(delegate { ChangeRelicsMode(relicsDropDown.value); });
         }
 
         private void ChangeRelicsMode(int value)
@@ -329,6 +340,8 @@ namespace JHT
 
             if (soulInventory.gameObject.activeSelf)
                 soulInventory.gameObject.SetActive(false);
+
+            UpdateTabButtonUI(equipModeButton);
         }
 
         private void ChangeRelicsMode()
@@ -343,6 +356,8 @@ namespace JHT
 
             if(soulInventory.gameObject.activeSelf)
                 soulInventory.gameObject.SetActive(false); 
+
+            UpdateTabButtonUI(relicsModeButton);
         }
 
         private void ChangeSoulMode()
@@ -357,7 +372,46 @@ namespace JHT
 
             if (!soulInventory.gameObject.activeSelf)
                 soulInventory.gameObject.SetActive(true);
+
+            UpdateTabButtonUI(soulButton);
         }
         #endregion
+
+        /// <summary>
+        /// 탭 버튼의 UI 상태(폰트 크기, 이미지 활성화)를 업데이트하여 선택된 탭을 강조합니다.
+        /// </summary>
+        /// <param name="selectedButton">현재 선택된 버튼</param>
+        private void UpdateTabButtonUI(Button selectedButton)
+        {
+            Button[] tabButtons = { soulButton, equipModeButton, relicsModeButton};
+
+            foreach (var button in tabButtons)
+            {
+                // 버튼 자식의 TextMeshProUGUI 컴포넌트를 찾습니다.
+                TextMeshProUGUI buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
+                // 버튼 자체의 Image 컴포넌트를 찾습니다.
+                Image buttonImage = button.GetComponent<Image>();
+
+                bool isSelected = (button == selectedButton);
+
+                if (buttonText != null)
+                {
+                    buttonText.fontSize = isSelected ? 60 : 45;
+                }
+                else
+                {
+                    Debug.LogWarning($"{button.name}에서 TextMeshProUGUI 컴포넌트를 찾을 수 없습니다.");
+                }
+
+                if (buttonImage != null)
+                {
+                    buttonImage.enabled = isSelected;
+                }
+                else
+                {
+                    Debug.LogWarning($"{button.name}에서 Image 컴포넌트를 찾을 수 없습니다.");
+                }
+            }
+        }
     }
 }

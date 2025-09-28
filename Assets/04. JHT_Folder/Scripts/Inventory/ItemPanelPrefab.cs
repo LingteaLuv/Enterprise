@@ -17,9 +17,9 @@ namespace JHT
         [Header("UI Components")]
         public Image itemImage;
         public Button itemDetail;
-        public Image[] starImages;
-        public TextMeshProUGUI nameText;
-        public TextMeshProUGUI levelText;
+        //public Image[] starImages;
+        //public TextMeshProUGUI nameText;
+        //public TextMeshProUGUI levelText;
 
         private WeaponObject weaponObject; // 표시할 무기 데이터
         private WeaponStatPanel weaponStatPanel; // 캐싱하여 사용
@@ -63,6 +63,7 @@ namespace JHT
             }
 
             this.weaponObject = weapon;
+            this.itemObject = weapon;
 
             // 새 무기 데이터의 이벤트에 UI 갱신 함수를 등록
             weaponObject.OnChangeLevel += RefreshUI;
@@ -74,25 +75,28 @@ namespace JHT
 
             // UI 즉시 갱신
             RefreshUI();
-
-            // 아이템 디테일 선택시 이벤트
-            ItemEventManager.Instance.OnClickItem -= HandleSelected;
+        }
+        private void OnEnable()
+        {
             ItemEventManager.Instance.OnClickItem += HandleSelected;
-
         }
 
+        private void OnDisable()
+        {
+            ItemEventManager.Instance.OnClickItem -= HandleSelected;
+        }
         private void RefreshUI(int dummy = 0) // 이벤트 콜백을 위해 파라미터 추가
         {
             if (weaponObject == null) return;
 
-            nameText.text = weaponObject.itemName;
+           // nameText.text = weaponObject.itemName;
             if (weaponObject.ItemStar >= 5)
             {
-                levelText.text = "Lv. MAX";
+                //levelText.text = "Lv. MAX";
             }
             else
             {
-                levelText.text = "Lv." + weaponObject.ItemLevel;
+                //levelText.text = "Lv." + weaponObject.ItemLevel;
             }
 
             if (weaponObject.itemIcon != null)
@@ -106,8 +110,10 @@ namespace JHT
         {
             if (weaponObject == null) return;
 
+            ItemEventManager.Instance.ClickItem(weaponObject);
+
             Debug.Log(weaponObject.itemName + " (레벨 " + weaponObject.ItemLevel + ") 상세 정보 보기");
-            weaponStatPanel = transform.root.GetComponent<GameUIController>().StatPanel;
+            weaponStatPanel = FindAnyObjectByType<WeaponStatPanel>(); 
             if (weaponStatPanel != null)
             {
                 weaponStatPanel.ShowStats(weaponObject);
@@ -120,15 +126,15 @@ namespace JHT
 
         private void UpdateStarDisplay(int currentStars)
         {
-            if (starImages == null) return;
+            //if (starImages == null) return;
 
-            for (int i = 0; i < starImages.Length; i++)
-            {
-                var img = starImages[i];
-                if (img == null) continue;  // Destroy되었거나 참조 끊긴 경우 스킵
+            //for (int i = 0; i < starImages.Length; i++)
+            //{
+            //    var img = starImages[i];
+            //    if (img == null) continue;  // Destroy되었거나 참조 끊긴 경우 스킵
 
-                img.color = (i < currentStars) ? Color.yellow : Color.grey;
-            }
+            //    img.color = (i < currentStars) ? Color.yellow : Color.grey;
+            //}
         }
         private void OnDestroy()
         {

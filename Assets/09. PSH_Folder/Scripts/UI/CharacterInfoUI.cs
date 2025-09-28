@@ -12,7 +12,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     public TextMeshProUGUI characterNameText;
     public Image characterImage;
     public TextMeshProUGUI levelText;
-    public TextMeshProUGUI soulFragmentsText; // 캐릭터별 영혼 조각
+    // public TextMeshProUGUI soulFragmentsText; // 캐릭터별 영혼 조각
     public TextMeshProUGUI flavorText;
 
     [Header("닫기 버튼")]
@@ -27,9 +27,11 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     public TextMeshProUGUI starUpgradeCostText; // 성급 업그레이드 비용 표시
     public Button starUpgradeButton; // 성급 업그레이드 버튼
 
-    [Header("직책 소속 아이콘")]
+    [Header("직책 소속 아이콘, 텍스트")]
     public Image crewRoleIcon;
     public Image factionIcon;
+    public TextMeshProUGUI crewRoleText;
+    public TextMeshProUGUI factionText;
 
     [Header("스탯 표시")]
     public TextMeshProUGUI hpDisplay; // HP LvX Value 형식
@@ -40,6 +42,9 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     public TextMeshProUGUI atkSpdDisplay;
 
     public TextMeshProUGUI battlePoint;
+
+    [Header("별 이미지")]
+    public Image[] starImages; // 별 이미지 배열
 
     [Header("좌우 버튼")]
     public Button prevButton;
@@ -53,7 +58,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     // 버튼 순서: 0:무기, 1:방패, 2:갑옷
     [SerializeField] private Button[] openEquipmentListButtons = new Button[3];
     [SerializeField] private Image[] equippedWeaponIcons = new Image[3];
-    [SerializeField] private Sprite emptyWeaponSlotIcon; // 장비가 없을 때 표시할 기본 아이콘
+    [SerializeField] private GameObject[] equippedWeaponBG = new GameObject[3]; 
     [SerializeField] private Button autoEquipButton; // 자동 장착 버튼
     [SerializeField] private Button unequipAllButton; // 전체 해제 버튼
 
@@ -199,6 +204,8 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             UpdateCharacterStatsDisplay();
             UpdateEquipmentIcons(); // 장비 아이콘 업데이트 호출
             UpdateRoleFactionIcon(); // 직책, 소속 아이콘 업데이트
+            UpdateStarUI(currentCharacterData.Star.Value); // 성급(별) UI 업데이트
+
         }
         else
         {
@@ -240,23 +247,23 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     /// </summary>
     private void UpdateSoulFragmentsUI()
     {
-        if (currentCharacterData == null || soulFragmentsText == null) return;
+        //if (currentCharacterData == null || soulFragmentsText == null) return;
 
-        int characterId = currentCharacterData.characterdata.characterID;
-        int currentFragments = 0;
+        //int characterId = currentCharacterData.characterdata.characterID;
+        //int currentFragments = 0;
 
-        /*if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments))
-        {
-            soulFragmentsText.text = $"영혼 조각 : {currentFragments} \n 승급";
-        }*/
-        if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.OwnedCharacters.TryGetValue(characterId, out var data))
-        {
-            soulFragmentsText.text = $"영혼 조각 : {data.Soul.Value} \n 승급";
-        }
-        else
-        {
-            soulFragmentsText.text = "영혼 조각 : 0";
-        }
+        ///*if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.characterSoulFragments.TryGetValue(characterId, out currentFragments))
+        //{
+        //    soulFragmentsText.text = $"영혼 조각 : {currentFragments} \n 승급";
+        //}*/
+        //if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.OwnedCharacters.TryGetValue(characterId, out var data))
+        //{
+        //    soulFragmentsText.text = $"영혼 조각 : {data.Soul.Value} \n 승급";
+        //}
+        //else
+        //{
+        //    soulFragmentsText.text = "영혼 조각 : 0";
+        //}
     }
 
     /// <summary>
@@ -309,10 +316,10 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         // PlayerDataManager.Instance.TryGetUpgradeCost가 int cost를 반환한다고 가정
         if (PlayerDataManager.Instance != null && PlayerDataManager.Instance.TryGetUpgradeCost(currentCharacterData.Star.Value, out cost))
         {
-            starUpgradeCostText.text = $"비용 : {cost} 영혼 조각";
+            starUpgradeCostText.text = $"{currentCharacterData.Soul.Value}/{cost}";
 
             // 해당 캐릭터의 영혼 조각이 충분한지 확인하여 버튼 활성화/비활성화
-            int currentFragments = 0;
+            // int currentFragments = 0;
             // PlayerDataManager.Instance.characterSoulFragments가 int를 저장한다고 가정
             /*if (PlayerDataManager.Instance.characterSoulFragments.TryGetValue(currentCharacterData.characterdata.characterID, out currentFragments))
             {
@@ -359,14 +366,14 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         currentCharacterData.RecalculateStats();
 
         // 2. 갱신된 스탯으로 UI를 업데이트합니다.
-        atkDisplay.text = $"공격력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Attack])}";
-        hpDisplay.text = $"체력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Health])}";
-        defDisplay.text = $"방어력 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Defense])}";
-        criChanDisplay.text = $"치확 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritChance])}%";
-        criDmgDisplay.text = $"치피 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritDamage])}%";
-        atkSpdDisplay.text = $"공속 : {DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.AttackSpeed])}";
+        atkDisplay.text = $"{DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Attack])}";
+        hpDisplay.text = $"{DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Health])}";
+        defDisplay.text = $"{DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.Defense])}";
+        criChanDisplay.text = $"{DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritChance])}";
+        criDmgDisplay.text = $"{DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.CritDamage])}";
+        atkSpdDisplay.text = $"{DataUtility.FormatNumber(currentCharacterData.finalStats[Stat.AttackSpeed])}";
 
-        battlePoint.text = $"전투력 : {DataUtility.FormatNumber(currentCharacterData.battlePower)}";
+        battlePoint.text = $"{DataUtility.FormatNumber(currentCharacterData.battlePower)}";
     }
 
     /// <summary>
@@ -457,8 +464,53 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
 
         crewRoleIcon.sprite = currentCharacterData.crewRoleIcon;
         factionIcon.sprite = currentCharacterData.factionIcon;
+        crewRoleText.text = EnumToText(currentCharacterData.characterdata.crewRole);
+        factionText.text = EnumToText(currentCharacterData.characterdata.faction);
     }
 
+    private string EnumToText(CrewRole crewRole)
+    {
+        switch (crewRole)
+        {
+            case CrewRole.Deckhand:
+                return "갑판장";
+            case CrewRole.Sailor:
+                return "선원";
+            case CrewRole.Cook:
+                return "요리사";
+            case CrewRole.Captain:
+                return "선장";
+            default:
+                return "";
+        }
+    }
+
+    private string EnumToText(Faction faction)
+    {
+        switch (faction)
+        {
+            case Faction.Marine:
+                return "해군";
+            case Faction.Pirate:
+                return "해적";
+            case Faction.Monster:
+                return "괴물";
+            default:
+                return "";
+        }
+
+    }
+
+    /// <summary>
+    /// 성급(별) UI를 현재 성급에 맞게 갱신합니다.
+    /// </summary>
+    private void UpdateStarUI(int currentStars)
+    {
+        for (int i = 0; i < starImages.Length; i++)
+        {
+            starImages[i].color = (i < currentStars) ? Color.white : Color.black;
+        }
+    }
     private void UpdateEquipmentIcons()
     {
         if (currentCharacterData == null) return;
@@ -475,10 +527,12 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             // WeaponObject에 'itemIcon'이라는 Sprite 프로퍼티가 있다고 가정합니다.
             equippedWeaponIcons[iconIndex].sprite = equippedItem.itemIcon;
+            equippedWeaponBG[iconIndex].SetActive(true);
         }
         else
         {
-            equippedWeaponIcons[iconIndex].sprite = emptyWeaponSlotIcon;
+            equippedWeaponIcons[iconIndex].sprite = null;
+            equippedWeaponBG[iconIndex].SetActive(false);
         }
     }
 
