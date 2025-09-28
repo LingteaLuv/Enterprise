@@ -28,8 +28,8 @@ namespace JHT
         [Header("DropDown")] 
         [SerializeField] private TMP_Dropdown weaponDropDown;
         [SerializeField] private TMP_Dropdown weaponNameDropdown;
-        [SerializeField] private TMP_Dropdown relicsDropDown;
-        [SerializeField] private TMP_Dropdown relicsNameDropdown;
+        //[SerializeField] private TMP_Dropdown relicsDropDown;
+        //[SerializeField] private TMP_Dropdown relicsNameDropdown;
         [SerializeField] private TMP_Dropdown soulDropDown;
         [SerializeField] private TMP_Dropdown soulNameDropdown;
         private List<string> weaponDropDownList;
@@ -39,6 +39,10 @@ namespace JHT
         private List<string> soulDropdownList;
         private List<string> soulNameDropdownList;
         private InventoryMode curMode;
+
+        [Header("재화")]
+        [SerializeField] private TextMeshProUGUI goldText;
+        [SerializeField] private TextMeshProUGUI EquipTicketText;
 
         private InventoryManager inventoryManager;
         private ItemEventManager itemEventManager;
@@ -60,6 +64,13 @@ namespace JHT
             Debug.Log("InventoryPanel이 리셋되어, 모든 상세창을 닫고 기본 탭으로 돌립니다.");
         }
 
+        public override void SetShow()
+        {
+            base.SetShow();
+
+            goldText.text = $"{CurrencyManager.Instance.GetCurrency(CurrencyType.Gold)}";
+            EquipTicketText.text = $"{CurrencyManager.Instance.GetCurrency(CurrencyType.EquipDrawTicket)}";
+        }
         private void Awake()
         {
             if (relicsPool == null)
@@ -164,15 +175,15 @@ namespace JHT
             relicsDropDownList = new();
             relicsNameDropdownList = new();
 
-            relicsDropDown.ClearOptions();
-            relicsNameDropdown.ClearOptions();
+            //relicsDropDown.ClearOptions();
+            //relicsNameDropdown.ClearOptions();
 
             relicsDropDownList.Add("레벨");
             relicsDropDownList.Add("희귀도");
 
-            relicsDropDown.AddOptions(relicsDropDownList);
+            //relicsDropDown.AddOptions(relicsDropDownList);
 
-            relicsDropDown.onValueChanged.AddListener(delegate { ChangeRelicsMode(relicsDropDown.value); });
+            //relicsDropDown.onValueChanged.AddListener(delegate { ChangeRelicsMode(relicsDropDown.value); });
         }
 
         private void ChangeRelicsMode(int value)
