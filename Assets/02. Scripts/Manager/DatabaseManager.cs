@@ -140,9 +140,9 @@ public class DatabaseManager : Singleton<DatabaseManager>
             if (init)
             {
                 await dataRef.SetValueAsync(value);
-                DataSnapshot newSnapshot = await dataRef.GetValueAsync();
-                T newData = (T)Convert.ChangeType(newSnapshot.Value, typeof(T));
-                callback(newData);
+                //DataSnapshot newSnapshot = await dataRef.GetValueAsync();
+                //T newData = (T)Convert.ChangeType(newSnapshot.Value, typeof(T));
+                callback(value);
             }
             return;
         }
@@ -594,11 +594,11 @@ public class DatabaseManager : Singleton<DatabaseManager>
                 data.Value = curDate + 1;
                 callback(curDate + 1);
             }
-            
+            FirebaseManager.DataReference.Child(_uid).Child("UserData").Child("RewardTime")
+                .SetValueAsync(ServerValue.Timestamp);
             return TransactionResult.Success(data);
         });
-        FirebaseManager.DataReference.Child(_uid).Child("UserData").Child("RewardTime")
-            .SetValueAsync(ServerValue.Timestamp);
+       
     }
 
     private async Task<bool> CheckAttendance()
@@ -609,18 +609,22 @@ public class DatabaseManager : Singleton<DatabaseManager>
         long rewardTime = snapshot.Exists ? long.Parse(snapshot.Value.ToString()) : 0;
 
         long serverTime = await CurrentServerTime();
-        
+            
         DateTime currentTime = DateTimeOffset.FromUnixTimeMilliseconds(serverTime).UtcDateTime;
         DateTime currentTimeKor = currentTime.AddHours(9);
 
         DateTime resetTime = new DateTime(currentTimeKor.Year, currentTimeKor.Month, currentTimeKor.Day, 6, 0, 0);
+        Debug.LogError($"currentTimeKor : {currentTimeKor.Year}년 {currentTimeKor.Month}월 {currentTimeKor.Day}일 " +
+                       $"{currentTimeKor.Hour}시 {currentTimeKor.Minute}분 {currentTimeKor.Second}초");
         if (currentTimeKor.Hour < 6)
         {
             resetTime = resetTime.AddDays(-1);
         }
-        
-        DateTime lastRewardTime = DateTimeOffset.FromUnixTimeMilliseconds(rewardTime).UtcDateTime;
-
+        Debug.LogError($"resetTime : {resetTime.Year}년 {resetTime.Month}월 {resetTime.Day}일 " +
+                       $"{resetTime.Hour}시 {resetTime.Minute}분 {resetTime.Second}초");
+        DateTime lastRewardTime = DateTimeOffset.FromUnixTimeMilliseconds(rewardTime).UtcDateTime.AddHours(9);
+        Debug.LogError($"lastRewardTime : {lastRewardTime.Year}년 {lastRewardTime.Month}월 {lastRewardTime.Day}일 " +
+                       $"{lastRewardTime.Hour}시 {lastRewardTime.Minute}분 {lastRewardTime.Second}초");
         return lastRewardTime < resetTime;
     }
 
