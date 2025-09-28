@@ -13,11 +13,11 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     [SerializeField] private Toggle _attendanceToggle;
     [SerializeField] private Toggle _toolToggle;
     [SerializeField] private Toggle _shipToggle;
+    [SerializeField] private Toggle _playerInfoToggle;
     [SerializeField] private Button _bossBtn;
     [SerializeField] private Button _dungeonBtn;
     
     [SerializeField] private TextMeshProUGUI _goldText;
-    [SerializeField] private TextMeshProUGUI _stoneText;
     [SerializeField] private TextMeshProUGUI _gemText;
 
     public WeaponStatPanel StatPanel;
@@ -30,11 +30,8 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         Btn2Panel,
         Btn3Panel,
         Btn4Panel,
-        Btn5Panel,
-        Btn6Panel,
-        Btn7Panel,
-        Btn8Panel,
-        ShipPanel
+        ShipPanel,
+        PlayerInfoPanel
     }
 
     private void Awake()
@@ -93,6 +90,12 @@ public class GameUIController : UIController<GameUIController.GameUIType>
                 ShowUI(GameUIType.ShipPanel);
             }
         });
+        _playerInfoToggle.onValueChanged.AddListener((isOn) =>
+        {
+            if (!isOn) HideUI(GameUIType.PlayerInfoPanel);
+            else ShowUI(GameUIType.PlayerInfoPanel);
+        });
+        
         _bossBtn.onClick.AddListener(() =>
         {
             GlobalStageManager.Instance.bossBattleTriggered = true;
@@ -119,7 +122,7 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     {
         Debug.Log("Text 업데이트 호출");
         _goldText.text = currency[0];
-        _stoneText.text = currency[1];
+        //_stoneText.text = currency[1];
         _gemText.text = currency[2];
     }
 

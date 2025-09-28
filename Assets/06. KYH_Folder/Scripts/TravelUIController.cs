@@ -134,7 +134,7 @@ public class TravelUIController : MonoBehaviour
 
         // 스테이지 라벨 갱신
         if (stageLabel != null)
-            stageLabel.text = $"STAGE {stageIndex} - ISLAND {index + 1}";
+            stageLabel.text = $"STAGE {stageIndex} - {index + 1}";
 
         // 배 위치 이동 연출
         Vector2 start = shipIcon.anchoredPosition;

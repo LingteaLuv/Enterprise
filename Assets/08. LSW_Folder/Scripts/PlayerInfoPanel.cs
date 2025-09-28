@@ -8,9 +8,9 @@ using UnityEngine.UI;
 public class PlayerInfoPanel : UIBase
 {
     [SerializeField] private TextMeshProUGUI _nicknameText;
-    [SerializeField] private TextMeshProUGUI _loginType;
+    //[SerializeField] private TextMeshProUGUI _loginType;
     [SerializeField] private Button _linkBtn;
-    [SerializeField] private Button _logoutBtn;
+    //[SerializeField] private Button _logoutBtn;
     [SerializeField] private Button _exitBtn;
     
     public Action OnTouchedExitBtn;
@@ -19,7 +19,7 @@ public class PlayerInfoPanel : UIBase
     {
         _linkBtn.onClick.AddListener(OnTouchLinkBtn);
         
-        _logoutBtn.onClick.AddListener(OnTouchLogoutBtn);
+        //_logoutBtn.onClick.AddListener(OnTouchLogoutBtn);
 
         if (!FirebaseManager.Auth.CurrentUser.IsAnonymous)
         {
@@ -37,13 +37,13 @@ public class PlayerInfoPanel : UIBase
     private void OnEnable()
     {
         _nicknameText.text = LoginManager.Instance.Nickname;
-        _loginType.text = LoginManager.Instance.LoginType.ToString();
+        //_loginType.text = LoginManager.Instance.LoginType.ToString();
     }
 
     private void OnDisable()
     {
         _nicknameText.text = "";
-        _loginType.text = "";
+        //_loginType.text = "";
     }
     
     private async UniTask SetText()
