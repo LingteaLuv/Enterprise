@@ -315,22 +315,26 @@ public class CharacterScrollViewUI : UIBase
     {
         if (charInfoButton == null || formationButton == null) return;
 
-        var charInfoButtonColors = charInfoButton.colors;
-        var formationButtonColors = formationButton.colors;
+        // 버튼의 Image 컴포넌트를 직접 가져와서 색상을 변경해요.
+        Image charInfoImage = charInfoButton.image;
+        Image formationImage = formationButton.image;
+
+        if (charInfoImage == null || formationImage == null)
+        {
+            Debug.LogError("버튼에 Image 컴포넌트가 없어");
+            return;
+        }
 
         if (isFormationMode)
         {
-            charInfoButtonColors.normalColor = normalColor;
-            formationButtonColors.normalColor = selectedColor;
+            charInfoImage.color = normalColor;
+            formationImage.color = selectedColor;
         }
         else
         {
-            charInfoButtonColors.normalColor = selectedColor;
-            formationButtonColors.normalColor = normalColor;
+            charInfoImage.color = selectedColor;
+            formationImage.color = normalColor;
         }
-
-        charInfoButton.colors = charInfoButtonColors;
-        formationButton.colors = formationButtonColors;
     }
 
     #region 드롭다운 UI 관련 (코드가 길어서 생략)

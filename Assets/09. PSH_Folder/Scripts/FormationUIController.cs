@@ -106,7 +106,7 @@ public class FormationUIController : MonoBehaviour
                     tempTeamPower += character.battlePower;
                 }
             }
-            teamBattlePowerText.text = $"팀 전투력: {DataUtility.FormatNumber(tempTeamPower)}";
+            teamBattlePowerText.text = $"현상금: {DataUtility.FormatNumber(tempTeamPower)}";
         }
     }
 

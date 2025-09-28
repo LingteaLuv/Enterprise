@@ -125,7 +125,7 @@ namespace JHT
 
             if (posList.Count > 0)
                 posList.Clear();
-
+            
             stageIndex = _stageIndex;
             roundTable = stageDic[_stageIndex];
 

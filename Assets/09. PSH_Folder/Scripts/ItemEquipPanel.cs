@@ -84,7 +84,7 @@ namespace JHT // 동일한 네임스페이스 사용
                 {
                     if (PlayerDataManager.Instance.OwnedCharacters.TryGetValue(charId, out PlayerCharacterData owner))
                     {
-                        equippedByText.text = $"장착중: {owner.characterdata.characterName}";
+                        equippedByText.text = $"{owner.characterdata.characterName}\n장착중";
                     }
                     else
                     {
