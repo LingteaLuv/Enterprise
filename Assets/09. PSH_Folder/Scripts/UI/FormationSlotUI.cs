@@ -96,8 +96,8 @@ public class FormationSlotUI : MonoBehaviour
         {
             if (displaySets.Length >= 2 && displaySets[0].DisplayRect != null && displaySets[1].DisplayRect != null)
             {
-                displaySets[0].DisplayRect.anchoredPosition = new Vector2(-25f, 50f);
-                displaySets[1].DisplayRect.anchoredPosition = new Vector2(25f, -50f);
+                displaySets[0].DisplayRect.anchoredPosition = new Vector2(-35f, 30f);
+                displaySets[1].DisplayRect.anchoredPosition = new Vector2(35f, -30f);
             }
         }
     }
