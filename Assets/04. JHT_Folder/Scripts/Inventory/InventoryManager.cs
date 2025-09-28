@@ -561,6 +561,64 @@ namespace JHT
         }
 #endregion
 
+
+        // 아이템 레어, 수치 함수
+        public string SetRarityKorean(ItemObject item)
+        {
+            if (item is RelicsObject)
+            {
+                var a = (RelicsObject)item;
+                string s = "";
+                switch (a.curRarity)
+                {
+                    case ItemRarity.Normal: s = "노말";   break;
+                    case ItemRarity.Rare:   s = "레어";   break;
+                    case ItemRarity.Epic:   s = "에픽";   break;
+                    case ItemRarity.Unique: s = "유니크"; break;
+                    case ItemRarity.Legend: s = "레전드"; break;
+                    default: s = ""; break;
+                }
+                return s;
+            }
+            //else
+            return null;
+        }
+
+        public string SetItemPowerType(PowerType type)
+        {
+            string a = "";
+            switch (type)
+            {
+                case PowerType.Attack: a = "공격력 증가량"; break;
+                case PowerType.AttackSpeed: a = "공격속도 증가량"; break;
+                case PowerType.CritDamage: a = "크리티컬 데미지 증가량"; break;
+                case PowerType.Health: a = "체력 증가량"; break;
+                case PowerType.CritChance: a = "크리티컬 확률 증가량"; break;
+                case PowerType.Defense: a = "방어력 증가량"; break;
+                default: a = ""; break;
+            }
+            return a;
+        }
+
+        //public float SetItemPowerPercent(ItemObject item)
+        //{
+        //    if (item is RelicsObject)
+        //    {
+        //        RelicsObject obj = (RelicsObject)item;
+        //        float a = 0;
+        //        if (obj.itemPowerType == PowerType.Attack)
+        //        {
+        //            a = obj.itemPower;
+        //        }
+        //        else
+        //        {
+        //            a = obj.itemPower * 100;
+        //        }
+        //        return a;
+        //    }
+        //    //else
+        //    return 0;
+        //}
     }
     public enum InventoryMode
     {

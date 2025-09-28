@@ -32,8 +32,8 @@ public class RelicsGachaListUI : MonoBehaviour
 
         if (token != null)
         {
-            token?.Cancel();
-            token?.Dispose();
+            token.Cancel();
+            token.Dispose();
             token = null;
         }
         else
@@ -47,9 +47,12 @@ public class RelicsGachaListUI : MonoBehaviour
         sequenceFadeIn.Kill();
         sequenceFadeOut.Kill();
 
-        token?.Cancel();
-        token?.Dispose();
-        token = null;
+        if (token != null)
+        {
+            token.Cancel();
+            token.Dispose();
+            token = null;
+        }
     }
 
     public async UniTask OutIt()
@@ -69,6 +72,7 @@ public class RelicsGachaListUI : MonoBehaviour
 
     private async UniTask ShowChooseItemAsync(RelicsObject obj1, RelicsObject obj2)
     {
+        fadeImg.gameObject.SetActive(true);
         sequenceFadeIn = DOTween.Sequence().SetAutoKill(false).Append(fadeImg.DOFade(1.0f, 1)).Append(fadeImg.DOFade(0.0f, 1));
 
         await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token.Token);

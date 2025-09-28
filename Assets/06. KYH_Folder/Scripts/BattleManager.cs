@@ -270,13 +270,7 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);      // 등장 연출 대기
 
         // 몬스터 수가 0이 될떄까지 반복
-        int safety = 0;
-        while (!goNextStage)
-        {
-            yield return null;
-            safety++;
-            if (safety > 10000) break; // 무한 루프 방지
-        }
+        yield return new WaitUntil(() => goNextStage);
 
         yield return new WaitForSeconds(1f);
 
@@ -435,7 +429,7 @@ public class BattleManager : MonoBehaviour
         isHandlingDefeat = true;
 
         ScreenScrollEffectManager.Instance.ShowScrollEffect("패배했습니다. 첫번째 섬부터 재도전합니다.", () => { });
-
+        currentRoundIndex = 0;
         yield return new WaitForSeconds(1f);
 
         IslandStageManager.Instance.ResetStageAfterDefeat();

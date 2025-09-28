@@ -20,6 +20,7 @@ namespace JHT
         public event Action<List<MonsterSkillSO>> OnSkillDataSetCompleted;
 
         public bool isMonsterDataReady;
+        public bool dataLoadFinish;
         public IEnumerator DownRelicsData()
         {
             yield return null;
@@ -37,13 +38,15 @@ namespace JHT
         public IEnumerator DownLoadMonsterData()
         {
             yield return null;
+            dataLoadFinish = false;
             yield return LoadDataCSV(monsterDataURL, SetData, 4);
             yield return LoadDataCSV(monsterTableDataURL, rows => {
                 try { SetMonsterTableData(rows); }
                 catch (Exception e) { Debug.LogException(e); }
             }, 4);
 
-            OnMonsterDataTableSetCompleted?.Invoke();
+            if(dataLoadFinish)
+                OnMonsterDataTableSetCompleted?.Invoke();
         }
 
         public IEnumerator DownLoadSkillTabledata()
@@ -98,7 +101,6 @@ namespace JHT
                     so.itemPowerType = (PowerType)Enum.Parse(typeof(PowerType), row[5]);
                     so.startPower[rarity - 1] = float.Parse(row[8]);
                     so.upPower[rarity - 1] = (float.Parse(row[6]) - so.startPower[rarity - 1])/100;
-                    
                     //so.rarityImage[rarity-1] = Resources.Load<Sprite>(row[8]);
                 }
             }
@@ -193,9 +195,9 @@ namespace JHT
                     List<string> numArray2 = new List<string>(readNum2);
                     List<string> numArray3 = new List<string>(readNum3);
 
-                    numArray1 = await TableDataReader(1,readNum1);
-                    numArray2 = await TableDataReader(2,readNum2);
-                    numArray3 = await TableDataReader(3,readNum3);
+                    numArray1 = await TableDataReader(2,readNum1);
+                    numArray2 = await TableDataReader(3,readNum2);
+                    numArray3 = await TableDataReader(4,readNum3);
 
                     if (so.monsterData.Count != (readNum1 + readNum2 + readNum3))
                     {
@@ -218,6 +220,7 @@ namespace JHT
                     so.roundCount = int.Parse(row[4]);
                     so.addStat = float.Parse(row[5]);
                     //so.roundCount = int.Parse(row[3]);
+                    dataLoadFinish = true;
                 }
             }
         }
@@ -225,21 +228,27 @@ namespace JHT
         private async UniTask<List<string>> TableDataReader(int num,int readNum)
         {
             List<string> list = new List<string>();
-            
-            for (int i = readNum; i > 0; i--)
+            try
             {
-                if (i >= 10)
+                for (int i = readNum; i > 0; i--)
                 {
+                    if (i >= 10)
+                    {
 
-                    list.Add(num.ToString() + "000" + i.ToString());
-                    
+                        list.Add(num.ToString() + "000" + i.ToString());
+
+                    }
+                    else
+                    {
+
+                        list.Add(num.ToString() + "0000" + i.ToString());
+
+                    }
                 }
-                else
-                {
-                    
-                    list.Add(num.ToString() + "0000" + i.ToString());
-                    
-                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(new Exception("[MonsterTable] 비동기 설정 실패", e));
             }
             await UniTask.Yield();
             return list;
