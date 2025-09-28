@@ -180,7 +180,7 @@ namespace JHT
             {
                 yield return null;
             }
-
+            Debug.Log($"현재 라운드 : {curRoundIndex}");
             roundIndex = curRoundIndex;
             if (curMonsterCountList.Count > 0)
                 curMonsterCountList.Clear();

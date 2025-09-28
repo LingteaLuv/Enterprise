@@ -14,36 +14,34 @@ public class DamageEffectSO : SkillEffectSO
     [Tooltip("타격 사이의 시간 간격 (밀리초)")]
     public int delayBetweenHits = 100;
 
+
     public override void ApplyEffect(IAttacker caster, IDamageable target)
     {
         base.ApplyEffect(caster, target);
 
-        CombatCharacter casterCharacter = caster as CombatCharacter;
-        if (casterCharacter == null) return;
+        //CombatCharacter casterCharacter = caster as CombatCharacter;
+        //if (casterCharacter == null) return;
+        //GameObject inst = (caster as MonoBehaviour).gameObject;
+        //GameObject t = (target as MonoBehaviour).gameObject;
 
-        // 비동기 메서드를 호출해서 여러 번 때리는 로직을 실행해요.
-        ApplyDamageAsync(casterCharacter, target);
+        ApplyDamageAsync(caster, target);
     }
 
-    private async void ApplyDamageAsync(CombatCharacter caster, IDamageable target)
+    private async void ApplyDamageAsync(IAttacker caster, IDamageable target)
     {
         for (int i = 0; i < hitCount; i++)
         {
-            // 루프를 도는 중에 타겟이 사라졌는지 확인해요.
             if (target == null || (target as Object) == null)
             {
                 Debug.Log("타겟이 사라져서 데미지 적용을 중단합니다.");
                 break;
             }
-
-            // 새로 만든 TakeDamage 메서드를 호출하면서 powerRatio를 넘겨줘요!
             target.TakeDamage(caster, powerRatio);
-
-            // 마지막 타격 후에는 딜레이를 주지 않아요.
             if (i < hitCount - 1)
             {
                 await Task.Delay(delayBetweenHits);
             }
         }
     }
+
 }

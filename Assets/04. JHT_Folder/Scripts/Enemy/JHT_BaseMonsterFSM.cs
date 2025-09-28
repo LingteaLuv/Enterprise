@@ -122,22 +122,6 @@ namespace JHT
             attackDelayCount = monsterStat.normalSkill.coolTime - monsterStat.normalSkill.clip.length > 0 ?
                 monsterStat.normalSkill.coolTime - monsterStat.normalSkill.clip.length : 1;
 
-            //스킬 초기화
-            if (monsterStat.normalSkill != null)
-            {
-                monsterStat.normalSkill.Init(monsterStat);
-            }
-
-            if (monsterStat.skill1 != null)
-            {
-                monsterStat.skill1.Init(monsterStat);
-            }
-
-            if (monsterStat.skill2 != null)
-            {
-                monsterStat.skill2.Init(monsterStat);
-            }
-
             // 애니메이션 세팅
             animator = monsterPrefab.GetComponentInChildren<Animator>(true);
 
@@ -370,10 +354,11 @@ namespace JHT
                     if (!animator)
                         return;
 
-                    await UniTask.WaitUntil(() => !skill1Active || !skill2Active, cancellationToken: Atoken[0].Token);
+                    await UniTask.WaitUntil(() => !skill1Active && !skill2Active, cancellationToken: Atoken[0].Token);
 
-                    if (animator != null)
+                    if (animator != null && !isAttacking)
                     {
+                        Debug.Log($"{monsterStat.monsterName} : 일반공격공격공격");
                         animator.Play(ATTACK, 0, 0f);
                     }
                     isAttacking = true;
@@ -403,7 +388,10 @@ namespace JHT
                         skill1Active = true;
 
                         if (animator != null)
+                        {
+                            Debug.Log($"{monsterStat.monsterName} : 스킬1공격공격공격");
                             animator.Play(SKILL1, 0, 0f);
+                        }
 
                         await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill1.clip.length), cancellationToken: Atoken[1].Token);
                         skill1Active = false;
@@ -432,7 +420,10 @@ namespace JHT
 
                         skill2Active = true;
                         if (animator != null)
+                        {
+                            Debug.Log($"{monsterStat.monsterName} :스킬2공격공격공격");
                             animator.Play(SKILL2, 0, 0f);
+                        }
 
                         await UniTask.Delay(TimeSpan.FromSeconds(monsterStat.skill2.clip.length), cancellationToken: Atoken[2].Token);
                         skill2Active = false;
@@ -508,7 +499,7 @@ namespace JHT
         public void ApplyOnHitDamageBuff(float value, float duration)
         {
             Buff newBuff = new Buff(Stat.Attack, value, duration, BuffType.Flat, false, BuffEffectType.ExtraDamageOnHit);
-            Debug.Log($"버프버프벞브펍프버프 이름 :{newBuff.BuffType}");
+            Debug.Log($"공격공격공격 버프버프 이름 :{newBuff.BuffType}");
             activeBuffs.Add(newBuff);
         }
 
@@ -640,6 +631,7 @@ namespace JHT
 
             if (currentState == MonsterState.ATTACK && curState != currentState)
             {
+                Debug.Log($"{monsterStat.monsterName} : 공격공격공격 바뀜");
                 for (int i = 0; i < Atoken.Length; i++)
                 {
                     if (Atoken[i] != null)

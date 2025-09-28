@@ -36,8 +36,8 @@ namespace JHT
             itemNum = data.itemNum;
             itemName = data.itemName;
 
-            itemPower = SetPower(data,level); 
-            
+            itemPower = data.startPower[(int)curRarity - 1] + data.upPower[(int)curRarity - 1] * level;
+
             itemRarityImage = data.rarityImage[(int)curRarity - 1];
         }
         
@@ -53,11 +53,12 @@ namespace JHT
             itemNum = data.itemNum;
             itemName = data.itemName;
 
-            itemPower = SetPower(data,level);
+            //itemPower = SetPower(data,level);
+            itemPower = data.startPower[(int)curRarity - 1] + data.upPower[(int)curRarity - 1] * level;
             itemRarityImage = data.rarityImage[(int)curRarity - 1];
         }
 
-        private float SetPower(ItemRelicsSO so,int level)
+        private float SetPower(ItemRelicsSO so, int level)
         {
             float amount = 0;
             if (itemPowerType == PowerType.Attack)
@@ -69,7 +70,7 @@ namespace JHT
                 amount = 1 + so.startPower[(int)curRarity - 1] + so.upPower[(int)curRarity - 1] * level;
             }
             return amount;
-
+        }
             //switch (itemPowerType)
             //{
             //    case PowerType.Attack:
@@ -91,6 +92,6 @@ namespace JHT
             //
             //        break;
             //}
-        }
+        
     }
 }
