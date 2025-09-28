@@ -264,26 +264,24 @@ namespace JHT
         public void TryAcquireNextTarget()
         {
             Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, monsterStat.chaseRange, targetLayer);
-
-            foreach (var c in cols)
+            if (cols == null || cols.Length == 0)
             {
-                if (c != null)
+                target = null;
+                if (monsterSearch != null) monsterSearch.target = null;
+                return;
+            }
+
+            if (cols[0].gameObject.GetComponent<HealthSystem>().currentHealth > 0 || cols[0] != null)
+            {
+                float d = Vector2.Distance(cols[0].gameObject.transform.position, transform.position);
+                if (d < monsterStat.chaseRange)
                 {
-                    if (c.gameObject.GetComponent<HealthSystem>().currentHealth <= 0)
-                    {
-                        continue;
-                    }
-
-                    float d = Vector2.Distance(c.gameObject.transform.position, transform.position);
-
-                    if (d < monsterStat.chaseRange)
-                    {
-                        target = c.gameObject;
-                        monsterSearch.target = target.transform;
-                        break;
-                    }
+                    target = cols[0].gameObject;
+                    monsterSearch.target = target.transform;
                 }
             }
+
+            
         }
 
         public virtual void HandleIdle()
@@ -510,6 +508,7 @@ namespace JHT
         public void ApplyOnHitDamageBuff(float value, float duration)
         {
             Buff newBuff = new Buff(Stat.Attack, value, duration, BuffType.Flat, false, BuffEffectType.ExtraDamageOnHit);
+            Debug.Log($"버프버프벞브펍프버프 이름 :{newBuff.BuffType}");
             activeBuffs.Add(newBuff);
         }
 

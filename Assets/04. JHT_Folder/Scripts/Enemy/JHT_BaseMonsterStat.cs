@@ -47,7 +47,7 @@ namespace JHT
                     monsterStats[m.stat] = m.amount * addStat * AttackCalculate(curSO);
             }
 
-            chaseRange = curSO.chaseRange * addStat;
+            chaseRange = curSO.chaseRange;
 
             moveSpeed = curSO.moveSpeed * addStat;
 
@@ -57,7 +57,6 @@ namespace JHT
             // Enum
             monsterAttackRangeType = curSO.monsterAttackType;
             attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack ? 1f : 2f;
-            attackRange *= addStat;
 
             monsterCrewRole = curSO.monsterCrewRole;
 

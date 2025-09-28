@@ -41,10 +41,10 @@ public class RelicsProductAnim : MonoBehaviour
         rewardRT = reward.rectTransform;
 
         baseWaveSize = waveRT.sizeDelta;
-        baseWavePos = waveRT.position;
+        baseWavePos = waveRT.anchoredPosition;
 
         baseShipSize = shipRT.sizeDelta;
-        baseShipPos = shipRT.position;
+        baseShipPos = shipRT.anchoredPosition;
 
         baselightRot = lightRT.rotation;
         baseShipRot = shipRT.rotation;
@@ -76,10 +76,10 @@ public class RelicsProductAnim : MonoBehaviour
         rewardRT.anchoredPosition = new Vector2(0, -700);
 
         waveRT.sizeDelta = baseWaveSize;
-        waveRT.position = baseWavePos;
+        waveRT.anchoredPosition = baseWavePos;
 
         shipRT.sizeDelta = baseShipSize;
-        shipRT.position = baseShipPos;
+        shipRT.anchoredPosition = baseShipPos;
 
         lightRT.rotation = baselightRot;
         shipRT.rotation = baseShipRot;
@@ -120,16 +120,16 @@ public class RelicsProductAnim : MonoBehaviour
         try
         {
             waveRT.DOAnchorPosX(waveTime, 9f);//.SetEase(Ease.InOutQuad).SetLoops(-1, LoopType.Yoyo);
-            waveRT.DOSizeDelta(new Vector2(12000, 800), 10f);
+            waveRT.DOSizeDelta(new Vector2(8000, 600), 5f);
             //waveRT.DOScale(1.3f, 8f).SetEase(Ease.InOutQuad);
 
             shipRT.DOLocalRotate(new Vector3(0, 0, -5f), 5f).SetEase(Ease.InOutQuad).SetLoops(-1, LoopType.Yoyo);
-            shipRT.DOAnchorPosY(30f, 5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
-            shipRT.DOSizeDelta(new Vector2(2000, 2000), 10f);
+            shipRT.DOAnchorPosY(10f, 5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+            shipRT.DOSizeDelta(new Vector2(2000, 2000), 5f);
 
-            lightRT.DOLocalRotate(new Vector3(0, 0, -5f), 10f).SetEase(Ease.InOutQuad).SetLoops(-1, LoopType.Yoyo);
+            lightRT.DOLocalRotate(new Vector3(0, 0, -5f), 5f).SetEase(Ease.InOutQuad).SetLoops(-1, LoopType.Yoyo);
 
-            await UniTask.Delay(TimeSpan.FromSeconds(6.5f), cancellationToken: token[0].Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(4.5f), cancellationToken: token[0].Token);
             chainMask.gameObject.SetActive(true);
 
             await ShowRelics();
@@ -142,11 +142,11 @@ public class RelicsProductAnim : MonoBehaviour
     {
         try
         {
-            chainRT.DOAnchorPosY(190, 3f);
-            chainRT.DOAnchorPosY(787, 3f).SetDelay(3f);
+            chainRT.DOAnchorPosY(190, 2f);
+            chainRT.DOAnchorPosY(787, 2f).SetDelay(2f);
 
             reward.gameObject.SetActive(true);
-            rewardRT.DOAnchorPosY(542, 4f).SetDelay(2f);
+            rewardRT.DOAnchorPosY(542, 2f).SetDelay(1f);
             rewardRT.DOShakeRotation(20, 4, 30);
 
 

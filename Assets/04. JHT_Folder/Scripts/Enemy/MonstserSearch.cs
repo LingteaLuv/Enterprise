@@ -12,6 +12,9 @@ public class MonstserSearch : MonoBehaviour
     //private Vector3Int lastTargetPos = new Vector3Int(int.MinValue, int.MinValue, 0);
     public void SearchTarget()
     {
+        if (!gameObject.activeSelf || target == null)
+            return;
+
         Vector3Int curtrans = new Vector3Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y), 0);
         Vector3Int targetTrans = new Vector3Int(Mathf.RoundToInt(target.position.x),
             Mathf.RoundToInt(target.position.y), 0);
