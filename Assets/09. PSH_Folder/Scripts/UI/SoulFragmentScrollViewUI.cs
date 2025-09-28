@@ -14,6 +14,7 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
     public GameObject soulFragmentPanelPrefab;
 
     public SoulStatPanel characterStatPanel;
+    public GameObject empty;
 
     // UI 패널들을 재사용하기 위한 오브젝트 풀
     private List<SoulFragmentPanel> panelPool = new List<SoulFragmentPanel>();
@@ -156,5 +157,6 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
 
         characterStatPanel.gameObject.SetActive(true);
         characterStatPanel.Init(data);
+        empty.SetActive(false);
     }
 }
