@@ -46,6 +46,13 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     [Header("별 이미지")]
     public Image[] starImages; // 별 이미지 배열
 
+    [Header("캐릭터 렌더링")]
+    [SerializeField] private RawImage characterRenderImage; // 3D 모델을 표시할 RawImage
+    [SerializeField] private string renderCameraName = "CharacterInfoRenderCamera"; // 렌더링에 사용할 카메라 이름
+    [SerializeField] private float modelYOffset = -1.0f; // 캐릭터 모델 Y축 위치 보정값
+    private Camera renderCamera;
+    private GameObject spawnedCharacter;
+
     [Header("좌우 버튼")]
     public Button prevButton;
     public Button nextButton;
@@ -58,7 +65,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     // 버튼 순서: 0:무기, 1:방패, 2:갑옷
     [SerializeField] private Button[] openEquipmentListButtons = new Button[3];
     [SerializeField] private Image[] equippedWeaponIcons = new Image[3];
-    [SerializeField] private GameObject[] equippedWeaponBG = new GameObject[3]; 
+    [SerializeField] private GameObject[] equippedWeaponBG = new GameObject[3];
     [SerializeField] private Button autoEquipButton; // 자동 장착 버튼
     [SerializeField] private Button unequipAllButton; // 전체 해제 버튼
 
@@ -70,6 +77,18 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
 
     void Awake()
     {
+        // 렌더 카메라 찾기
+        if (!string.IsNullOrEmpty(renderCameraName))
+        {
+            GameObject camObj = GameObject.Find(renderCameraName);
+            if (camObj != null)
+            {
+                renderCamera = camObj.GetComponent<Camera>();
+                if (renderCamera == null) Debug.LogError($"'{renderCameraName}' 오브젝트에서 Camera 컴포넌트를 찾을 수 없습니다!", this.gameObject);
+            }
+            else Debug.LogError($"'{renderCameraName}' 이름의 카메라 오브젝트를 씬에서 찾을 수 없습니다!", this.gameObject);
+        }
+
         // 닫기 버튼 이벤트 연결
         if (closeButton != null)
         {
@@ -205,6 +224,7 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             UpdateEquipmentIcons(); // 장비 아이콘 업데이트 호출
             UpdateRoleFactionIcon(); // 직책, 소속 아이콘 업데이트
             UpdateStarUI(currentCharacterData.Star.Value); // 성급(별) UI 업데이트
+            UpdateCharacterModel(); // 3D 모델 업데이트
 
         }
         else
@@ -434,6 +454,13 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     // 3. ClosePanel()을 UIBase의 SetHide()를 오버라이드 하도록 변경
     public override void SetHide()
     {
+        // 3D 모델이 생성되어 있다면 파괴
+        if (spawnedCharacter != null)
+        {
+            Destroy(spawnedCharacter);
+            spawnedCharacter = null;
+        }
+
         base.SetHide(); // gameObject.SetActive(false)를 호출
     }
 
@@ -511,6 +538,38 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             starImages[i].color = (i < currentStars) ? Color.white : Color.black;
         }
     }
+
+    /// <summary>
+    /// 3D 캐릭터 모델을 갱신합니다.
+    /// </summary>
+    private void UpdateCharacterModel()
+    {
+        // 기존에 생성된 캐릭터가 있다면 파괴
+        if (spawnedCharacter != null)
+        {
+            Destroy(spawnedCharacter);
+        }
+
+        if (currentCharacterData == null || renderCamera == null || characterRenderImage == null)
+        {
+            if (characterRenderImage != null) characterRenderImage.gameObject.SetActive(false);
+            return;
+        }
+
+        var prefabToInstantiate = currentCharacterData.characterdata.characterPrefab;
+        if (prefabToInstantiate != null)
+        {
+            characterRenderImage.gameObject.SetActive(true);
+            Vector3 spawnPos = renderCamera.transform.position + renderCamera.transform.forward * 10f;
+            spawnPos.y += modelYOffset; // Y축 위치 보정
+            spawnedCharacter = Instantiate(prefabToInstantiate, spawnPos, renderCamera.transform.rotation, renderCamera.transform);
+        }
+        else
+        {
+            characterRenderImage.gameObject.SetActive(false);
+        }
+    }
+
     private void UpdateEquipmentIcons()
     {
         if (currentCharacterData == null) return;
