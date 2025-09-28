@@ -3,6 +3,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public enum CharacterSortOption
 {
@@ -37,6 +38,13 @@ public class CharacterScrollViewUI : UIBase
     public TMP_Dropdown sortDropdown;
     public TMP_Dropdown crewRoleFilterDropdown;
     public TMP_Dropdown factionFilterDropdown;
+
+    [Header("UI 애니메이션")]
+    [SerializeField] private RectTransform scrollViewRectTransform; // 높이를 변경할 UI
+    [SerializeField] private float heightDecreaseAmount = 700f; // 편성 모드에서 줄어들 높이
+    [SerializeField] private float heightAnimationDuration = 0.3f; // 애니메이션 시간
+
+    private float initialHeight; // 초기 높이를 저장할 변수
 
     [Header("편성 모드")]
     public bool isFormationMode = false;
@@ -82,6 +90,11 @@ public class CharacterScrollViewUI : UIBase
 
     void Start()
     {
+        if (scrollViewRectTransform != null)
+        {
+            initialHeight = scrollViewRectTransform.sizeDelta.y;
+        }
+
         sortDropdown.onValueChanged.AddListener(OnSortDropdownChanged);
         crewRoleFilterDropdown.onValueChanged.AddListener(OnCrewRoleFilterDropdownChanged);
         factionFilterDropdown.onValueChanged.AddListener(OnFactionFilterDropdownChanged);
@@ -196,8 +209,25 @@ public class CharacterScrollViewUI : UIBase
 
         UpdateFormationButtonVisuals();
         RefreshUI();
-        formationPanel.SetActive(isFormationMode);
+        // formationPanel.SetActive(isFormationMode);
         if (saveButton) saveButton.gameObject.SetActive(isFormationMode);
+
+        // UI 높이 애니메이션
+        if (scrollViewRectTransform != null)
+        {
+            // 편성 모드(enable=true)일 때는 줄어든 높이로, 일반 모드(enable=false)일 때는 초기 높이로 설정
+            float targetHeight = enable ? initialHeight - heightDecreaseAmount : initialHeight;
+            float currentHeight = scrollViewRectTransform.sizeDelta.y;
+
+            // 높이 변화량의 절반만큼 Y위치를 보정해줘야 아래를 기준으로 늘어남/줄어듦
+            float heightDifference = targetHeight - currentHeight;
+            Vector2 targetPosition = scrollViewRectTransform.anchoredPosition + new Vector2(0, heightDifference / 2f);
+
+            // 시퀀스를 사용해 높이와 위치를 동시에 애니메이션
+            Sequence sequence = DOTween.Sequence();
+            sequence.Append(scrollViewRectTransform.DOSizeDelta(new Vector2(scrollViewRectTransform.sizeDelta.x, targetHeight), heightAnimationDuration));
+            sequence.Join(scrollViewRectTransform.DOAnchorPos(targetPosition, heightAnimationDuration));
+        }
     }
 
     private void OnSaveFormation()
