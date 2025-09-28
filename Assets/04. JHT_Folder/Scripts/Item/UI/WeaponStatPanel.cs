@@ -17,7 +17,7 @@ namespace JHT
         [SerializeField] private TextMeshProUGUI levelText; // 레벨 표시용 텍스트
         [SerializeField] private TextMeshProUGUI statText;
         [SerializeField] private TextMeshProUGUI powerText;
-        [SerializeField] private Slider pointSlider;
+        [SerializeField] private Image pointFillImage;
 
         private void Awake()
         {
@@ -32,7 +32,7 @@ namespace JHT
             {
                 curWeapon.OnChangeLevel -= OnWeaponDataChanged;
                 curWeapon.OnChangeStar -= OnWeaponDataChanged;
-                if(InventoryManager.Instance != null)
+                if (InventoryManager.Instance != null)
                     InventoryManager.Instance.OnEquipmentEnhancementPointsChanged -= OnEnhancementPointsChanged;
             }
         }
@@ -97,7 +97,7 @@ namespace JHT
         private void UpdateUI()
         {
             if (curWeapon == null) return;
-            
+
             int requirePoint = InventoryManager.Instance.GetRequiredPointsForLevelUp(curWeapon);
             int currentPoint = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum);
 
@@ -105,7 +105,7 @@ namespace JHT
             weaponImage.sprite = curWeapon.itemIcon;
             nameText.text = curWeapon.itemName;
             pointText.text = $"{currentPoint} / {requirePoint}";
-            pointSlider.value = Mathf.Min((float)currentPoint / requirePoint, 1);
+            pointFillImage.fillAmount = Mathf.Min((float)currentPoint / requirePoint, 1);
 
             if (curWeapon.ItemStar >= 5)
             {
