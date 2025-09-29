@@ -209,7 +209,7 @@ public class CharacterScrollViewUI : UIBase
 
         UpdateFormationButtonVisuals();
         RefreshUI();
-        formationPanel.SetActive(isFormationMode);
+        // formationPanel.SetActive(isFormationMode);
         if (saveButton) saveButton.gameObject.SetActive(isFormationMode);
 
         // UI 높이 애니메이션
