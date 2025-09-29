@@ -1,4 +1,5 @@
 using JHT;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -51,8 +52,8 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
 
     [Header("캐릭터 렌더링")]
     [SerializeField] private RawImage characterRenderImage; // 3D 모델을 표시할 RawImage
-    [SerializeField] private string renderCameraName = "CharacterInfoRenderCamera"; // 렌더링에 사용할 카메라 이름
-    [SerializeField] private float modelYOffset = -1.0f; // 캐릭터 모델 Y축 위치 보정값
+    [SerializeField] private string renderCameraName; // 렌더링에 사용할 카메라 이름
+    [SerializeField] private float modelYOffset = -0.5f; // 캐릭터 모델 Y축 위치 보정값
     private Camera renderCamera;
     private GameObject spawnedCharacter;
 
@@ -73,25 +74,13 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     [SerializeField] private Button unequipAllButton; // 전체 해제 버튼
 
     [Header("스와이프 설정")]
-    public float swipeThreshold = 50f; // 스와이프로 인식할 최소 픽셀 거리
+    public float swipeThreshold = 500f; // 스와이프로 인식할 최소 픽셀 거리
     private Vector2 dragStartPosition;
 
     private PlayerCharacterData currentCharacterData; // 현재 표시 중인 캐릭터 데이터
 
     void Awake()
     {
-        // 렌더 카메라 찾기
-        if (!string.IsNullOrEmpty(renderCameraName))
-        {
-            GameObject camObj = GameObject.Find(renderCameraName);
-            if (camObj != null)
-            {
-                renderCamera = camObj.GetComponent<Camera>();
-                if (renderCamera == null) Debug.LogError($"'{renderCameraName}' 오브젝트에서 Camera 컴포넌트를 찾을 수 없습니다!", this.gameObject);
-            }
-            else Debug.LogError($"'{renderCameraName}' 이름의 카메라 오브젝트를 씬에서 찾을 수 없습니다!", this.gameObject);
-        }
-
         // 닫기 버튼 이벤트 연결
         if (closeButton != null)
         {
@@ -144,6 +133,17 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             unequipAllButton.onClick.AddListener(OnUnequipAll);
         }
+    }
+
+    private IEnumerator FindCameraAndUpdate()
+    {
+        yield return null; // 씬의 카메라들이 활성화될 때까지 대기
+        if (renderCamera == null && !string.IsNullOrEmpty(renderCameraName))
+        {
+            GameObject camObj = GameObject.Find(renderCameraName);
+            if (camObj != null) renderCamera = camObj.GetComponent<Camera>();
+        }
+        UpdateCharacterModel();
     }
 
     private void OnAutoEquip()
@@ -431,6 +431,15 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         if (PlayerDataManager.Instance != null)
         {
             PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterUpdate;
+        }
+
+        if (renderCamera == null)
+        {
+            StartCoroutine(FindCameraAndUpdate());
+        }
+        else
+        {
+            UpdateCharacterModel();
         }
     }
 
