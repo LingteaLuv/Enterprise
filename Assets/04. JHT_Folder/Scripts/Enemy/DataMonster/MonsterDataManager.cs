@@ -8,6 +8,12 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class MonsterDataManager : Singleton<MonsterDataManager>
 {
+    protected override void Awake()
+    {
+        base.Awake();
+        dataLoader = new JHT_DataDownLoader();
+    }
+
     public List<JHT_MonsterDataTable> monsterTableList;
     public List<JHT_MonsterDataSO> monsterDataList;
     public List<GameObject> monsterPrefabList;
@@ -37,18 +43,12 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     public bool isSkillListFinish;
 
     private bool isDataLodedFinish;
-    private bool isTableLoadedFinish;
+    public bool isTableLoadedFinish { get; private set; }
     
     public Action OnMonsterDataLoadFinish;
     public Action OnMonsterTableLoadFinish;
     public Action OnMonsterPrefabLoadFinish;
     public Action OnMonsterSkillLoadFinish;
-
-    protected override void Awake()
-    {
-        base.Awake();
-        dataLoader = new JHT_DataDownLoader();
-    }
 
     protected override void OnDestroy()
     {

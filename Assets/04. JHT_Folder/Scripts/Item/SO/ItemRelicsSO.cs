@@ -11,6 +11,7 @@ namespace JHT
         public float[] upPower;
         public float[] startPower;
         public Sprite[] rarityImage;
+        public int[] cost;
     }
 
     public enum PowerType

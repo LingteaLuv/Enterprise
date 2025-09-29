@@ -11,8 +11,8 @@ public class RelicsGachaManager : MonoBehaviour
     public int levelResult { get; set; }
 
     public int relicsCouponCost;
-    public float relicsSpecialCost;
-    public float relicsUpgradeCost;
+    public int relicsSpecialCost;
+    public int relicsUpgradeCost;
     public int relicsTablelevel { get; set; }
 
     public bool isChoose;
@@ -38,6 +38,8 @@ public class RelicsGachaManager : MonoBehaviour
         dataManager = ItemDataManager.Instance;
         gachaData = new();
         dataManager.OnRelicsDataLoadFinish += DataSetting;
+        relicsCouponCost = 2;
+        relicsSpecialCost = 200;
 
         //dtabase사용하게되면 변경
         relicsTablelevel = 0;
@@ -142,10 +144,7 @@ public class RelicsGachaManager : MonoBehaviour
     private void AddResult(ItemRelicsSO so, ItemRarity rarity, int level)
     {
         RelicsObject obj = inventoryManager.relicsList.Find(x => x.itemNum == so.itemNum);
-        if (obj == null)
-        {
-            Debug.LogError("없음");
-        }
+        
         if (obj == null)
         {
             OnChooseItem?.Invoke(null, new RelicsObject(so, rarity, level));

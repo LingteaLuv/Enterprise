@@ -1,5 +1,6 @@
 using JHT;
 using System;
+using System.Numerics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,20 +24,20 @@ public class RelicsPoints : MonoBehaviour
         InventoryManager.Instance.OnChangeRelicsPoints -= ShowRelicsPoint;
         InventoryManager.Instance.OnChangeRelicsPoints += ShowRelicsPoint;
 
-        ShowRelicsPoint(InventoryManager.Instance.RelicsPoints);
+        ShowRelicsPoint();
 
         OnChangeValue -= ChangeRelicsPoint;
         OnChangeValue += ChangeRelicsPoint;
     }
 
-    private void ShowRelicsPoint(float value)
+    private void ShowRelicsPoint()
     {
-        relicsPointText.text = value.ToString();
+        relicsPointText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon).ToString();
         OnChangeValue?.Invoke();
     }
 
     private void ChangeRelicsPoint()
     {
-        fillImage.fillAmount = InventoryManager.Instance.RelicsPoints / gachaManager.relicsSpecialCost;
+        fillImage.fillAmount = (float)CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsPoint) / (float)gachaManager.relicsSpecialCost;
     }
 }

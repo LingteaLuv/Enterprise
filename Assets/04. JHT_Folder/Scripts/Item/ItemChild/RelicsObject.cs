@@ -20,7 +20,7 @@ namespace JHT
     {
         public float itemPower;
         public int itemLevel;
-        public float itemCost;
+        public int itemCost;
         public Sprite itemRarityImage;
         public ItemRarity curRarity;
         public PowerType itemPowerType;
@@ -37,7 +37,7 @@ namespace JHT
             itemName = data.itemName;
 
             itemPower = data.startPower[(int)curRarity - 1] + data.upPower[(int)curRarity - 1] * level;
-
+            itemCost = data.cost[(int)curRarity - 1];
             itemRarityImage = data.rarityImage[(int)curRarity - 1];
         }
         
