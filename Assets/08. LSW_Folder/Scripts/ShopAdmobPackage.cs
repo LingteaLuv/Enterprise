@@ -1,34 +1,40 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ShopPackage : MonoBehaviour
+public class ShopAdmobPackage : MonoBehaviour
 {
-    //[SerializeField] private TextMeshProUGUI _priceText;
     [SerializeField] private Button _purchaseBtn;
-    
+    [SerializeField] private GameObject _purchasedImage;
     private string _packageId;
-
+    
     private void Start()
     {
+        DatabaseManager.Instance.LoadAllPackageData(packageId =>
+        {
+            Debug.LogError("[ShopAdmobPackage] : package 정보 DB에서 불러옴");
+            Init(packageId);
+        });
+        
         _purchaseBtn.onClick.AddListener(OnTouchPurchaseBtn);
     }
     
-    public void Init(string packageId)
+    private void Init(string packageId)
     {
         _packageId = packageId;
-        //_priceText.text = $"무료 패키지 : 100 Gem 획득";
         _purchaseBtn.interactable = true;
         UpdatePanel();
     }
     
     private void OnTouchPurchaseBtn()
     {
+        Debug.LogError("[ShopAdmobPackage] : OnTouchPurchaseBtn 진입");
         GoogleAdmobTester.Instance.ShowRewardedAd((reward) =>
         {
+            Debug.LogError("[ShopAdmobPackage] : ShowRewardedAd 진입");
             DatabaseManager.Instance.LoadPackageData(_packageId, (price, rewardGem) =>
             {
+                Debug.LogError("[ShopAdmobPackage] : LoadPackageData 진입");
                 DatabaseManager.Instance.AddCurrency("Gem", -price);
                 foreach (var kvp in rewardGem)
                 {
@@ -39,12 +45,13 @@ public class ShopPackage : MonoBehaviour
             });
         });
     }
-
+    
     private void UpdatePanel()
     {
         DatabaseManager.Instance.LoadPackage(_packageId, (isPurchase) =>
         {
             _purchaseBtn.interactable = !isPurchase;
+            _purchasedImage.SetActive(isPurchase);
         });
     }
 }
