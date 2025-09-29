@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using _05._CSJ_Folder.Scripts.Codex;
 using _05._CSJ_Folder.Scripts.Quest.Data;
 using Cysharp.Threading.Tasks;
 using Firebase.Auth;
@@ -1028,7 +1029,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         }
         
         // 해당 payload들을 딕셔너리로 저장
-        SaveFieldsAsync(payload);
+        await SaveFieldsAwaitAsync(payload);
     }
     
     /// <summary>
@@ -1152,6 +1153,103 @@ public class DatabaseManager : Singleton<DatabaseManager>
         }
         return result;
     }
+    #endregion
+    
+    #region codex
+    /// <summary>
+    /// {_uid}/{subPath}에 데이터를 저장합니다.
+    /// </summary>
+    public async Task SaveCodexDataAsync(string subPath, IEnumerable<CodexData> datas)
+    {
+        Init();
+        var root = $"{_uid}/{subPath}";
+        var payload = new Dictionary<string, object>();
+
+        foreach (var data in datas)
+        {
+            var key = data.Faction.ToString();
+
+            payload[$"{root}/{key}/LevelSum"] = data.LevelSum;
+            payload[$"{root}/{key}/RankSum"] = data.RankSum;
+
+            payload[$"{root}/{key}/ClearedLevelCount"] = data.ClearedLevelQuestCount;
+            payload[$"{root}/{key}/ClearedRankCount"] = data.ClearedRankQuestCount;
+            
+            payload[$"{root}/{key}/CritChance"] = data.CritChance;
+            payload[$"{root}/{key}/CritDamage"] = data.CritDamage;
+        }
+        
+        // 해당 payload들을 딕셔너리로 저장
+        await SaveFieldsAwaitAsync(payload);
+    }
+    
+    private Task SaveFieldsAwaitAsync(Dictionary<string, object> dictionary)
+    {
+        var tcs = new TaskCompletionSource<bool>();
+        FirebaseManager.DataReference.UpdateChildrenAsync(dictionary)
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    Debug.Log("데이터 저장 성공");
+                    tcs.TrySetResult(true);
+                }
+                else if (task.IsFaulted)
+                {
+                    tcs.TrySetException(task.Exception ?? new Exception("Save failed"));
+                }
+                else if (task.IsCanceled)
+                {
+                    tcs.TrySetCanceled();
+                }
+            });
+        return tcs.Task;
+    }
+    
+    /// <summary>
+    /// {_uid}/{subPath}에서 데이터를 로드합니다.
+    /// </summary>
+    public async Task<Dictionary<Faction,CodexData>> LoadCodexDataAsync(string subPath)
+    {
+        Init();
+        var dataRef = FirebaseManager.DataReference.Child(_uid).Child(subPath);
+        var snapshot = await dataRef.GetValueAsync();
+        
+        var factionDatas = new Dictionary<Faction, CodexData>();
+        
+        if (!snapshot.Exists || snapshot.Value == null) return factionDatas;
+        
+        
+        
+        foreach (var child in snapshot.Children)
+        {
+            if (string.IsNullOrEmpty(child.Key)) continue;
+
+            if (!Enum.TryParse(child.Key, out Faction faction))
+            {
+                continue;
+            }
+
+
+            var data = new CodexData
+            {
+                Faction = faction,
+                LevelSum = ToInt(child.Child("LevelSum").Value, 0),
+                RankSum = ToInt(child.Child("RankSum").Value, 0),
+
+                ClearedLevelQuestCount = ToInt(child.Child("ClearedLevelCount").Value, 0),
+                ClearedRankQuestCount = ToInt(child.Child("ClearedRankCount").Value, 0),
+            };
+            
+            data.SetCodex(
+                ToInt(child.Child("CritChance").Value, 0), 
+                ToInt(child.Child("CritDamage").Value, 0));
+            factionDatas[faction] = data;
+        }
+
+        return factionDatas;
+    }
+    
     #endregion
     
     

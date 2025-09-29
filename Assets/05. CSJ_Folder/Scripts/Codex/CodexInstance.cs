@@ -35,34 +35,35 @@ namespace _05._CSJ_Folder.Scripts.Codex
         private bool isCleared;
         private bool isReceived;
 
-        public Faction CodexFaction;
-        public CodexStd_Enum CodexStd;
-        public CodexRewardSO RewardSO;
-        public int StatAmount;
-        public CodexStat StatType;
+        public readonly Faction CodexFaction;
+        public readonly CodexStd_Enum CodexStd;
+        public readonly CodexRewardSO RewardSO;
+        public readonly int StatAmount;
+        public readonly CodexStat StatType;
         
         private readonly StringBuilder _sb = new();
         private readonly string _FirstContents = "보유중인 ";
         private readonly string _middleContents = " 크루의 총 ";
         private readonly string _middle2 = "의 합이 ";
         private readonly string _wordEnd = "을 달성하자";
-        public string ProgressText;
+        public readonly string ProgressText;
         
         public event Action OnProgressChanged;
         public event Action<CodexInstance> OnStateChanged;
-        
-        // TODO : 추후 데이터베이스와 진행사항 연계
-        public CodexInstance(CodexRewardSO reward, int value, int idx, int Dist, int statValue,CodexStd_Enum std, CodexStat stat, Faction faction)
+
+        public CodexInstance(CodexList list, int value, int idx, CodexRewardSO reward, int cleardCount)
         {
             OnProgressChanged += CheckClear;
-            RewardSO = reward;
-            Index = idx;
-            CodexFaction = faction;
-            MaxProgress = (idx + 1) * Dist;
             CurrentProgress = value;
-            StatAmount = statValue;
-            CodexStd = std;
-            StatType = stat;
+            Index = idx;
+            CodexFaction = list.faction;
+            MaxProgress = (idx + 1) * list._codexDistance;
+            StatAmount = list._codexIncrease;
+            CodexStd = list._codexStd;
+            StatType = list._codexStat;
+            RewardSO = reward;
+            CheckClear();
+            isReceived = idx < cleardCount;
             
             string a = CodexStd == CodexStd_Enum.Level? "레벨" :  "등급";
             ProgressText = _sb.Append(_FirstContents)
@@ -87,7 +88,7 @@ namespace _05._CSJ_Folder.Scripts.Codex
             return true;
         }
 
-        private void CheckClear()
+        public void CheckClear()
         {
             isCleared = _currentProgress >= MaxProgress;
         }

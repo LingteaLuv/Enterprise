@@ -37,7 +37,17 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
         {
             if (_instanceMap == null) return;
             if (_instanceMap.TryGetValue(inst, out var card))
-                _prefab.CardSet(inst);
+            {
+                card.CardSet(inst);
+                if (_prefab.IsReceived)
+                    RemoveCard(card);
+            }
+        }
+
+        public void RemoveCard(CodexPrefab card)
+        {
+            card.gameObject.SetActive(false);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_transform);
         }
     }
 }

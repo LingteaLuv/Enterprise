@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Numerics;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -13,36 +14,41 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
         [SerializeField] private TextMeshProUGUI _progressContent;
         [SerializeField] private TextMeshProUGUI _questContent;
         [SerializeField] private Image RewardSprite;
+        [SerializeField] private TextMeshProUGUI RewardText;
 
         [SerializeField] private string QuestId;
         private UnityAction ButtonEvent;
-        private Image objectImg;
+        //private Image objectImg;
         
-        private Color CompleteColor = new Color(20, 20, 20, 150);
-        private Color ActiveColor = new Color(152, 152,152, 150);
+
+        
+        private readonly Color CompleteColor = new Color(255, 255, 255, 255);
+        private readonly Color ActiveColor = new Color(255, 255,255, 100);
 
         public void CardSet(TemporaryInstance inst)
         {
-            if (objectImg == null) objectImg = gameObject.GetComponent<Image>();
+            //if (objectImg == null) objectImg = gameObject.GetComponent<Image>();
 
             switch (inst.QuestState)
             {
                 case QuestState_Enum.Received:
                     _CompleteButton.gameObject.SetActive(false);
                     _ClearButton.SetActive(true);
-                    objectImg.color = CompleteColor;
+                    //objectImg.color = CompleteColor;
                     break;
                 case QuestState_Enum.Completed:
                     _CompleteButton.gameObject.SetActive(true);
                     _CompleteButton.interactable = true;
                     _ClearButton.SetActive(false);
-                    objectImg.color = ActiveColor;
+                    _CompleteButton.image.color = CompleteColor;
+                    //objectImg.color = ActiveColor;
                     break;
                 case QuestState_Enum.Active:
                     _CompleteButton.gameObject.SetActive(true);
                     _CompleteButton.interactable = false;
                     _ClearButton.gameObject.SetActive(false);
-                    objectImg.color = ActiveColor;
+                    _CompleteButton.image.color = ActiveColor;
+                    //objectImg.color = ActiveColor;
                     break;
             }
 
@@ -54,6 +60,12 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
             if (inst.Def.Reward?.Reward.RewardIcon is not null)
             {
                 RewardSprite.sprite = inst.Def.Reward.Reward.RewardIcon;
+                RewardText.text = $"{DataUtility.FormatNumber((BigInteger)inst.Def.Reward.Reward.GetAmount(inst.Def, inst))}";
+            }
+            else
+            {
+                RewardSprite.sprite = null;
+                RewardText.text = "";
             }
             
             QuestId = inst.TemporaryQuestId;

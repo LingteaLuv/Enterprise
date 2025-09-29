@@ -21,12 +21,31 @@ namespace _05._CSJ_Folder.Scripts.Codex
         public int CritChance { get; private set; }
         public int CritDamage { get; private set; }
 
-        internal void ClearCodex(int value, CodexStd_Enum std)
+
+        public int ClearedLevelQuestCount;
+        public int ClearedRankQuestCount;
+
+        internal void AchieveCodex(CodexInstance inst, bool isInit)
         {
-            if (std == CodexStd_Enum.Level) 
-                AdjustCritDamage(value, true);
-            else if (std == CodexStd_Enum.Rank)
-                AdjustCritChance(value, true);
+            switch (inst.StatType)
+            {
+                case CodexStat.CritChance:
+                    AdjustCritChance(inst.StatAmount, true);
+                    break;
+                case CodexStat.CritDamage:
+                    AdjustCritDamage(inst.StatAmount, true);
+                    break;
+            }
+            if (isInit) return;
+            switch (inst.CodexStd)
+            {
+                case CodexStd_Enum.Level:
+                    ClearedLevelQuestCount++;
+                    break;
+                case CodexStd_Enum.Rank:
+                    ClearedRankQuestCount++;
+                    break;
+            }
         }
 
         private void AdjustCritChance(int value, bool isAdd)
@@ -39,6 +58,12 @@ namespace _05._CSJ_Folder.Scripts.Codex
         {
             if (isAdd) CritDamage += value;
             else CritDamage -= value;
+        }
+
+        internal void SetCodex(int chance, int damage)
+        {
+            CritChance = chance;
+            CritDamage = damage;
         }
 
         internal void AdjustValueSum(CodexStd_Enum std, int value, bool isAdd)

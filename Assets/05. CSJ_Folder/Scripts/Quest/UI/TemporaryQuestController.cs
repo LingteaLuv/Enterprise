@@ -13,15 +13,23 @@ public class TemporaryQuestController : UIBase
     [SerializeField] private Button _closeButton;
     
     [SerializeField] private Button _dailyButton;
-    [SerializeField] private GameObject _dailyPanel;
+    //[SerializeField] private GameObject _dailyPanel;
     
     [SerializeField] private Button _weeklyButton;
-    [SerializeField] private GameObject _weeklyPanel;
+    //[SerializeField] private GameObject _weeklyPanel;
+    
+    [SerializeField] private Sprite _activeSprite;
+    [SerializeField] private Sprite _inactiveSprite;
+
+    [SerializeField] private Button[] _ChangeButtons;
 
     private List<TemporaryInstance> _dailyQuests;
     private List<TemporaryInstance> _weeklyQuests;
+    private Button[] _stdButtons;
+    private bool isDaily = true;
     
     public Action OnTouchedExitBtn;
+
     
     private void Start()
     {
@@ -35,6 +43,12 @@ public class TemporaryQuestController : UIBase
         _closeButton.onClick.AddListener(CloseQuestTab);
         _dailyButton.onClick.AddListener(() => ChangeQuestType(QuestType_Enum.Daily));
         _weeklyButton.onClick.AddListener(() => ChangeQuestType(QuestType_Enum.Weekly));
+        foreach (var button in _ChangeButtons)
+        {
+            button.onClick.AddListener(() => ChangeQuestType(isDaily ? QuestType_Enum.Daily : QuestType_Enum.Weekly));
+        }
+
+        _stdButtons = new[] {_dailyButton, _weeklyButton};
     }
 
     private void OnDisable()
@@ -42,6 +56,10 @@ public class TemporaryQuestController : UIBase
         _closeButton.onClick.RemoveAllListeners();
         _dailyButton.onClick.RemoveAllListeners();
         _weeklyButton.onClick.RemoveAllListeners();
+        foreach (var button in _ChangeButtons)
+        {
+            button.onClick.RemoveAllListeners();       
+        }
     }
     private void OpenQuestTab()
     {
@@ -56,26 +74,42 @@ public class TemporaryQuestController : UIBase
     
     private void ChangeQuestType(QuestType_Enum questType)
     {
-        if (questType == QuestType_Enum.Daily)
+        switch (questType)
         {
-            Debug.Log("daily");
-            _dailyPanel.SetActive(true);
-            _weeklyPanel.SetActive(false);
+            case QuestType_Enum.Daily:
+            {
+                Debug.Log("daily");
+                // _dailyPanel.SetActive(true);
+                // _weeklyPanel.SetActive(false);
 
-            _dailyButton.interactable = false;
-            _weeklyButton.interactable = true;
-            _questListController.RebuildList(_dailyQuests);
-        }
-        
-        else if (questType == QuestType_Enum.Weekly)
-        {
-            Debug.Log("weekly");
-            _dailyPanel.SetActive(false);
-            _weeklyPanel.SetActive(true);
+                for (var i = 0; i < 2; i++)
+                {
+                    _stdButtons[i].interactable = i == 1;
+                    _stdButtons[i].image.sprite = i == 0 ? _activeSprite : _inactiveSprite;
+                }
+            
+                _questListController.RebuildList(_dailyQuests);
+                isDaily = true;
+                
+                break;
+            }
+            case QuestType_Enum.Weekly:
+            {
+                Debug.Log("weekly");
+                // _dailyPanel.SetActive(false);
+                // _weeklyPanel.SetActive(true);
 
-            _weeklyButton.interactable = false;
-            _dailyButton.interactable = true;
-            _questListController.RebuildList(_weeklyQuests);
+                for (var i = 0; i < 2; i++)
+                {
+                    _stdButtons[i].interactable = i == 0;
+                    _stdButtons[i].image.sprite = i == 0 ? _inactiveSprite : _activeSprite;
+                }
+                
+                _questListController.RebuildList(_weeklyQuests);
+                isDaily = false;
+                
+                break;
+            }
         }
     }
 

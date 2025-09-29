@@ -2,7 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using _05._CSJ_Folder.Scripts.Quest;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,42 +13,56 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
 {
     public class CodexUIController : UIBase
     { 
+        [SerializeField] private TextMeshProUGUI _codexName;
+        
         [SerializeField] private CodexListController _codexListController;
         [SerializeField] private Button _closeButton;
 
+        [SerializeField] private Slider _progress;
+        [SerializeField] private TextMeshProUGUI _progressText;
+        
+        [SerializeField] private TextMeshProUGUI _curLevelText;
+        [SerializeField] private TextMeshProUGUI _nextLevelText;
+        
         [SerializeField] private Button[] stdButtons;
-        [SerializeField] private GameObject[] stdPanels;
+        // [SerializeField] private GameObject[] stdPanels;
         
         [SerializeField] private Button[] factionButtons;
-        [SerializeField] private GameObject[] factionPanels;
+        //[SerializeField] private GameObject[] factionPanels;
+
+        [SerializeField] private Sprite _toggleButton_On;
+        [SerializeField] private Sprite _toggleButton_Off;
+        
         
         private Faction _faction;
         private CodexStd_Enum _std;
 
         private Dictionary<Button, CodexStd_Enum> _stdButtonMap = new Dictionary<Button, CodexStd_Enum>();
-        private Dictionary<Button, GameObject> _stdPanelMap = new Dictionary<Button, GameObject>();
         private Dictionary<Button, Faction> _factionButtonMap= new Dictionary<Button, Faction>();
-        private Dictionary<Button, GameObject> _factionPanelMap = new Dictionary<Button, GameObject>();
 
         public Action OnTouchedExitBtn;
         
-        public bool isReady = false;
+        private bool isReady = false;
         private bool _bootstrapped;
         private Coroutine _waitReadyCo;
+        
+        private readonly string pirateText = "해적 도감";
+        private readonly string marineText = "해군 도감";
+        private readonly string monsterText = "괴물 도감";
+        
+        private int _codexIndex;
 
         private void Awake()
         {
             _stdButtonMap.Clear();
-            _stdPanelMap.Clear();
             _factionButtonMap.Clear();
-            _factionPanelMap.Clear();
             
             for (int i = 0; i < factionButtons.Length; i++)
             {
                 var faction = (Faction)(i);
                 factionButtons[i].onClick.AddListener(() => ChangeType(faction));
                 _factionButtonMap.TryAdd(factionButtons[i], faction);
-                _factionPanelMap.TryAdd(factionButtons[i], factionPanels[i]);
+                //_factionPanelMap.TryAdd(factionButtons[i], factionPanels[i]);
             }
             
             for (int i = 0; i < stdButtons.Length; i++)
@@ -54,7 +70,7 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
                 var std = (CodexStd_Enum)(i);
                 stdButtons[i].onClick.AddListener(() => ChangeType(std));
                 _stdButtonMap.TryAdd(stdButtons[i], std);
-                _stdPanelMap.TryAdd(stdButtons[i], stdPanels[i]);
+                //_stdPanelMap.TryAdd(stdButtons[i], stdPanels[i]);
             }
         }
 
@@ -85,12 +101,13 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
         {
             yield return new WaitUntil(() => isReady);
             
+            
             ChangeCodexType(_faction, _std);
         }
         
         private void InitCodexTab()
         {
-            _faction = Faction.Marine;
+            _faction = Faction.Pirate;
             _std = CodexStd_Enum.Level;
         }
 
@@ -118,22 +135,37 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
             {
                 var btn = kv.Key;
                 var type = kv.Value;
-                if (!_stdPanelMap.TryGetValue(btn, out var panel)) continue;
                 
                 bool on = type == std;
-                panel.SetActive(on);
                 btn.interactable = !on;
+                btn.image.sprite = on ? _toggleButton_On : _toggleButton_Off;
             }
             foreach (var kv in _factionButtonMap)
             {
                 var btn = kv.Key;
                 var type = kv.Value;
-                if (!_factionPanelMap.TryGetValue(btn, out var panel)) continue;
                 
                 bool on = faction == type;
-                panel.SetActive(on);
                 btn.interactable = !on;
+                btn.image.sprite = on ? _toggleButton_On : _toggleButton_Off;
             }
+
+            _codexName.text = faction switch
+            {
+                Faction.Pirate => pirateText,
+                Faction.Marine => marineText,
+                Faction.Monster => monsterText,
+                _ => _codexName.text
+            };
+
+            var curValue = CodexManager.Instance.GetCurrentValue(faction, std);
+            _progress.value = curValue;
+            var nextValue = CodexManager.Instance.GetNextValue(faction, std);
+            _progress.maxValue = nextValue[0];
+            _progressText.text = $"{curValue} / {nextValue[0]}";
+            
+            _curLevelText.text = nextValue[1].ToString();
+            _nextLevelText.text = nextValue[2].ToString();
             
             _codexListController.RebuildList(faction, std);
         }
