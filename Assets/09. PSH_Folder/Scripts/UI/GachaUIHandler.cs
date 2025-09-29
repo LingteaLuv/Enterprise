@@ -282,7 +282,7 @@ public class GachaUIHandler : UIBase
         string currencyName = GetCurrencyNameInKorean(manager.currencyType);
 
         PopManager.Instance.ShowOKCancelPopup(
-            $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?","넹",
+            $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?",
             onLeftClick: () =>
             {
                 if (manager.PerformMultipleGacha(count))
@@ -316,7 +316,7 @@ public class GachaUIHandler : UIBase
                         QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
                     }
                 }
-            },"아뇽",
+            },
             onRightClick: () =>
             {
                 Debug.Log($"{itemType} {count}회 뽑기 취소됨");
