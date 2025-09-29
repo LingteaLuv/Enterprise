@@ -140,6 +140,7 @@ public class SynergyImporter
                 SynergySO synergySO = AssetDatabase.LoadAssetAtPath<SynergySO>(synergyAssetPath) ?? CreateAsset<SynergySO>(synergyAssetPath);
 
                 synergySO.synergyName = GetString(fields, headerMap, "synergy_name");
+                synergySO.synergyID = int.Parse(synergyID);
 
                 // 필요한 캐릭터 ID 목록 파싱 (crewID1 ~ crewID5)
                 synergySO.requiredCharacterIDs = new List<int>();

@@ -6,6 +6,9 @@ namespace JHT
 {
     public class WeaponStatPanel : MonoBehaviour
     {
+        [Header("패널 관리")]
+        [SerializeField] private GameObject emptyPanel; // 아이템 미선택 시 표시될 패널
+
         private WeaponObject curWeapon;
 
         // [SerializeField] private HoldButton levelUpBtn;
@@ -44,27 +47,31 @@ namespace JHT
             {
                 curWeapon.OnChangeLevel -= OnWeaponDataChanged;
                 curWeapon.OnChangeStar -= OnWeaponDataChanged;
-                InventoryManager.Instance.OnEquipmentEnhancementPointsChanged -= OnEnhancementPointsChanged;
+                if (InventoryManager.Instance != null)
+                    InventoryManager.Instance.OnEquipmentEnhancementPointsChanged -= OnEnhancementPointsChanged;
             }
 
             curWeapon = weapon;
+            gameObject.SetActive(true); // 패널 자체는 항상 활성화
 
             if (curWeapon == null)
             {
-                // 무기 정보가 없으면 패널 비활성화 또는 초기 상태로
-                gameObject.SetActive(false);
-                return;
+                // 무기 정보가 없으면 emptyPanel 활성화
+                if (emptyPanel != null) emptyPanel.SetActive(true);
             }
+            else
+            {
+                // 무기 정보가 있으면 emptyPanel 비활성화 및 UI 업데이트
+                if (emptyPanel != null) emptyPanel.SetActive(false);
 
-            gameObject.SetActive(true);
+                // 새 무기의 데이터 변경 이벤트에 UI 업데이트 함수 연결
+                curWeapon.OnChangeLevel += OnWeaponDataChanged;
+                curWeapon.OnChangeStar += OnWeaponDataChanged;
+                // 강화 포인트 변경 이벤트에 UI 업데이트 함수 연결
+                InventoryManager.Instance.OnEquipmentEnhancementPointsChanged += OnEnhancementPointsChanged;
 
-            // 새 무기의 데이터 변경 이벤트에 UI 업데이트 함수 연결
-            curWeapon.OnChangeLevel += OnWeaponDataChanged;
-            curWeapon.OnChangeStar += OnWeaponDataChanged;
-            // 강화 포인트 변경 이벤트에 UI 업데이트 함수 연결
-            InventoryManager.Instance.OnEquipmentEnhancementPointsChanged += OnEnhancementPointsChanged;
-
-            UpdateUI();
+                UpdateUI();
+            }
         }
 
         private void OnLevelUpButtonClick()
@@ -105,6 +112,7 @@ namespace JHT
             weaponImage.sprite = curWeapon.itemIcon;
             nameText.text = curWeapon.itemName;
             pointText.text = $"{currentPoint} / {requirePoint}";
+            if (pointFillImage == null) Debug.Log("pointFillImage가 null입니다!");
             pointFillImage.fillAmount = Mathf.Min((float)currentPoint / requirePoint, 1);
 
             if (curWeapon.ItemStar >= 5)

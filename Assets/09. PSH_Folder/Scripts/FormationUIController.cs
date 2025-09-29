@@ -31,7 +31,7 @@ public class FormationUIController : MonoBehaviour
             PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterDataUpdated;
         }
 
-        RefreshFormationDisplay(); // 활성화될 때 한 번 새로고침
+        //RefreshFormationDisplay(); // 활성화될 때 한 번 새로고침
     }
 
     // 비활성화될 때 이벤트 구독을 해제합니다.

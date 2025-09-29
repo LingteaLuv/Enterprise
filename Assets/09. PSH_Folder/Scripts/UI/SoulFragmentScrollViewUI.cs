@@ -14,6 +14,7 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
     public GameObject soulFragmentPanelPrefab;
 
     public SoulStatPanel characterStatPanel;
+    public GameObject empty;
 
     // UI 패널들을 재사용하기 위한 오브젝트 풀
     private List<SoulFragmentPanel> panelPool = new List<SoulFragmentPanel>();
@@ -119,7 +120,6 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
         // 영혼 조각이 0보다 큰 캐릭터만 필터링합니다.
         charactersQuery = charactersQuery.Where(c =>
         {
-            int fragmentCount;
             // characterSoulFragments 딕셔너리에서 해당 캐릭터의 조각 수를 찾아, 0보다 큰지 확인합니다.
             bool hasFragments = PlayerDataManager.Instance.OwnedCharacters.TryGetValue(c.characterdata.characterID, out var data);
             return hasFragments && data.Soul.Value > 0;
@@ -131,13 +131,13 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
         switch (value)
         {
             case 0:
-                sortedCharacters = charactersQuery.OrderByDescending(c => c.battlePower);
+                sortedCharacters = charactersQuery.OrderBy(c => c.characterdata.characterName);          
                 break;
             case 1:
-                sortedCharacters = charactersQuery.OrderByDescending(c => c.Star);
+                sortedCharacters = charactersQuery.OrderByDescending(c => c.Soul.Value);
                 break;
             case 2:
-                sortedCharacters = charactersQuery.OrderByDescending(c => c.Level);
+                sortedCharacters = charactersQuery.OrderByDescending(c => c.Level.Value);
                 break;
             case -1:
                 sortedCharacters = charactersQuery.OrderBy(c => c.characterdata.characterName);
@@ -156,5 +156,6 @@ public class SoulFragmentScrollViewUI : MonoBehaviour
 
         characterStatPanel.gameObject.SetActive(true);
         characterStatPanel.Init(data);
+        empty.SetActive(false);
     }
 }

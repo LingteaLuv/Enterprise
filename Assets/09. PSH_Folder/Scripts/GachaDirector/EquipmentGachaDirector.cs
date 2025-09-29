@@ -27,6 +27,9 @@ public class EquipmentGachaDirector : MonoBehaviour
     public float weaponShakeDuration = 0.1f;
     public float weaponShakeStrength = 5f;
 
+    [Header("스킵 버튼")]
+    public Button skipBtn;
+
     private Sequence mainSequence;
 
     // --- [수정] 모든 애니메이션 요소의 초기 상태를 저장하기 위한 변수들 ---
@@ -42,7 +45,15 @@ public class EquipmentGachaDirector : MonoBehaviour
         InitializeTransforms();
         materialChanger = weaponImage.gameObject.GetComponent<ImageMaterialChanger>();
     }
+    private void OnEnable()
+    {
+        skipBtn.onClick.AddListener(() => { EffectPoolManager.Instance.ReturnToPool(gameObject); });
+    }
 
+    private void OnDisable()
+    {
+        skipBtn.onClick.RemoveAllListeners();
+    }
     private void InitializeTransforms()
     {
         if (_isInitialized) return;

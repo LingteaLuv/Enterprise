@@ -41,6 +41,9 @@ public class CharacterGachaDirector : MonoBehaviour
     public float ropeThrowDuration = 0.5f;
     public float endDelay = 1f; // 연출이 모두 끝난 후, 사라지기 전까지의 대기 시간
 
+    [Header("스킵 버튼")]
+    public Button skipBtn;
+
     private Sequence mainSequence;
     private Dictionary<RectTransform, Vector2> _initialPositions;
     private bool _isInitialized = false;
@@ -48,6 +51,15 @@ public class CharacterGachaDirector : MonoBehaviour
     void Awake()
     {
         InitializePositions();
+    }
+    private void OnEnable()
+    {
+        skipBtn.onClick.AddListener(() => { EffectPoolManager.Instance.ReturnToPool(gameObject); });
+    }
+
+    private void OnDisable()
+    {
+        skipBtn.onClick.RemoveAllListeners();
     }
 
     /// <summary>
