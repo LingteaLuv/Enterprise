@@ -44,6 +44,7 @@ public class BattleManager : MonoBehaviour
     public List<JHT_BaseMonsterStat> spawnedEnemies = new(); // GameObject -> JHT_MOnsterDataSO
 
     public int currentRoundIndex = 0;
+
     private bool isbattleover = false;
 
     private bool isInitialized = false;
@@ -165,6 +166,7 @@ public class BattleManager : MonoBehaviour
             Debug.Log("[BattleManager] 기존 전투 중단 후 재시작");
             StopCoroutine(battleRoutine);
             battleRoutine = null;
+            JHT_MonsterSpawnManager.Instance.MonsterAllClear();
             ClearEnemies();
             ClearPlayers();
         }
@@ -239,7 +241,7 @@ public class BattleManager : MonoBehaviour
         IsStageEnd = false;
 
         battleRoutine = StartCoroutine(BattleRoutine());
-        Debug.Log("battleRoutine 시작됨");
+       // Debug.Log("battleRoutine 시작됨");
 
         if (_skipBtn != null)
             _skipBtn.interactable = true;
@@ -261,9 +263,16 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log("전투 시작");
 
-        var field = battleFields[GlobalStageManager.Instance.CurrentStageIndex.Value];
+        // 수정
+        int stageIdx = GlobalStageManager.Instance.CurrentStageIndex.Value - 1;
+        if (stageIdx < 0 || stageIdx >= battleFields.Count)
+        {
+            Debug.LogError($"[BattleRoutine] stageIdx {stageIdx} 가 battleFields 범위를 벗어남 (count={battleFields.Count})");
+            yield break;
+        }
+        var field = battleFields[stageIdx];
 
-        SpawnEnemies(currentRoundIndex);
+        SpawnEnemies(stageIdx);
         SpawnPlayers(field);
         
 
@@ -282,8 +291,10 @@ public class BattleManager : MonoBehaviour
         if (_skipBtn != null)
             _skipBtn.interactable = false;
 
-        ClearPlayers();
+
+        JHT_MonsterSpawnManager.Instance.MonsterAllClear();
         ClearEnemies();
+        ClearPlayers();
         currentRoundIndex = 0; // 이게 필요 없을수도 있음 -> 다음 island를 위해 설정하는부분
         IslandStageManager.Instance.OnBattleComplete();
     }
@@ -416,9 +427,6 @@ public class BattleManager : MonoBehaviour
             if (_skipBtn != null)
                 _skipBtn.interactable = false;
 
-            ClearEnemies();
-            ClearPlayers();
-
             StartCoroutine(HandleDefeat());
         }
     }
@@ -427,6 +435,10 @@ public class BattleManager : MonoBehaviour
     private IEnumerator HandleDefeat()
     {
         isHandlingDefeat = true;
+
+        JHT_MonsterSpawnManager.Instance.MonsterAllClear();
+        ClearEnemies();
+        ClearPlayers();
 
         ScreenScrollEffectManager.Instance.ShowScrollEffect("패배했습니다. 첫번째 섬부터 재도전합니다.", () => { });
         currentRoundIndex = 0;

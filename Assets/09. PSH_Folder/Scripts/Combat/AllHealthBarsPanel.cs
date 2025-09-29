@@ -43,13 +43,29 @@ public class AllHealthBarsPanel : MonoBehaviour
     {
         Debug.Log("[AllHealthBarsPanel] OnPartyReady 신호 수신! 체력바 설정을 시작합니다.");
 
-        // 등록된 체력바 개수만큼 반복합니다.
-        for (int i = 0; i < healthBars.Count; i++)
+        // 🔥 Destroy된 오브젝트 정리
+        healthBars.RemoveAll(hb => hb == null);
+
+        // 등록된 체력바 개수만큼 반복 (단, 파티 수보다 많으면 파티 수까지만)
+        int count = Mathf.Min(healthBars.Count, partyCharacters.Count);
+
+        for (int i = 0; i < count; i++)
         {
-            // 체력바를 활성화하고, 해당 캐릭터를 연결해줍니다.
+            if (healthBars[i] == null)
+            {
+                Debug.LogWarning($"체력바 {i}번이 Destroy되어 null 상태입니다. 스킵합니다.");
+                continue;
+            }
+
             healthBars[i].gameObject.SetActive(true);
             healthBars[i].Initialize(partyCharacters[i]);
             Debug.Log($"체력바 {i}번에 '{partyCharacters[i].name}' 캐릭터를 연결했습니다.");
+        }
+
+        // 만약 체력바 개수가 부족하면 경고 로그
+        if (partyCharacters.Count > healthBars.Count)
+        {
+            Debug.LogWarning($"파티 캐릭터 수({partyCharacters.Count})가 체력바 수({healthBars.Count})보다 많습니다. 일부 캐릭터는 체력바가 없습니다.");
         }
     }
 }
