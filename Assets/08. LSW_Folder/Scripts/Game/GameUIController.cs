@@ -13,6 +13,7 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     [SerializeField] private Toggle _attendanceToggle;
     [SerializeField] private Toggle _toolToggle;
     [SerializeField] private Toggle _shipToggle;
+    [SerializeField] private Toggle _codexToggle;
     [SerializeField] private Toggle _playerInfoToggle;
     [SerializeField] private Button _bossBtn;
     [SerializeField] private Button _dungeonBtn;
@@ -31,7 +32,8 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         Btn3Panel,
         Btn4Panel,
         ShipPanel,
-        PlayerInfoPanel
+        PlayerInfoPanel,
+        CodexPanel
     }
 
     private void Awake()
@@ -94,6 +96,12 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         {
             if (!isOn) HideUI(GameUIType.PlayerInfoPanel);
             else ShowUI(GameUIType.PlayerInfoPanel);
+        });
+        
+        _codexToggle.onValueChanged.AddListener((isOn) =>
+        {
+            if (!isOn) HideUI(GameUIType.CodexPanel);
+            else ShowUI(GameUIType.CodexPanel);
         });
         
         _bossBtn.onClick.AddListener(() =>
