@@ -69,7 +69,7 @@ namespace JHT // 동일한 네임스페이스 사용
             for (int i = 0; i < starImages.Length; i++)
             {
                 if (starImages[i] == null) continue;
-                starImages[i].color = (i < currentStars) ? Color.yellow : Color.grey;
+                starImages[i].color = (i < currentStars) ? Color.white : Color.black;
             }
         }
 
