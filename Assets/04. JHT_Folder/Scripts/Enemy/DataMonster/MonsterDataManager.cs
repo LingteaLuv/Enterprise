@@ -13,6 +13,7 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     public List<GameObject> monsterPrefabList;
     public List<MonsterSkillSO> monsterSkillList;
     public RuntimeAnimatorController animatorController;
+    //public List<AnimationClip> animClipList;
 
     public Dictionary<int, JHT_MonsterDataTable> monsterTableDic;
     public Dictionary<string, JHT_MonsterDataSO> monsterDataDic;
@@ -25,6 +26,7 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     private AsyncOperationHandle<IList<JHT_MonsterDataSO>> monsterDataHandle;
     private AsyncOperationHandle<IList<GameObject>> monsterPrefabHandle;
     private AsyncOperationHandle<IList<MonsterSkillSO>> monsterSkillHandle;
+    //private AsyncOperationHandle<IList<AnimationClip>> animClipHandle;
 
     public JHT_DataDownLoader dataLoader;
     public MonsterSkillSet skillManager;
@@ -81,12 +83,14 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         monsterDataHandle = Addressables.LoadAssetsAsync<JHT_MonsterDataSO>("MonsterData");
         monsterPrefabHandle = Addressables.LoadAssetsAsync<GameObject>("MonsterPrefab");
         monsterSkillHandle = Addressables.LoadAssetsAsync<MonsterSkillSO>("MonsterSkill");
+        //animClipHandle = Addressables.LoadAssetsAsync<AnimationClip>("AnimationClip");
 
         yield return handle;
         yield return monsterPrefabHandle;
         yield return monsterTableHandle;
         yield return monsterDataHandle;
         yield return monsterSkillHandle;
+        //yield return animClipHandle;
 
         animatorController = handle.Result;
 
@@ -94,7 +98,22 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
         LoadMonsterDataList(monsterDataHandle);
         LoadMonsterPrefabList(monsterPrefabHandle);
         LoadMonsterSkillList(monsterSkillHandle);
+        //LoadAnimList(animClipHandle);
     }
+
+    #region AnimationClip
+
+    //private void LoadAnimList(AsyncOperationHandle<IList<AnimationClip>> objs)
+    //{
+    //    List<AnimationClip> list = new();
+    //    foreach (var o in objs.Result)
+    //    {
+    //        animClipList.Add(o);
+    //    }
+    //}
+
+    #endregion
+
 
     #region MonsterSkill
 
