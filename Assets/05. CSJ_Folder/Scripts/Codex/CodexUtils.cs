@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace _05._CSJ_Folder.Scripts.Codex
 {

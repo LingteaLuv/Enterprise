@@ -51,9 +51,22 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
         private readonly string monsterText = "괴물 도감";
         
         private int _codexIndex;
+        
+        private void Start()
+        {
+            gameObject.SetActive(false);
+        }
 
         private void Awake()
         {
+
+        }
+
+        private void OnEnable()
+        {
+            Debug.Log("Enable");
+            _closeButton.onClick.AddListener(CloseQuestTab);
+            InitCodexTab();
             _stdButtonMap.Clear();
             _factionButtonMap.Clear();
             
@@ -72,13 +85,6 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
                 _stdButtonMap.TryAdd(stdButtons[i], std);
                 //_stdPanelMap.TryAdd(stdButtons[i], stdPanels[i]);
             }
-        }
-
-        private void OnEnable()
-        {
-            Debug.Log("Enable");
-            _closeButton.onClick.AddListener(CloseQuestTab);
-            InitCodexTab();
             if (_waitReadyCo != null) StopCoroutine(_waitReadyCo);
             _waitReadyCo = StartCoroutine(WaitReady());
         }
@@ -100,7 +106,6 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
         private IEnumerator WaitReady()
         {
             yield return new WaitUntil(() => isReady);
-            
             
             ChangeCodexType(_faction, _std);
         }

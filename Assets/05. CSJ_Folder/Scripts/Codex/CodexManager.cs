@@ -138,11 +138,11 @@ namespace _05._CSJ_Folder.Scripts.Codex
                     var StateMap = new Dictionary<int, bool>();
                     var codexList = new List<CodexInstance>();
                     var specialIndex = 0;
-
+                    
                     for (int i = 0; i < list._lastCodexIndex; i++)
                     {
                         CodexInstance inst;
-                        if (i == 0 || list._specialQuestDistance == 0 || list._specialQuestDistance % (i + 1) != 0)
+                        if (list._specialQuestDistance == 0 ||  (i + 1) % list._specialQuestDistance != 0)
                         {
                             inst = new CodexInstance(
                                 list, 
@@ -154,6 +154,7 @@ namespace _05._CSJ_Folder.Scripts.Codex
                         }
                         else
                         {
+
                             inst = new CodexInstance(
                                 list,
                                 _codexValue,
@@ -213,6 +214,7 @@ namespace _05._CSJ_Folder.Scripts.Codex
 
             if (!allSuccessed) return;
             _codexData.AdjustValueSum(std, value, true); 
+            FactionData[faction] = _codexData;
         }
 
         private void ReciveReward(CodexInstance inst)

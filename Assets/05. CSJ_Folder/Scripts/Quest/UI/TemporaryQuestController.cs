@@ -44,7 +44,7 @@ public class TemporaryQuestController : UIBase
         _weeklyButton.onClick.AddListener(() => ChangeQuestType(QuestType_Enum.Weekly));
         foreach (var button in _ChangeButtons)
         {
-            button.onClick.AddListener(() => ChangeQuestType(isDaily ? QuestType_Enum.Daily : QuestType_Enum.Weekly));
+            button.onClick.AddListener(() => ChangeQuestType(isDaily ? QuestType_Enum.Weekly : QuestType_Enum.Daily));
         }
 
         _stdButtons = new[] {_dailyButton, _weeklyButton};

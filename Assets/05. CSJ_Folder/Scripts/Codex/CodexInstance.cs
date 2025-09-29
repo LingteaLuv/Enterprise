@@ -41,12 +41,12 @@ namespace _05._CSJ_Folder.Scripts.Codex
         public readonly int StatAmount;
         public readonly CodexStat StatType;
         
-        private readonly StringBuilder _sb = new();
-        private readonly string _FirstContents = "보유중인 ";
-        private readonly string _middleContents = " 크루의 총 ";
-        private readonly string _middle2 = "의 합이 ";
-        private readonly string _wordEnd = "을 달성하자";
-        public readonly string ProgressText;
+        // private readonly StringBuilder _sb = new();
+        // private readonly string _FirstContents = "보유중인 ";
+        // private readonly string _middleContents = " 크루의 총 ";
+        // private readonly string _middle2 = "의 합이 ";
+        // private readonly string _wordEnd = "을 달성하자";
+        // public readonly string ProgressText;
         
         public event Action OnProgressChanged;
         public event Action<CodexInstance> OnStateChanged;
@@ -65,16 +65,16 @@ namespace _05._CSJ_Folder.Scripts.Codex
             CheckClear();
             isReceived = idx < cleardCount;
             
-            string a = CodexStd == CodexStd_Enum.Level? "레벨" :  "등급";
-            ProgressText = _sb.Append(_FirstContents)
-                .Append(CodexFaction)
-                .Append(_middleContents)
-                .Append(a)
-                .Append(_middle2)
-                .Append(MaxProgress)
-                .Append(_wordEnd)
-                .ToString();
-            // 보유중인 "팩션" 크루의 총 "타입"의 합을 "목표"을 달성하자
+            // string a = CodexStd == CodexStd_Enum.Level? "레벨" :  "등급";
+            // ProgressText = _sb.Append(_FirstContents)
+            //     .Append(CodexFaction)
+            //     .Append(_middleContents)
+            //     .Append(a)
+            //     .Append(_middle2)
+            //     .Append(MaxProgress)
+            //     .Append(_wordEnd)
+            //     .ToString();
+            // // 보유중인 "팩션" 크루의 총 "타입"의 합을 "목표"을 달성하자
         }
 
         public bool AddProgress(int value, int levelSum)

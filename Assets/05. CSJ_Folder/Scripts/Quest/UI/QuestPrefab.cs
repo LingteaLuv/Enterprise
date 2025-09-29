@@ -62,11 +62,6 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                 RewardSprite.sprite = inst.Def.Reward.Reward.RewardIcon;
                 RewardText.text = $"{DataUtility.FormatNumber((BigInteger)inst.Def.Reward.Reward.GetAmount(inst.Def, inst))}";
             }
-            else
-            {
-                RewardSprite.sprite = null;
-                RewardText.text = "";
-            }
             
             QuestId = inst.TemporaryQuestId;
             _CompleteButton.onClick.RemoveAllListeners();

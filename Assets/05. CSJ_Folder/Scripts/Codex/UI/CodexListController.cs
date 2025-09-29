@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,8 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
         
         public Dictionary<(Faction, CodexStd_Enum),List<CodexInstance>> _instMap;
         private Dictionary<CodexInstance, CodexPrefab> _instanceMap;
-
+        
+        
         private void Awake()
         {
             _instanceMap = new Dictionary<CodexInstance, CodexPrefab>();
@@ -22,10 +24,17 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
                 Destroy(_transform.GetChild(i).gameObject);
             if (_instanceMap == null) return;
             _instanceMap.Clear();
-
+            
+            bool isFirst = true;
             foreach (var inst in _instMap[(faction, codexType)])
             {
+                if (inst.IsReceived) continue;
                 var card = Instantiate(_prefab, _transform);
+                if (isFirst)
+                {
+                    card.isFirst = true;
+                    isFirst = false;
+                }
                 card.CardSet(inst);
                 _instanceMap.TryAdd(inst, card);
             }
@@ -39,15 +48,12 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
             if (_instanceMap.TryGetValue(inst, out var card))
             {
                 card.CardSet(inst);
-                if (_prefab.IsReceived)
-                    RemoveCard(card);
+                if (card.IsReceived)
+                {
+                    Destroy(card.gameObject);
+                    RebuildList(inst.CodexFaction, inst.CodexStd);
+                }
             }
-        }
-
-        public void RemoveCard(CodexPrefab card)
-        {
-            card.gameObject.SetActive(false);
-            LayoutRebuilder.ForceRebuildLayoutImmediate(_transform);
         }
     }
 }
