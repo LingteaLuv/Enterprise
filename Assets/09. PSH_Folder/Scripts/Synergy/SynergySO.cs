@@ -10,7 +10,7 @@ using System.Collections.Generic;
 public class SynergySO : ScriptableObject
 {
     [Header("시너지 정보")]
-    public string synergyID;
+    public int synergyID;
     public string synergyName; // 시너지 이름
 
     [Header("발동 조건")]
