@@ -227,14 +227,15 @@ public class PlayerCharacterData
     //    return Resources.Load<Sprite>(path);
     //}
 
-    public async UniTask Init(int crewId, int star)
+    public void Init(int crewId, int star)
     {
         Level = new Property<int>(1);
         Star = new Property<int>(star);
         Soul = new Property<int>(0);
-        await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Level", 1);
-        await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Star", star);
-        await DatabaseManager.Instance.SaveFieldAsync($"StatusData/Crew/{crewId}/Soul", 0);
+        
+        DatabaseManager.Instance.SaveField($"StatusData/Crew/{crewId}/Level", 1);
+        DatabaseManager.Instance.SaveField($"StatusData/Crew/{crewId}/Star", star);
+        DatabaseManager.Instance.SaveField($"StatusData/Crew/{crewId}/Soul", 0);
         
         Level.OnChanged += async (value) =>
         {
@@ -256,7 +257,7 @@ public class PlayerCharacterData
     public static async UniTask<PlayerCharacterData> Instantiate(CharacterData so, int star)
     {
         PlayerCharacterData data = new PlayerCharacterData(so);
-        await data.Init(so.characterID, star);
+        data.Init(so.characterID, star);
         return data;
     }
 }
