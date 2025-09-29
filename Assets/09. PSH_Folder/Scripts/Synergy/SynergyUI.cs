@@ -1,7 +1,7 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class SynergyUI : MonoBehaviour
 {
@@ -11,17 +11,19 @@ public class SynergyUI : MonoBehaviour
     public Button showAllSynergiesButton; // 여러 시너지일 때 활성화될 버튼
 
     [Header("Optional: For displaying multiple synergies")]
-    public GameObject allSynergiesPanel; // 모든 시너지를 표시할 패널 (팝업 등)
-    public TextMeshProUGUI allSynergiesText; // 모든 시너지 이름을 표시할 텍스트
+    public GameObject allSynergyPanel;
+    public GameObject synergyPanel;
+    public GameObject synergyPanel2;
+    public TextMeshProUGUI synergyText;
+    public TextMeshProUGUI synergyText2;
 
     void Awake()
     {
         // 초기에는 비활성화 상태로 시작
         synergyUIPanel.SetActive(false);
-        if (allSynergiesPanel != null)
-        {
-            allSynergiesPanel.SetActive(false);
-        }
+        allSynergyPanel.SetActive(false);
+        synergyPanel.SetActive(false);
+        synergyPanel2.SetActive(false);
     }
 
     void OnEnable()
@@ -68,60 +70,47 @@ public class SynergyUI : MonoBehaviour
         {
             // 시너지가 하나도 없으면 UI 비활성화
             synergyUIPanel.SetActive(false);
-            if (allSynergiesPanel != null) allSynergiesPanel.SetActive(false);
+            synergyPanel.SetActive(false);
+            synergyPanel2.SetActive(false);
+            if (allSynergyPanel != null) allSynergyPanel.SetActive(false);
             Debug.Log("현재 활성화된 시너지가 없습니다. Synergy UI 비활성화.");
         }
         else if (currentSynergies.Count == 1)
         {
             // 시너지가 하나면 해당 시너지 이름만 표시하고 버튼 비활성화
             synergyUIPanel.SetActive(true);
+            synergyPanel.SetActive(false);
+            synergyPanel2.SetActive(false);
             mainSynergyText.text = currentSynergies[0].synergyName;
             if (showAllSynergiesButton != null) showAllSynergiesButton.gameObject.SetActive(false);
-            if (allSynergiesPanel != null) allSynergiesPanel.SetActive(false);
+            if (allSynergyPanel != null) allSynergyPanel.SetActive(false);
             Debug.Log($"단일 시너지 활성화: {currentSynergies[0].synergyName}");
         }
         else
         {
             // 시너지가 여러 개면 첫 번째 시너지 이름 표시하고 버튼 활성화
             synergyUIPanel.SetActive(true);
-            mainSynergyText.text = $"{currentSynergies[0].synergyName} 외 {currentSynergies.Count - 1}개"; // 예시: "불의 맹세 외 2개"
+            synergyPanel.SetActive(false);
+            synergyPanel2.SetActive(false);
+            mainSynergyText.text = $"{currentSynergies[0].synergyName} 외 {currentSynergies.Count - 1}개";
+            if (currentSynergies.Count > 1)
+            {
+                synergyText.text = $"{currentSynergies[1].synergyName}";
+                synergyPanel.SetActive(true);
+            }
+            if (currentSynergies.Count > 2)
+            {
+                synergyText2.text = $"{currentSynergies[2].synergyName}";
+                synergyPanel2.SetActive(true);
+            }
             if (showAllSynergiesButton != null) showAllSynergiesButton.gameObject.SetActive(true);
-            if (allSynergiesPanel != null) allSynergiesPanel.SetActive(false); // 여러 시너지 패널은 일단 닫아둠
+            if (allSynergyPanel != null) allSynergyPanel.SetActive(false);
             Debug.Log($"여러 시너지 활성화. 첫 번째: {currentSynergies[0].synergyName}, 총 {currentSynergies.Count}개.");
         }
     }
 
     private void OnShowAllSynergiesButtonClicked()
     {
-        if (allSynergiesPanel != null)
-        {
-            // 모든 시너지 패널 토글
-            allSynergiesPanel.SetActive(!allSynergiesPanel.activeSelf);
-
-            if (allSynergiesPanel.activeSelf && allSynergiesText != null)
-            {
-                // 패널이 활성화되면 모든 시너지 이름 표시
-                List<string> synergyNames = new List<string>();
-                foreach (var synergy in SynergyManager.Instance.PreviewSynergies)
-                {
-                    synergyNames.Add(synergy.synergyName);
-                }
-                allSynergiesText.text = "활성화된 시너지:" + string.Join("", synergyNames);
-                Debug.Log("모든 시너지 보기 버튼 클릭됨. 패널 활성화.");
-            }
-            else
-            {
-                Debug.Log("모든 시너지 보기 버튼 클릭됨. 패널 비활성화.");
-            }
-        }
-        else
-        {
-            // 모든 시너지 패널이 없으면 로그로 출력
-            Debug.Log("모든 시너지 패널이 설정되지 않았습니다. 시너지 목록:");
-            foreach (var synergy in SynergyManager.Instance.PreviewSynergies)
-            {
-                Debug.Log($"- {synergy.synergyName}");
-            }
-        }
+        allSynergyPanel.SetActive(!allSynergyPanel.activeSelf);
     }
 }
