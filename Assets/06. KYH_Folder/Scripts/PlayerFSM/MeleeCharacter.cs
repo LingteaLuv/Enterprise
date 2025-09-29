@@ -20,7 +20,7 @@ public class MeleeCharacter : BaseCharacterFSM
     private Coroutine moveRoutine;
 
     // 애니메이터 및 SPUM 캐릭터 애니메이션 관리
-    private Animator animator;
+    
     private SPUM_Prefabs spum;
 
     // 현재 이동 경로 (A* 결과)
