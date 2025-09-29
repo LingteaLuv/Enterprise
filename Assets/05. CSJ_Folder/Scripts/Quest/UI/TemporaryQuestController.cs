@@ -39,7 +39,6 @@ public class TemporaryQuestController : UIBase
     private void OnEnable()
     {
         Debug.Log("Enable");
-        OpenQuestTab();
         _closeButton.onClick.AddListener(CloseQuestTab);
         _dailyButton.onClick.AddListener(() => ChangeQuestType(QuestType_Enum.Daily));
         _weeklyButton.onClick.AddListener(() => ChangeQuestType(QuestType_Enum.Weekly));
@@ -49,6 +48,7 @@ public class TemporaryQuestController : UIBase
         }
 
         _stdButtons = new[] {_dailyButton, _weeklyButton};
+        OpenQuestTab();
     }
 
     private void OnDisable()
