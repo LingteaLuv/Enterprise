@@ -97,7 +97,6 @@ namespace JHT
                 {
                     so.itemName = row[1];
                     so.desc = row[2];
-                    so.icon = Resources.Load<Sprite>(row[3]);
                     so.itemPowerType = (PowerType)Enum.Parse(typeof(PowerType), row[5]);
                     so.startPower[rarity - 1] = float.Parse(row[8]);
                     so.upPower[rarity - 1] = (float.Parse(row[6]) - so.startPower[rarity - 1])/100;

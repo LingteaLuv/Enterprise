@@ -10,14 +10,7 @@ namespace JHT
         public RelicsObject relicsObject;
 
         public Image frontImage;
-        public Button itemDetailButton;
-        public TextMeshProUGUI powerText;
-        public TextMeshProUGUI levelText;
-        public Image itemRarityImage;
-
-        [Header("Current Click Item")]
-        public GameObject curClickItem;
-
+        public TextMeshProUGUI itemName;
         
 
         public void Init(RelicsObject item)
@@ -37,21 +30,13 @@ namespace JHT
             }
         }
 
-        private void ShowItem()
-        {
-            ItemEventManager.Instance.ClickItem(relicsObject);
-        }
-
         private void SetRelics()
         {
             if (relicsObject == null)
                 return;
 
             frontImage.sprite = relicsObject.itemIcon;
-            powerText.text = $"{relicsObject.itemPowerType.ToString()} : {relicsObject.itemPower} Up!";
-            itemRarityImage.sprite = relicsObject.itemRarityImage;
-            levelText.text = $"Level : {relicsObject.itemLevel}";
-            itemDetailButton.onClick.AddListener(ShowItem);
+            itemName.text = relicsObject.itemName;
         }
 
         private void HandleSelected(ItemObject clicked)
@@ -62,8 +47,6 @@ namespace JHT
             bool value = ReferenceEquals(clicked, relicsObject)
                         || (clicked != null && clicked.itemNum == relicsObject.itemNum);
 
-            
-            curClickItem.SetActive(value);
         }
 
     }
