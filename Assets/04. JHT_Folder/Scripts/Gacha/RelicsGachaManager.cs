@@ -142,7 +142,10 @@ public class RelicsGachaManager : MonoBehaviour
     private void AddResult(ItemRelicsSO so, ItemRarity rarity, int level)
     {
         RelicsObject obj = inventoryManager.relicsList.Find(x => x.itemNum == so.itemNum);
-
+        if (obj == null)
+        {
+            Debug.LogError("없음");
+        }
         if (obj == null)
         {
             OnChooseItem?.Invoke(null, new RelicsObject(so, rarity, level));

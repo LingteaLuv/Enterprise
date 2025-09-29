@@ -65,7 +65,6 @@ public class ChoosePopUp : MonoBehaviour
         {
             item1Panel.SetActive(false);
         }
-
         relicsObj2 = obj2;
         Item2Setting();
 
@@ -120,8 +119,6 @@ public class ChoosePopUp : MonoBehaviour
         item2.sprite = so.icon;
         rarityPanel2.color = SetItemRarityColor(relicsObj2);
         item2Power = so.startPower[(int)relicsObj2.curRarity - 1] + so.upPower[(int)relicsObj2.curRarity - 1] * relicsObj2.itemLevel;
-        Debug.LogError($"SO : {item2Power}");
-        Debug.LogError($"RElics : {relicsObj2.itemPower}");
 
         item2PowerText.text = relicsObj2.itemPowerType == PowerType.Attack ? $"{relicsObj2.itemPower.ToString()}" : $"{relicsObj2.itemPower.ToString()} % ";
         
