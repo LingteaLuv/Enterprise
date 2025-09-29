@@ -23,7 +23,7 @@ public class FormationSlotUI : MonoBehaviour
 
     private bool _isInitialized = false;
 
-    void Awake()
+    void Start()
     {
         Initialize();
     }
@@ -76,6 +76,8 @@ public class FormationSlotUI : MonoBehaviour
             var set = displaySets[i];
             var characterToDisplay = charactersInSlot[i];
             var prefabToInstantiate = characterToDisplay.characterdata.characterPrefab; // 직접 프리팹 참조를 사용합니다.
+
+            Debug.Log($"[{name}] Camera: {set.RenderCamera}, Prefab: {prefabToInstantiate}");
 
             if (prefabToInstantiate != null && set.DisplayImage != null && set.RenderCamera != null)
             {
