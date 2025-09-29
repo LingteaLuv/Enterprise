@@ -251,13 +251,17 @@ namespace JHT
             }
             else
             {
-                RelicsObject inst = (RelicsObject)InventoryManager.Instance.GetItemData(obj);
-
-                if (!relicsStatPanel.gameObject.activeSelf)
-                    relicsStatPanel.gameObject.SetActive(true);
-
-                relicsStatPanel.Init(inst);
+                return;
             }
+            //else
+            //{
+            //    RelicsObject inst = (RelicsObject)InventoryManager.Instance.GetItemData(obj);
+
+            //    if (!relicsStatPanel.gameObject.activeSelf)
+            //        relicsStatPanel.gameObject.SetActive(true);
+
+            //    relicsStatPanel.Init();
+            //}
         }
 
         #region weaponPanel spawn

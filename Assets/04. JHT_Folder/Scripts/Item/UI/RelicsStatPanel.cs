@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using JHT;
 using TMPro;
 using UnityEngine;
@@ -7,21 +8,36 @@ namespace JHT
 {
     public class RelicsStatPanel : MonoBehaviour
     {
-        private RelicsObject curRelics;
-        [SerializeField] private Image relicsImage;
-        [SerializeField] private TextMeshProUGUI powerText;
-        [SerializeField] private TextMeshProUGUI levelText;
-        [SerializeField] private TextMeshProUGUI powerTypeText;
+        [SerializeField] private TextMeshProUGUI[] powerText;
+        [SerializeField] private TextMeshProUGUI[] powerTypeText;
 
-        public void Init(RelicsObject relics)
+        List<RelicsObject> list;
+        public void OnEnable()
         {
-            curRelics = relics;
-            ItemRelicsSO so = (ItemRelicsSO)curRelics.itemSO;
+            InventoryManager.Instance.OnChangeAddItem += OnPanelReset;
+            OnPanelReset(null);
+            list = new();
+        }
 
-            relicsImage.sprite = relics.itemSO.icon;
-            powerText.text = relics.itemPower.ToString("N1");
-            levelText.text = relics.itemLevel.ToString();
-            powerTypeText.text = relics.itemPowerType.ToString();
+        private void OnDestroy()
+        {
+            InventoryManager.Instance.OnChangeAddItem -= OnPanelReset;
+        }
+
+        private void OnPanelReset(RelicsObject obj)
+        {
+            list = InventoryManager.Instance.relicsList;
+
+            list.Sort((a,b) => a.itemSO.itemNum.CompareTo(b.itemSO.itemNum));
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == null)
+                    continue;
+
+                powerText[i].text = list[i].itemPower.ToString();
+
+                powerTypeText[i].text = InventoryManager.Instance.SetItemPowerType(list[i].itemPowerType);
+            }
         }
     }
 }
