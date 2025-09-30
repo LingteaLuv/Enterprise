@@ -29,8 +29,6 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         ToolPanel,
         Btn1Panel,
         Btn2Panel,
-        Btn3Panel,
-        Btn4Panel,
         ShipPanel,
         PlayerInfoPanel,
         CodexPanel

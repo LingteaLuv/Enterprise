@@ -8,7 +8,7 @@ public class LoginPanel : UIBase
     [SerializeField] private Button _googleLoginBtn;
     [SerializeField] private Button _guestLoginBtn;
     [SerializeField] private Button _playGamesLoginBtn;
-    [SerializeField] private Button _testLoginBtn;
+    //[SerializeField] private Button _testLoginBtn;
 
     public Action OnLoginCompleted;
     public Action OnLoginTried;
@@ -19,7 +19,7 @@ public class LoginPanel : UIBase
         _googleLoginBtn.onClick.AddListener(async () => await OnTouchGoogleLoginBtn());
         _guestLoginBtn.onClick.AddListener(async () => await OnTouchGuestLoginBtn());
         _playGamesLoginBtn.onClick.AddListener(async () => await OnTouchPlayGamesLoginBtn());
-        _testLoginBtn.onClick.AddListener(async () => await OnTouchTestLoginBtn());
+        //_testLoginBtn.onClick.AddListener(async () => await OnTouchTestLoginBtn());
     }
 
     private async Task OnTouchGoogleLoginBtn()
