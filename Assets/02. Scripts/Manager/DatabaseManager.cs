@@ -303,7 +303,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     {
         Init();
         string nickname;
-        if (_user.IsAnonymous)
+        if (newNickname == "Guest")
         {
             nickname = $"게스트{UnityEngine.Random.Range(1000, 10000)}";
         }
