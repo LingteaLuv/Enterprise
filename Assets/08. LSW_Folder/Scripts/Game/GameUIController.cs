@@ -12,7 +12,7 @@ public class GameUIController : UIController<GameUIController.GameUIType>
 {
     [SerializeField] private Toggle _attendanceToggle;
     [SerializeField] private Toggle _toolToggle;
-    [SerializeField] private Toggle _shipToggle;
+    [SerializeField] private Button _shipBtn;
     [SerializeField] private Toggle _codexToggle;
     [SerializeField] private Toggle _playerInfoToggle;
     [SerializeField] private Button _bossBtn;
@@ -21,7 +21,7 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     [SerializeField] private TextMeshProUGUI _goldText;
     [SerializeField] private TextMeshProUGUI _gemText;
 
-    public WeaponStatPanel StatPanel;
+    //public WeaponStatPanel StatPanel;
     
     public enum GameUIType
     {
@@ -77,18 +77,9 @@ public class GameUIController : UIController<GameUIController.GameUIType>
             if (!isOn) HideUI(GameUIType.ToolPanel);
             else ShowUI(GameUIType.ToolPanel);
         });
-        _shipToggle.onValueChanged.AddListener((isOn) =>
+        _shipBtn.onClick.AddListener(() =>
         {
-            if (!isOn)
-            {
-                _shipToggle.image.color = Color.white;
-                HideUI(GameUIType.ShipPanel);
-            }
-            else
-            {
-                _shipToggle.image.color = Color.gray;
-                ShowUI(GameUIType.ShipPanel);
-            }
+            ShowUI(GameUIType.ShipPanel);
         });
         _playerInfoToggle.onValueChanged.AddListener((isOn) =>
         {
