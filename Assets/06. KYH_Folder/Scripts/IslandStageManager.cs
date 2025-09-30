@@ -220,7 +220,7 @@ public class IslandStageManager : MonoBehaviour
         DeactivateAllBattleFields();
 
         bool done = false;
-        ScreenScrollEffectManager.Instance.ShowScrollEffect("전투 완료! 다음 섬으로 이동합니다...", () =>
+        ScreenScrollEffectManager.Instance.ShowScrollEffect("전투 완료! \n 다음 섬으로 이동합니다...", () =>
         {
             done = true;
         });
