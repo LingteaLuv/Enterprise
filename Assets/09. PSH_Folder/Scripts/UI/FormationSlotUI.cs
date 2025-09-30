@@ -19,10 +19,11 @@ public class FormationSlotUI : MonoBehaviour
 
     [Header("캐릭터 표시 세트 (2명)")]
     public CharacterDisplaySet[] displaySets = new CharacterDisplaySet[2];
+    [SerializeField] private float modelYOffset = -0.5f; // 캐릭터 모델 Y축 위치 보정값
 
     private bool _isInitialized = false;
 
-    void Awake()
+    void Start()
     {
         Initialize();
     }
@@ -76,11 +77,14 @@ public class FormationSlotUI : MonoBehaviour
             var characterToDisplay = charactersInSlot[i];
             var prefabToInstantiate = characterToDisplay.characterdata.characterPrefab; // 직접 프리팹 참조를 사용합니다.
 
+            Debug.Log($"[{name}] Camera: {set.RenderCamera}, Prefab: {prefabToInstantiate}");
+
             if (prefabToInstantiate != null && set.DisplayImage != null && set.RenderCamera != null)
             {
                 set.DisplayImage.gameObject.SetActive(true);
 
                 Vector3 spawnPos = set.RenderCamera.transform.position + set.RenderCamera.transform.forward * 10f;
+                spawnPos.y += modelYOffset; // Y축 위치 보정
                 set.SpawnedCharacter = Instantiate(prefabToInstantiate, spawnPos, set.RenderCamera.transform.rotation, set.RenderCamera.transform);
             }
         }
@@ -94,8 +98,8 @@ public class FormationSlotUI : MonoBehaviour
         {
             if (displaySets.Length >= 2 && displaySets[0].DisplayRect != null && displaySets[1].DisplayRect != null)
             {
-                displaySets[0].DisplayRect.anchoredPosition = new Vector2(-25f, 50f);
-                displaySets[1].DisplayRect.anchoredPosition = new Vector2(25f, -50f);
+                displaySets[0].DisplayRect.anchoredPosition = new Vector2(-35f, 30f);
+                displaySets[1].DisplayRect.anchoredPosition = new Vector2(35f, -30f);
             }
         }
     }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using _05._CSJ_Folder.Scripts.Codex;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -383,6 +384,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         playerCharData.Star.Value++;
         Debug.Log($"{playerCharData.characterdata.characterName}이(가) {playerCharData.Star.Value}성으로 승급했습니다!");
         QuestSignalManager.Instance.RankUp(ItemType.Character, 1);
+        CodexSiganlManager.Instance.RaiseRankSignal(playerCharData.characterdata.faction, 1);
         playerCharData.RecalculateStats();
         OnCharacterDataUpdated?.Invoke(playerCharData);
         return true;
@@ -414,6 +416,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         character.Level.Value++;
         Debug.Log($"{character.characterdata.characterName} 레벨업! (Lv.{character.Level.Value})");
         QuestSignalManager.Instance.LevelUp(ItemType.Character, 1);
+        CodexSiganlManager.Instance.RaiseLevelSignal(character.characterdata.faction, 1);
         character.RecalculateStats();
         OnCharacterDataUpdated?.Invoke(character);
         CurrencyManager.Instance.UpdateCurrencyUI();

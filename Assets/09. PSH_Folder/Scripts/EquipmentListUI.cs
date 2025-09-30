@@ -84,7 +84,7 @@ public class EquipmentListUI : MonoBehaviour
     {
         if (weaponDropDown != null)
         {
-            var weaponDropDownList = new List<string> { "Power", "Star", "Level", "Rarity" };
+            var weaponDropDownList = new List<string> { "능력치", "별개수", "레벨" };
             weaponDropDown.ClearOptions();
             weaponDropDown.AddOptions(weaponDropDownList);
         }
@@ -172,7 +172,6 @@ public class EquipmentListUI : MonoBehaviour
             case 0: return weapons.OrderByDescending(w => w.ItemPower).ToList();
             case 1: return weapons.OrderByDescending(w => w.ItemStar).ToList();
             case 2: return weapons.OrderByDescending(w => w.ItemLevel).ToList();
-            case 3: return weapons.OrderByDescending(w => w.rarity).ToList();
             default: return weapons;
         }
     }
