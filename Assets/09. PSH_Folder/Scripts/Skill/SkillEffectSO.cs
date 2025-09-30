@@ -8,8 +8,11 @@ using UnityEngine;
 public class SkillEffectSO : ScriptableObject
 {
     [Header("효과 비주얼")]
-    [Tooltip("효과가 적용될 때 대상의 위치에 생성될 이펙트 프리팹")]
-    public GameObject effectPrefab;
+    [Tooltip("시전자에게 생성될 이펙트 프리팹")]
+    public GameObject casterEffectPrefab;
+
+    [Tooltip("대상에게 생성될 이펙트 프리팹")]
+    public GameObject targetEffectPrefab;
 
     /// <summary>
     /// 스킬 효과를 대상에게 적용합니다.
@@ -23,23 +26,17 @@ public class SkillEffectSO : ScriptableObject
             return;
         }
 
-        // 공통 로직: 비주얼 이펙트 생성
-        SpawnVisualEffect(target);
+        SpawnVisualEffect(caster as Component, casterEffectPrefab);
+        SpawnVisualEffect(target as Component, targetEffectPrefab);
     }
 
     /// <summary>
     /// 설정된 effectPrefab을 대상의 위치에 생성합니다.
     /// </summary>
-    protected virtual void SpawnVisualEffect(IDamageable target)
+    private void SpawnVisualEffect(Component comp, GameObject prefab)
     {
-        if (effectPrefab == null) return;
-
-        Transform targetTransform = (target as Component)?.transform;
-        if (targetTransform != null)
-        {
-            // 이펙트 지속시간은 2초를 기본값으로 설정합니다.
-            EffectPoolManager.Instance.SpawnEffect(effectPrefab, targetTransform.position, Quaternion.identity, 2f);
-        }
+        if (prefab == null || comp == null) return;
+        EffectPoolManager.Instance.SpawnEffect(prefab, comp.transform.position, Quaternion.identity, 2f);
     }
 }
 
