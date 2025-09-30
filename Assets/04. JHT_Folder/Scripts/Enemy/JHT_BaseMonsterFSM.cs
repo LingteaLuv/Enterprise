@@ -52,6 +52,8 @@ namespace JHT
 
         [SerializeField] private List<Buff> activeBuffs = new List<Buff>();
 
+        public event Action OnDie;
+
         #region Animator
 
         [Header("Anim")]
@@ -575,7 +577,8 @@ namespace JHT
             else if (monsterSpawnType == SpawnType.BossStage)
                 JHT_BossBattleManager.Instance.MonsterCount--;
 
-                Outit();
+            OnDie?.Invoke();
+            Outit();
         }
 
         public void Outit()
