@@ -94,6 +94,7 @@ public class BattleManager : MonoBehaviour
 
             InitUI();
             InitBattleFields();
+            ClearPlayers();
 
             if (_skipBtn != null)
             {
@@ -248,6 +249,9 @@ public class BattleManager : MonoBehaviour
 
         if (_skipBtn != null)
             _skipBtn.interactable = true;
+
+        // 카메라 전투 ON
+        cameraFollow?.SetBattleActive(true);
     }
 
     //private IEnumerator StageStartCor()
@@ -300,6 +304,7 @@ public class BattleManager : MonoBehaviour
         ClearPlayers();
         currentRoundIndex = 0; // 이게 필요 없을수도 있음 -> 다음 island를 위해 설정하는부분
         cameraFollow?.StopFollowing(); // 전투 종료 시 추적 해제
+        cameraFollow?.SetBattleActive(false);   // 전투 OFF
         IslandStageManager.Instance.OnBattleComplete();
     }
 
@@ -307,7 +312,12 @@ public class BattleManager : MonoBehaviour
     private void SpawnPlayers(BattleField field)
     {
         ClearPlayers();
-        var party = PartyManager.Instance.GetAllPartyMembers();
+        var party = PartyManager.Instance.GetAllPartyMembers(); // 전체 반환
+
+        if (allHealthBarsPanel != null)
+        {
+            allHealthBarsPanel.gameObject.SetActive(true);
+        }  // 전체 반환
 
         for (int i = 0; i < party.Count; i++)
         {
@@ -433,7 +443,12 @@ public class BattleManager : MonoBehaviour
         ClearEnemies();
         ClearPlayers();
 
-        ScreenScrollEffectManager.Instance.ShowScrollEffect("패배했습니다. 첫번째 섬부터 재도전합니다.", () => { });
+        // 패배 시 카메라 전투 OFF
+        cameraFollow?.SetBattleActive(false);
+        cameraFollow?.StopFollowing();
+        
+
+        ScreenScrollEffectManager.Instance.ShowScrollEffect("패배했습니다. \n 첫번째 섬부터 재도전합니다.", () => { });
         currentRoundIndex = 0;
         yield return new WaitForSeconds(1f);
 

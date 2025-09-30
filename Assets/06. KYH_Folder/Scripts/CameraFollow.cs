@@ -23,6 +23,7 @@ public class CameraFollow : MonoBehaviour
 
     private bool isFollowing = false;
 
+    private bool isBattleActive = false;  // 전투 중 여부
     /// <summary>
     /// 외부에서 추적할 여러 유닛을 설정
     /// </summary>
@@ -42,9 +43,16 @@ public class CameraFollow : MonoBehaviour
         isFollowing = false;
     }
 
+    /// <summary> 전투 상태 토글 </summary>
+    public void SetBattleActive(bool active)
+    {
+        isBattleActive = active;
+    }
+
     private void LateUpdate()
     {
-        if (!isFollowing || multipleTargets == null || multipleTargets.Count == 0)
+        // 전투 중 & 팔로우 활성화일 때만 추적
+        if (!isBattleActive || !isFollowing || multipleTargets == null || multipleTargets.Count == 0)
             return;
 
         Vector3 center = GetCenterPoint();
