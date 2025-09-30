@@ -10,9 +10,9 @@ using UnityEngine.UI;
 public class InfoPanel : UIBase
 {
     [SerializeField] private Button _startBtn;
-    [SerializeField] private Button _linkBtn;
-    [SerializeField] private Button _deleteBtn;
-    [SerializeField] private Button _logoutBtn;
+    //[SerializeField] private Button _linkBtn;
+    //[SerializeField] private Button _deleteBtn;
+    //[SerializeField] private Button _logoutBtn;
 
     [SerializeField] private TextMeshProUGUI _welcomeText;
 
@@ -23,20 +23,20 @@ public class InfoPanel : UIBase
     {
         OnGameExit += () =>
         {
-            _linkBtn.gameObject.SetActive(true);
+            //_linkBtn.gameObject.SetActive(true);
         };
     }
     
     private void Start()
     {
         _startBtn.onClick.AddListener(OnTouchStartBtn);
-        _linkBtn.onClick.AddListener(OnTouchLinkBtn);
-        _deleteBtn.onClick.AddListener(async () => await OnTouchDeleteBtn());
-        _logoutBtn.onClick.AddListener(OnTouchLogoutBtn);
+        //_linkBtn.onClick.AddListener(OnTouchLinkBtn);
+        //_deleteBtn.onClick.AddListener(async () => await OnTouchDeleteBtn());
+        //_logoutBtn.onClick.AddListener(OnTouchLogoutBtn);
 
         if (!FirebaseManager.Auth.CurrentUser.IsAnonymous)
         {
-            _linkBtn.gameObject.SetActive(false);
+            //_linkBtn.gameObject.SetActive(false);
         }
     }
     
@@ -54,7 +54,7 @@ public class InfoPanel : UIBase
     {
         if (!FirebaseManager.Auth.CurrentUser.IsAnonymous)
         {
-            _linkBtn.gameObject.SetActive(false);
+            //_linkBtn.gameObject.SetActive(false);
         }
         
         await DatabaseManager.Instance.LoadNicknameAsync((nickname) =>
