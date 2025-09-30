@@ -21,6 +21,8 @@ public class CameraFollow : MonoBehaviour
     [Header("추적 대상들 (여러 플레이어들)")]
     [SerializeField] private List<Transform> multipleTargets = new();
 
+    private bool isFollowing = false;
+
     /// <summary>
     /// 외부에서 추적할 여러 유닛을 설정
     /// </summary>
@@ -29,19 +31,27 @@ public class CameraFollow : MonoBehaviour
         multipleTargets = targets;
     }
 
+    public void StartFollowing(List<Transform> targets)
+    {
+        multipleTargets = targets;
+        isFollowing = true;
+    }
+
+    public void StopFollowing()
+    {
+        isFollowing = false;
+    }
+
     private void LateUpdate()
     {
-        if (multipleTargets == null || multipleTargets.Count == 0)
+        if (!isFollowing || multipleTargets == null || multipleTargets.Count == 0)
             return;
 
-        // 중심점 계산
         Vector3 center = GetCenterPoint();
 
-        // UI 오프셋 계산
         float extraYOffset = (GatchaPanel.activeSelf || InventoryPanel.activeSelf) ? uiYOffset : 0f;
         Vector3 totalOffset = baseOffset + new Vector3(0, extraYOffset, 0);
 
-        // 최종 위치 계산 및 이동
         Vector3 desiredPosition = center + totalOffset;
         transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
     }

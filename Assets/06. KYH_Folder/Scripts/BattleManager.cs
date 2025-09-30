@@ -186,7 +186,7 @@ public class BattleManager : MonoBehaviour
                 .Select(p => p.transform)
                 .ToList();
 
-            cameraFollow.SetTargets(playerTransforms);
+            cameraFollow.StartFollowing(playerTransforms);
             Debug.Log("[BattleManager] OnFormationSaved → CameraFollow SetTargets 갱신 완료");
         }
     }
@@ -299,6 +299,7 @@ public class BattleManager : MonoBehaviour
         ClearEnemies();
         ClearPlayers();
         currentRoundIndex = 0; // 이게 필요 없을수도 있음 -> 다음 island를 위해 설정하는부분
+        cameraFollow?.StopFollowing(); // 전투 종료 시 추적 해제
         IslandStageManager.Instance.OnBattleComplete();
     }
 
@@ -306,38 +307,27 @@ public class BattleManager : MonoBehaviour
     private void SpawnPlayers(BattleField field)
     {
         ClearPlayers();
-
-        // 체력바 추가
-        if (allHealthBarsPanel != null)
-        {
-            allHealthBarsPanel.gameObject.SetActive(true);
-        }
-
-        var party = PartyManager.Instance.GetAllPartyMembers(); // 전체 반환
+        var party = PartyManager.Instance.GetAllPartyMembers();
 
         for (int i = 0; i < party.Count; i++)
         {
             var character = party[i];
-            character.Initialize(character.CharacterStats); // 캐릭터 스탯 초기화
+            character.Initialize(character.CharacterStats);
             character.transform.SetParent(null);
             character.transform.position = field.PlayerSpawnPoint.position + new Vector3(i * 0.3f, 0, 0);
             character.gameObject.SetActive(true);
 
-            // FSM 활성화 보장
             var fsm = character.GetComponent<BaseCharacterFSM>();
             if (fsm != null)
             {
                 fsm.enabled = true;
                 fsm.ChangeStateIdleForce();
             }
-
             currentPlayers.Add(character.gameObject);
         }
 
-        List<Transform> playerTransforms = currentPlayers.Select(p => p.transform).ToList();
-
-        if (cameraFollow != null)
-            cameraFollow.SetTargets(playerTransforms);
+        var playerTransforms = currentPlayers.Select(p => p.transform).ToList();
+        cameraFollow?.StartFollowing(playerTransforms);
     }
 
     // 적 생성 (스테이지 수에 비례해 증가)

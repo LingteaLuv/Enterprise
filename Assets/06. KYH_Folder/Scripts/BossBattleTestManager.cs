@@ -47,7 +47,7 @@ public class BossBattleTestManager : MonoBehaviour
         {
             Debug.Log(" 보스전 패배!");
             GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;
-            GlobalStageManager.Instance.bossBattleTriggered = false; // 🔥 추가
+            GlobalStageManager.Instance.bossBattleTriggered = false; // 추가
             StartCoroutine(Delay2());
         });
 
@@ -66,6 +66,7 @@ public class BossBattleTestManager : MonoBehaviour
         yield return new WaitForSeconds(8f);
         _successBtn.gameObject.SetActive(true);
         _failBtn.gameObject.SetActive(true);
+        BossBattleManager.IsBossBattle = false;
     }
     
     private IEnumerator Delay1()
@@ -74,6 +75,7 @@ public class BossBattleTestManager : MonoBehaviour
         _failBtn.gameObject.SetActive(false);
         yield return new WaitForSeconds(8f);
         SceneManager.LoadScene(_returnSceneName);
+        BossBattleManager.IsBossBattle = false;
     }
     
     private IEnumerator Delay2()
@@ -82,5 +84,6 @@ public class BossBattleTestManager : MonoBehaviour
         _failBtn.gameObject.SetActive(false);
         yield return new WaitForSeconds(8f);
         SceneManager.LoadScene(_returnSceneName);
+        BossBattleManager.IsBossBattle = false;
     }
 }
