@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 5117368590764302865}
   - component: {fileID: 8034374073215820797}
   - component: {fileID: 8394489746639773613}
+  - component: {fileID: 2554865739464830622}
+  - component: {fileID: 1585250351304363828}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -54,6 +56,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
 --- !u!114 &9219142560693629224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67,6 +70,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
 --- !u!114 &3355339983544106539
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,6 +84,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
 --- !u!114 &8290560094364945987
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -93,6 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
   weaponList: []
   relicsList: []
   currentMode: 0
@@ -110,6 +116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
   statDefinitions:
   - type: 2
     baseValue: 0
@@ -139,6 +146,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
   giveAllCharactersForTest: 0
   startingCharacters:
   - {fileID: 11400000, guid: 04e894a30460a614598bf120b30d2418, type: 2}
@@ -159,6 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
 --- !u!114 &5117368590764302865
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,6 +181,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
   _signal: {fileID: 11400000, guid: c231c101f2103d84da16538b75e4ef7f, type: 2}
 --- !u!114 &8034374073215820797
 MonoBehaviour:
@@ -186,6 +196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
   _signal: {fileID: 11400000, guid: c231c101f2103d84da16538b75e4ef7f, type: 2}
   _stageClearTemplate: {fileID: 11400000, guid: 688a7902e816669449fb054357651407, type: 2}
   _tutorialSequence: {fileID: 11400000, guid: ddb13c502b804d144b074c7dc42943c6, type: 2}
@@ -204,6 +215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
+  _isStatic: 1
   AllRelics:
   - {fileID: 11400000, guid: 4d8c4b8ae403a8940b493cce34d71d1e, type: 2}
   - {fileID: 11400000, guid: b16a3c693bfcff849ac5183d75db9846, type: 2}
@@ -314,3 +326,40 @@ MonoBehaviour:
   - {fileID: 11400000, guid: aea54e34b2360874e9899ee504ea18e4, type: 2}
   - {fileID: 11400000, guid: 7982fc5298cc93c4ba64db1c6a7ed9c5, type: 2}
   - {fileID: 11400000, guid: aff582a53c8b7904c8da388fb4a917a5, type: 2}
+--- !u!114 &2554865739464830622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624125741546029507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9d5a0b274ba462481aa18945da4c536, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  _isStatic: 1
+  _codexSignal: {fileID: 11400000, guid: 399b76eea652ec94fa375d4e092e53e2, type: 2}
+  _codexLists:
+  - {fileID: 11400000, guid: 30236cd2bad568d47bbd03f1792d1d96, type: 2}
+  - {fileID: 11400000, guid: bcdd7cd6ced229a479693b2086d72b97, type: 2}
+  - {fileID: 11400000, guid: 55f7c2d53314c9349aad22de911ad2ba, type: 2}
+  - {fileID: 11400000, guid: 60f100b51ba65c2408ba59660f33d4a0, type: 2}
+  - {fileID: 11400000, guid: 6fff573ef24830f4999188fe06ceb3d3, type: 2}
+  - {fileID: 11400000, guid: 63768e0f4466e674e8c3caf58b51d78d, type: 2}
+--- !u!114 &1585250351304363828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624125741546029507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 846ca1d99dca44f08a43ac2520a9526f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  _isStatic: 1
+  _signal: {fileID: 11400000, guid: 399b76eea652ec94fa375d4e092e53e2, type: 2}

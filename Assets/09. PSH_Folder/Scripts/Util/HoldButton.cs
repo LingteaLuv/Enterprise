@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI; // UnityEngine.UI 네임스페이스 추가
 using System.Collections;
 
+[RequireComponent(typeof(Button))]
 /// <summary>
 /// 버튼을 꾹 누르면 연결된 함수를 반복적으로 호출하는 기능을 제공합니다.
 /// 터치할 때 한 번, 딜레이 후 반복적으로 실행.
