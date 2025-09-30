@@ -9,7 +9,8 @@ public class PlayerInfoPanel : UIBase
 {
     [SerializeField] private TextMeshProUGUI _nicknameText;
     //[SerializeField] private TextMeshProUGUI _loginType;
-    [SerializeField] private Button _linkBtn;
+    [SerializeField] private Button _googleLinkBtn;
+    [SerializeField] private Button _playGamesLinkBtn;
     //[SerializeField] private Button _logoutBtn;
     [SerializeField] private Button _exitBtn;
     
@@ -17,13 +18,15 @@ public class PlayerInfoPanel : UIBase
     
     private void Start()
     {
-        _linkBtn.onClick.AddListener(OnTouchLinkBtn);
+        _googleLinkBtn.onClick.AddListener(OnTouchGoogleLinkBtn);
+        _playGamesLinkBtn.onClick.AddListener(async () => await OnTouchPlayGamesLinkBtn() );
         
         //_logoutBtn.onClick.AddListener(OnTouchLogoutBtn);
 
         if (!FirebaseManager.Auth.CurrentUser.IsAnonymous)
         {
-            _linkBtn.gameObject.SetActive(false);
+            _googleLinkBtn.gameObject.SetActive(false);
+            _playGamesLinkBtn.gameObject.SetActive(false);
         }
         
         _exitBtn.onClick.AddListener(() =>
@@ -50,7 +53,8 @@ public class PlayerInfoPanel : UIBase
     {
         if (!FirebaseManager.Auth.CurrentUser.IsAnonymous)
         {
-            _linkBtn.gameObject.SetActive(false);
+            _googleLinkBtn.gameObject.SetActive(false);
+            _playGamesLinkBtn.gameObject.SetActive(false);
         }
         
         await DatabaseManager.Instance.LoadNicknameAsync((nickname) =>
@@ -59,9 +63,17 @@ public class PlayerInfoPanel : UIBase
         });
     }
     
-    private void OnTouchLinkBtn()
+    private void OnTouchGoogleLinkBtn()
     {
         AuthManager.Instance.LinkWithGoogleAsync(async () =>
+        {
+            await SetText();
+        });
+    }
+    
+    private async UniTask OnTouchPlayGamesLinkBtn()
+    {
+        await AuthManager.Instance.LinkWithPlayGamesAsync(async () =>
         {
             await SetText();
         });
