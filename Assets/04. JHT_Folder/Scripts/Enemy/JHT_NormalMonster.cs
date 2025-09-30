@@ -12,9 +12,9 @@ namespace JHT
             base.OnDisable();
         }
 
-        public override void Init(JHT_BaseMonsterStat stat)
+        public override void Init(JHT_BaseMonsterStat stat, SpawnType type)
         {
-            base.Init(stat);
+            base.Init(stat, type);
 
             if (monsterUI != null)
             {
@@ -22,6 +22,30 @@ namespace JHT
             }
 
         }
+
+        protected override void MonsterSizeSetting(SpawnType type)
+        {
+            if (type == SpawnType.BossStage)
+            {
+                switch (monsterStat.monsterCrewRole)
+                {
+                    case CrewRole.Sailor:
+                    case CrewRole.Deckhand:
+                    case CrewRole.Cook:
+                        gameObject.transform.localScale = new Vector3(0.7f, 0.7f, 1);
+                        monsterPrefab.transform.localScale = gameObject.transform.localScale;
+                        monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.10f, 0);
+                        break;
+                    case CrewRole.Captain:
+                        gameObject.transform.localScale = Vector3.one;
+                        monsterPrefab.transform.localScale = gameObject.transform.localScale;
+                        monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.15f, 0);
+                        break;
+                }
+            }
+            
+        }
+
         protected override void Update()
         {
             base.Update();

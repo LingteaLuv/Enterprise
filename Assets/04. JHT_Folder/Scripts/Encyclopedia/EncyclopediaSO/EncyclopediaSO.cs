@@ -40,10 +40,10 @@ public class EncyclopediaSO : ScriptableObject
             case CurrencyType.EnhancementStone:
                 break;
             case CurrencyType.RelicsCoupon:
-                InventoryManager.Instance.RelicsCoupon += rewardAmount2;
+                CurrencyManager.Instance.AddCurrency(CurrencyType.RelicsCoupon, rewardAmount2);
                 break;
             case CurrencyType.RelicsPoint:
-                InventoryManager.Instance.RelicsPoints += rewardAmount2;
+                CurrencyManager.Instance.AddCurrency(CurrencyType.RelicsPoint, rewardAmount2);
                 break;
         }
     }

@@ -226,6 +226,9 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        if (!MonsterDataManager.Instance.isTableLoadedFinish)
+            return;
+
         if (GlobalStageManager.Instance.CurrentStageIndex == null)
         {
             // 딕셔너리가 세팅안되는 상황
