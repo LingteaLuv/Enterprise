@@ -2,6 +2,7 @@ using System;
 using JHT;
 using System.Collections.Generic;
 using System.Numerics;
+using _05._CSJ_Folder.Scripts.Codex;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -161,6 +162,14 @@ public class PlayerCharacterData
             finalStats[Stat.Health] = finalStats.GetValueOrDefault(Stat.Health, 0) + BasicStatManager.Instance.GetStatValue(BasicStatType.Health);
             finalStats[Stat.Attack] = finalStats.GetValueOrDefault(Stat.Attack, 0) + BasicStatManager.Instance.GetStatValue(BasicStatType.Attack);
             finalStats[Stat.Defense] = finalStats.GetValueOrDefault(Stat.Defense, 0) + BasicStatManager.Instance.GetStatValue(BasicStatType.Defense);
+        }
+
+        if (BasicStatManager.Instance != null)
+        {
+            finalStats[Stat.CritChance] = finalStats.GetValueOrDefault(Stat.CritChance, 0) +
+                                          CodexManager.Instance.GetCodexStat(Stat.CritChance, characterdata.faction);
+            finalStats[Stat.CritDamage] = finalStats.GetValueOrDefault(Stat.CritDamage, 0)+
+                                          CodexManager.Instance.GetCodexStat(Stat.CritDamage, characterdata.faction);
         }
 
         // 3. 장비 및 유물 스탯 적용 (향후 확장)

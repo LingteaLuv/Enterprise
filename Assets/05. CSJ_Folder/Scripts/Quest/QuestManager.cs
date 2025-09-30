@@ -125,6 +125,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             {
                 _signal.OnSignal -= OnSignal;                
                 _signal.OnSignalComplete -= OnSignalComplete;
+                _signal.OnSignalFailed -= OnSignalFailed;
             }
 
             if (_questUI != null)
@@ -134,8 +135,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
                 // 테스트용 코드 구독해제
                 // TODO: 정식 출시시 삭제
-                _questUI.OnForceClear -= ForceQuestComplete;
-                _questUI.OnForceInit -= ForceQuestReset;
+                // _questUI.OnForceClear -= ForceQuestComplete;
+                // _questUI.OnForceInit -= ForceQuestReset;
 
                 OnQuestCompleted -= _questUI.UpdateQuest;
                 OnQuestUpdated -= _questUI.UpdateQuest;
@@ -185,8 +186,10 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 // 중복 방지
                 _signal.OnSignal -= OnSignal;
                 _signal.OnSignalComplete -= OnSignalComplete;
+                _signal.OnSignalFailed -= OnSignalFailed;
                 _signal.OnSignal += OnSignal;                
                 _signal.OnSignalComplete += OnSignalComplete;
+                _signal.OnSignalFailed += OnSignalFailed;
             }
             // 기간 퀘스트 
             RegisterTemporaryQuests();
@@ -262,9 +265,9 @@ namespace _05._CSJ_Folder.Scripts.Quest
             
             OnTempoQuestUpdated -= _temporaryQuestController.UpdateQuest;
             
-            // 삭제
-            _questUI.OnForceClear -= ForceQuestComplete;
-            _questUI.OnForceInit -= ForceQuestReset;
+            // TODO : 삭제
+            // _questUI.OnForceClear -= ForceQuestComplete;
+            // _questUI.OnForceInit -= ForceQuestReset;
             
             _questUI = null;
             QuestUI = null;
@@ -786,8 +789,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
             OnQuestUpdated += _questUI.UpdateQuest;
             
             // TODO : 정식 출시 시 삭제
-            _questUI.OnForceClear += ForceQuestComplete;
-            _questUI.OnForceInit += ForceQuestReset;
+            // _questUI.OnForceClear += ForceQuestComplete;
+            // _questUI.OnForceInit += ForceQuestReset;
 
             if (_temporaryQuestController != null)
             {
@@ -1262,7 +1265,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             foreach (var quest in quests)
             {
                 if (quest == null) continue;
-                GetTemporaryInstance(quest);
+                InitTemporaryInstance(quest);
             }
         }
 
@@ -1364,10 +1367,9 @@ namespace _05._CSJ_Folder.Scripts.Quest
         }
 
 
-        private TemporaryInstance[] GetTemporaryInstance(TemporaryQuestDefinitionSO def)
+        private void InitTemporaryInstance(TemporaryQuestDefinitionSO def)
         {
             var instCount = def.QuestCount;
-            var insts = new TemporaryInstance[instCount];
             
             for (int i = 0; i < instCount; i++)
             {
@@ -1381,9 +1383,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                     _instances.Add(id, inst);
                     _temporaryInstances.Add(id, inst);
                 }
-                insts[i] = inst;
             }
-            return insts;
         }
 
         private void OnSignalComplete(string signalName)
@@ -1396,6 +1396,18 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 def = t.Def;
             
             ReceiveReward(def, inst);
+        }
+
+        private void OnSignalFailed(string signalName)
+        {
+            var inst = GetInstance(signalName);
+            if (inst == null) return;
+            
+            var def = GetDefinition(signalName);
+            if (def is null && inst is TemporaryInstance t)
+                def = t.Def;
+
+            inst.GoalCountInit();
         }
 
         private void OnTemporaryCompleted(TemporaryInstance inst)

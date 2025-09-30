@@ -198,6 +198,10 @@ public class IslandStageManager : MonoBehaviour
 
         QuestSignalManager.Instance.ETCAchieve("IslandClear");
 
+        if (SynergyManager.Instance is not null && SynergyManager.Instance.IsSynergyActive())
+        {
+            QuestSignalManager.Instance.ETCAchieve("CrewSynergy");
+        }
         // 디버깅용 상태 확인
         if (!this.enabled)
             Debug.LogError(" IslandStageManager.enabled == false");

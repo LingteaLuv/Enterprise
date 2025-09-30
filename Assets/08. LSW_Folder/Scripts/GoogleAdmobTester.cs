@@ -38,6 +38,7 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
             _loadedAd = ad;
             _loadedAd.OnAdFullScreenContentClosed -= LoadAd;
             _loadedAd.OnAdFullScreenContentClosed += LoadAd;
+            QuestSignalManager.Instance.ETCAchieve("AdWatch");
         });
     }
 

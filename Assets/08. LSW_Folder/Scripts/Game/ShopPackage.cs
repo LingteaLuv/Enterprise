@@ -21,6 +21,8 @@ public class ShopPackage : MonoBehaviour
         _priceText.text = $"무료 패키지 : 100 Gem 획득";
         _purchaseBtn.interactable = true;
         UpdatePanel();
+        
+        QuestSignalManager.Instance.ETCAchieve("ShopReward");
     }
     
     private void OnTouchPurchaseBtn()

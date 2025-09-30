@@ -35,9 +35,10 @@ public class TypedEnumKeyDrawer : PropertyDrawer
         var upgradeProp = property.FindPropertyRelative("upgrade");
         var activeProp  = property.FindPropertyRelative("active");
         var achieveProp = property.FindPropertyRelative("achieveText");
-        var deckSynergyProp = property.FindPropertyRelative("deck");
+        var deckProp = property.FindPropertyRelative("deck");
         var rankProp    = property.FindPropertyRelative("rankUp");
         var TutorialProp = property.FindPropertyRelative("tutorial");
+        var FactionProp = property.FindPropertyRelative("faction");
 
         Rect baseRect = EditorGUI.IndentedRect(position);
         float line  = EditorGUIUtility.singleLineHeight;
@@ -58,9 +59,10 @@ public class TypedEnumKeyDrawer : PropertyDrawer
             case KeyKind.ItemType:    EditorGUI.PropertyField(valueRect, itemTypeProp,GUIContent.none); break;
             case KeyKind.UpgradeType: EditorGUI.PropertyField(valueRect, upgradeProp, GUIContent.none); break;
             case KeyKind.Active:      EditorGUI.PropertyField(valueRect, activeProp,  GUIContent.none); break;
-            case KeyKind.DeckSynergy: EditorGUI.PropertyField(valueRect, deckSynergyProp, GUIContent.none); break;
+            case KeyKind.Deck:        EditorGUI.PropertyField(valueRect, deckProp, GUIContent.none); break;
             case KeyKind.RankUp:      EditorGUI.PropertyField(valueRect, rankProp, GUIContent.none); break;
             case KeyKind.Tutorial:    EditorGUI.PropertyField(valueRect, TutorialProp, GUIContent.none); break;
+            case KeyKind.Faction:     EditorGUI.PropertyField(valueRect, FactionProp, GUIContent.none); break;
             case KeyKind.Achieve:     valueRect.height = EditorGUI.GetPropertyHeight(achieveProp, true);
                                       EditorGUI.PropertyField(valueRect, achieveProp, GUIContent.none, true); 
                                       break;

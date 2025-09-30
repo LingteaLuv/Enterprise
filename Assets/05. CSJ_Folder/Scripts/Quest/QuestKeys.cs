@@ -27,14 +27,16 @@
         public static string Active(ActiveType activeType) => $"Active:{activeType}";
         public static string Achieve(string achieveType) => $"Achieve:{achieveType}";
         public static string StageClear() => stageClearkey;
-        public static string DeckComposition(DeckSynergy deckSynergy) => $"DeckComposition:{deckSynergy}";
+        public static string DeckComposition(CrewRole deckSynergy) => $"DeckComposition:{deckSynergy}";
+        public static string Faction(Faction name) => $"Faction:{name}";
         public static string RankUp(ItemType rankUp) => $"RankUp:{rankUp}";
         public static string Tutorial(string name) => $"Tutorial:{name}";
+
     }
 
     public enum KeyFunc
     {
-        Kill, Collect, GachaPull, LevelUp, Upgrade, Active, Achieve, StageClear, Deck, RankUp, Tutorial
+        Kill, Collect, GachaPull, LevelUp, Upgrade, Active, Achieve, StageClear, Deck, RankUp, Tutorial, Faction
     }
 
     public enum MonsterId
@@ -61,12 +63,7 @@
     {
         Skill, AutoCombat, Dungeon
     }
-
-    public enum DeckSynergy
-    {
-        Bosun, Sailor, Cook
-    }
-
+    
     public enum RankUp
     {
         Character, Equipment, Relic, All
@@ -78,7 +75,7 @@
     }
 
     
-    public enum KeyKind { Monster, Money, ItemType, UpgradeType, Active, Achieve, DeckSynergy, RankUp, Tutorial}
+    public enum KeyKind { Monster, Money, ItemType, UpgradeType, Active, Achieve, Deck, RankUp, Tutorial, Faction}
 
     [Serializable]
     public struct TypedEnumKey
@@ -89,9 +86,10 @@
         public ItemType itemType;
         public UpgradeType upgrade;
         public ActiveType active;
-        public DeckSynergy deck;
+        public CrewRole deck;
         public RankUp rankUp;
         public Tutorial tutorial;
+        public Faction faction;
 
         [TextArea(2, 4)] public string achieveText;
         
@@ -105,9 +103,10 @@
                 case KeyKind.UpgradeType: return upgrade.ToString();
                 case KeyKind.Active: return active.ToString();
                 case KeyKind.Achieve: return achieveText.Trim();
-                case KeyKind.DeckSynergy: return deck.ToString();
+                case KeyKind.Deck: return deck.ToString();
                 case KeyKind.RankUp: return rankUp.ToString();
                 case KeyKind.Tutorial: return tutorial.ToString();
+                case KeyKind.Faction: return faction.ToString();
                 default: return string.Empty;
             }
         }

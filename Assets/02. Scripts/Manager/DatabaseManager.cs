@@ -680,6 +680,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             
         SaveFieldsAsync(weaponData);
     }
+    
     #region QuestCheck (AddedByCSJ)
     
     // reset 기준 UTC 기준 시간선; 기본인 9는 Kst인 UTC+09:00 기준입니다.
@@ -1251,7 +1252,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
     }
     
     #endregion
-    
     
     #endregion
 }
