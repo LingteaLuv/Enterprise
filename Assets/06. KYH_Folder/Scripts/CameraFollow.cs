@@ -69,12 +69,20 @@ public class CameraFollow : MonoBehaviour
     /// </summary>
     private Vector3 GetCenterPoint()
     {
-        if (multipleTargets.Count == 1)
-            return multipleTargets[0].position;
+        // 살아있는(Active) 타겟만 필터링
+        var validTargets = multipleTargets
+            .Where(t => t != null && t.gameObject.activeInHierarchy)
+            .ToList();
 
-        Bounds bounds = new Bounds(multipleTargets[0].position, Vector3.zero);
-        for (int i = 1; i < multipleTargets.Count; i++)
-            bounds.Encapsulate(multipleTargets[i].position);
+        if (validTargets.Count == 0)
+            return transform.position; // 남은 대상 없으면 카메라 안 움직이게
+
+        if (validTargets.Count == 1)
+            return validTargets[0].position;
+
+        Bounds bounds = new Bounds(validTargets[0].position, Vector3.zero);
+        for (int i = 1; i < validTargets.Count; i++)
+            bounds.Encapsulate(validTargets[i].position);
 
         return bounds.center;
     }
