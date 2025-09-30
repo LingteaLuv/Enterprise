@@ -20,15 +20,15 @@ namespace JHT
         public Transform SetPos(JHT_BaseMonsterStat stat)
         {
             int idx = -1;
-            if (stat.monsterRarity == MonsterRarity.Elite)
-            {
-                idx = 6;
-            }
-            else
-            {
-                idx = SetPosIndex(stat);
-            }
-
+            //if (stat.monsterRarity == MonsterRarity.Elite)
+            //{
+            //    idx = 6;
+            //}
+            //else
+            //{
+            //    idx = SetPosIndex(stat);
+            //}
+            idx = SetPosIndex(stat);
             if (stat == null)
             {
                 Debug.LogError("[SetPos] : so없음");
@@ -50,7 +50,22 @@ namespace JHT
             if (monsterCrewCountDic.TryGetValue(stat.monsterCrewRole, out int value))
             {
                 if (checkList.Contains(stat.monsterCrewRole))
+                {
                     index = value + 1;
+                }
+                else if (stat.monsterCrewRole == CrewRole.Captain)
+                {
+                    if (!checkList.Contains(stat.monsterCrewRole))
+                    {
+
+                        checkList.Add(stat.monsterCrewRole);
+                        index = 6;
+                    }
+                    else
+                    {
+                        index = -1;
+                    }
+                }
                 else
                 {
                     checkList.Add(stat.monsterCrewRole);

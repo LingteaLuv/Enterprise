@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 
 namespace JHT
@@ -12,7 +14,7 @@ namespace JHT
         public const string itemRelicsURL = "https://docs.google.com/spreadsheets/d/1yrgwWQ_XijgUwjyUSkgDH9wji0oHuoYjEcmjZdZVGmg/export?format=csv&gid=1891336971"; //범위 설정 : &range=A2:B, 두번쨰시트 : &gid~~
         public const string lootTableURL = "https://docs.google.com/spreadsheets/d/13MgAe8F47N4GJRDn4vg4wGtn2Y31aOerQEQF096ox_g/export?format=csv";
         public const string monsterDataURL = "https://docs.google.com/spreadsheets/d/1YVvWgG0PJYlX51LqkHn7emFqH58TzSgl7KFRFzwL1aU/export?format=csv&gid=1334569449";
-        public const string monsterTableDataURL = "https://docs.google.com/spreadsheets/d/1W5YTINFy0XWnzm549uTDJL6Up4h81jeZhlc0A_9T_j8/export?format=csv&gid=1059773203";
+        public const string monsterTableDataURL = "https://docs.google.com/spreadsheets/d/1W5YTINFy0XWnzm549uTDJL6Up4h81jeZhlc0A_9T_j8/export?format=csv&gid=1380546625";
         public const string skillDataURL = "https://docs.google.com/spreadsheets/d/1YVvWgG0PJYlX51LqkHn7emFqH58TzSgl7KFRFzwL1aU/export?format=csv";
         
         public event Action OnDataSetCompleted;
@@ -186,38 +188,60 @@ namespace JHT
                 int readNum1 = int.Parse(row[1]);
                 int readNum2 = int.Parse(row[2]);
                 int readNum3 = int.Parse(row[3]);
-
+                int readNum4 = int.Parse(row[4]);
                 JHT_MonsterDataTable so = Array.Find(parse, w => w.ID == TableID);
                 if (so != null)
                 {
                     List<string> numArray1 = new List<string>(readNum1);
                     List<string> numArray2 = new List<string>(readNum2);
                     List<string> numArray3 = new List<string>(readNum3);
+                    List<string> numArray4 = new List<string>(readNum4);
 
-                    numArray1 = await TableDataReader(2,readNum1);
-                    numArray2 = await TableDataReader(3,readNum2);
-                    numArray3 = await TableDataReader(4,readNum3);
+                    numArray1 = await TableDataReader(2, readNum1);
+                    numArray2 = await TableDataReader(3, readNum2);
+                    numArray3 = await TableDataReader(4, readNum3);
+                    numArray4 = await TableDataReader(1, readNum4);
 
                     if (so.monsterData.Count != (readNum1 + readNum2 + readNum3))
                     {
                         so.monsterData.Clear();
                         for (int i = 0; i < numArray1.Count; i++)
                         {
-                            so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray1[i]]);
+                            if (MonsterDataManager.Instance.monsterDataDic.TryGetValue(numArray1[i], out var soData1))
+                                so.monsterData.Add(soData1); 
+                            else
+                                Debug.LogError($"Missing key: {numArray1[1]}");
                         }
                         for (int i = 0; i < numArray2.Count; i++)
                         {
-                            so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray2[i]]);
+                            if (MonsterDataManager.Instance.monsterDataDic.TryGetValue(numArray2[i], out var soData2))
+                                so.monsterData.Add(soData2);
+                            else
+                                Debug.LogError($"Missing key: {numArray2[i]}");
                         }
                         for (int i = 0; i < numArray3.Count; i++)
                         {
-                            so.monsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray3[i]]);
+                            if (MonsterDataManager.Instance.monsterDataDic.TryGetValue(numArray3[i], out var soData3))
+                                so.monsterData.Add(soData3);
+                            else
+                                Debug.LogError($"Missing key: {numArray3[i]}");
                         }
                     }
 
+                    if (so.captinMonsterData.Count != readNum4)
+                    {
+                        so.captinMonsterData.Clear();
+                        for (int i = 0; i < numArray4.Count; i++)
+                        {
+                            if (!so.captinMonsterData.Contains(MonsterDataManager.Instance.monsterDataDic[numArray4[i]]))
+                                so.captinMonsterData.Add(MonsterDataManager.Instance.monsterDataDic[numArray4[i]]);
+                        }
 
-                    so.roundCount = int.Parse(row[4]);
+                    }
+
+                    so.roundCount = int.Parse(row[7]);
                     so.addStat = float.Parse(row[5]);
+                    so.captinAddStat = float.Parse(row[6]);
                     //so.roundCount = int.Parse(row[3]);
                     dataLoadFinish = true;
                 }

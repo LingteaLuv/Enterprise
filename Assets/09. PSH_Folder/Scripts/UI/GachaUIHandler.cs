@@ -237,7 +237,7 @@ public class GachaUIHandler : UIBase
     #region 유물 뽑기 함수
     public void OnClick_RelicsGacha_Single()
     {
-        if (InventoryManager.Instance.RelicsCoupon >= relicsGachaManager.relicsCouponCost)
+        if (CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon) >= relicsGachaManager.relicsCouponCost)
         {
             ShowSelectPopUp(relicsGachaManager, relicsGachaManager.relicsTablelevel);
         }
@@ -249,13 +249,13 @@ public class GachaUIHandler : UIBase
 
     public void OnClick_RelicsGacha_Special()
     {
-        if (InventoryManager.Instance.RelicsPoints >= relicsGachaManager.relicsSpecialCost)
+        if (CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsPoint) >= relicsGachaManager.relicsSpecialCost)
         {
             ShowSelectPopUp(relicsGachaManager, -1);
         }
         else
         {
-            PopManager.Instance.ShowOKPopup($"{relicsGachaManager.relicsSpecialCost - InventoryManager.Instance.RelicsPoints}만큼 유물잔해가 부족합니다!");
+            PopManager.Instance.ShowOKPopup($"{relicsGachaManager.relicsSpecialCost - CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsPoint)}만큼 유물잔해가 부족합니다!");
         }
     }
     #endregion
@@ -282,7 +282,7 @@ public class GachaUIHandler : UIBase
         string currencyName = GetCurrencyNameInKorean(manager.currencyType);
 
         PopManager.Instance.ShowOKCancelPopup(
-            $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?","넹",
+            $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?",
             onLeftClick: () =>
             {
                 if (manager.PerformMultipleGacha(count))
@@ -316,7 +316,7 @@ public class GachaUIHandler : UIBase
                         QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
                     }
                 }
-            },"아뇽",
+            },
             onRightClick: () =>
             {
                 Debug.Log($"{itemType} {count}회 뽑기 취소됨");
@@ -351,7 +351,7 @@ public class GachaUIHandler : UIBase
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
-                InventoryManager.Instance.RelicsCoupon -= manager.relicsCouponCost;
+                CurrencyManager.Instance.AddCurrency(CurrencyType.RelicsPoint, -manager.relicsCouponCost);
             },
             onRightClick: () =>
             {
@@ -367,7 +367,7 @@ public class GachaUIHandler : UIBase
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
-                InventoryManager.Instance.RelicsPoints -= manager.relicsSpecialCost;
+                CurrencyManager.Instance.AddCurrency(CurrencyType.RelicsPoint, -manager.relicsSpecialCost);
             },
             onRightClick: () =>
             {

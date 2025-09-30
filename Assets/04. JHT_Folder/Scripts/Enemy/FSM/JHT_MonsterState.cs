@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 namespace JHT
 {
@@ -102,7 +103,11 @@ namespace JHT
                 return;
             }
 
-            fsm.monsterSearch.SearchTarget();
+            if(fsm.monsterSpawnType == SpawnType.IslandStage)
+                fsm.monsterSearch.SearchTarget();
+            else if(fsm.monsterSpawnType == SpawnType.BossStage)
+                fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position, 1 * Time.deltaTime);
+            
             fsm.Rotate();
             
             float dist = Vector2.Distance(fsm.target.transform.position, fsm.gameObject.transform.position);
