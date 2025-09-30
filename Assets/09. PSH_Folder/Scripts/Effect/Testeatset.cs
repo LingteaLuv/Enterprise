@@ -61,6 +61,6 @@ public class Testeatset : MonoBehaviour
     public GameObject deathEffect;
     void D()
     {
-        EffectPoolManager.Instance.SpawnEffect(deathEffect, transform.position, Quaternion.identity, 5);
+        EffectPoolManager.Instance.SpawnEffect(EffectDatabase.Instance.deathEffectPrefab, transform.position, Quaternion.identity, 5);
     }
 }

@@ -70,7 +70,7 @@ public class CharacterMaterialChanger : MonoBehaviour
         {
             // 리스트의 가장 마지막에 있는(가장 나중에 추가된) 효과를 적용해요.
             EffectType currentEffect = activeEffects.Last();
-            Material materialToApply = EffectMaterialManager.Instance.GetMaterial(currentEffect);
+            Material materialToApply = EffectDatabase.Instance.GetMaterial(currentEffect);
 
             if (materialToApply != null)
             {
