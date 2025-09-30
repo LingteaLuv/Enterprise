@@ -1,7 +1,7 @@
 using UnityEngine;
 using DG.Tweening;
 
-public class TestMoveEffect : MonoBehaviour
+public class TestMoveEffect : MonoBehaviour, IMoveEffect
 {
     private Transform _target;
     private Vector3 _startPos;
