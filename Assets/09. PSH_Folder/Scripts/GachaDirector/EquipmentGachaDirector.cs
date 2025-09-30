@@ -17,15 +17,18 @@ public class EquipmentGachaDirector : MonoBehaviour
     [Header("연출 흐름 설정")]
     public float startDelay = 1f;
     public float zoomScale = 1.5f;
-    public int strikeCount = 5;
-    public float strikeDuration = 0.5f;
+    public int strikeCount = 3;
+    public float strikeDuration = 1f;
     public float endDelay = 1f;
 
     [Header("세부 애니메이션 설정")]
-    public float hammerWindUpAngle = 45f;
-    public float hammerStrikeMoveDistanceY = -40f;
-    public float weaponShakeDuration = 0.1f;
-    public float weaponShakeStrength = 5f;
+    public float hammerWindUpAngle = -45f;
+    public float hammerStrikeMoveDistanceY = 150f;
+    public float weaponShakeDuration = 0.2f;
+    public float weaponShakeStrength = 20f;
+
+    [Header("스킵 버튼")]
+    public Button skipBtn;
 
     private Sequence mainSequence;
 
@@ -42,7 +45,15 @@ public class EquipmentGachaDirector : MonoBehaviour
         InitializeTransforms();
         materialChanger = weaponImage.gameObject.GetComponent<ImageMaterialChanger>();
     }
+    private void OnEnable()
+    {
+        skipBtn.onClick.AddListener(() => { EffectPoolManager.Instance.ReturnToPool(gameObject); });
+    }
 
+    private void OnDisable()
+    {
+        skipBtn.onClick.RemoveAllListeners();
+    }
     private void InitializeTransforms()
     {
         if (_isInitialized) return;
@@ -92,26 +103,75 @@ public class EquipmentGachaDirector : MonoBehaviour
 
         mainSequence.AppendInterval(startDelay);
 
-        float singleStrikeTime = strikeDuration / 2f;
-        Vector3 hammerRot = _initialRotations[hammerImage.transform];
+        // 타이밍 세분화
+        float windUpTime = strikeDuration * 0.4f;   // 준비
+        float strikeTime = strikeDuration * 0.2f;   // 내려치기
+        float recoverTime = strikeDuration * 0.4f;  // 복귀
+
+        Vector3 hammerRotOrigin = _initialRotations[hammerImage.transform];
         float hammerInitialY = _initialPositions[hammerImage.transform].y;
 
         for (int i = 0; i < strikeCount; i++)
         {
-            mainSequence.Append(hammerImage.rectTransform.DORotate(new Vector3(0, 0, hammerWindUpAngle), singleStrikeTime * 0.7f).SetEase(Ease.OutQuad));
-            mainSequence.Append(hammerImage.rectTransform.DORotate(hammerRot, singleStrikeTime * 0.3f).SetEase(Ease.InQuad));
-            mainSequence.Join(hammerImage.rectTransform.DOAnchorPosY(hammerInitialY + hammerStrikeMoveDistanceY, singleStrikeTime * 0.3f).SetEase(Ease.InQuad));
-            mainSequence.AppendCallback(() => {
-                if (weaponImage != null) weaponImage.transform.DOShakePosition(weaponShakeDuration, new Vector3(weaponShakeStrength, 0, 0), 10, 90, false, true);
-                if (materialChanger != null) materialChanger.AddEffect(EffectType.ForgeFlare, .2f);
+            // 준비동작 (위로 올리기)
+            mainSequence.Append(
+                hammerImage.rectTransform.DORotate(
+                    new Vector3(0, 0, hammerWindUpAngle),
+                    windUpTime
+                ).SetEase(Ease.OutQuad)
+            ); 
+            mainSequence.Join(
+                hammerImage.rectTransform.DOAnchorPosY(
+                    hammerInitialY + hammerStrikeMoveDistanceY,
+                    strikeTime
+                ).SetEase(Ease.InQuad)
+            );
+
+            // 내려치기 시작(이펙트도 이 시점에)
+
+            mainSequence.Append(
+                hammerImage.rectTransform.DORotate(
+                    new Vector3(0, 0, -hammerWindUpAngle * 0.5f),
+                    strikeTime
+                ).SetEase(Ease.InQuad)
+            );
+            mainSequence.Join(
+                hammerImage.rectTransform.DOAnchorPosY(
+                    hammerInitialY,
+                    strikeTime
+                ).SetEase(Ease.InQuad)
+            );
+
+            // 복귀(튕김 느낌)
+            mainSequence.AppendCallback(() =>
+            {
+                if (materialChanger != null)
+                    materialChanger.AddEffect(EffectType.ForgeFlare, .2f);
             });
+            mainSequence.Append(
+                hammerImage.rectTransform.DORotate(
+                    hammerRotOrigin,
+                    recoverTime
+                ).SetEase(Ease.OutBounce)
+            );
+
+            // 무기 흔들기 (같이 조인)
+            mainSequence.Join(
+                weaponImage.transform.DOShakePosition(
+                    weaponShakeDuration,
+                    new Vector3(weaponShakeStrength, 0, 0),
+                    10, 90, false, true
+                )
+            );
         }
 
+        // 전체 컨테이너 확대 연출
         float totalStrikeDuration = strikeDuration * strikeCount;
         container.DOScale(zoomScale, totalStrikeDuration).SetEase(Ease.InOutSine);
 
         mainSequence.AppendInterval(endDelay);
-        mainSequence.OnComplete(() => {
+        mainSequence.OnComplete(() =>
+        {
             Debug.Log("장비 가챠 연출 완료!");
             onComplete?.Invoke();
         });

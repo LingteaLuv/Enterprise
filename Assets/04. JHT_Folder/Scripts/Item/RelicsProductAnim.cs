@@ -41,10 +41,11 @@ public class RelicsProductAnim : MonoBehaviour
         rewardRT = reward.rectTransform;
 
         baseWaveSize = waveRT.sizeDelta;
-        baseWavePos = new Vector2(0, -510f);
+        baseWavePos = new Vector2(0, 0);
 
         baseShipSize = shipRT.sizeDelta;
-        baseShipPos = new Vector2(0, -30f);
+        baseShipPos = new Vector2(0, -592);
+        shipRT.pivot = new Vector2(0.5f, 0.74f);
 
         baselightRot = lightRT.rotation;
         baseShipRot = shipRT.rotation;
@@ -85,6 +86,7 @@ public class RelicsProductAnim : MonoBehaviour
 
         shipRT.sizeDelta = baseShipSize;
         shipRT.anchoredPosition = baseShipPos;
+        shipRT.pivot = new Vector2(0.5f, 0.8f);
 
         lightRT.rotation = baselightRot;
         shipRT.rotation = baseShipRot;
@@ -133,7 +135,7 @@ public class RelicsProductAnim : MonoBehaviour
             //waveRT.DOScale(1.3f, 8f).SetEase(Ease.InOutQuad);
 
             shipRT.DOLocalRotate(new Vector3(0, 0, -5f), 5f).SetEase(Ease.InOutQuad).SetLoops(-1, LoopType.Yoyo);
-            shipRT.DOAnchorPosY(10f, 5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+            shipRT.DOAnchorPosY(0f, -2f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
             shipRT.DOSizeDelta(new Vector2(2000, 2000), 5f);
 
             lightRT.DOLocalRotate(new Vector3(0, 0, -5f), 5f).SetEase(Ease.InOutQuad).SetLoops(-1, LoopType.Yoyo);

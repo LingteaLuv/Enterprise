@@ -2,6 +2,7 @@ using JHT;
 using System;
 using System.Collections;
 using System.Linq;
+using System.Numerics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -41,7 +42,7 @@ public class RelicsProbability : MonoBehaviour
         InventoryManager.Instance.OnChangeRelicsPoints += AddPoints;
 
         ShowProbabilityItemPanel();
-        AddPoints(InventoryManager.Instance.RelicsPoints);
+        AddPoints();
     }
 
     private void OnEnable()
@@ -62,10 +63,10 @@ public class RelicsProbability : MonoBehaviour
         if (manager == null)
             return;
 
-        if (manager.relicsUpgradeCost > InventoryManager.Instance.RelicsPoints)
+        if (manager.relicsUpgradeCost > CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsPoint))
         {
             PopManager.Instance.ShowOKPopup(
-                $"유물 재화가 {manager.relicsUpgradeCost - InventoryManager.Instance.RelicsPoints}만큼 부족합니다");
+                $"유물 재화가 {manager.relicsUpgradeCost - CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsPoint)}만큼 부족합니다");
 
             StartCoroutine(WaitCoroutine());
         }
@@ -100,10 +101,9 @@ public class RelicsProbability : MonoBehaviour
         closeButton.interactable = true;
     }
 
-    private void AddPoints(float value)
+    private void AddPoints()
     {
-        upgradePoint = value;
-        pointText.text = upgradePoint.ToString();
+        pointText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsPoint).ToString();
     }
     
 }

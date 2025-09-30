@@ -23,7 +23,7 @@ namespace JHT
         [SerializeField] private Button soulButton;
 
         [SerializeField] private WeaponStatPanel weaponStatPanel;
-        [SerializeField] private RelicsStatPanel relicsStatPanel;
+        //[SerializeField] private RelicsStatPanel relicsStatPanel;
 
         [Header("DropDown")] 
         [SerializeField] private TMP_Dropdown weaponDropDown;
@@ -162,8 +162,8 @@ namespace JHT
             soulDropDown.ClearOptions();
             soulNameDropdown.ClearOptions();
 
-            soulDropdownList.Add("전투력");
-            soulDropdownList.Add("별레벨");
+            soulDropdownList.Add("이름");
+            soulDropdownList.Add("개수");
             soulDropdownList.Add("레벨");
 
             soulDropDown.AddOptions(soulDropdownList);

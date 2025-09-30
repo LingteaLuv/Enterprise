@@ -94,6 +94,7 @@ public class BattleManager : MonoBehaviour
 
             InitUI();
             InitBattleFields();
+            ClearPlayers();
 
             if (_skipBtn != null)
             {
@@ -186,7 +187,7 @@ public class BattleManager : MonoBehaviour
                 .Select(p => p.transform)
                 .ToList();
 
-            cameraFollow.SetTargets(playerTransforms);
+            cameraFollow.StartFollowing(playerTransforms);
             Debug.Log("[BattleManager] OnFormationSaved → CameraFollow SetTargets 갱신 완료");
         }
     }
@@ -226,6 +227,9 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        if (!MonsterDataManager.Instance.isTableLoadedFinish)
+            return;
+
         if (GlobalStageManager.Instance.CurrentStageIndex == null)
         {
             // 딕셔너리가 세팅안되는 상황
@@ -245,6 +249,9 @@ public class BattleManager : MonoBehaviour
 
         if (_skipBtn != null)
             _skipBtn.interactable = true;
+
+        // 카메라 전투 ON
+        cameraFollow?.SetBattleActive(true);
     }
 
     //private IEnumerator StageStartCor()
@@ -296,6 +303,8 @@ public class BattleManager : MonoBehaviour
         ClearEnemies();
         ClearPlayers();
         currentRoundIndex = 0; // 이게 필요 없을수도 있음 -> 다음 island를 위해 설정하는부분
+        cameraFollow?.StopFollowing(); // 전투 종료 시 추적 해제
+        cameraFollow?.SetBattleActive(false);   // 전투 OFF
         IslandStageManager.Instance.OnBattleComplete();
     }
 
@@ -303,38 +312,32 @@ public class BattleManager : MonoBehaviour
     private void SpawnPlayers(BattleField field)
     {
         ClearPlayers();
+        var party = PartyManager.Instance.GetAllPartyMembers(); // 전체 반환
 
-        // 체력바 추가
         if (allHealthBarsPanel != null)
         {
             allHealthBarsPanel.gameObject.SetActive(true);
-        }
-
-        var party = PartyManager.Instance.GetAllPartyMembers(); // 전체 반환
+        }  // 전체 반환
 
         for (int i = 0; i < party.Count; i++)
         {
             var character = party[i];
-            character.Initialize(character.CharacterStats); // 캐릭터 스탯 초기화
+            character.Initialize(character.CharacterStats);
             character.transform.SetParent(null);
             character.transform.position = field.PlayerSpawnPoint.position + new Vector3(i * 0.3f, 0, 0);
             character.gameObject.SetActive(true);
 
-            // FSM 활성화 보장
             var fsm = character.GetComponent<BaseCharacterFSM>();
             if (fsm != null)
             {
                 fsm.enabled = true;
                 fsm.ChangeStateIdleForce();
             }
-
             currentPlayers.Add(character.gameObject);
         }
 
-        List<Transform> playerTransforms = currentPlayers.Select(p => p.transform).ToList();
-
-        if (cameraFollow != null)
-            cameraFollow.SetTargets(playerTransforms);
+        var playerTransforms = currentPlayers.Select(p => p.transform).ToList();
+        cameraFollow?.StartFollowing(playerTransforms);
     }
 
     // 적 생성 (스테이지 수에 비례해 증가)
@@ -440,7 +443,12 @@ public class BattleManager : MonoBehaviour
         ClearEnemies();
         ClearPlayers();
 
-        ScreenScrollEffectManager.Instance.ShowScrollEffect("패배했습니다. 첫번째 섬부터 재도전합니다.", () => { });
+        // 패배 시 카메라 전투 OFF
+        cameraFollow?.SetBattleActive(false);
+        cameraFollow?.StopFollowing();
+        
+
+        ScreenScrollEffectManager.Instance.ShowScrollEffect("패배했습니다. \n 첫번째 섬부터 재도전합니다.", () => { });
         currentRoundIndex = 0;
         yield return new WaitForSeconds(1f);
 

@@ -1,9 +1,7 @@
-using System;
+using System.Numerics;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // TextMeshPro 사용
-using System.Collections.Generic; // Dictionary 사용
-using System.Numerics; // BigInteger 사용
 
 public class BasicStatUI : UIBase
 {
@@ -14,6 +12,13 @@ public class BasicStatUI : UIBase
     public Button levelUpMultiplierButton; // x1 / x10 토글 버튼
     public TextMeshProUGUI levelUpMultiplierText; // 버튼 텍스트 (x1, x10)
 
+    [Header("닫기 버튼")]
+    public Button closeButton;
+    public Button blocker;
+
+    [Header("보유 골드")]
+    public TextMeshProUGUI goldText;
+
     private int _levelsToGain = 1; // 한 번에 올릴 레벨 수 (1 또는 10)
 
     // UI 그룹을 인스펙터에서 설정하기 위한 Serializable 클래스
@@ -21,7 +26,6 @@ public class BasicStatUI : UIBase
     public class BasicStatUIGroup
     {
         public BasicStatType statType; // 이 그룹이 담당하는 스탯 종류
-        public TextMeshProUGUI statNameText; // 스탯 이름 (예: 공격력)
         public TextMeshProUGUI levelText; // 현재 레벨 (예: Lv. 1)
         public TextMeshProUGUI valueText; // 현재 스탯 값 (예: 100)
         public TextMeshProUGUI costText; // 레벨업 비용 (예: 1000 Gold)
@@ -49,7 +53,16 @@ public class BasicStatUI : UIBase
         // 초기 UI 갱신
         UpdateMultiplierButtonText();
     }
-
+    private void OnEnable()
+    {
+        closeButton.onClick.AddListener(()=>gameObject.SetActive(false));
+        blocker.onClick.AddListener(() => gameObject.SetActive(false));
+    }
+    private void OnDisable()
+    {
+        closeButton.onClick.RemoveAllListeners();
+        blocker.onClick.RemoveAllListeners();
+    }
     /// <summary>
     /// 모든 기본 스탯 UI를 갱신합니다.
     /// </summary>
@@ -62,23 +75,17 @@ public class BasicStatUI : UIBase
         }
         if (CurrencyManager.Instance == null)
         {
-            Debug.LogError("InventoryManager가 초기화되지 않았습니다.");
+            Debug.LogError("CurrencyManager가 초기화되지 않았습니다.");
             return;
         }
 
         foreach (var group in statUIGroups)
         {
-            // 스탯 이름 표시 (선택 사항, 인스펙터에서 설정해도 됨)
-            if (group.statNameText != null)
-            {
-                group.statNameText.text = GetStatDisplayName(group.statType);
-            }
-
             // 현재 레벨 표시
             int currentLevel = BasicStatManager.Instance.GetStatLevel(group.statType);
             if (group.levelText != null)
             {
-                group.levelText.text = $"Lv. {currentLevel}";
+                group.levelText.text = $"{currentLevel}";
             }
 
             // 현재 스탯 값 표시
@@ -94,7 +101,7 @@ public class BasicStatUI : UIBase
 
             if (group.costText != null)
             {
-                group.costText.text = $"비용: {DataUtility.FormatNumber(cost)} {costType}"; 
+                group.costText.text = $"{DataUtility.FormatNumber(cost)}"; 
             }
 
             // 레벨업 버튼 활성화/비활성화
@@ -102,6 +109,12 @@ public class BasicStatUI : UIBase
             {
                 BigInteger currentGold = CurrencyManager.Instance.GetCurrency(costType);
                 group.levelUpButton.interactable = (currentGold >= cost);
+            }
+
+            // 현재 골드 텍스트
+            if (goldText != null)
+            {
+                goldText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.Gold));
             }
         }
     }
@@ -121,13 +134,13 @@ public class BasicStatUI : UIBase
             switch (type)
             {
                 case BasicStatType.Attack:
-                    upType = upType = UpgradeType.Atk;
+                    upType = UpgradeType.Atk;
                     break;
                 case BasicStatType.Defense:
-                    upType = upType = UpgradeType.Def;
+                    upType = UpgradeType.Def;
                     break;
                 case BasicStatType.Health:
-                    upType = upType = UpgradeType.Hp;
+                    upType = UpgradeType.Hp;
                     break;
                 default:
                     upType = UpgradeType.Atk;
@@ -155,18 +168,6 @@ public class BasicStatUI : UIBase
         if (levelUpMultiplierText != null)
         {
             levelUpMultiplierText.text = $"x{_levelsToGain}";
-        }
-    }
-
-    // 스탯 타입에 따른 표시 이름 반환 (선택 사항)
-    private string GetStatDisplayName(BasicStatType type)
-    {
-        switch (type)
-        {
-            case BasicStatType.Attack: return "ATK";
-            case BasicStatType.Defense: return "DEF";
-            case BasicStatType.Health: return "HP";
-            default: return type.ToString();
         }
     }
 }

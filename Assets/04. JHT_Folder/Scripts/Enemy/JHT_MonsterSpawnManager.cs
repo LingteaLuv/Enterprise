@@ -2,14 +2,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace JHT
 {
+    public enum SpawnType
+    {
+        IslandStage,
+        Dungeon,
+        BossStage
+    }
+
     public class JHT_MonsterSpawnManager : Singleton<JHT_MonsterSpawnManager>
     {
         public JHT_ObjectPool projectilePool;
-        private JHT_ObjectPool monsterPool;
+        public JHT_ObjectPool monsterPool;
         public JHT_ObjectPool damageTextPool;
 
         [SerializeField] private JHT_BaseMonsterFSM monsterPrefab;
@@ -26,20 +32,21 @@ namespace JHT
         public Dictionary<int, JHT_MonsterDataTable> stageDic;
         public List<JHT_MonsterSetManager> posList;
         public List<JHT_BaseMonsterStat> curMonsterCountList;
+        
 
         public int stageIndex;
         public int roundIndex;
 
-        private bool isMonsterDataSetReady;
-        private bool isSkillSetReady;
+        public bool isMonsterDataSetReady { get; set; }
+        public bool isSkillSetReady { get; set; }
 
         private GameObject projectilePoolParent;
         private GameObject monsterPoolParent;
         private GameObject damageTextPoolParent;
         private GameObject spawnPosParent;
+        
 
-
-        public event Func<int, List<JHT_BaseMonsterStat>> OnAddMonster;
+        public event Func<int,int, List<JHT_BaseMonsterStat>> OnAddMonster;
 
         MonsterDataManager monsterDataManager;
 
@@ -171,6 +178,18 @@ namespace JHT
         // curStageIndex를 ++을 통해 round를 구별해줄거임
         private IEnumerator ChangeRoundCor(int curRoundIndex)
         {
+            if (roundTable.monsterData == null || roundTable.monsterData.Count == 0)
+            {
+                Debug.LogError($"MonsterTable empty: {roundTable.ID}");
+                yield break;
+            }
+
+            for (int i = 0; i < spawnPosParent.transform.childCount; i++)
+            {
+                if (!spawnPosParent.transform.GetChild(i).gameObject.activeInHierarchy)
+                    spawnPosParent.transform.GetChild(i).gameObject.SetActive(true);
+            }
+
             while (!isMonsterDataSetReady || !isSkillSetReady || roundTable == null)
             {
                 yield return null;
@@ -180,12 +199,12 @@ namespace JHT
             {
                 yield return null;
             }
-            Debug.Log($"현재 라운드 : {curRoundIndex}");
+            
             roundIndex = curRoundIndex;
             if (curMonsterCountList.Count > 0)
                 curMonsterCountList.Clear();
 
-            curMonsterCountList = OnAddMonster?.Invoke(curRoundIndex);
+            curMonsterCountList = OnAddMonster?.Invoke(curRoundIndex,5);
 
             posList[curRoundIndex].checkList = new();
 
@@ -193,15 +212,23 @@ namespace JHT
             for (int i = 0; i < curMonsterCountList.Count; i++)
             {
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
-                obj.Init(curMonsterCountList[i]);
-                obj.transform.position = posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
-                
+                obj.Init(curMonsterCountList[i], SpawnType.IslandStage);
+                Vector2 pos = posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
+                obj.transform.position = new Vector2(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y));
             }
 
         }
 
+        public List<JHT_BaseMonsterStat> GetMonsterDataList(int curRoundIndex, bool isBoss, int spawnCount)
+        {
+            List<JHT_BaseMonsterStat> list = new();
 
-        public List<JHT_BaseMonsterStat> SetSpawnMonster(int curRoundIndex)
+            list = OnAddMonster?.Invoke(curRoundIndex, spawnCount);
+
+            return list;
+        }
+
+        public List<JHT_BaseMonsterStat> SetSpawnMonster(int curRoundIndex,int spawnCount)
         {
             int count = 0;
             List<JHT_BaseMonsterStat> dataList = new();
@@ -210,19 +237,15 @@ namespace JHT
             float roundStart = Time.realtimeSinceStartup;
 
             // 다음 스테이지나 씬으로 연결 **************************************************** 제발
-            if (curRoundIndex > roundTable.roundCount)
-            {
-                return null;
-            }
-
-            while (count <= 4)
+            
+            while (count < spawnCount)
             {
                 int rand = UnityEngine.Random.Range(0, roundTable.monsterData.Count);
 
                 //시간 경과가 마쳤음에도 랜덤값을 못뻈을경우
                 if (Time.realtimeSinceStartup - roundStart > 1f)
                 {
-                    while (count <= 4)
+                    while (count < spawnCount)
                     {
                         for (int i = 0; i < roundTable.monsterData.Count; i++)
                         {
@@ -230,17 +253,7 @@ namespace JHT
                             {
                                 if (data < 2)
                                 {
-                                    MonsterSkillSO n = roundTable.monsterData[i].normalSkill == -1 ?
-                                        null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].normalSkill];
-
-                                    MonsterSkillSO s1 = roundTable.monsterData[i].skill1 == -1 ?
-                                        null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].skill1];
-
-                                    MonsterSkillSO s2 = roundTable.monsterData[i].skill2 == -1 ?
-                                        null : monsterDataManager.monsterSkillDic[roundTable.monsterData[i].skill2];
-
-                                    JHT_BaseMonsterStat s = new(roundTable.monsterData[i], n, s1, s2, roundTable.addStat);
-
+                                    var s = DataSettiing(i, false);
                                     dataList.Add(s);
 
                                     if (count == 4)
@@ -270,16 +283,7 @@ namespace JHT
                 {
                     crewRoleCounter[roundTable.monsterData[rand].monsterCrewRole] = 1;
                 }
-                MonsterSkillSO normal = roundTable.monsterData[rand].normalSkill == -1 ?
-                    null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].normalSkill];
-
-                MonsterSkillSO skill1 = roundTable.monsterData[rand].skill1 == -1 ?
-                    null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill1];
-
-                MonsterSkillSO skill2 = roundTable.monsterData[rand].skill2 == -1 ?
-                    null : monsterDataManager.monsterSkillDic[roundTable.monsterData[rand].skill2];
-
-                JHT_BaseMonsterStat stat = new(roundTable.monsterData[rand], normal, skill1, skill2, roundTable.addStat);
+                var stat = DataSettiing(rand, false);
                 count++;
 
                 // 조건에 따라 Elite 나오게하기
@@ -297,6 +301,39 @@ namespace JHT
             return dataList;
         }
 
+        public JHT_BaseMonsterStat DataSettiing(int num, bool isBoss)
+        {
+            JHT_BaseMonsterStat stat = null;
+
+            if (isBoss)
+            {
+                MonsterSkillSO normal = roundTable.captinMonsterData[num].normalSkill == -1 ?
+                        null : monsterDataManager.monsterSkillDic[roundTable.captinMonsterData[num].normalSkill];
+
+                MonsterSkillSO skill1 = roundTable.captinMonsterData[num].skill1 == -1 ?
+                    null : monsterDataManager.monsterSkillDic[roundTable.captinMonsterData[num].skill1];
+
+                MonsterSkillSO skill2 = roundTable.captinMonsterData[num].skill2 == -1 ?
+                    null : monsterDataManager.monsterSkillDic[roundTable.captinMonsterData[num].skill2];
+
+                stat = new(roundTable.captinMonsterData[num], normal, skill1, skill2, roundTable.captinAddStat);
+            }
+            else
+            {
+                MonsterSkillSO normal = roundTable.monsterData[num].normalSkill == -1 ?
+                                    null : monsterDataManager.monsterSkillDic[roundTable.monsterData[num].normalSkill];
+
+                MonsterSkillSO skill1 = roundTable.monsterData[num].skill1 == -1 ?
+                    null : monsterDataManager.monsterSkillDic[roundTable.monsterData[num].skill1];
+
+                MonsterSkillSO skill2 = roundTable.monsterData[num].skill2 == -1 ?
+                    null : monsterDataManager.monsterSkillDic[roundTable.monsterData[num].skill2];
+
+                stat = new(roundTable.monsterData[num], normal, skill1, skill2, roundTable.addStat);
+            }
+
+            return stat;
+        }
 
         public void MonsterAllClear()
         {
@@ -322,6 +359,12 @@ namespace JHT
                 {
                     damageTextPoolParent.transform.GetChild(i).GetComponent<JHT_DamageBox>().Release();
                 }
+            }
+
+            for (int i = 0; i < spawnPosParent.transform.childCount; i++)
+            {
+                if (spawnPosParent.transform.GetChild(i).gameObject.activeInHierarchy)
+                    spawnPosParent.transform.GetChild(i).gameObject.SetActive(false);
             }
             EndChangeRound();
             curMonsterCountList.Clear();

@@ -237,7 +237,7 @@ public class GachaUIHandler : UIBase
     #region 유물 뽑기 함수
     public void OnClick_RelicsGacha_Single()
     {
-        if (InventoryManager.Instance.RelicsCoupon >= relicsGachaManager.relicsCouponCost)
+        if (CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon) >= relicsGachaManager.relicsCouponCost)
         {
             ShowSelectPopUp(relicsGachaManager, relicsGachaManager.relicsTablelevel);
         }
@@ -249,13 +249,13 @@ public class GachaUIHandler : UIBase
 
     public void OnClick_RelicsGacha_Special()
     {
-        if (InventoryManager.Instance.RelicsPoints >= relicsGachaManager.relicsSpecialCost)
+        if (CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsPoint) >= relicsGachaManager.relicsSpecialCost)
         {
             ShowSelectPopUp(relicsGachaManager, -1);
         }
         else
         {
-            PopManager.Instance.ShowOKPopup($"{relicsGachaManager.relicsSpecialCost - InventoryManager.Instance.RelicsPoints}만큼 유물잔해가 부족합니다!");
+            PopManager.Instance.ShowOKPopup($"{relicsGachaManager.relicsSpecialCost - CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsPoint)}만큼 유물잔해가 부족합니다!");
         }
     }
     #endregion
@@ -282,31 +282,30 @@ public class GachaUIHandler : UIBase
         string currencyName = GetCurrencyNameInKorean(manager.currencyType);
 
         PopManager.Instance.ShowOKCancelPopup(
-            $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?","넹",
+            $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?",
             onLeftClick: () =>
             {
-                // 캐릭터 가챠 연출
-                if (isCharacterGacha && characterGachaDirectorPrefab != null)
-                {
-                    CharacterGachaDirector director = EffectPoolManager.Instance.SpawnObject<CharacterGachaDirector>(characterGachaDirectorPrefab);
-                    if (director != null)
-                    {
-                        director.Play(onComplete: () => { EffectPoolManager.Instance.ReturnToPool(director.gameObject); });
-                    }
-                }
-                // 장비 가챠 연출
-                else if (isEquipmentGacha && equipmentGachaDirectorPrefab != null)
-                {
-                    EquipmentGachaDirector director = EffectPoolManager.Instance.SpawnObject<EquipmentGachaDirector>(equipmentGachaDirectorPrefab);
-                    if (director != null)
-                    {
-                        director.Play(onComplete: () => { EffectPoolManager.Instance.ReturnToPool(director.gameObject); });
-                    }
-                }
-
-                // 연출 유무와 관계없이, 실제 뽑기 로직과 결과 표시는 즉시 실행
                 if (manager.PerformMultipleGacha(count))
                 {
+                    // 캐릭터 가챠 연출
+                    if (isCharacterGacha && characterGachaDirectorPrefab != null)
+                    {
+                        CharacterGachaDirector director = EffectPoolManager.Instance.SpawnObject<CharacterGachaDirector>(characterGachaDirectorPrefab);
+                        if (director != null)
+                        {
+                            director.Play(onComplete: () => { EffectPoolManager.Instance.ReturnToPool(director.gameObject); });
+                        }
+                    }
+                    // 장비 가챠 연출
+                    else if (isEquipmentGacha && equipmentGachaDirectorPrefab != null)
+                    {
+                        EquipmentGachaDirector director = EffectPoolManager.Instance.SpawnObject<EquipmentGachaDirector>(equipmentGachaDirectorPrefab);
+                        if (director != null)
+                        {
+                            director.Play(onComplete: () => { EffectPoolManager.Instance.ReturnToPool(director.gameObject); });
+                        }
+                    }
+
                     Debug.Log($"UI 버튼 클릭으로 {itemType} {count}회 뽑기를 실행했습니다.");
                     if (isCharacterGacha)
                     {
@@ -317,7 +316,7 @@ public class GachaUIHandler : UIBase
                         QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
                     }
                 }
-            },"아뇽",
+            },
             onRightClick: () =>
             {
                 Debug.Log($"{itemType} {count}회 뽑기 취소됨");
@@ -352,7 +351,7 @@ public class GachaUIHandler : UIBase
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
-                InventoryManager.Instance.RelicsCoupon -= manager.relicsCouponCost;
+                CurrencyManager.Instance.AddCurrency(CurrencyType.RelicsPoint, -manager.relicsCouponCost);
             },
             onRightClick: () =>
             {
@@ -368,7 +367,7 @@ public class GachaUIHandler : UIBase
                 relicsGachaListPanel.gameObject.SetActive(true);
                 relicsGachaListPanel.Init(manager);
 
-                InventoryManager.Instance.RelicsPoints -= manager.relicsSpecialCost;
+                CurrencyManager.Instance.AddCurrency(CurrencyType.RelicsPoint, -manager.relicsSpecialCost);
             },
             onRightClick: () =>
             {

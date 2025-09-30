@@ -24,7 +24,7 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
         LoadAdTest();
     }
 
-    public void LoadAd()
+    /*public void LoadAd()
     {
         AdRequest adRequest = new AdRequest();
         InterstitialAd.Load(_adID, adRequest, (ad, error) =>
@@ -40,7 +40,7 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
             _loadedAd.OnAdFullScreenContentClosed += LoadAd;
             QuestSignalManager.Instance.ETCAchieve("AdWatch");
         });
-    }
+    }*/
 
     public void LoadAdTest()
     {
@@ -57,6 +57,7 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
             _rewardedInterstitialAd.OnAdFullScreenContentClosed -= LoadAdTest;
             _rewardedInterstitialAd.OnAdFullScreenContentClosed += LoadAdTest;
             QuestSignalManager.Instance.ETCAchieve("AdWatch");
+            Debug.LogError("[GoogleAdmobTester] : 광고 로드 완료");
         });
     }
     

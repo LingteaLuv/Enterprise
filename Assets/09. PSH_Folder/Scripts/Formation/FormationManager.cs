@@ -40,6 +40,8 @@ public class FormationManager : Singleton<FormationManager>
         tempFormation = DeepCopyFormation(PlayerDataManager.Instance.formation);
         HasUnsavedChanges = false;
         Debug.Log("임시 편성 초기화 완료.");
+
+        OnTempFormationChanged?.Invoke();
     }
 
     /// <summary>

@@ -19,6 +19,7 @@ namespace JHT
         public MonsterState currentState;
         public JHT_StateMachine stateMachine;
         public MonstserSearch monsterSearch;
+        public SpawnType monsterSpawnType;
 
         [Header("Target")]
         public LayerMask targetLayer;
@@ -51,6 +52,8 @@ namespace JHT
 
         [SerializeField] private List<Buff> activeBuffs = new List<Buff>();
 
+        public event Action OnDie;
+
         #region Animator
 
         [Header("Anim")]
@@ -66,19 +69,19 @@ namespace JHT
         #endregion
 
 
-        public virtual void Init(JHT_BaseMonsterStat stat)
+        public virtual void Init(JHT_BaseMonsterStat stat, SpawnType spawnType)
         {
             monsterSearch = GetComponent<MonstserSearch>();
-            StartCoroutine(StartSetting(stat));
+            StartCoroutine(StartSetting(stat, spawnType));
         }
 
-        private IEnumerator StartSetting(JHT_BaseMonsterStat stat)
+        private IEnumerator StartSetting(JHT_BaseMonsterStat stat, SpawnType spawnType)
         {
             // 풀에서 받은 이전의 값 정리
             _initialized = false;
             target = null;
             isAttacking = false;
-
+            monsterSpawnType = spawnType;
 
             yield return new WaitUntil(() => MonsterDataManager.Instance.IsPrefabLoadedFinish);
 
@@ -112,9 +115,11 @@ namespace JHT
             // 초기 상태 세팅
             StateMachineInit();
             MonsterScale(monsterStat);
-
-           
+            MonsterSizeSetting(this.monsterSpawnType);
         }
+
+        protected virtual void MonsterSizeSetting(SpawnType type) { }
+
         #region 초기설정
         private void SetAnimSkill()
         {
@@ -147,6 +152,8 @@ namespace JHT
             _initialized = true;
         }
 
+
+        // 엘리트 몬스터 있을경우 필요
         private void MonsterScale(JHT_BaseMonsterStat monsterStat)
         {
 
@@ -565,8 +572,12 @@ namespace JHT
 
         private void Die()
         {
-            BattleManager.Instance.OnEnemyDead(monsterStat);
+            if (monsterSpawnType == SpawnType.IslandStage)
+                BattleManager.Instance.OnEnemyDead(monsterStat);
+            else if (monsterSpawnType == SpawnType.BossStage)
+                JHT_BossBattleManager.Instance.MonsterCount--;
 
+            OnDie?.Invoke();
             Outit();
         }
 

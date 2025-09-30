@@ -1,4 +1,5 @@
 using JHT;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -46,6 +47,16 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     [Header("별 이미지")]
     public Image[] starImages; // 별 이미지 배열
 
+    [Header("편성 정보")]
+    [SerializeField] private GameObject inFormationIndicator; // 편성 중임을 나타내는 UI 오브젝트
+
+    [Header("캐릭터 렌더링")]
+    [SerializeField] private RawImage characterRenderImage; // 3D 모델을 표시할 RawImage
+    [SerializeField] private string renderCameraName; // 렌더링에 사용할 카메라 이름
+    [SerializeField] private float modelYOffset = -0.5f; // 캐릭터 모델 Y축 위치 보정값
+    private Camera renderCamera;
+    private GameObject spawnedCharacter;
+
     [Header("좌우 버튼")]
     public Button prevButton;
     public Button nextButton;
@@ -58,12 +69,12 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     // 버튼 순서: 0:무기, 1:방패, 2:갑옷
     [SerializeField] private Button[] openEquipmentListButtons = new Button[3];
     [SerializeField] private Image[] equippedWeaponIcons = new Image[3];
-    [SerializeField] private GameObject[] equippedWeaponBG = new GameObject[3]; 
+    [SerializeField] private GameObject[] equippedWeaponBG = new GameObject[3];
     [SerializeField] private Button autoEquipButton; // 자동 장착 버튼
     [SerializeField] private Button unequipAllButton; // 전체 해제 버튼
 
     [Header("스와이프 설정")]
-    public float swipeThreshold = 50f; // 스와이프로 인식할 최소 픽셀 거리
+    public float swipeThreshold = 500f; // 스와이프로 인식할 최소 픽셀 거리
     private Vector2 dragStartPosition;
 
     private PlayerCharacterData currentCharacterData; // 현재 표시 중인 캐릭터 데이터
@@ -122,6 +133,17 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             unequipAllButton.onClick.AddListener(OnUnequipAll);
         }
+    }
+
+    private IEnumerator FindCameraAndUpdate()
+    {
+        yield return null; // 씬의 카메라들이 활성화될 때까지 대기
+        if (renderCamera == null && !string.IsNullOrEmpty(renderCameraName))
+        {
+            GameObject camObj = GameObject.Find(renderCameraName);
+            if (camObj != null) renderCamera = camObj.GetComponent<Camera>();
+        }
+        UpdateCharacterModel();
     }
 
     private void OnAutoEquip()
@@ -205,6 +227,8 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             UpdateEquipmentIcons(); // 장비 아이콘 업데이트 호출
             UpdateRoleFactionIcon(); // 직책, 소속 아이콘 업데이트
             UpdateStarUI(currentCharacterData.Star.Value); // 성급(별) UI 업데이트
+            UpdateCharacterModel(); // 3D 모델 업데이트
+            UpdateInFormationIndicator(); // 편성 중인지 UI 업데이트
 
         }
         else
@@ -408,6 +432,15 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
         {
             PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterUpdate;
         }
+
+        if (renderCamera == null)
+        {
+            StartCoroutine(FindCameraAndUpdate());
+        }
+        else
+        {
+            UpdateCharacterModel();
+        }
     }
 
     private void OnDisable()
@@ -434,6 +467,13 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
     // 3. ClosePanel()을 UIBase의 SetHide()를 오버라이드 하도록 변경
     public override void SetHide()
     {
+        // 3D 모델이 생성되어 있다면 파괴
+        if (spawnedCharacter != null)
+        {
+            Destroy(spawnedCharacter);
+            spawnedCharacter = null;
+        }
+
         base.SetHide(); // gameObject.SetActive(false)를 호출
     }
 
@@ -511,8 +551,52 @@ public class CharacterInfoUI : UIBase, IBeginDragHandler, IEndDragHandler, IDrag
             starImages[i].color = (i < currentStars) ? Color.white : Color.black;
         }
     }
+
+    /// <summary>
+    /// 3D 캐릭터 모델을 갱신합니다.
+    /// </summary>
+    private void UpdateCharacterModel()
+    {
+        // 기존에 생성된 캐릭터가 있다면 파괴
+        if (spawnedCharacter != null)
+        {
+            Destroy(spawnedCharacter);
+        }
+
+        if (currentCharacterData == null || renderCamera == null || characterRenderImage == null)
+        {
+            if (characterRenderImage != null) characterRenderImage.gameObject.SetActive(false);
+            return;
+        }
+
+        var prefabToInstantiate = currentCharacterData.characterdata.characterPrefab;
+        if (prefabToInstantiate != null)
+        {
+            characterRenderImage.gameObject.SetActive(true);
+            Vector3 spawnPos = renderCamera.transform.position + renderCamera.transform.forward * 10f;
+            spawnPos.y += modelYOffset; // Y축 위치 보정
+            spawnedCharacter = Instantiate(prefabToInstantiate, spawnPos, renderCamera.transform.rotation, renderCamera.transform);
+        }
+        else
+        {
+            characterRenderImage.gameObject.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 현재 캐릭터가 편성에 포함되어 있는지 확인하고 UI를 갱신합니다.
+    /// </summary>
+    private void UpdateInFormationIndicator()
+    {
+        if (currentCharacterData == null || inFormationIndicator == null) return;
+
+        bool isInFormation = PlayerDataManager.Instance.IsInFormation(currentCharacterData);
+        inFormationIndicator.SetActive(isInFormation);
+    }
+
     private void UpdateEquipmentIcons()
     {
+
         if (currentCharacterData == null) return;
 
         // 버튼 순서: 0:무기, 1:방패, 2:갑옷

@@ -341,6 +341,75 @@ public class AuthManager : Singleton<AuthManager>
         return false;
     }
     
+    public async UniTask<bool> LinkWithPlayGamesAsync(Action callback)
+    {
+        // 계정 전환 가능 여부 체크
+        FirebaseUser user = FirebaseManager.Auth.CurrentUser;
+    
+        if (user == null || !user.IsAnonymous)
+        {
+            //PopupManager.Instance.ShowOKPopup("게스트x. 계정 전환 불가", "OK", () => PopupManager.Instance.HidePopup());
+            return false;
+        }
+        
+        PlayGamesPlatform.Activate();
+        
+        var tcs = new TaskCompletionSource<bool>();
+
+        void RequestServerSide()
+        {
+            PlayGamesPlatform.Instance.RequestServerSideAccess(true, async code =>
+            {
+                if (string.IsNullOrEmpty(code))
+                {
+                    tcs.SetResult(false);
+                    return;
+                }
+                
+                try
+                {
+                    Credential credential = PlayGamesAuthProvider.GetCredential(code);
+                    var linkTask = await FirebaseManager.Auth.CurrentUser.LinkWithCredentialAsync(credential);
+                    
+                    await DatabaseManager.Instance.SetNickname(linkTask.User.DisplayName);
+                    
+                    LoginManager.Instance.SetLoginType(user.ProviderId);
+                    callback.Invoke();
+                    
+                    tcs.SetResult(true);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("PlayGamesSignUp 실패: " + e);
+                    tcs.SetResult(false);
+                }
+            });
+        }
+
+        if (!PlayGamesPlatform.Instance.IsAuthenticated())
+        {
+            PlayGamesPlatform.Instance.Authenticate(status =>
+            {
+                if (status == SignInStatus.Success)
+                {
+                    Debug.Log("플레이 게임즈 로그인 성공: " + PlayGamesPlatform.Instance.GetUserId());
+                    RequestServerSide();
+                }
+                else
+                {
+                    Debug.LogError("플레이 게임즈 로그인 실패: " + status);
+                    tcs.SetResult(false);
+                }
+            });
+        }
+        else
+        {
+            RequestServerSide();
+        }
+
+        return await tcs.Task;
+    }
+    
     #endregion
 
     private async UniTask GiveCurrency()

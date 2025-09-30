@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.Numerics;
 
 namespace JHT
 {
@@ -9,13 +10,13 @@ namespace JHT
         public List<WeaponObject> weaponList;
         public List<RelicsObject> relicsList;
 
-        [Header("유물재화")]
-        private float relicsPoints;
-        private int relicsCoupon;
-        public float RelicsPoints { get { return relicsPoints; } set { relicsPoints = value; OnChangeRelicsPoints?.Invoke(relicsPoints); } }
-        public int RelicsCoupon { get { return relicsCoupon; } set {  relicsCoupon = value; OnChangeRelicsCoupon?.Invoke(relicsCoupon); } }
-        public Action<int> OnChangeRelicsCoupon;
-        public Action<float> OnChangeRelicsPoints;
+        //[Header("유물재화")]
+        //public float relicsPoints;
+        //public int relicsCoupon;
+        //public float RelicsPoints { get { return relicsPoints; } set { relicsPoints = value; OnChangeRelicsPoints?.Invoke(relicsPoints); } }
+        //public int RelicsCoupon { get { return relicsCoupon; } set {  relicsCoupon = value; OnChangeRelicsCoupon?.Invoke(relicsCoupon); } }
+        public Action OnChangeRelicsCoupon;
+        public Action OnChangeRelicsPoints;
 
         public Action<ItemObject> OnAddInventory;
         public Action<ItemObject> OnRemoveInventory;
@@ -61,6 +62,7 @@ namespace JHT
         private void Start()
         {
             AuthManager.Instance.LoginCompleted += InitDatabase;
+            //RelicsCoupon = 1;
         }
 
         private void OnEnable()
@@ -412,7 +414,8 @@ namespace JHT
             int removed = relicsList.RemoveAll(r => r.itemNum == obj.itemNum);
             if (removed > 0)
             {
-                RelicsPoints += obj.itemCost;
+                //RelicsPoints += obj.itemCost;
+                CurrencyManager.Instance.AddCurrency(CurrencyType.RelicsPoint, obj.itemCost);
             }
         }
 

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class ShopPackage : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _priceText;
+    //[SerializeField] private TextMeshProUGUI _priceText;
     [SerializeField] private Button _purchaseBtn;
     
     private string _packageId;
@@ -18,7 +18,7 @@ public class ShopPackage : MonoBehaviour
     public void Init(string packageId)
     {
         _packageId = packageId;
-        _priceText.text = $"무료 패키지 : 100 Gem 획득";
+        //_priceText.text = $"무료 패키지 : 100 Gem 획득";
         _purchaseBtn.interactable = true;
         UpdatePanel();
         

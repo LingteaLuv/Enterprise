@@ -1,3 +1,4 @@
+using System.Numerics;
 using JHT;
 using TMPro;
 using UnityEngine;
@@ -10,15 +11,15 @@ public class RelicsCoupon : MonoBehaviour
     private void OnEnable()
     {
         InventoryManager.Instance.OnChangeRelicsCoupon += ChangeValue;
-        relicsCouponCountText.text = InventoryManager.Instance.RelicsCoupon.ToString();
+        ChangeValue();
     }
     private void OnDisable()
     {
         InventoryManager.Instance.OnChangeRelicsCoupon -= ChangeValue;
     }
 
-    private void ChangeValue(int value)
+    private void ChangeValue()
     {
-        relicsCouponCountText.text = InventoryManager.Instance.RelicsCoupon.ToString();
+        relicsCouponCountText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon).ToString();
     }
 }
