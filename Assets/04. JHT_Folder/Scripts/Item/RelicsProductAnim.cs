@@ -41,10 +41,10 @@ public class RelicsProductAnim : MonoBehaviour
         rewardRT = reward.rectTransform;
 
         baseWaveSize = waveRT.sizeDelta;
-        baseWavePos = new Vector2(0, -510f);
+        baseWavePos = new Vector2(0, 440);
 
         baseShipSize = shipRT.sizeDelta;
-        baseShipPos = new Vector2(0, -30f);
+        baseShipPos = new Vector2(0, 200);
 
         baselightRot = lightRT.rotation;
         baseShipRot = shipRT.rotation;

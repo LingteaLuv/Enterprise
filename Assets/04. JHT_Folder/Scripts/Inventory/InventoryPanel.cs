@@ -23,7 +23,7 @@ namespace JHT
         [SerializeField] private Button soulButton;
 
         [SerializeField] private WeaponStatPanel weaponStatPanel;
-        [SerializeField] private RelicsStatPanel relicsStatPanel;
+        //[SerializeField] private RelicsStatPanel relicsStatPanel;
 
         [Header("DropDown")] 
         [SerializeField] private TMP_Dropdown weaponDropDown;

@@ -38,7 +38,7 @@ public class RelicsGachaManager : MonoBehaviour
         dataManager = ItemDataManager.Instance;
         gachaData = new();
         dataManager.OnRelicsDataLoadFinish += DataSetting;
-        relicsCouponCost = 2;
+        relicsCouponCost = 0;
         relicsSpecialCost = 200;
 
         //dtabase사용하게되면 변경
