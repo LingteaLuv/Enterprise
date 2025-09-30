@@ -367,6 +367,15 @@ public class DatabaseManager : Singleton<DatabaseManager>
 
     #region Time
 
+    public void SaveLoginTime()
+    {
+        Init();
+        
+        DatabaseReference userRef = FirebaseManager.DataReference.Child(_uid).Child("UserData");
+        long unixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        userRef.Child("LogInTime").SetValueAsync(unixTime);
+    }
+    
     /// <summary>
     /// 오프라인이 되었을 때 접속 종료 시각을 저장하는 메서드
     /// </summary>
