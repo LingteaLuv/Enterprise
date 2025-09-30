@@ -30,7 +30,7 @@ public class RelicsProductAnim : MonoBehaviour
     Sequence sequenceFadeInOut;
 
 
-    RelicsGachaListUI inst;
+    [SerializeField] private RelicsGachaListUI inst;
     void Awake()
     {
         waveRT = waveImg.rectTransform;
@@ -93,7 +93,7 @@ public class RelicsProductAnim : MonoBehaviour
         //chainMask.GetComponent<RectTransform>().anchoredPosition = baseMaskPos;
         //rewardRT.anchoredPosition = baseRewardPos;
 
-        inst = gameObject.GetComponentInParent<RelicsGachaListUI>();
+        //inst = gameObject.GetComponentInParent<RelicsGachaListUI>();
     }
     private void OnDisable()
     {
