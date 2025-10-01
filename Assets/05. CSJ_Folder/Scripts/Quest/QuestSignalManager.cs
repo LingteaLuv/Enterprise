@@ -81,20 +81,24 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
         Tutorial("BossTutorial");
     }
 
-    public void OnDungeonEntered()
-    {
-        OnDungeonEnter?.Invoke();
-    }
 
     public void OnTutorial()
     {
         Tutorial("RoguelikeTutorial");
     }
 
+    #region  Dungeon
+    public void OnDungeonEntered()
+    {
+        OnDungeonEnter?.Invoke();
+    }
+    
     public void OnActiveDungeon()
     {
         Active(ActiveType.Dungeon);
     }
+
+    #endregion
     
     /// <summary>
     /// 적을 죽였을 때 이를 퀘스트로 갱신할 때 호출하는 시그널
@@ -109,9 +113,51 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     {
         var key = QuestKeys.Kill(enemyId);
         SendSignal(key, count, general, daily, weekly);
+
+        if (enemyId == MonsterId.Boss)
+            BossBattleCheck();
+        
         if (enemyId is MonsterId.All) return;
         SendSignal(QuestKeys.Kill(MonsterId.All), count, general,daily, weekly);
     }
+
+    public void BossFailed(bool isClear, int count = 1, bool general = true, bool daily = true, bool weekly = true)
+    {
+        var key = QuestKeys.Achieve("ContinuousKill");
+        SendFailedSignal(key, general, daily, weekly);
+    }
+
+    public void BossBattleCheck()
+    {
+        int[] crews = { 0, 0, 0, 0 };
+        int[] factions = { 0, 0, 0 };
+        foreach (var cha in PlayerDataManager.Instance.formation)
+        {
+            foreach (var c in cha.Value )
+            {
+                factions[(int)c.characterdata.faction]++;
+                crews[(int)c.characterdata.crewRole]++;
+            }
+        }
+
+        foreach (var crew in crews)
+        {
+            if (crew <= 1) continue;
+            DeckComposition((CrewRole)crew);
+            break;
+        }
+
+        foreach (var faction in factions)
+        {
+            if (faction == 5) 
+                FactionSignal((Faction)faction);
+            else if (faction > 0) break;        
+        }
+
+        ETCAchieve("ContinuousKill");
+
+    }
+    
 
     /// <summary>
     /// 아이템 획득시 보내는 시그널
@@ -203,10 +249,16 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
         SendSignal(key, stage, general, daily, weekly);
     }
 
-    public void DeckComposition(DeckSynergy synergy, int count, bool general = true, bool daily = true, bool weekly = true)
+    public void DeckComposition(CrewRole synergy, int count = 1, bool general = true, bool daily = true, bool weekly = true)
     {
         var key = QuestKeys.DeckComposition(synergy);
         SendSignal(key, count, general, daily, weekly);
+    }
+
+    public void FactionSignal(Faction faction)
+    {
+        var key = QuestKeys.Faction(faction);
+        SendSignal(key, 1, true, true, true);
     }
 
     public void RankUp(ItemType rankKey, int rankCount, bool general = true, bool daily = true, bool weekly = true)
@@ -227,6 +279,11 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
         if(general) _signal.Raise(QuestType_Enum.General, key, count);
         if(daily) _signal.Raise(QuestType_Enum.Daily, key, count);
         if(weekly) _signal.Raise(QuestType_Enum.Weekly, key, count);
+    }
+    
+    private void SendFailedSignal(string key, bool general, bool daily, bool weekly)
+    {
+        _signal.OnFailed(key);
     }
 
     public void OnCompleteQuest(string QuestId)

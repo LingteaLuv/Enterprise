@@ -230,6 +230,8 @@ namespace _05._CSJ_Folder.Scripts.Codex
             
             _codexUIController.UpdateCodex(inst);
             
+            QuestSignalManager.Instance.ETCAchieve("CodexRegister", 1);
+            
             RequestSave();
         }
 
@@ -238,6 +240,24 @@ namespace _05._CSJ_Folder.Scripts.Codex
             // TODO : 아직 재화 구조가 확정되지 않았고 작동 확인은 진행했으므로 우선 주석 전환
             // 추후 팝업 메시지 창과 연결 가능성
             // DatabaseManager.Instance.AddCurrency(entry.RewardType, entry.amount);
+        }
+
+        public int GetCodexStat(Stat stat, Faction faction)
+        {
+            int statAmount;
+            switch (stat)
+            {
+                case Stat.CritChance:
+                    statAmount = FactionData[faction].CritChance;
+                    break;
+                case Stat.CritDamage:
+                    statAmount = FactionData[faction].CritDamage;
+                    break;
+                default:
+                    statAmount = 0;
+                    break;
+            }
+            return statAmount;
         }
 
         private void UpdateState(CodexInstance inst)

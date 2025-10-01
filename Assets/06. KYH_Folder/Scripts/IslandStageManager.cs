@@ -198,6 +198,10 @@ public class IslandStageManager : MonoBehaviour
 
         QuestSignalManager.Instance.ETCAchieve("IslandClear");
 
+        if (SynergyManager.Instance is not null && SynergyManager.Instance.IsSynergyActive())
+        {
+            QuestSignalManager.Instance.ETCAchieve("CrewSynergy");
+        }
         // 디버깅용 상태 확인
         if (!this.enabled)
             Debug.LogError(" IslandStageManager.enabled == false");
@@ -253,8 +257,8 @@ public class IslandStageManager : MonoBehaviour
                 if (GlobalStageManager.Instance.CurrentStageIndex.Value >= 4)
                 {
                     Debug.Log("→ 스테이지 5가 없으므로 4-1로 되돌림");
-                    GlobalStageManager.Instance.CurrentStageIndex.Value = 4;   // 현재 스테이지를 4로 고정
-                    GlobalStageManager.Instance.CurrentIslandIndex.Value = 0; // 첫 섬부터 다시
+                    GlobalStageManager.Instance.CurrentStageIndex.Value = 4;    // 현재 스테이지를 4로 고정
+                    GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;   // 첫 섬부터 다시
                     ResetClearMarkers();
                     StartStage();
                     yield break;

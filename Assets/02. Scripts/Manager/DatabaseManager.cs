@@ -303,7 +303,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     {
         Init();
         string nickname;
-        if (_user.IsAnonymous)
+        if (newNickname == "Guest")
         {
             nickname = $"게스트{UnityEngine.Random.Range(1000, 10000)}";
         }
@@ -689,6 +689,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
             
         SaveFieldsAsync(weaponData);
     }
+    
     #region QuestCheck (AddedByCSJ)
     
     // reset 기준 UTC 기준 시간선; 기본인 9는 Kst인 UTC+09:00 기준입니다.
@@ -704,7 +705,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// </summary>
     /// <param name="resetTime">기본 기준 시간입니다. </param>
     /// <returns>일일 초기화가 필요한지 bool 값으로 반환합니다.</returns>
-    public async Task<bool> DailyCheckIn(int resetTime = 6)
+    public async Task<bool> DailyCheckIn(int resetTime = 9)
     {
         Init();
         
@@ -810,7 +811,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <param name="resetDay">초기화 기준 요일입니다. 기본 값은 월요일입니다.</param>
     /// <param name="resetTime">일일 초기화 기준 시각입니다. </param>
     /// <returns></returns>
-    public async Task<bool> WeeklyCheckIn(DayOfWeek resetDay = DayOfWeek.Monday, int resetTime = 6)
+    public async Task<bool> WeeklyCheckIn(DayOfWeek resetDay = DayOfWeek.Monday, int resetTime = 9)
     {
         Init();
         
@@ -902,7 +903,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
     /// <summary>
     /// 주간 퀘스트가 초기화되는 경계를 받아옵니다. (현재 시간을 기점으로 마지막으로 초기화된 경계)
     /// </summary>
-    private static DateTime GetWeeklyBoundary(DateTime now, DayOfWeek resetDay, int resetTime)
+    private static DateTime GetWeeklyBoundary(DateTime now, DayOfWeek resetDay, int resetTime = 9)
     {
         // 경계 기본 값을 지정합니다.
         var BaseToday = new DateTime(now.Year, now.Month, now.Day, resetTime, 0, 0, DateTimeKind.Utc);
@@ -966,7 +967,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         return 0;
     }
 
-    public bool QuickDailyCheck(int resetTime = 6)
+    public bool QuickDailyCheck(int resetTime = 9)
     {
         long approxMs = GetApproxServerTime();
         if (approxMs == 0) return true;
@@ -980,7 +981,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         return lastStd < dailyBoundary;
     }
 
-    public bool QuickWeeklyCheck(DayOfWeek resetDay = DayOfWeek.Monday, int resetTime = 6)
+    public bool QuickWeeklyCheck(DayOfWeek resetDay = DayOfWeek.Monday, int resetTime = 9)
     {
         long approxMs = GetApproxServerTime();
         if (approxMs == 0) return true;
@@ -1260,7 +1261,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
     }
     
     #endregion
-    
     
     #endregion
 }

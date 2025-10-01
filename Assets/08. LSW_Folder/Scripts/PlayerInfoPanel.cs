@@ -8,13 +8,15 @@ using UnityEngine.UI;
 public class PlayerInfoPanel : UIBase
 {
     [SerializeField] private TextMeshProUGUI _nicknameText;
-    //[SerializeField] private TextMeshProUGUI _loginType;
+    [SerializeField] private TextMeshProUGUI _uidText;
+    [SerializeField] private Button _nicknameChangeBtn;
     [SerializeField] private Button _googleLinkBtn;
     [SerializeField] private Button _playGamesLinkBtn;
     //[SerializeField] private Button _logoutBtn;
     [SerializeField] private Button _exitBtn;
     
-    public Action OnTouchedExitBtn;
+    public Action OnClickedExitBtn;
+    public Action OnClickedNicknameChangeBtn;
     
     private void Start()
     {
@@ -29,10 +31,14 @@ public class PlayerInfoPanel : UIBase
             _playGamesLinkBtn.gameObject.SetActive(false);
         }
         
+        _nicknameChangeBtn.onClick.AddListener(async () =>
+        {
+            OnClickedNicknameChangeBtn.Invoke();
+        });
+        
         _exitBtn.onClick.AddListener(() =>
         {
-            OnTouchedExitBtn?.Invoke();
-            gameObject.SetActive(false);
+            OnClickedExitBtn?.Invoke();
         });
         gameObject.SetActive(false);
     }
@@ -40,13 +46,13 @@ public class PlayerInfoPanel : UIBase
     private void OnEnable()
     {
         _nicknameText.text = LoginManager.Instance.Nickname;
-        //_loginType.text = LoginManager.Instance.LoginType.ToString();
+        _uidText.text = $"UID : {FirebaseManager.Auth.CurrentUser.UserId.Substring(0,6)}";
     }
 
     private void OnDisable()
     {
         _nicknameText.text = "";
-        //_loginType.text = "";
+        _uidText.text = "";
     }
     
     private async UniTask SetText()

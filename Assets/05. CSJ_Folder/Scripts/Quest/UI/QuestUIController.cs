@@ -30,7 +30,7 @@ public class QuestUIController : MonoBehaviour
     private void Awake()
     {
         _questButton.onClick.AddListener(OnClickQuest);
-        SubmitButton();
+        // SubmitButton();
     }
 
     private void OnClickQuest()
@@ -86,63 +86,63 @@ public class QuestUIController : MonoBehaviour
     }
     
     
-    public Action OnForceClear;
-    public Action OnForceInit;
-    [SerializeField] private Button KillButton;
-    [SerializeField] private Button GachaButton;
-    [SerializeField] private Button LevelUpButton;
-    [SerializeField] private Button UpgradeButton;
-    private void OnClickCheatButton()
-    {
-        OnForceClear?.Invoke();
-    }
-
-    private void OnClickInitButton()
-    {
-        OnForceInit?.Invoke();
-    }
-    
-    private void SubmitButton()
-    {
-        if (_CheatButton !=null)
-            _CheatButton.onClick.AddListener(OnClickCheatButton);
-        if (KillButton !=null)
-            KillButton.onClick.AddListener(OnClickKillButton);
-        if (GachaButton !=null)
-            GachaButton.onClick.AddListener(OnClickGachaButton);
-        if (LevelUpButton !=null)
-            LevelUpButton.onClick.AddListener(OnClickLevelUpButton);
-        if (UpgradeButton !=null)
-            UpgradeButton.onClick.AddListener(OnClickUpgradeButton);
-        if (_InitButton is not null)
-            _InitButton.onClick.AddListener(OnClickInitButton);
-    }
-
-    private void OnClickKillButton()
-    {
-        QuestSignalManager.Instance.KillEnemy(MonsterId.All);
-    }
-
-    private void OnClickGachaButton()
-    {
-        QuestSignalManager.Instance.GachaPull(ItemType.Character, 5);
-        QuestSignalManager.Instance.GachaPull(ItemType.Equipment, 5);
-        QuestSignalManager.Instance.GachaPull(ItemType.Relic, 5);
-        QuestSignalManager.Instance.GachaPull(ItemType.RareRelic, 5);
-    }
-
-    private void OnClickLevelUpButton()
-    {
-        QuestSignalManager.Instance.LevelUp(ItemType.Character, 5);
-        QuestSignalManager.Instance.LevelUp(ItemType.Relic, 5);
-        QuestSignalManager.Instance.LevelUp(ItemType.Equipment, 5);
-    }
-
-    private void OnClickUpgradeButton()
-    {
-        QuestSignalManager.Instance.Upgrade(UpgradeType.Atk,5);
-        QuestSignalManager.Instance.Upgrade(UpgradeType.Def,5);
-        QuestSignalManager.Instance.Upgrade(UpgradeType.Hp, 5);
-    }
+    // public Action OnForceClear;
+    // public Action OnForceInit;
+    // [SerializeField] private Button KillButton;
+    // [SerializeField] private Button GachaButton;
+    // [SerializeField] private Button LevelUpButton;
+    // [SerializeField] private Button UpgradeButton;
+    // private void OnClickCheatButton()
+    // {
+    //     OnForceClear?.Invoke();
+    // }
+    //
+    // private void OnClickInitButton()
+    // {
+    //     OnForceInit?.Invoke();
+    // }
+    //
+    // private void SubmitButton()
+    // {
+    //     if (_CheatButton !=null)
+    //         _CheatButton.onClick.AddListener(OnClickCheatButton);
+    //     if (KillButton !=null)
+    //         KillButton.onClick.AddListener(OnClickKillButton);
+    //     if (GachaButton !=null)
+    //         GachaButton.onClick.AddListener(OnClickGachaButton);
+    //     if (LevelUpButton !=null)
+    //         LevelUpButton.onClick.AddListener(OnClickLevelUpButton);
+    //     if (UpgradeButton !=null)
+    //         UpgradeButton.onClick.AddListener(OnClickUpgradeButton);
+    //     if (_InitButton is not null)
+    //         _InitButton.onClick.AddListener(OnClickInitButton);
+    // }
+    //
+    // private void OnClickKillButton()
+    // {
+    //     QuestSignalManager.Instance.KillEnemy(MonsterId.All);
+    // }
+    //
+    // private void OnClickGachaButton()
+    // {
+    //     QuestSignalManager.Instance.GachaPull(ItemType.Character, 5);
+    //     QuestSignalManager.Instance.GachaPull(ItemType.Equipment, 5);
+    //     QuestSignalManager.Instance.GachaPull(ItemType.Relic, 5);
+    //     QuestSignalManager.Instance.GachaPull(ItemType.RareRelic, 5);
+    // }
+    //
+    // private void OnClickLevelUpButton()
+    // {
+    //     QuestSignalManager.Instance.LevelUp(ItemType.Character, 5);
+    //     QuestSignalManager.Instance.LevelUp(ItemType.Relic, 5);
+    //     QuestSignalManager.Instance.LevelUp(ItemType.Equipment, 5);
+    // }
+    //
+    // private void OnClickUpgradeButton()
+    // {
+    //     QuestSignalManager.Instance.Upgrade(UpgradeType.Atk,5);
+    //     QuestSignalManager.Instance.Upgrade(UpgradeType.Def,5);
+    //     QuestSignalManager.Instance.Upgrade(UpgradeType.Hp, 5);
+    // }
     
 }

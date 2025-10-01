@@ -8,10 +8,10 @@ public class BossBattleTestManager : MonoBehaviour
     [SerializeField] private Button _successBtn;
     [SerializeField] private Button _failBtn;
     [SerializeField] private Button _startBtn;
-    
+
     private readonly string _returnSceneName = "Game";
-    
-    
+
+
     private void Start()
     {
         _successBtn.onClick.AddListener(() =>
@@ -47,7 +47,9 @@ public class BossBattleTestManager : MonoBehaviour
         {
             Debug.Log(" 보스전 패배!");
             GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;
-            GlobalStageManager.Instance.bossBattleTriggered = false; // 추가
+            GlobalStageManager.Instance.bossBattleTriggered = true; // 추가
+
+            QuestSignalManager.Instance.BossFailed(false);
             StartCoroutine(Delay2());
         });
 
@@ -55,7 +57,7 @@ public class BossBattleTestManager : MonoBehaviour
         {
             StartCoroutine(Delay());
         });
-        
+
         _successBtn.gameObject.SetActive(false);
         _failBtn.gameObject.SetActive(false);
     }
@@ -68,7 +70,7 @@ public class BossBattleTestManager : MonoBehaviour
         _failBtn.gameObject.SetActive(true);
         BossBattleManager.IsBossBattle = false;
     }
-    
+
     private IEnumerator Delay1()
     {
         _successBtn.gameObject.SetActive(false);
@@ -77,7 +79,7 @@ public class BossBattleTestManager : MonoBehaviour
         SceneManager.LoadScene(_returnSceneName);
         BossBattleManager.IsBossBattle = false;
     }
-    
+
     private IEnumerator Delay2()
     {
         _successBtn.gameObject.SetActive(false);
