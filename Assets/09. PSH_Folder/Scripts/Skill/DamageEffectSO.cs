@@ -39,7 +39,8 @@ public class DamageEffectSO : SkillEffectSO
             var moveEffect = effectObj.GetComponent<IMoveEffect>();
             if (moveEffect != null)
             {
-                moveEffect.Init(casterComp.transform, targetComp.transform);
+               // moveEffect.Init(casterComp.transform, targetComp.transform);
+                moveEffect.Init(targetComp.transform);
             }
             else
             {

@@ -10,5 +10,5 @@ public interface IMoveEffect
     /// </summary>
     /// <param name="caster">시전자 트랜스폼</param>
     /// <param name="target">대상 트랜스폼</param>
-    void Init(Transform caster, Transform target);
+    void Init( Transform target);
 }
