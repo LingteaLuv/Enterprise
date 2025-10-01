@@ -238,6 +238,15 @@ public class SynergyManager : Singleton<SynergyManager>
     
     #endregion
 
+    #region Synergy Check (CSJ Added)
+
+    public bool IsSynergyActive()
+    {
+        return _combatSynergies != null && _combatSynergies.Count != 0;
+    }
+
+    #endregion
+
     // 사용되지 않는 이전 함수들입니다. 필요하다면 참고 후 삭제하세요.
     // private void UpdateActiveSynergies(List<int> currentPartyIDs) { ... }
     // private void ActivateSynergy(SynergySO synergy) { ... }
