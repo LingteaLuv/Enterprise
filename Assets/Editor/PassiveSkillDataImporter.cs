@@ -55,7 +55,8 @@ public class PassiveSkillDataImporter
 
                 // 공통 파라미터 읽기
                 string effectType = GetString(fields, headerMap, "EffectType");
-                string prefabName = GetString(fields, headerMap, "EffectPrefab_Name");
+                string prefabName1 = GetString(fields, headerMap, "EffectPrefab_Name1");
+                string prefabName2 = GetString(fields, headerMap, "EffectPrefab_Name2");
                 string paramString1 = GetString(fields, headerMap, "Param_String1");
                 string paramString2 = GetString(fields, headerMap, "Param_String2");
                 float paramFloat1 = GetFloat(fields, headerMap, "Param_Float1");
@@ -103,25 +104,47 @@ public class PassiveSkillDataImporter
                 // 공통 로직: 프리팹 연결
                 if (skillEffect != null)
                 {
-                    if (!string.IsNullOrEmpty(prefabName))
+                    if (!string.IsNullOrEmpty(prefabName1))
                     {
-                        string prefabPath = EFFECT_PREFAB_ASSET_PATH + prefabName + ".prefab";
-                        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                        string prefabPath1 = EFFECT_PREFAB_ASSET_PATH + prefabName1 + ".prefab";
+                        GameObject casterEffectPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath1);
 
-                        if (prefab != null)
+                        if (casterEffectPrefab != null)
                         {
-                            skillEffect.effectPrefab = prefab;
+                            skillEffect.casterEffectPrefab = casterEffectPrefab;
                         }
                         else
                         {
-                            Debug.LogWarning($"[PassiveSkillParser] 이펙트 프리팹을 찾을 수 없습니다: {prefabPath}");
-                            skillEffect.effectPrefab = null; // 못찾으면 필드를 null로 설정
+                            Debug.LogWarning($"[PassiveSkillParser] 캐스터 프리팹을 찾을 수 없습니다: {prefabPath1}");
+                            skillEffect.casterEffectPrefab = null; // 못찾으면 필드를 null로 설정
                         }
                     }
                     else
                     {
-                        skillEffect.effectPrefab = null; // CSV에 이름이 없으면 null로 설정
+                        skillEffect.casterEffectPrefab = null; // CSV에 이름이 없으면 null로 설정
                     }
+
+                    if (!string.IsNullOrEmpty(prefabName2))
+                    {
+                        string prefabPath2 = EFFECT_PREFAB_ASSET_PATH + prefabName2 + ".prefab";
+                        GameObject targetEffectPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath2);
+
+
+                        if (targetEffectPrefab != null)
+                        {
+                            skillEffect.targetEffectPrefab = targetEffectPrefab;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[PassiveSkillParser] 타겟 프리팹을 찾을 수 없습니다: {prefabPath2}");
+                            skillEffect.targetEffectPrefab = null; // 못찾으면 필드를 null로 설정
+                        }
+                    }
+                    else
+                    {
+                        skillEffect.targetEffectPrefab = null; // CSV에 이름이 없으면 null로 설정
+                    }
+
 
                     EditorUtility.SetDirty(skillEffect);
                 }

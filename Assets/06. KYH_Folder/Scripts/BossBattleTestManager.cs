@@ -47,7 +47,7 @@ public class BossBattleTestManager : MonoBehaviour
         {
             Debug.Log(" 보스전 패배!");
             GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;
-            GlobalStageManager.Instance.bossBattleTriggered = false; // 추가
+            GlobalStageManager.Instance.bossBattleTriggered = true; // 추가
 
             QuestSignalManager.Instance.BossFailed(false);
             StartCoroutine(Delay2());

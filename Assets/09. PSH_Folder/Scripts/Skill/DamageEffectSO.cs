@@ -14,10 +14,42 @@ public class DamageEffectSO : SkillEffectSO
     [Tooltip("타격 사이의 시간 간격 (밀리초)")]
     public int delayBetweenHits = 100;
 
+    [Header("이동 효과 설정")]
+    [Tooltip("Caster에서 Target으로 이동하는 효과 프리팹")]
+    public GameObject moveEffectPrefab;
+
 
     public override void ApplyEffect(IAttacker caster, IDamageable target)
     {
+        Debug.Log($"[{name}] ApplyEffect 호출됨. Caster: {caster}, Target: {target}");
         base.ApplyEffect(caster, target);
+
+        if (moveEffectPrefab != null && caster is Component casterComp && target is Component targetComp)
+        {
+            Debug.Log($"[{name}] 이동 효과 생성 시도.");
+            // 이동 효과의 지속시간을 2초로 설정합니다.
+            GameObject effectObj = EffectPoolManager.Instance.SpawnEffect(moveEffectPrefab, casterComp.transform.position, Quaternion.identity, 2f);
+            if (effectObj == null)
+            {
+                Debug.LogError($"[{name}] EffectPoolManager가 null을 반환했습니다.");
+                ApplyDamageAsync(caster, target);
+                return;
+            }
+
+            var moveEffect = effectObj.GetComponent<IMoveEffect>();
+            if (moveEffect != null)
+            {
+                moveEffect.Init(casterComp.transform, targetComp.transform);
+            }
+            else
+            {
+                Debug.LogWarning($"[{name}] MoveEffectPrefab에 IMoveEffect 컴포넌트가 없습니다.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[{name}] 이동 효과를 생성할 수 없습니다. Prefab: {moveEffectPrefab != null}, Caster: {caster is Component}, Target: {target is Component}");
+        }
 
         //CombatCharacter casterCharacter = caster as CombatCharacter;
         //if (casterCharacter == null) return;

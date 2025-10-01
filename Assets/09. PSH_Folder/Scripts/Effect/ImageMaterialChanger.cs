@@ -71,7 +71,7 @@ public class ImageMaterialChanger : MonoBehaviour
         if (activeEffects.Any())
         {
             EffectType currentEffect = activeEffects.Last();
-            Material materialToApply = EffectMaterialManager.Instance.GetMaterial(currentEffect);
+            Material materialToApply = EffectDatabase.Instance.GetMaterial(currentEffect);
 
             if (materialToApply != null)
             {

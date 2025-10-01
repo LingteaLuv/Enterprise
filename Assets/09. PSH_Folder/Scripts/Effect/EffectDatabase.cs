@@ -11,7 +11,7 @@ public enum EffectType
     // 나중에 추가
 }
 
-public class EffectMaterialManager : Singleton<EffectMaterialManager>
+public class EffectDatabase : Singleton<EffectDatabase>
 {
     [System.Serializable]
     public class EffectMaterialPair
@@ -22,6 +22,10 @@ public class EffectMaterialManager : Singleton<EffectMaterialManager>
 
     // 이펙트 머테리얼 목록을 인스펙터에서 설정할 수 있어요!
     public List<EffectMaterialPair> effectMaterials;
+
+    // 프리팹도 여기서 관리
+    public GameObject deathEffectPrefab;
+
 
     // 실제 게임에서는 리스트보다 딕셔너리(사전)로 찾는게 훨씬 빨라요!
     private Dictionary<EffectType, Material> materialDictionary;
