@@ -1307,7 +1307,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             }
         }
 
-        private void ScheduleNextResetTick(int resetHour = 6, DayOfWeek resetDay = DayOfWeek.Monday)
+        private void ScheduleNextResetTick(int resetHour = 9, DayOfWeek resetDay = DayOfWeek.Monday)
         {
             if (_nextResetCoroutine != null)
                 StopCoroutine(_nextResetCoroutine);
