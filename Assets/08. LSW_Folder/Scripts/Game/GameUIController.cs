@@ -13,7 +13,7 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     [SerializeField] private Toggle _attendanceToggle;
     [SerializeField] private Toggle _toolToggle;
     [SerializeField] private Button _shipBtn;
-    [SerializeField] private Toggle _codexToggle;
+    [SerializeField] private Button _codexBtn;
     [SerializeField] private Button _playerInfoBtn;
     [SerializeField] private Button _bossBtn;
     [SerializeField] private Button _dungeonBtn;
@@ -86,10 +86,9 @@ public class GameUIController : UIController<GameUIController.GameUIType>
             ShowUI(GameUIType.PlayerInfoPanel);
         });
         
-        _codexToggle.onValueChanged.AddListener((isOn) =>
+        _codexBtn.onClick.AddListener(() =>
         {
-            if (!isOn) HideUI(GameUIType.CodexPanel);
-            else ShowUI(GameUIType.CodexPanel);
+            ShowUI(GameUIType.CodexPanel);
         });
         
         _bossBtn.onClick.AddListener(() =>
