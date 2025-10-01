@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening.Core.Easing;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ public class GlobalStageManager : MonoBehaviour
 
     public bool bossBattleTriggered = false;
 
-    private async void Awake()
+    private void Awake()
     {
         if (Instance != null && Instance != this)
         {
@@ -22,7 +23,18 @@ public class GlobalStageManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject); // 씬 전환에도 유지
+    }
 
+    private void Start()
+    {
+        AuthManager.Instance.LoginCompletedFirstEvent += async () =>
+        {
+            await Initialize();
+        };
+    }
+
+    private async UniTask Initialize()
+    {
         if(!await DatabaseManager.Instance.CheckFieldAsync("StageData/Stage", (long value) =>
            {
                CurrentStageIndex = new Property<int>((int)value);

@@ -13,6 +13,8 @@ public class AuthManager : Singleton<AuthManager>
 {
     private FirebaseAuth _auth;
     private bool _isClicked;
+
+    public event Action LoginCompletedFirstEvent;
     public event Action LoginCompleted;
     public bool isLogined = false;
 
@@ -52,18 +54,19 @@ public class AuthManager : Singleton<AuthManager>
                 return false;
             }
             
-            /*if (user.IsAnonymous)
+            if (user.IsAnonymous)
             {
                 await DatabaseManager.Instance.DeleteDataAsync();
                 await user.DeleteAsync();
                 _auth.SignOut();
                 return false;
-            }*/
+            }
 
             FirebaseUser currentUser = FirebaseManager.Auth.CurrentUser;
             if (currentUser != null)
             {
                 LoginManager.Instance.SetLoginType(user.ProviderId);
+                LoginCompletedFirstEvent?.Invoke();
                 LoginCompleted?.Invoke();
                 return true;
             }
@@ -102,6 +105,7 @@ public class AuthManager : Singleton<AuthManager>
             
             await DatabaseManager.Instance.SetNickname();
             LoginManager.Instance.SetLoginType("test");
+            LoginCompletedFirstEvent?.Invoke();
             LoginCompleted?.Invoke();
         }
         _isClicked = false;
@@ -137,6 +141,7 @@ public class AuthManager : Singleton<AuthManager>
             
             await DatabaseManager.Instance.SetNickname();
             LoginManager.Instance.SetLoginType("anonymous");
+            LoginCompletedFirstEvent?.Invoke();
             LoginCompleted?.Invoke();
         }
         _isClicked = false;
@@ -194,6 +199,7 @@ public class AuthManager : Singleton<AuthManager>
             await DatabaseManager.Instance.SetNickname(userTask.DisplayName);
             //await user.ReloadAsync();
             LoginManager.Instance.SetLoginType(user.ProviderId);
+            LoginCompletedFirstEvent?.Invoke();
             LoginCompleted?.Invoke();
             return true;
         }
@@ -280,6 +286,7 @@ public class AuthManager : Singleton<AuthManager>
             await DatabaseManager.Instance.SetNickname(user.DisplayName);
             //await user.ReloadAsync();
             LoginManager.Instance.SetLoginType(user.ProviderId);
+            LoginCompletedFirstEvent?.Invoke();
             LoginCompleted?.Invoke();
         }
     }
