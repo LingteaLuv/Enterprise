@@ -48,6 +48,8 @@ public class EquipmentGachaDirector : MonoBehaviour
     private void OnEnable()
     {
         skipBtn.onClick.AddListener(() => { EffectPoolManager.Instance.ReturnToPool(gameObject); });
+        RectTransform rect = GetComponent<RectTransform>();
+        rect.anchoredPosition = Vector2.zero;
     }
 
     private void OnDisable()
