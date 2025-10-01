@@ -40,7 +40,6 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     public bool isDataLoaded { get; private set; }
     public bool isTableLoaded { get; private set; }
     public bool IsPrefabLoadedFinish;
-    public bool isSkillListFinish;
 
     private bool isDataLodedFinish;
     public bool isTableLoadedFinish { get; private set; }

@@ -41,7 +41,7 @@ namespace JHT
         public bool isSkillSetReady { get; set; }
 
         private GameObject projectilePoolParent;
-        private GameObject monsterPoolParent;
+        public GameObject monsterPoolParent;
         private GameObject damageTextPoolParent;
         private GameObject spawnPosParent;
         

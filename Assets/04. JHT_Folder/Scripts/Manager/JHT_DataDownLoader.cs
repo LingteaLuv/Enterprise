@@ -102,6 +102,7 @@ namespace JHT
                     so.itemPowerType = (PowerType)Enum.Parse(typeof(PowerType), row[5]);
                     so.startPower[rarity - 1] = float.Parse(row[8]);
                     so.upPower[rarity - 1] = (float.Parse(row[6]) - so.startPower[rarity - 1])/100;
+                    so.cost[rarity - 1] = int.Parse(row[7]);
                     //so.rarityImage[rarity-1] = Resources.Load<Sprite>(row[8]);
                 }
             }
