@@ -52,6 +52,7 @@ namespace JHT
             itemIcon = data.icon;
             itemNum = data.itemNum;
             itemName = data.itemName;
+            itemCost = data.cost[(int)curRarity - 1];
 
             //itemPower = SetPower(data,level);
             itemPower = data.startPower[(int)curRarity - 1] + data.upPower[(int)curRarity - 1] * level;

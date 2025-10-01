@@ -216,7 +216,6 @@ MonoBehaviour:
   _googleLoginBtn: {fileID: 1886686620}
   _guestLoginBtn: {fileID: 1415596461}
   _playGamesLoginBtn: {fileID: 1611712680}
-  _testLoginBtn: {fileID: 376085819}
 --- !u!1 &134951661
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,9 +310,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _startBtn: {fileID: 487000538}
-  _linkBtn: {fileID: 601764843}
-  _deleteBtn: {fileID: 1444414203}
-  _logoutBtn: {fileID: 2080236397}
   _welcomeText: {fileID: 1584194462}
 --- !u!1 &167068982
 GameObject:
@@ -4505,6 +4501,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 1155779086736858009}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5221a4a5f4c57124d80da26a9e6eb969, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  _isStatic: 1
+  monsterTableList: []
+  monsterDataList: []
+  monsterPrefabList: []
+  monsterSkillList: []
+  animatorController: {fileID: 0}
+  skillManager:
+    effects: []
+  IsPrefabLoadedFinish: 0
+--- !u!114 &1155779086736858011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1155779086736858009}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a32fd915b4aed74b8c28939e3387c8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
@@ -4524,29 +4542,7 @@ MonoBehaviour:
   curMonsterCountList: []
   stageIndex: 0
   roundIndex: 0
---- !u!114 &1155779086736858011
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1155779086736858009}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5221a4a5f4c57124d80da26a9e6eb969, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _dontDestroyOnLoad: 1
-  _isStatic: 1
-  monsterTableList: []
-  monsterDataList: []
-  monsterPrefabList: []
-  monsterSkillList: []
-  animatorController: {fileID: 0}
-  skillManager:
-    effects: []
-  IsPrefabLoadedFinish: 0
-  isSkillListFinish: 0
+  monsterPoolParent: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

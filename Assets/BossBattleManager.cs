@@ -4,8 +4,9 @@ using System.Linq;
 using JHT;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using System;
 
-public class BossBattleManager : MonoBehaviour
+public class BossBattleManager : Singleton<BossBattleManager>
 {
     [Header("플레이어 스폰 포인트")]
     [SerializeField] private Transform playerSpawnPoint;
@@ -13,34 +14,67 @@ public class BossBattleManager : MonoBehaviour
     [Header("보스 스폰 위치 설정")]
     [SerializeField] private JHT_MonsterSetManager bossPos; // 팀원 방식 사용
 
-    private List<GameObject> currentPlayers = new();
+    private List<GameObject> currentPlayers;
     private CameraFollow cameraFollow;
 
     public static bool IsBossBattle = false;
     private readonly string _returnSceneName = "Game";
 
     private JHT_MonsterSpawnManager monsterSpawnManager;
-    private List<JHT_BaseMonsterStat> spawnBossMonster;
+    public List<JHT_BaseMonsterStat> spawnBossMonster;
 
     [SerializeField] private UnityEngine.UI.Button startBattleButton;
     [SerializeField] private float startDelay = 3f; // 몇 초 뒤에 켜줄지
 
+    [SerializeField] private UnityEngine.UI.Button battleButton;
+
+    public Action<JHT_BaseMonsterStat> OnDieMonster;
+
+    Coroutine delay1;
+    Coroutine delay2;
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+    }
+
+    private void OnEnable()
+    {
+        OnDieMonster += HandleBossDefeated;
+        battleButton.onClick.AddListener(Battle);
+    }
+
+    private void OnDisable()
+    {
+        OnDieMonster -= HandleBossDefeated;
+        battleButton.onClick.RemoveListener(Battle);
+    }
+
     private void Start()
     {
-        IsBossBattle = true;
+    }
+
+    private void Battle()
+    {
         cameraFollow = Camera.main?.GetComponent<CameraFollow>();
         monsterSpawnManager = JHT_MonsterSpawnManager.Instance;
 
         SpawnPlayers();
         SpawnBoss();
 
-        if (startBattleButton != null)
-            startBattleButton.onClick.AddListener(() => StartCoroutine(EnableMeleeAfterDelay()));
+        StartCoroutine(EnableMeleeAfterDelay());
     }
 
     #region 플레이어 스폰
     private void SpawnPlayers()
     {
+        currentPlayers = new();
+
+        IsBossBattle = true;
         var party = PartyManager.Instance.GetAllPartyMembers();
 
         foreach (var character in party.Select((ch, i) => new { ch, i }))
@@ -81,6 +115,7 @@ public class BossBattleManager : MonoBehaviour
             return;
         }
 
+        spawnBossMonster = new();
         if (monsterSpawnManager.curMonsterCountList.Count > 0)
             monsterSpawnManager.curMonsterCountList.Clear();
 
@@ -105,19 +140,26 @@ public class BossBattleManager : MonoBehaviour
             JHT_BaseMonsterFSM obj = monsterSpawnManager.monsterPool.GetPooled() as JHT_BaseMonsterFSM;
             obj.Init(spawnBossMonster[i], SpawnType.BossStage);
             obj.transform.position = bossPosSpawn.SetPos(spawnBossMonster[i]).position;
-
+            //obj.GetComponent<JHT_NormalMonster>().enabled = false;
             // 보스 사망 이벤트 연결
-            obj.OnDie += HandleBossDefeated;
         }
     }
     #endregion
 
     #region 승패 처리
-    private void HandleBossDefeated()
+
+
+    private void HandleBossDefeated(JHT_BaseMonsterStat stat)
     {
         // 보스 몬스터 다 죽으면 전투 종료
-        if (monsterSpawnManager != null && monsterSpawnManager.curMonsterCountList.Count == 0)
+        
+        spawnBossMonster.Remove(stat);
+
+        if (spawnBossMonster.Count <= 0)
+        {
             EndBattle(true);
+        }
+
     }
 
     public void OnPlayerDead(GameObject player)
@@ -131,8 +173,9 @@ public class BossBattleManager : MonoBehaviour
 
     private void EndBattle(bool isVictory)
     {
-        IsBossBattle = false;
 
+        IsBossBattle = false;
+        spawnBossMonster.Clear();
         // 카메라 추적 해제
         if (cameraFollow != null)
             cameraFollow.SetTargets(new List<Transform>());
@@ -173,12 +216,25 @@ public class BossBattleManager : MonoBehaviour
     {
         yield return new WaitForSeconds(8f);
         SceneManager.LoadScene(_returnSceneName);
+
+        if (delay1 != null)
+        {
+            StopCoroutine(delay1);
+            delay1 = null;
+        }
+
     }
 
     private IEnumerator Delay2()
     {
         yield return new WaitForSeconds(8f);
         SceneManager.LoadScene(_returnSceneName);
+
+        if (delay2 != null)
+        {
+            StopCoroutine(delay2);
+            delay2 = null;
+        }
     }
     #endregion
 
@@ -196,5 +252,6 @@ public class BossBattleManager : MonoBehaviour
                 Debug.Log($"{player.name} 의 MeleeCharacter 스크립트 활성화됨!");
             }
         }
+
     }
 }
