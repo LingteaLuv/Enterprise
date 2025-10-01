@@ -37,6 +37,16 @@ public class SkillEffectSO : ScriptableObject
     {
         if (prefab == null || comp == null) return;
         EffectPoolManager.Instance.SpawnEffect(prefab, comp.transform.position, Quaternion.identity, 2f);
+        var moveEffect = prefab.GetComponent<IMoveEffect>();
+        if (moveEffect != null)
+        {
+            // moveEffect.Init(casterComp.transform, targetComp.transform);
+            moveEffect.Init(comp.transform);
+        }
+        else
+        {
+            Debug.LogWarning($"[{name}] MoveEffectPrefab에 IMoveEffect 컴포넌트가 없습니다.");
+        }
     }
 }
 
