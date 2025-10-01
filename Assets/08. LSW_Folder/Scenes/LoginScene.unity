@@ -293,6 +293,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &314358816
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 314358818}
+  - component: {fileID: 314358817}
+  m_Layer: 0
+  m_Name: GlobalStageManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &314358817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 314358816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8efe2c38e0e6b6f4b9c8a8cca60594cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bossBattleTriggered: 0
+--- !u!4 &314358818
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 314358816}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 572.8537, y: 1530.9012, z: 1.3980204}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &487000536
 GameObject:
   m_ObjectHideFlags: 0
@@ -2784,7 +2829,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4997080597747607661, guid: 8d108b6ceb29fb444be44e5912a03043, type: 3}
       propertyPath: giveAllCharactersForTest
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3716,7 +3761,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ver 0.2.6
+  m_text: ver 0.2.9
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2a9704dbe25b10a4d9fb55c22ce1d210, type: 2}
   m_sharedMaterial: {fileID: 4298989957701501213, guid: 2a9704dbe25b10a4d9fb55c22ce1d210, type: 2}
@@ -3950,3 +3995,4 @@ SceneRoots:
   - {fileID: 1471218226}
   - {fileID: 863821528}
   - {fileID: 726960256}
+  - {fileID: 314358818}
