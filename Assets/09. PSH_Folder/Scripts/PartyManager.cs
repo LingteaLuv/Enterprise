@@ -6,7 +6,6 @@ public class PartyManager : Singleton<PartyManager>
 {
     [Header("캐릭터 생성 설정")]
     [SerializeField] private GameObject characterPrefab; // 캐릭터로 사용할 프리팹
-    [SerializeField] private Transform characterParent; // 생성된 캐릭터들이 위치할 부모 트랜스폼
 
     [Header("전투시만 필요한 스탯")]
     public float moveSpeed;
@@ -30,11 +29,6 @@ public class PartyManager : Singleton<PartyManager>
         return activeParty;
     }
 
-    private void Start()
-    {
-        SetupBattleParty();
-    }
-
     private void OnEnable()
     {
         if (PlayerDataManager.Instance != null)
@@ -53,6 +47,15 @@ public class PartyManager : Singleton<PartyManager>
 
     public void SetupBattleParty()
     {
+        // 씬 안에서 "CharacterParent"라는 태그를 가진 오브젝트를 찾습니다.
+        Transform characterParent = GameObject.FindWithTag("CharacterParent")?.transform;
+        if (characterParent == null)
+        {
+            // 태그를 가진 오브젝트가 없으면, 전투 씬이 아니라고 판단하고 함수를 그냥 종료합니다.
+            Debug.Log("이곳은 전투 씬이 아니거나 'CharacterParent' 태그가 설정되지 않았으므로, 캐릭터를 생성하지 않습니다.");
+            return;
+        }
+
         IsPartyReady = false; // 파티 설정을 다시 시작하므로 플래그를 내립니다.
 
         // 1. 기존에 생성된 캐릭터가 있다면 모두 파괴
@@ -106,8 +109,8 @@ public class PartyManager : Singleton<PartyManager>
         }
 
         // 4. 모든 설정이 끝난 후, 파티가 준비되었다고 알립니다.
-        IsPartyReady = true;
         OnPartyReady?.Invoke(activeParty);
+        IsPartyReady = true;
         Debug.Log("[PartyManager] 파티 생성 완료! OnPartyReady 신호를 보냅니다.");
     }
 }
