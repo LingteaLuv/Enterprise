@@ -17,7 +17,7 @@ public class NicknameChangePanel : UIBase
 
     private void Start()
     {
-        _nicknameField.characterLimit = 8;
+        //_nicknameField.characterLimit = 7;
 
         _closePopupButton.onClick.AddListener(() => OnClickClosePopup?.Invoke());
         _nicknameChangeButton.onClick.AddListener(ChanegeNickname);
@@ -29,7 +29,7 @@ public class NicknameChangePanel : UIBase
 
         _currentNickname = LoginManager.Instance.Nickname;
         
-        _nicknameField.placeholder.GetComponent<TMP_Text>().text = user.DisplayName;
+        _nicknameField.placeholder.GetComponent<TMP_Text>().text = _currentNickname;
     }
 
     /// <summary>
@@ -48,9 +48,9 @@ public class NicknameChangePanel : UIBase
             ShowPopup("닉네임을 입력해주세요.");
             return;
         }
-
+        Debug.LogError($"{_nicknameField.text.Length} vs {_nicknameField.characterLimit}");
         // 닉네임 글자 수 체크
-        if (_nicknameField.characterLimit > 8)
+        if (_nicknameField.text.Length > 8)
         {
             ShowPopup("닉네임은 8글자 이내로 입력해 주세요.");
             return;
@@ -64,7 +64,7 @@ public class NicknameChangePanel : UIBase
         }
 
         //NicknameCheck();
-
+        
         // 닉네임 재설정 및 데이터베이스에 저장
         await DatabaseManager.Instance.SetNickname(_nicknameField.text);
         LoginManager.Instance.SetNickname();
