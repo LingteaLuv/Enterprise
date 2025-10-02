@@ -38,11 +38,11 @@ public class AllHealthBarsPanel : MonoBehaviour
 
         // 만약 이 패널이 활성화되기 전에 PartyManager가 이미 준비를 마쳤다면,
         // 놓친 신호를 보충하기 위해 직접 파티 목록을 가져와 체력바를 설정합니다.
-        if (PartyManager.Instance != null && PartyManager.Instance.IsPartyReady)
+        /*if (PartyManager.Instance != null && PartyManager.Instance.IsPartyReady)
         {
             Debug.Log("[AllHealthBarsPanel] PartyManager가 이미 준비 완료 상태입니다. 직접 체력바를 설정합니다.");
             SetupHealthBars(PartyManager.Instance.ActiveParty);
-        }
+        }*/
     }
 
     private void OnDisable()
@@ -73,9 +73,9 @@ public class AllHealthBarsPanel : MonoBehaviour
                 continue;
             }
 
+            Debug.Log($"체력바 {i}번에 '{partyCharacters[i].name}' 캐릭터를 연결했습니다.");
             healthBars[i].gameObject.SetActive(true);
             healthBars[i].Initialize(partyCharacters[i]);
-            Debug.Log($"체력바 {i}번에 '{partyCharacters[i].name}' 캐릭터를 연결했습니다.");
         }
 
         // 만약 체력바 개수가 부족하면 경고 로그

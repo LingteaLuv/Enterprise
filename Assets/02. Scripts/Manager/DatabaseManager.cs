@@ -197,6 +197,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
 
     public async UniTask LoadCharactersAsync(Action<Dictionary<int, PlayerDataManager.ParsingPlayerData>> callback)
     {
+        Init();
         DatabaseReference dataRef = FirebaseManager.DataReference.Child(_uid).Child("StatusData").Child("Crew");
         DataSnapshot snapshot = await dataRef.GetValueAsync();
 

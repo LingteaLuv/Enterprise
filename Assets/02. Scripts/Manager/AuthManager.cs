@@ -20,6 +20,7 @@ public class AuthManager : Singleton<AuthManager>
 
     private void Start()
     {
+        PlayGamesPlatform.Activate();
         FirebaseManager.Instance.OnFirebaseReady += () => Init();
     }
     
@@ -212,8 +213,7 @@ public class AuthManager : Singleton<AuthManager>
         if (_isClicked) return false;
         _isClicked = true;
         Debug.Log("플레이 게임즈 로그인 버튼 입력");
-
-        PlayGamesPlatform.Activate();
+        
         var tcs = new TaskCompletionSource<bool>();
 
         void RequestServerSide()
