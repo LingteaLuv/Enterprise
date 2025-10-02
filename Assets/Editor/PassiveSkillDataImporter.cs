@@ -11,7 +11,7 @@ public class PassiveSkillDataImporter
     private static string CSV_PATH = "/CSVData/";
     private static string SKILL_SO_PATH = "Assets/Resources/SkillData/PassiveSkills/";
     private static string EFFECT_SO_PATH = "Assets/Resources/SkillData/PassiveEffects/";
-    private const string EFFECT_PREFAB_ASSET_PATH = "Assets/09. PSH_Folder/SkillEffect/"; // 이펙트 프리팹 에셋 경로
+    private const string EFFECT_PREFAB_ASSET_PATH = "Assets/04. JHT_Folder/Prefabs/SkillEffect/"; // 이펙트 프리팹 에셋 경로
 
     [MenuItem("Tools/Import Data/PassiveSkill")]
     public static void ParseGameData()
@@ -57,6 +57,7 @@ public class PassiveSkillDataImporter
                 string effectType = GetString(fields, headerMap, "EffectType");
                 string prefabName1 = GetString(fields, headerMap, "EffectPrefab_Name1");
                 string prefabName2 = GetString(fields, headerMap, "EffectPrefab_Name2");
+                string prefabName3 = GetString(fields, headerMap, "EffectPrefab_Name3");
                 string paramString1 = GetString(fields, headerMap, "Param_String1");
                 string paramString2 = GetString(fields, headerMap, "Param_String2");
                 float paramFloat1 = GetFloat(fields, headerMap, "Param_Float1");
@@ -86,6 +87,25 @@ public class PassiveSkillDataImporter
                         damageEffect.powerRatio = paramFloat1;
                         damageEffect.hitCount = (int)paramFloat2;
                         damageEffect.delayBetweenHits = (int)paramFloat3;
+                        //if (!string.IsNullOrEmpty(prefabName3))
+                        //{
+                        //    string prefabPath3 = EFFECT_PREFAB_ASSET_PATH + prefabName3 + ".prefab";
+                        //    GameObject casterEffectPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath3);
+
+                        //    if (casterEffectPrefab != null)
+                        //    {
+                        //        damageEffect.moveEffectPrefab = casterEffectPrefab;
+                        //    }
+                        //    else
+                        //    {
+                        //        Debug.LogWarning($"[PassiveSkillParser] 프리팹을 찾을 수 없습니다: {prefabPath3}");
+                        //        damageEffect.moveEffectPrefab = null; // 못찾으면 필드를 null로 설정
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    damageEffect.moveEffectPrefab = null; // CSV에 이름이 없으면 null로 설정
+                        //}
                         skillEffect = damageEffect;
                         break;
                     case "Stun":
