@@ -109,8 +109,8 @@ public class PartyManager : Singleton<PartyManager>
         }
 
         // 4. 모든 설정이 끝난 후, 파티가 준비되었다고 알립니다.
-        IsPartyReady = true;
         OnPartyReady?.Invoke(activeParty);
+        IsPartyReady = true;
         Debug.Log("[PartyManager] 파티 생성 완료! OnPartyReady 신호를 보냅니다.");
     }
 }
