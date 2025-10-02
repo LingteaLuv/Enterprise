@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 8394489746639773613}
   - component: {fileID: 2554865739464830622}
   - component: {fileID: 1585250351304363828}
+  - component: {fileID: 8037936580061298811}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -117,22 +118,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _dontDestroyOnLoad: 1
   _isStatic: 1
-  statDefinitions:
-  - type: 2
-    baseValue: 0
-    growthPerLevel: 50
-    baseCostString: 1001
-    costIncreaseRatio: 1.05
-  - type: 0
-    baseValue: 0
-    growthPerLevel: 10
-    baseCostString: 1000
-    costIncreaseRatio: 1.05
-  - type: 1
-    baseValue: 0
-    growthPerLevel: 1
-    baseCostString: 1000
-    costIncreaseRatio: 1.05
 --- !u!114 &4997080597747607661
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,8 +136,8 @@ MonoBehaviour:
   startingCharacters:
   - {fileID: 11400000, guid: 04e894a30460a614598bf120b30d2418, type: 2}
   - {fileID: 11400000, guid: 2985c4716e4c9e44180c124c0bdd694b, type: 2}
-  - {fileID: 11400000, guid: df64a7b4d1c51f8439c066f8df95733c, type: 2}
-  - {fileID: 11400000, guid: bc0621898e3cfe54b887081ff2e5bc2f, type: 2}
+  - {fileID: 11400000, guid: 38034731ff2889e4fa5df7312eccc6a9, type: 2}
+  - {fileID: 11400000, guid: 7575d797d1f681a4f986aace056c39bb, type: 2}
   - {fileID: 11400000, guid: da1952c92a55d2c4b87ed15cca808a56, type: 2}
 --- !u!114 &4655398051407419997
 MonoBehaviour:
@@ -363,3 +348,17 @@ MonoBehaviour:
   _dontDestroyOnLoad: 1
   _isStatic: 1
   _signal: {fileID: 11400000, guid: 399b76eea652ec94fa375d4e092e53e2, type: 2}
+--- !u!114 &8037936580061298811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624125741546029507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c455cda7fb36f642864b61652202de6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  _isStatic: 1
