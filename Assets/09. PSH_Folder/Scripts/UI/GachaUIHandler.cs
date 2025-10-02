@@ -216,7 +216,7 @@ public class GachaUIHandler : UIBase
         if (gachaPityCountText != null && characterGachaManager != null)
         {
             int remaining = CharacterGachaManager.GACHA_CEILING_COUNT - characterGachaManager.gachaPityCounter;
-            gachaPityCountText.text = "3성 확정까지\n<color=yellow>" + remaining + "회</color> 남음";
+            gachaPityCountText.text = "3성 확정까지 <color=yellow>" + remaining + "회</color> 남음";
         }
     }
     #endregion
