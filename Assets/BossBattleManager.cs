@@ -5,14 +5,16 @@ using JHT;
 using System.Collections;
 using UnityEngine.SceneManagement;
 using System;
+using Cysharp.Threading.Tasks;
+using System.Threading;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class BossBattleManager : Singleton<BossBattleManager>
 {
-    [Header("플레이어 스폰 포인트")]
-    [SerializeField] private Transform playerSpawnPoint;
 
     [Header("보스 스폰 위치 설정")]
-    [SerializeField] private JHT_MonsterSetManager bossPos; // 팀원 방식 사용
+    [SerializeField] private GameObject bossPos; // 팀원 방식 사용
 
     private List<GameObject> currentPlayers;
     private CameraFollow cameraFollow;
@@ -23,18 +25,18 @@ public class BossBattleManager : Singleton<BossBattleManager>
     private JHT_MonsterSpawnManager monsterSpawnManager;
     public List<JHT_BaseMonsterStat> spawnBossMonster;
 
-    [SerializeField] private UnityEngine.UI.Button startBattleButton;
     [SerializeField] private float startDelay = 3f; // 몇 초 뒤에 켜줄지
 
-    [SerializeField] private UnityEngine.UI.Button battleButton;
-
     public Action<JHT_BaseMonsterStat> OnDieMonster;
+
+    CancellationTokenSource[] token = new CancellationTokenSource[2];
 
     Coroutine delay1;
     Coroutine delay2;
     protected override void Awake()
     {
         base.Awake();
+
     }
 
     protected override void OnDestroy()
@@ -42,31 +44,48 @@ public class BossBattleManager : Singleton<BossBattleManager>
         base.OnDestroy();
     }
 
-    private void OnEnable()
+
+    public void Battle()
     {
-        OnDieMonster += HandleBossDefeated;
-        battleButton.onClick.AddListener(Battle);
+        BattleAsync().Forget();
+
+        //StartCoroutine(EnableMeleeAfterDelay());
     }
 
-    private void OnDisable()
+    private async UniTask BattleAsync()
     {
-        OnDieMonster -= HandleBossDefeated;
-        battleButton.onClick.RemoveListener(Battle);
+        try
+        {
+
+            for (int i = 0; i < token.Length; i++)
+            {
+                if(token[i] == null)
+                    token[i] = new();
+            }
+
+            if(bossPos == null)
+                await DataLoad();
+
+            await UniTask.Delay(TimeSpan.FromSeconds(3f), cancellationToken: token[0].Token);
+
+            OnDieMonster += HandleBossDefeated;
+            Debug.Log("보스전 시작");
+            cameraFollow = Camera.main?.GetComponent<CameraFollow>();
+            monsterSpawnManager = JHT_MonsterSpawnManager.Instance;
+
+
+            SpawnPlayers();
+            SpawnBoss();
+        }
+        catch (OperationCanceledException) { }
     }
 
-    private void Start()
+    private async UniTask DataLoad()
     {
-    }
+        var monsterTransformHandle = await Addressables.LoadAssetAsync<GameObject>("BossTransform");
 
-    private void Battle()
-    {
-        cameraFollow = Camera.main?.GetComponent<CameraFollow>();
-        monsterSpawnManager = JHT_MonsterSpawnManager.Instance;
+        bossPos = monsterTransformHandle;
 
-        SpawnPlayers();
-        SpawnBoss();
-
-        StartCoroutine(EnableMeleeAfterDelay());
     }
 
     #region 플레이어 스폰
@@ -81,7 +100,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
         {
             var c = character.ch;
             c.Initialize(c.CharacterStats);
-            c.transform.position = playerSpawnPoint.position + new Vector3(character.i * 0.3f, 0, 0);
+            c.transform.position = new Vector3(character.i * 0.3f - 1.5f, 0, 0);
             c.gameObject.SetActive(true);
 
             var fsm = c.GetComponent<BaseCharacterFSM>();
@@ -92,8 +111,8 @@ public class BossBattleManager : Singleton<BossBattleManager>
             }
 
             // MeleeCharacter 스크립트 비활성화
-            var melee = c.GetComponent<MeleeCharacter>();
-            if (melee != null) melee.enabled = false;
+            //var melee = c.GetComponent<MeleeCharacter>();
+            //if (melee != null) melee.enabled = false;
 
 
             currentPlayers.Add(c.gameObject);
@@ -111,7 +130,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
             !monsterSpawnManager.isSkillSetReady ||
             monsterSpawnManager.roundTable == null)
         {
-            Debug.LogError("보스 데이터 세팅 미완료");
             return;
         }
 
@@ -123,7 +141,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
         int randBoss = UnityEngine.Random.Range(0, monsterSpawnManager.roundTable.captinMonsterData.Count);
 
         // 보스 포지션 프리팹 생성
-        JHT_MonsterSetManager bossPosSpawn = Instantiate(bossPos);
+        JHT_MonsterSetManager bossPosSpawn = Instantiate(bossPos).GetComponent<JHT_MonsterSetManager>();
 
         // 기본 몬스터 리스트 + 보스 추가
         monsterSpawnManager.curMonsterCountList = monsterSpawnManager.GetMonsterDataList(
@@ -175,7 +193,9 @@ public class BossBattleManager : Singleton<BossBattleManager>
     {
 
         IsBossBattle = false;
+
         spawnBossMonster.Clear();
+        currentPlayers.Clear();
         // 카메라 추적 해제
         if (cameraFollow != null)
             cameraFollow.SetTargets(new List<Transform>());
@@ -183,6 +203,13 @@ public class BossBattleManager : Singleton<BossBattleManager>
         // FSM/입력 정지
         foreach (var player in currentPlayers)
             player?.GetComponent<BaseCharacterFSM>()?.ChangeStateIdleForce();
+
+        for (int i = 0; i < token.Length; i++)
+        {
+            token[i].Cancel();
+            token[i].Dispose();
+            token[i] = null;
+        }
 
         if (isVictory)
         {
@@ -210,11 +237,14 @@ public class BossBattleManager : Singleton<BossBattleManager>
             GlobalStageManager.Instance.bossBattleTriggered = false;
             StartCoroutine(Delay2());
         }
+
+        OnDieMonster -= HandleBossDefeated;
     }
 
     private IEnumerator Delay1()
     {
         yield return new WaitForSeconds(8f);
+        cameraFollow = null;
         SceneManager.LoadScene(_returnSceneName);
 
         if (delay1 != null)
@@ -228,10 +258,12 @@ public class BossBattleManager : Singleton<BossBattleManager>
     private IEnumerator Delay2()
     {
         yield return new WaitForSeconds(8f);
+        cameraFollow = null;
         SceneManager.LoadScene(_returnSceneName);
 
         if (delay2 != null)
         {
+
             StopCoroutine(delay2);
             delay2 = null;
         }

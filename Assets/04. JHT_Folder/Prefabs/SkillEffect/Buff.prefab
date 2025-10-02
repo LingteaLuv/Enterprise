@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 1882593017104627305}
   - component: {fileID: 2111689995033573311}
   - component: {fileID: 2702981111537583512}
-  - component: {fileID: -5359329581222089147}
+  - component: {fileID: 6490523442787189710}
   m_Layer: 0
-  m_Name: BowShoot_Owner
+  m_Name: Buff
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27,13 +27,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5005237911714535618}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2111689995033573311
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: -968700265
   m_SortingLayer: 2
   m_SortingOrder: 10
-  m_Sprite: {fileID: 1906173186, guid: 41335d592287ebe40908a353cb89f754, type: 3}
+  m_Sprite: {fileID: 101711418, guid: 82e6088992fdb7c4e8d3f788e25abacc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -111,7 +111,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &-5359329581222089147
+--- !u!114 &6490523442787189710
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -120,10 +120,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5005237911714535618}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60643905487831d469c637d808117d55, type: 3}
+  m_Script: {fileID: 11500000, guid: 90a96102031524a4681cb23cb44aae06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clip: {fileID: 7400000, guid: c6c2106ca0b43574ebcb411c2089c3b2, type: 2}
+  clip: {fileID: 7400000, guid: f5eb853c9e5d6ad4e934233ea3904fc0, type: 2}
   rigid: {fileID: 0}
   moveSpeed: 0
   rac: {fileID: 9100000, guid: c6574da16b275bb4fa6e53c9a8d074fc, type: 2}
