@@ -22,7 +22,7 @@ public class ReinforcementDataManager : Singleton<ReinforcementDataManager>
 
     private async void LoadAndParseDataAsync()
     {
-        AsyncOperationHandle<TextAsset> handle = Addressables.LoadAssetAsync<TextAsset>(REINFORCEMENT_CSV_ADDRESS);
+        AsyncOperationHandle<TextAsset> handle = Addressables.LoadAssetAsync<TextAsset>("ShipReinforcementTable");
         await handle.Task;
 
         if (handle.Status == AsyncOperationStatus.Succeeded)
