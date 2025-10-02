@@ -478,7 +478,7 @@ public class BattleManager : MonoBehaviour
             if (player != null)
             {
                 player.SetActive(false);
-                player.transform.SetParent(PartyManager.Instance.transform); // 다시 파티매니저로 귀환
+                //player.transform.SetParent(PartyManager.Instance.transform); // 다시 파티매니저로 귀환
             }
         }
         currentPlayers.Clear();
