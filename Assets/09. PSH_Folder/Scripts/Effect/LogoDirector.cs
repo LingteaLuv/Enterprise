@@ -12,19 +12,19 @@ public class LogoDirector : MonoBehaviour
     public Transform object4;
 
     [Header("1번 오브젝트: 낙하 & 흔들기 설정")]
-    [SerializeField] private float obj1_startOffsetY = 10f;
-    [SerializeField] private float obj1_dropDuration = 0.8f;
+    [SerializeField] private float obj1_startOffsetY = 700f;
+    [SerializeField] private float obj1_dropDuration = 1.2f;
     [SerializeField] private Ease obj1_dropEase = Ease.OutBounce;
     [SerializeField] private float obj1_shakeDuration = 0.5f;
-    [SerializeField] private float obj1_shakeStrength = 5f;
+    [SerializeField] private float obj1_shakeStrength = 15f;
 
     [Header("2번 오브젝트: 스케일 업 설정")]
     [SerializeField] private float obj2_scaleDuration = 0.5f;
     [SerializeField] private Ease obj2_scaleEase = Ease.OutBack;
 
     [Header("3번 오브젝트: 급정거 등장 설정")]
-    [SerializeField] private float obj3_startOffsetX = 20f;
-    [SerializeField] private float obj3_moveDuration = 0.7f;
+    [SerializeField] private float obj3_startOffsetX = 800f;
+    [SerializeField] private float obj3_moveDuration = 0.9f;
     [SerializeField] private Ease obj3_moveEase = Ease.OutQuint;
 
     [Header("3번 오브젝트: 대각선 늘리기 설정")]
@@ -41,16 +41,16 @@ public class LogoDirector : MonoBehaviour
 
     [Header("4번 오브젝트: 3단 회전 설정")]
     [Tooltip("첫 번째 회전 각도")]
-    [SerializeField] private float obj4_angle1 = 45f;
+    [SerializeField] private float obj4_angle1 = 90f;
     [Tooltip("첫 번째 회전에 걸리는 시간")]
-    [SerializeField] private float obj4_duration1 = 0.4f;
+    [SerializeField] private float obj4_duration1 = 1.1f;
     [SerializeField] private Ease obj4_ease1 = Ease.InOutSine;
 
     [Space(10)]
     [Tooltip("두 번째 회전 각도")]
-    [SerializeField] private float obj4_angle2 = -45f;
+    [SerializeField] private float obj4_angle2 = -90f;
     [Tooltip("두 번째 회전에 걸리는 시간")]
-    [SerializeField] private float obj4_duration2 = 0.4f;
+    [SerializeField] private float obj4_duration2 = 0.7f;
     [SerializeField] private Ease obj4_ease2 = Ease.InOutSine;
 
     [Space(10)]
