@@ -672,10 +672,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2081699385}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 256.36}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 925.0043, y: -128.18}
+  m_SizeDelta: {x: 264.28693, y: 256.36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &297477781
 MonoBehaviour:
@@ -2804,7 +2804,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2581154908661347123, guid: 83e0018f805fcdd4283d03c277aa01f9, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3623,6 +3623,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5280709143874820054, guid: ecde352327ed6084baa92609a2690703, type: 3}
       propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6228550627957967390, guid: ecde352327ed6084baa92609a2690703, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7703492598645017418, guid: ecde352327ed6084baa92609a2690703, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7769515819290646849, guid: ecde352327ed6084baa92609a2690703, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7769515819290646849, guid: ecde352327ed6084baa92609a2690703, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7769515819290646849, guid: ecde352327ed6084baa92609a2690703, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7769515819290646849, guid: ecde352327ed6084baa92609a2690703, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7769515819290646849, guid: ecde352327ed6084baa92609a2690703, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7769515819290646849, guid: ecde352327ed6084baa92609a2690703, type: 3}
+      propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8534504044483820297, guid: ecde352327ed6084baa92609a2690703, type: 3}
@@ -6800,10 +6832,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2081699385}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 256.36}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 660.7173, y: -128.18}
+  m_SizeDelta: {x: 264.28693, y: 256.36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &864686006
 MonoBehaviour:
@@ -7017,10 +7049,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2081699385}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 256.36}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 396.4304, y: -128.18}
+  m_SizeDelta: {x: 264.28693, y: 256.36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &943801401
 MonoBehaviour:
@@ -10640,7 +10672,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1257699569
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11512,8 +11544,8 @@ MonoBehaviour:
   _attendanceToggle: {fileID: 1513442777}
   _toolToggle: {fileID: 1572472074}
   _shipBtn: {fileID: 1910545478}
-  _codexToggle: {fileID: 697789765}
-  _playerInfoToggle: {fileID: 975515788}
+  _codexBtn: {fileID: 0}
+  _playerInfoBtn: {fileID: 0}
   _bossBtn: {fileID: 1968191830}
   _dungeonBtn: {fileID: 1052437035}
   _goldText: {fileID: 1975853687810532817}
@@ -11619,7 +11651,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1429659316
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14276,10 +14308,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2081699385}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 256.36}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 132.14346, y: -128.18}
+  m_SizeDelta: {x: 264.28693, y: 256.36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1631349578
 MonoBehaviour:
@@ -15193,10 +15225,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2081699385}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 256.36}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 1189.2911, y: -128.18}
+  m_SizeDelta: {x: 264.28693, y: 256.36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1772253193
 MonoBehaviour:
@@ -16152,7 +16184,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8134454119583327153, guid: ac7b194c65d1a8344bd110ecef8a5a8c, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -16627,7 +16659,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 62.45
+  m_fontSize: 62.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -17358,7 +17390,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 256.36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2081699386
 MonoBehaviour:

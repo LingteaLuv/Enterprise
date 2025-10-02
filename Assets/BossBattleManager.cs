@@ -77,18 +77,18 @@ public class BossBattleManager : Singleton<BossBattleManager>
             monsterSpawnManager = JHT_MonsterSpawnManager.Instance;
 
             product.Init();
-            //SpawnPlayers();
-            //SpawnBoss();
+            SpawnPlayers();
+            SpawnBoss();
         }
         catch (OperationCanceledException) { }
     }
 
     private async UniTask DataLoad()
     {
-        var monsterTransformHandle = await Addressables.LoadAssetAsync<GameObject>("BossTransform");
+        var monsterTransformHandle = await Addressables.LoadAssetAsync<GameObject>("MonsterTransform");
 
         bossPos = monsterTransformHandle;
-        bossPos.transform.position += new Vector3(6, 0);
+        //bossPos.transform.position += new Vector3(6, 0);
     }
 
     #region 플레이어 스폰

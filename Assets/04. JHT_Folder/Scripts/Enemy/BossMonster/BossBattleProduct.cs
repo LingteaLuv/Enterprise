@@ -47,7 +47,7 @@ public class BossBattleProduct : MonoBehaviour
 
         //token = new CancellationTokenSource[1];
 
-        CameraSetting().Forget();
+        //CameraSetting().Forget();
         
         
         playerWave.transform.DOMoveX(waveTime, 9f).SetEase(Ease.Linear).SetLoops(-1,LoopType.Yoyo);
@@ -71,11 +71,9 @@ public class BossBattleProduct : MonoBehaviour
         float t = 10;
         while (t >= 10)
         {
-            cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, 12, t);
             t -= Time.deltaTime;
+            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, 5, t);
         }
-        
-
     }
 
 }
