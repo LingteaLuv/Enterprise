@@ -79,7 +79,7 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
     {
         if (_characterLoadHandle.IsValid())
         {
-            Addressables.Release(_characterLoadHandle);
+            //Addressables.Release(_characterLoadHandle);
             Debug.Log("[CharacterGachaManager] 캐릭터 풀 어드레서블 핸들을 해제했습니다.");
         }
     }
