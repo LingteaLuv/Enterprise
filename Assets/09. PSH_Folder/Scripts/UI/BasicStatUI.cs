@@ -16,12 +16,12 @@ public class BasicStatUI : UIBase
     public Button closeButton;
     public Button blocker;
 
-    [Header("보유 골드")]
+    [Header("보유 골드 및 단계 표시")]
     public TextMeshProUGUI goldText;
+    public TextMeshProUGUI stageText; // 현재 단계를 표시할 텍스트
 
     private int _levelsToGain = 1; // 한 번에 올릴 레벨 수 (1 또는 10)
 
-    // UI 그룹을 인스펙터에서 설정하기 위한 Serializable 클래스
     [System.Serializable]
     public class BasicStatUIGroup
     {
@@ -34,94 +34,94 @@ public class BasicStatUI : UIBase
 
     private void Awake()
     {
-        // 각 스탯 그룹의 레벨업 버튼에 리스너 연결
         foreach (var group in statUIGroups)
         {
             if (group.levelUpButton != null)
             {
-                // 람다식을 사용하여 어떤 스탯의 버튼인지 전달
                 group.levelUpButton.onHoldAction.AddListener(() => OnLevelUpButtonClicked(group.statType));
             }
         }
 
-        // 레벨업 배수 버튼에 리스너 연결
         if (levelUpMultiplierButton != null)
         {
             levelUpMultiplierButton.onClick.AddListener(ToggleLevelsToGain);
         }
-
-        // 초기 UI 갱신
         UpdateMultiplierButtonText();
     }
+
     private void OnEnable()
     {
-        closeButton.onClick.AddListener(()=>gameObject.SetActive(false));
+        closeButton.onClick.AddListener(() => gameObject.SetActive(false));
         blocker.onClick.AddListener(() => gameObject.SetActive(false));
+        // BasicStatManager의 이벤트에 구독하여 스탯 변경 시 UI를 자동으로 갱신
+        BasicStatManager.OnBaseStatsChanged += RefreshUI;
+        RefreshUI(); // 활성화될 때 항상 최신 정보로 갱신
     }
+
     private void OnDisable()
     {
         closeButton.onClick.RemoveAllListeners();
         blocker.onClick.RemoveAllListeners();
+        // 비활성화될 때 이벤트 구독 해제
+        BasicStatManager.OnBaseStatsChanged -= RefreshUI;
     }
-    /// <summary>
-    /// 모든 기본 스탯 UI를 갱신합니다.
-    /// </summary>
+
     public override void RefreshUI()
     {
-        if (BasicStatManager.Instance == null)
+        if (BasicStatManager.Instance == null || CurrencyManager.Instance == null)
         {
-            Debug.LogError("BasicStatManager가 초기화되지 않았습니다.");
-            return;
+            return; // 매니저가 준비되지 않았으면 UI 갱신 중단
         }
-        if (CurrencyManager.Instance == null)
+
+        // 단계 텍스트 갱신
+        if (stageText != null)
         {
-            Debug.LogError("CurrencyManager가 초기화되지 않았습니다.");
-            return;
+            stageText.text = $"단계 {BasicStatManager.Instance.GetCurrentStage()}";
         }
 
         foreach (var group in statUIGroups)
         {
-            // 현재 레벨 표시
             int currentLevel = BasicStatManager.Instance.GetStatLevel(group.statType);
             if (group.levelText != null)
             {
                 group.levelText.text = $"{currentLevel}";
             }
 
-            // 현재 스탯 값 표시
             float currentValue = BasicStatManager.Instance.GetStatValue(group.statType);
             if (group.valueText != null)
             {
                 group.valueText.text = DataUtility.FormatNumber(currentValue);
             }
 
-            // 레벨업 비용 표시
             BigInteger cost = BasicStatManager.Instance.GetLevelUpCost(group.statType, _levelsToGain);
-            CurrencyType costType = CurrencyType.Gold; // 기본 스탯 레벨업 비용은 골드라고 가정
 
             if (group.costText != null)
             {
-                group.costText.text = $"{DataUtility.FormatNumber(cost)}"; 
+                // GetLevelUpCost가 -1을 반환하면 최대 레벨에 도달한 것으로 간주
+                if (cost < 0)
+                {
+                    group.costText.text = "MAX";
+                }
+                else
+                {
+                    group.costText.text = $"{DataUtility.FormatNumber(cost)}";
+                }
             }
 
-            // 레벨업 버튼 활성화/비활성화
             if (group.levelUpButton != null)
             {
-                BigInteger currentGold = CurrencyManager.Instance.GetCurrency(costType);
-                group.levelUpButton.interactable = (currentGold >= cost);
+                bool canAfford = (cost >= 0) && CurrencyManager.Instance.CanSpendCurrency(CurrencyType.Gold, cost);
+                group.levelUpButton.interactable = canAfford;
             }
+        }
 
-            // 현재 골드 텍스트
-            if (goldText != null)
-            {
-                goldText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.Gold));
-            }
+        if (goldText != null)
+        {
+            // goldText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.Gold));
+            goldText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.Gold).ToString();
         }
     }
 
-    /// <summary>
-    /// 레벨업 버튼 클릭 시 호출됩니다.
-    /// </summary>
     private void OnLevelUpButtonClicked(BasicStatType type)
     {
         if (BasicStatManager.Instance == null) return;
@@ -129,40 +129,28 @@ public class BasicStatUI : UIBase
         bool success = BasicStatManager.Instance.TryLevelUpStat(type, _levelsToGain);
         if (success)
         {
-            RefreshUI(); // 레벨업 성공 시 UI 갱신
+            // OnBaseStatsChanged 이벤트가 RefreshUI를 호출하므로 여기서 직접 호출할 필요 없음
+            // RefreshUI(); 
+
             UpgradeType upType;
             switch (type)
             {
-                case BasicStatType.Attack:
-                    upType = UpgradeType.Atk;
-                    break;
-                case BasicStatType.Defense:
-                    upType = UpgradeType.Def;
-                    break;
-                case BasicStatType.Health:
-                    upType = UpgradeType.Hp;
-                    break;
-                default:
-                    upType = UpgradeType.Atk;
-                    break;
+                case BasicStatType.Attack: upType = UpgradeType.Atk; break;
+                case BasicStatType.Defense: upType = UpgradeType.Def; break;
+                case BasicStatType.Health: upType = UpgradeType.Hp; break;
+                default: upType = UpgradeType.Atk; break;
             }
-                QuestSignalManager.Instance.Upgrade(upType,_levelsToGain);
+            QuestSignalManager.Instance.Upgrade(upType, _levelsToGain);
         }
     }
 
-    /// <summary>
-    /// 레벨업 배수 (x1 / x10)를 토글합니다.
-    /// </summary>
     private void ToggleLevelsToGain()
     {
         _levelsToGain = (_levelsToGain == 1) ? 10 : 1;
         UpdateMultiplierButtonText();
-        RefreshUI(); // 배수 변경 시 비용 갱신을 위해 UI 전체 갱신
+        RefreshUI();
     }
 
-    /// <summary>
-    /// 레벨업 배수 버튼의 텍스트를 갱신합니다.
-    /// </summary>
     private void UpdateMultiplierButtonText()
     {
         if (levelUpMultiplierText != null)
