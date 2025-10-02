@@ -83,7 +83,7 @@ public class BossBattleDirection : MonoBehaviour
         defaultPosition = mainCamera.transform.position; // 기본 위치 저장
     }
 
-    private void Start()
+    public void Init()
     {
         InitializeUI();                 // UI 초기화
          // 시퀸스 저장

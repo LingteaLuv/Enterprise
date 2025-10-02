@@ -8,7 +8,6 @@ using System;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class BossBattleManager : Singleton<BossBattleManager>
 {
@@ -16,16 +15,18 @@ public class BossBattleManager : Singleton<BossBattleManager>
     [Header("보스 스폰 위치 설정")]
     [SerializeField] private GameObject bossPos; // 팀원 방식 사용
 
+
     private List<GameObject> currentPlayers;
     private CameraFollow cameraFollow;
 
     public static bool IsBossBattle = false;
     private readonly string _returnSceneName = "Game";
+    [SerializeField] private float startDelay = 3f; // 몇 초 뒤에 켜줄지
 
     private JHT_MonsterSpawnManager monsterSpawnManager;
     public List<JHT_BaseMonsterStat> spawnBossMonster;
-
-    [SerializeField] private float startDelay = 3f; // 몇 초 뒤에 켜줄지
+    public BossBattleProduct product;
+    public BossBattleDirection direction;
 
     public Action<JHT_BaseMonsterStat> OnDieMonster;
 
@@ -56,7 +57,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
     {
         try
         {
-
             for (int i = 0; i < token.Length; i++)
             {
                 if(token[i] == null)
@@ -66,16 +66,19 @@ public class BossBattleManager : Singleton<BossBattleManager>
             if(bossPos == null)
                 await DataLoad();
 
-            await UniTask.Delay(TimeSpan.FromSeconds(3f), cancellationToken: token[0].Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token[0].Token);
+
+            product = FindFirstObjectByType<BossBattleProduct>();//GameObject.FindGameObjectWithTag("BossBattleProduct").GetComponent<BossBattleProduct>();
+            direction = FindFirstObjectByType<BossBattleDirection>();//GameObject.FindGameObjectWithTag("BossBattleDirection").GetComponent<BossBattleDirection>();
 
             OnDieMonster += HandleBossDefeated;
             Debug.Log("보스전 시작");
             cameraFollow = Camera.main?.GetComponent<CameraFollow>();
             monsterSpawnManager = JHT_MonsterSpawnManager.Instance;
 
-
-            SpawnPlayers();
-            SpawnBoss();
+            product.Init();
+            //SpawnPlayers();
+            //SpawnBoss();
         }
         catch (OperationCanceledException) { }
     }
@@ -85,7 +88,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
         var monsterTransformHandle = await Addressables.LoadAssetAsync<GameObject>("BossTransform");
 
         bossPos = monsterTransformHandle;
-
+        bossPos.transform.position += new Vector3(6, 0);
     }
 
     #region 플레이어 스폰
