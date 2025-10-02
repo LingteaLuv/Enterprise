@@ -14,13 +14,6 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
     public const int GACHA_CEILING_COUNT = 20; // 천장 횟수
     public int gachaPityCounter = 0;
 
-    [Header("캐릭터 데이터 (전용)")]
-    [Tooltip("어드레서블에 등록된 캐릭터 데이터 애셋들의 레이블")]
-    public string characterDataLabel = "Characters";
-
-    [Tooltip("게임에 존재하는 모든 캐릭터 SO 목록")]
-    public List<CharacterData> allCharacters;
-
     [Header("캐릭터 가챠 전용 확률")]
     [Range(0, 100)]
     public float captainChance = 10f; // 선장이 나올 확률
@@ -34,54 +27,33 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
     private List<CharacterData> captainPool;
     private List<CharacterData> crewPool;
 
-    private AsyncOperationHandle<IList<CharacterData>> _characterLoadHandle;
-
     protected override void Start()
     {
         base.Start();
-        StartCoroutine(InitializeGachaPool());
+        StartCoroutine(InitializeGachaPoolFromDataManager());
     }
 
-    private System.Collections.IEnumerator InitializeGachaPool()
+    private System.Collections.IEnumerator InitializeGachaPoolFromDataManager()
     {
-        while (ItemDataManager.Instance == null || !ItemDataManager.Instance.IsDataLoaded)
+        // DataManager가 데이터 로딩을 끝낼 때까지 기다립니다.
+        while (DataManager.Instance == null || !DataManager.Instance.IsDataLoaded)
         {
             yield return null;
         }
 
-        Debug.Log("[CharacterGachaManager] 어드레서블을 통해 캐릭터 풀 로딩을 시작합니다...");
-        var handle = Addressables.LoadAssetsAsync<CharacterData>("Characters");
-        _characterLoadHandle = handle;
+        Debug.Log("[CharacterGachaManager] DataManager로부터 캐릭터 풀 정보를 가져옵니다...");
 
-        yield return handle;
+        // DataManager가 이미 로드해 둔 캐릭터 목록을 가져옵니다.
+        var allCharacters = DataManager.Instance.AllCharacters;
 
-        if (handle.Status == AsyncOperationStatus.Succeeded)
-        {
-            allCharacters = handle.Result.ToList();
-            Debug.Log($"[CharacterGachaManager] {allCharacters.Count}명의 캐릭터를 뽑기 풀에 추가했습니다.");
+        captainPool = allCharacters.Where(c => c.crewRole == CrewRole.Captain).ToList();
+        crewPool = allCharacters.Where(c => c.crewRole != CrewRole.Captain).ToList();
 
-            captainPool = allCharacters.Where(c => c.crewRole == CrewRole.Captain).ToList();
-            crewPool = allCharacters.Where(c => c.crewRole != CrewRole.Captain).ToList();
-
-            Debug.Log($"[CharacterGachaManager] 선장 풀: {captainPool.Count}명, 선원 풀: {crewPool.Count}명");
-        }
-        else
-        {
-            Debug.LogError($"[CharacterGachaManager] 어드레서블 로딩 실패! 레이블 '{characterDataLabel}'을 확인해주세요.");
-        }
+        Debug.Log($"[CharacterGachaManager] 선장 풀: {captainPool.Count}명, 선원 풀: {crewPool.Count}명");
 
         gachaPityCounter = PlayerDataManager.Instance.GachaPityCounter;
         Debug.Log($"[CharacterGachaManager] 현재 천장 카운트: {gachaPityCounter}");
         OnGachaPityChanged?.Invoke();
-    }
-
-    protected virtual void OnDestroy()
-    {
-        if (_characterLoadHandle.IsValid())
-        {
-            Addressables.Release(_characterLoadHandle);
-            Debug.Log("[CharacterGachaManager] 캐릭터 풀 어드레서블 핸들을 해제했습니다.");
-        }
     }
 
     public override bool PerformMultipleGacha(int count)
