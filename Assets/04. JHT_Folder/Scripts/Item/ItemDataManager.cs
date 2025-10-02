@@ -84,7 +84,7 @@ namespace JHT
         {
             if (objs.Status != AsyncOperationStatus.Succeeded)
             {
-                Debug.LogError("무기 데이터 로드에 실패했습니다!");
+                
                 return;
             }
 
@@ -174,7 +174,7 @@ namespace JHT
         {
             while (!IsRelicsDataLoaded)
                 yield return null;
-            Debug.LogError($"유물 csv");
+            
             //downLoader = new JHT_DataDownLoader();
             yield return downLoader.DownRelicsData();
 
@@ -226,7 +226,7 @@ namespace JHT
             while (!IsLootTableDataLoaded)
                 yield return null;
 
-            Debug.LogError($"루트테이블 csv");
+            
             yield return downLoader.DownLootTableData();
             OnRelicsDataLoadFinish?.Invoke(true);
         }

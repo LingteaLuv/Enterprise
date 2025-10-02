@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1882593017104627305}
@@ -99,9 +99,9 @@ GameObject:
   - component: {fileID: 2111689995033573311}
   - component: {fileID: 2702981111537583512}
   - component: {fileID: 6855986019988517260}
-  - component: {fileID: 2233699918487044283}
+  - component: {fileID: 7360823614866233762}
   m_Layer: 0
-  m_Name: SheildSpin
+  m_Name: SheildFall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -117,7 +117,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2111535756805899617}
@@ -172,7 +172,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.64, y: 0.64}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
@@ -227,7 +227,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &2233699918487044283
+--- !u!114 &7360823614866233762
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -236,19 +236,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5005237911714535618}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ff333ad60c448645a5a072e0546deef, type: 3}
+  m_Script: {fileID: 11500000, guid: 88be3ad5a1399a949818567903c41f80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clip: {fileID: 7400000, guid: 76374b9d94f5b204ea49866b328143b3, type: 2}
+  clip: {fileID: 7400000, guid: 608778c266d52bd46886f94c3bb5a8b7, type: 2}
   rigid: {fileID: 6855986019988517260}
-  moveSpeed: 1
+  moveSpeed: 0
   rac: {fileID: 9100000, guid: c6574da16b275bb4fa6e53c9a8d074fc, type: 2}
-  durationForward: 0.7
-  durationBack: 0.7
-  arc: 1
-  samples: 9
-  smoothK: 1
-  rotateAlongPath: 0
-  fadeTarget: {fileID: 1293789308323013515}
-  fadeTo: 0.3
-  fadeDuration: 0.6
+  nextClip: {fileID: 7400000, guid: aafd8d960bee3074e800c4b307397e0e, type: 2}
+  fallObj: {fileID: 1293789308323013515}

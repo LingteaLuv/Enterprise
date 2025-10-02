@@ -13,6 +13,9 @@ public class BowShoot_Target_SkillEffect : SkillEffectAnim
         bool targetOnRight = target.transform.position.x > transform.position.x;
 
         transform.localRotation = Quaternion.Euler(0f, targetOnRight ? 180f : 0f, 0f);
-        gameObject.transform.position = target.position;
+        if(targetOnRight)
+            gameObject.transform.position = new Vector2(target.position.x - 0.2f, target.position.y);
+        else
+            gameObject.transform.position = new Vector2(target.position.x + 0.2f, target.position.y);
     }
 }

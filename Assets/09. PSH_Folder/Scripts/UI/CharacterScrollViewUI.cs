@@ -114,7 +114,7 @@ public class CharacterScrollViewUI : UIBase
         PlayerDataManager.Instance.OnOwnedCharactersChanged += RefreshUI;
         PlayerDataManager.Instance.OnCharacterDataUpdated += HandleCharacterUpdate;
         FormationManager.Instance.OnTempFormationChanged += RefreshUI; // 임시 편성 변경 시 UI 갱신
-        RefreshUI();
+        //RefreshUI();
     }
 
     private void OnDisable()
