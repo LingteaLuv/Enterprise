@@ -1,8 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using JHT;
 using TMPro;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -127,6 +130,9 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         JHT_MonsterSpawnManager.Instance.MonsterAllClear();
         BattleManager.Instance.ClearEnemies();
         BattleManager.Instance.ClearPlayers();
+        BossBattleManager.Instance.Battle();
         SceneManager.LoadScene("BossBattleScene");
     }
+
+
 }

@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
-public abstract class SkillEffectAnim : MonoBehaviour
+public abstract class SkillEffectAnim : MonoBehaviour, IMoveEffect
 {
-    [SerializeField] private AnimationClip clip;
-    [SerializeField] protected float spawnTime;
+    public AnimationClip clip;
     [SerializeField] protected Rigidbody2D rigid = null;
     [SerializeField] protected float moveSpeed;
 
@@ -19,7 +16,7 @@ public abstract class SkillEffectAnim : MonoBehaviour
     private AnimatorOverrideController aoc;
     public RuntimeAnimatorController rac;
 
-    CancellationTokenSource token;
+    protected CancellationTokenSource token;
     public DG.Tweening.Sequence sequence;
 
 
@@ -65,17 +62,17 @@ public abstract class SkillEffectAnim : MonoBehaviour
         {
             aoc["Effect"] = clip;
         }
+        
+        animator.Play("Effect",0,0);
 
-        animator.Play("Effect");
-
-        EffectTime(spawnTime).Forget();
+        EffectTime(clip.length).Forget();
     }
 
-    protected async UniTaskVoid EffectTime(float spawnTime)
+    protected virtual async UniTaskVoid EffectTime(float spawnTime)
     {
         try
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(spawnTime), cancellationToken: token.Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(spawnTime * 2), cancellationToken: token.Token);
             gameObject.SetActive(false);
         }
         catch (OperationCanceledException) { }

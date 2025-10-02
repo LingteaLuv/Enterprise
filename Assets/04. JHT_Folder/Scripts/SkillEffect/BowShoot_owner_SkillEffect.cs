@@ -12,6 +12,13 @@ public class BowShoot_owner_SkillEffect : SkillEffectAnim
         base.Init(target);
         bool targetOnRight = target.transform.position.x > transform.position.x;
 
-        transform.localRotation = Quaternion.Euler(0f, targetOnRight ? 180f : 0f, 0f);
+        if ((targetOnRight))
+        {
+            transform.localRotation = Quaternion.Euler(0, targetOnRight ? 180f : -180f, -90f);
+        }
+        else
+        {
+            transform.localRotation = Quaternion.Euler(0, targetOnRight ? 180f : -180f, 90f);
+        }
     }
 }
