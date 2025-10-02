@@ -3,8 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.UI;
-using static UnityEditor.U2D.ScriptablePacker;
 
 public class BossBattleProduct : MonoBehaviour
 {
