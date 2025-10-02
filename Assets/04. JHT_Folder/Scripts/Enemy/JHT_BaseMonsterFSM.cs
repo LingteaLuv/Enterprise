@@ -575,6 +575,7 @@ namespace JHT
             if (monsterSpawnType == SpawnType.IslandStage)
             {
                 BattleManager.Instance.OnEnemyDead(monsterStat);
+                DatabaseManager.Instance.AddCurrency("Gold",GlobalStageManager.Instance.CurrentIslandIndex.Value);
             }
             else if (monsterSpawnType == SpawnType.BossStage)
             {
