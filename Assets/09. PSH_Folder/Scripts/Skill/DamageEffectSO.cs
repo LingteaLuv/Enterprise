@@ -36,11 +36,11 @@ public class DamageEffectSO : SkillEffectSO
                 return;
             }
 
-            var moveEffect = effectObj.GetComponent<IMoveEffect>();
+            var moveEffect = effectObj.GetComponent<TestMoveEffect>();
             if (moveEffect != null)
             {
-               // moveEffect.Init(casterComp.transform, targetComp.transform);
-                moveEffect.Init(targetComp.transform);
+               moveEffect.Init(casterComp.transform, targetComp.transform);
+                //moveEffect.Init(targetComp.transform);
             }
             else
             {
