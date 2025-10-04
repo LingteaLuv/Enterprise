@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System.Collections;
 using UnityEngine;
 
 public class MoveUpEffect : MonoBehaviour, IMoveEffect
@@ -9,7 +10,14 @@ public class MoveUpEffect : MonoBehaviour, IMoveEffect
 
     private void OnEnable()
     {
-        Vector3 v = transform.position + new Vector3 (0f,1f,0f);
-        gameObject.transform.DOMove(v, 1f);
+        transform.DOKill(); // 기존 트윈 종료
+        StartCoroutine(StartMove());
+    }
+
+    private IEnumerator StartMove()
+    {
+        yield return null; // 한 프레임 대기 (위치 세팅 끝난 후)
+        Vector3 v = transform.position + Vector3.up;
+        transform.DOMove(v, 1f);
     }
 }
