@@ -89,6 +89,7 @@ public class IslandStageManager : MonoBehaviour
                 GlobalStageManager.Instance.bossBattleTriggered = true;
                 _bossDirection.OnBossChallenge();
                 yield return new WaitForSeconds(5f);
+                BossBattleManager.Instance.Battle();
                 SceneManager.LoadScene("BossBattleScene");
                 yield break;
             }
