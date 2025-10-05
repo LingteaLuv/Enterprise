@@ -161,11 +161,12 @@ namespace JHT
                         so.monsterStat[i].stat = (Stat)i;
                         so.monsterStat[i].amount = float.Parse(row[7+i]);
                     }
-                    so.monsterStat[0].amount = float.Parse(row[17]);
+                    so.monsterFaction = (Faction)Enum.Parse(typeof(Faction),row[3]);
                     so.normalSkill = int.Parse(row[5]);
                     so.skill1 = int.Parse(row[15]);
                     so.skill2 = -1;
                     //so.skill2
+                    so.monsterStat[0].amount = float.Parse(row[17]);
                     so.chaseRange = float.Parse(row[18]);
                     so.moveSpeed = float.Parse(row[19]);
                     
