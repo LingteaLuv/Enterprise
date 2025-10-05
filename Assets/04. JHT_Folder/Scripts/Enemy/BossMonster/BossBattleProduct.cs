@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.U2D.ScriptablePacker;
 
 public class BossBattleProduct : MonoBehaviour
 {
@@ -13,16 +12,26 @@ public class BossBattleProduct : MonoBehaviour
 
     [SerializeField] private SpriteRenderer playerWave;
     [SerializeField] private SpriteRenderer monsterWave;
+
+    Vector2 playerShipPos;
+    Vector2 monsterShipPos;
+
     private float waveTime;
     private Camera cam;
-
+    
     CancellationTokenSource[] token;
     Sequence playerSequence, monsterSequence;
+
+    private void Awake()
+    {
+        playerShipPos = playerShip.transform.position;
+        monsterShipPos = monsterShip.transform.position;
+    }
 
     private void OnEnable()
     {
 
-        waveTime = 1000f;
+        waveTime = 10;
     }
 
     private void OnDisable()
@@ -36,6 +45,16 @@ public class BossBattleProduct : MonoBehaviour
                 token[i] = null;
             }
         }
+    }
+
+    private void Start()
+    {
+        Init();
+    }
+
+    private void ProductInitalize()
+    {
+
     }
 
     public void  Init()
@@ -60,7 +79,8 @@ public class BossBattleProduct : MonoBehaviour
         monsterWave.transform.DOMoveX(waveTime, 9f).SetEase(Ease.Linear).SetLoops(-1, LoopType.Yoyo);
 
         monsterSequence.Append(monsterShip.transform.DOLocalMoveX(2f, 3));
-        monsterSequence.Append(monsterShip.transform.DORotate(new Vector3(0, 0, -14),1f));
+        monsterShip.transform.DORotate(new Vector3(0, 0, -14), 1f).SetDelay(2.5f);
+        //monsterSequence.Append();
         monsterSequence.Append(monsterShip.transform.DORotate(new Vector3(0, 0, 0), 0f));
 
     }
