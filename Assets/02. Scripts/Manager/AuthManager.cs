@@ -42,7 +42,7 @@ public class AuthManager : Singleton<AuthManager>
     public async UniTask<bool> AutoLogin()
     {
         FirebaseUser user = _auth.CurrentUser;
-        if (_auth != null && user != null)
+        if (_auth != null && user != null)  
         {
             try
             {

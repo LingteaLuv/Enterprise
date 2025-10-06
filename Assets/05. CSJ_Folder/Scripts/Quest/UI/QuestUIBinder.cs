@@ -9,12 +9,19 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
         [SerializeField] GameObject questUI;
         [SerializeField] TemporaryQuestController temporaryQuestController;
         [SerializeField] CodexUIController codexUIController;
+        [SerializeField] TutorialDirector tutorialDirector;
 
         void Awake()
         {
             if(QuestManager.Instance is null) return;
-            if (questUI is not null && temporaryQuestController is not null) 
-                QuestManager.Instance.BindUI(questUI, temporaryQuestController);
+            if (questUI is not null && temporaryQuestController is not null)
+            {
+                if( tutorialDirector is null)
+                    QuestManager.Instance.BindUI(questUI, temporaryQuestController);
+                else
+                    QuestManager.Instance.BindUI(questUI, temporaryQuestController, tutorialDirector);
+            }
+
 
             //if (CodexManager.Instance is null) return;
             if (codexUIController is null) return;

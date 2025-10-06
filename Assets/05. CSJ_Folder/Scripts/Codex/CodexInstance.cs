@@ -81,7 +81,6 @@ namespace _05._CSJ_Folder.Scripts.Codex
         {
             if (levelSum != _currentProgress)
             {
-                Debug.LogWarning($"레벨 합 이상 : 기존 인스턴스 내부 {_currentProgress}, 데이터 상 레벨합 {levelSum}");
                 return false;
             }
             _currentProgress += value;

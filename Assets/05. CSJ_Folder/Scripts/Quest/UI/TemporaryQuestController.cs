@@ -38,7 +38,6 @@ public class TemporaryQuestController : UIBase
     
     private void OnEnable()
     {
-        Debug.Log("Enable");
         _closeButton.onClick.AddListener(CloseQuestTab);
         _dailyButton.onClick.AddListener(() => ChangeQuestType(QuestType_Enum.Daily));
         _weeklyButton.onClick.AddListener(() => ChangeQuestType(QuestType_Enum.Weekly));
@@ -78,7 +77,6 @@ public class TemporaryQuestController : UIBase
         {
             case QuestType_Enum.Daily:
             {
-                Debug.Log("daily");
                 // _dailyPanel.SetActive(true);
                 // _weeklyPanel.SetActive(false);
 
@@ -95,7 +93,6 @@ public class TemporaryQuestController : UIBase
             }
             case QuestType_Enum.Weekly:
             {
-                Debug.Log("weekly");
                 // _dailyPanel.SetActive(false);
                 // _weeklyPanel.SetActive(true);
 
