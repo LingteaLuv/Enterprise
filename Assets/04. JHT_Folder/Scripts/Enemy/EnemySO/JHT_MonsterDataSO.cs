@@ -15,6 +15,7 @@ public class JHT_MonsterDataSO : ScriptableObject
 
     public AtkRangeType monsterAttackType;
     public CrewRole monsterCrewRole;
+    public Faction monsterFaction;
 
     public List<MonsterStat> monsterStat;
 

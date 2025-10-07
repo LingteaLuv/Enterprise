@@ -22,6 +22,7 @@ namespace JHT
         public AtkRangeType monsterAttackRangeType;
         public MonsterRarity monsterRarity;
         public CrewRole monsterCrewRole;
+        public Faction monsterFaction;
         public AnimatorOverrideController aoc;
         //애니메이션 R&D 후 추가 animator override controller OR animator
 
@@ -50,13 +51,14 @@ namespace JHT
             chaseRange = curSO.chaseRange;
 
             moveSpeed = curSO.moveSpeed * addStat;
-
+            this.monsterFaction = curSO.monsterFaction;
             //sprite
             projectileSprite = curSO.projectileSprite;
 
             // Enum
             monsterAttackRangeType = curSO.monsterAttackType;
             attackRange = curSO.monsterAttackType == AtkRangeType.Melee_Attack ? 1f : 2f;
+
 
             monsterCrewRole = curSO.monsterCrewRole;
 
