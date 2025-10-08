@@ -1,11 +1,8 @@
-using JHT;
+using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using System;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
-using Cysharp.Threading.Tasks;
 
 
 public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
@@ -16,13 +13,17 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
 
     [Header("캐릭터 가챠 전용 확률")]
     [Range(0, 100)]
-    public float captainChance = 10f; // 선장이 나올 확률
+    public float captainChance = .1f; // 선장이 나올 확률
 
     [Tooltip("선장이 아닐 경우, 등급별로 뽑힐 확률")]
     public List<GradeChance> crewGradeChances;
 
     [Tooltip("선장일 경우, 등급별로 뽑힐 확률")]
     public List<GradeChance> captainGradeChances;
+
+    [Header("튜토리얼 설정")]
+    [Tooltip("튜토리얼에서 확정적으로 지급할 캐릭터")]
+    public CharacterData tutorialCharacter;
 
     private List<CharacterData> captainPool;
     private List<CharacterData> crewPool;
@@ -203,5 +204,48 @@ public class CharacterGachaManager : BaseGachaManager<PlayerCharacterData>
     protected override PlayerCharacterData DrawItem()
     {
         return null;
+    }
+
+    public async void TutorialGacha()
+    {
+        if (tutorialCharacter == null)
+        {
+            Debug.LogError("튜토리얼 캐릭터가 지정되지 않았습니다! 인스펙터에서 tutorialCharacter를 설정해주세요.");
+            return;
+        }
+
+        Debug.Log("<color=cyan>튜토리얼 캐릭터 뽑기를 시작합니다...</color>");
+
+        // 튜토리얼 캐릭터는 보통 등급이 정해져 있을테니, 여기서는 1성으로 임의 설정합니다.
+        // 필요하다면 인스펙터에서 등급도 설정할 수 있도록 변경 가능합니다.
+        GachaGrade tutorialGrade = GachaGrade.OneStar;
+
+        PlayerCharacterData newCharacterInstance = await PlayerDataManager.Instance.AddCharacter(tutorialCharacter, tutorialGrade);
+
+        if (newCharacterInstance != null)
+        {
+            LastGachaResults = new List<PlayerCharacterData> { newCharacterInstance };
+            List<GachaGrade> resultGrades = new List<GachaGrade> { tutorialGrade };
+
+            Debug.Log($"튜토리얼 캐릭터 뽑기 완료! [{tutorialGrade}] {newCharacterInstance.characterdata.characterName} 획득!");
+
+            if (resultPanel != null)
+            {
+                resultPanel.SetActive(true);
+                GachaListUI resultUI = resultPanel.GetComponent<GachaListUI>();
+                if (resultUI != null)
+                {
+                    resultUI.DisplayCharacterResults(LastGachaResults, resultGrades);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("결과 패널이 연결되지 않았습니다!");
+            }
+        }
+        else
+        {
+            Debug.LogError("튜토리얼 캐릭터를 추가하는 데 실패했습니다.");
+        }
     }
 }

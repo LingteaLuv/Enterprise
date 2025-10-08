@@ -64,6 +64,9 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     private const int CAPTAIN_FRAGMENT_GAIN_3 = 6;
     public int GachaPityCounter { get; set; }
 
+    // 튜토리얼가챠여부
+    public bool hasCompletedTutorialGacha = false;
+
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
     public event System.Action OnOwnedCharactersChanged;
     public event System.Action OnFormationSaved;

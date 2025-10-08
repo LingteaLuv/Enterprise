@@ -271,23 +271,41 @@ public class GachaUIHandler : UIBase
             return;
         }
 
-        int totalCost = manager.singleGachaCost * count;
-        string itemType = "아이템";
         bool isCharacterGacha = typeof(T) == typeof(PlayerCharacterData);
         bool isEquipmentGacha = typeof(T) == typeof(ItemObject);
 
+        // 튜토리얼 뽑기인지 확인합니다 (캐릭터 1회 뽑기 && 튜토리얼 미완료 상태)
+        bool isTutorialGacha = isCharacterGacha && count == 1 && !PlayerDataManager.Instance.hasCompletedTutorialGacha;
+
+        // 튜토리얼일 경우 비용을 0으로 표시하거나, 팝업 메시지를 다르게 할 수 있습니다.
+        // 여기서는 기존 흐름과 동일하게 보이기 위해 비용 팝업을 그대로 사용합니다.
+        int totalCost = manager.singleGachaCost * count;
+        string itemType = "아이템";
         if (isCharacterGacha) itemType = "캐릭터";
         else if (isEquipmentGacha) itemType = "장비";
-
         string currencyName = GetCurrencyNameInKorean(manager.currencyType);
 
         PopManager.Instance.ShowOKCancelPopup(
             $"{totalCost}{currencyName}을(를) 소비하여 {itemType} {count}회 뽑기를 진행하시겠습니까?",
             onLeftClick: () =>
             {
-                if (manager.PerformMultipleGacha(count))
+                bool gachaInitiated = false;
+
+                if (isTutorialGacha)
                 {
-                    // 캐릭터 가챠 연출
+                    Debug.Log("<color=cyan>튜토리얼 캐릭터 뽑기를 실행합니다.</color>");
+                    (manager as CharacterGachaManager).TutorialGacha();
+                    PlayerDataManager.Instance.hasCompletedTutorialGacha = true;
+                    gachaInitiated = true;
+                }
+                else
+                {
+                    gachaInitiated = manager.PerformMultipleGacha(count);
+                }
+
+                if (gachaInitiated)
+                {
+                    // 캐릭터 가챠 연출 (튜토리얼 포함)
                     if (isCharacterGacha && characterGachaDirectorPrefab != null)
                     {
                         CharacterGachaDirector director = EffectPoolManager.Instance.SpawnObject<CharacterGachaDirector>(characterGachaDirectorPrefab);
@@ -307,13 +325,18 @@ public class GachaUIHandler : UIBase
                     }
 
                     Debug.Log($"UI 버튼 클릭으로 {itemType} {count}회 뽑기를 실행했습니다.");
-                    if (isCharacterGacha)
+
+                    // 퀘스트 시그널은 실제 재화를 소모하는 일반 뽑기에서만 호출되도록 할 수 있습니다.
+                    if (!isTutorialGacha)
                     {
-                        QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
-                    }
-                    else if (isEquipmentGacha)
-                    {
-                        QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
+                        if (isCharacterGacha)
+                        {
+                            QuestSignalManager.Instance.GachaPull(ItemType.Character, count);
+                        }
+                        else if (isEquipmentGacha)
+                        {
+                            QuestSignalManager.Instance.GachaPull(ItemType.Equipment, count);
+                        }
                     }
                 }
             },
