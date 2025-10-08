@@ -702,59 +702,18 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         if (OwnedCharacters.Count == 0) return false;
 
-        // 역할별 최대 인원수 정의 (임시, FormationManager와 동기화 필요)
-        var roleLimits = new Dictionary<CrewRole, int>
-        {
-            { CrewRole.Captain, 1 },
-            { CrewRole.Deckhand, 2 },
-            { CrewRole.Sailor, 2 },
-            { CrewRole.Cook, 2 }
-        };
-
+        // 역할별 빈 리스트 생성
         var newFormation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
-        var addedCharacters = new HashSet<PlayerCharacterData>();
         foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
         {
             newFormation[role] = new List<PlayerCharacterData>();
         }
 
-        // 1. 역할별 에이스 1명씩 선발
-        foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
+        // 조건 무시 — 그냥 다 넣기
+        foreach (var character in OwnedCharacters.Values)
         {
-            var bestInRole = OwnedCharacters.Values
-                .Where(c => c.characterdata.crewRole == role)
-                .OrderByDescending(c => c.battlePower)
-                .FirstOrDefault();
-
-            if (bestInRole != null)
-            {
-                newFormation[role].Add(bestInRole);
-                addedCharacters.Add(bestInRole);
-            }
-        }
-
-        // 2. 남은 슬롯 충원
-        int currentTeamSize = addedCharacters.Count;
-        if (currentTeamSize < MAX_FORMATION_SIZE)
-        {
-            var remainingCandidates = OwnedCharacters.Values
-                .Except(addedCharacters)
-                .Where(c => c.characterdata.crewRole != CrewRole.Captain)
-                .OrderByDescending(c => c.battlePower)
-                .ToList();
-
-            foreach (var candidate in remainingCandidates)
-            {
-                if (currentTeamSize >= MAX_FORMATION_SIZE) break;
-
-                CrewRole role = candidate.characterdata.crewRole;
-                if (newFormation[role].Count < roleLimits[role])
-                {
-                    newFormation[role].Add(candidate);
-                    addedCharacters.Add(candidate);
-                    currentTeamSize++;
-                }
-            }
+            var role = character.characterdata.crewRole;
+            newFormation[role].Add(character);
         }
 
         // 3. 실제 편성에 적용
