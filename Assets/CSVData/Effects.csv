@@ -49,19 +49,19 @@ STUN2,Stun,,,2,,,,,,,
 STUN3,Stun,,,3,,,,,,,
 STUN5,Stun,,,5,,,,,,,
 ExDB,ExtraDamageBuff,,,10,5,,,,,,
-D10001,Damage,,,1,1,200,,SheildPush,SheildPush,10001,방패 밀치기
-D10002,Damage,,,1,1,200,,SheildSpin,SheildSpin,10002,방패 부메랑
-D10003,Damage,,,1,1,200,,SheildFall,SheildFall,10003,방패 내려찍기
-D10004,Damage,,,1,1,200,,Slash1,Slash1,10004,검격(1회)
-D10005,Damage,,,0.3,3,200,,Slash3,Slash3,10005,검격(3회)
-D10006,Damage,,,0.2,5,200,,SlashN,SlashN,10006,검격(난무)
-D10007,Damage,,,1,1,200,,SpearN,SpearN,10007,창 찌르기
-D10008,Damage,,,1,1,200,BowShoot_Owner,BowShoot_Target,,10008,화살 발사
-D10009,Damage,,,1,1,200,,,,10009,폭발
-D10010,Damage,,,1,1,200,,,,10010,총알 발사
-B10011,Buff,Health,Percent,0.2,4,,Buff,,,10011,최대 체력 버프(소)
-B10012,Buff,Defense,Percent,0.2,4,,Buff,,,10012,방어력 버프(소)
-B10013,Buff,Attack,Percent,0.2,4,,Buff,,,10013,공격력 버프(소)
-B10014,Buff,AttackSpeed,Percent,0.2,4,,Buff,,,10014,공격 속도 버프(소)
-B10015,ExtraDamageBuff,,,10,5,,Buff,,,10015,기본 공격 추가 피해 버프(소)
-B10016,Heal,,,1000,,,Buff,,,10016,체력 회복 버프(소)
+D10001,Damage,,,1,1,200,S10001,,SheildPush,10001,방패 밀치기
+D10002,Damage,,,1,1,200,S10002,,SheildPush,10002,방패 부메랑
+D10003,Damage,,,1,1,200,,ShieldStamp,,10003,방패 내려찍기
+D10004,Damage,,,1,1,200,,S10004,,10004,검격(1회)
+D10005,Damage,,,0.3,3,200,,S10005,,10005,검격(3회)
+D10006,Damage,,,0.2,5,200,,S10006,,10006,검격(난무)
+D10007,Damage,,,1,1,200,,S10007,,10007,창 찌르기
+D10008,Damage,,,1,1,200,,S10008,,10008,화살 발사
+D10009,Damage,,,1,1,200,,S10009,,10009,폭발
+D10010,Damage,,,1,1,200,,S10010,,10010,총알 발사
+B10011,Buff,Health,Percent,0.2,4,,S10011,HPBuffIcon,,10011,최대 체력 버프(소)
+B10012,Buff,Defense,Percent,0.2,4,,S10011,DefBuffIcon,,10012,방어력 버프(소)
+B10013,Buff,Attack,Percent,0.2,4,,S10011,AtkBuffIcon,,10013,공격력 버프(소)
+B10014,Buff,AttackSpeed,Percent,0.2,4,,S10011,AtkSpdBuffIcon,,10014,공격 속도 버프(소)
+B10015,ExtraDamageBuff,,,10,5,,S10011,ExtraBuffIcon,,10015,기본 공격 추가 피해 버프(소)
+B10016,Heal,,,1000,,,S10011,HealBuffIcon,,10016,체력 회복 버프(소)

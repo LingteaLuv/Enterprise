@@ -257,4 +257,9 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
     {
         return charName;
     }
+
+    public Faction GetFaction()
+    {
+        return CharacterStats.characterdata.faction;
+    }
 }

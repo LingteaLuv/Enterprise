@@ -11,7 +11,7 @@ public class PassiveSkillDataImporter
     private static string CSV_PATH = "/CSVData/";
     private static string SKILL_SO_PATH = "Assets/Resources/SkillData/PassiveSkills/";
     private static string EFFECT_SO_PATH = "Assets/Resources/SkillData/PassiveEffects/";
-    private const string EFFECT_PREFAB_ASSET_PATH = "Assets/04. JHT_Folder/Prefabs/SkillEffect/"; // 이펙트 프리팹 에셋 경로
+    private const string EFFECT_PREFAB_ASSET_PATH = "Assets/09. PSH_Folder/SkillEffect/"; // 이펙트 프리팹 에셋 경로
 
     [MenuItem("Tools/Import Data/PassiveSkill")]
     public static void ParseGameData()
