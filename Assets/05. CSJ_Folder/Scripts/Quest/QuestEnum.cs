@@ -39,4 +39,9 @@
     {
         Gem, Exp, Gold, CrewTicket, EquipmentTicket, CrewEnchantStone, 
     }
+
+    public enum TutorialStepType
+    {
+        Dialogue, Highlight, WaitSignal, CompleteQuest, ClaimReward,
+    }
 }

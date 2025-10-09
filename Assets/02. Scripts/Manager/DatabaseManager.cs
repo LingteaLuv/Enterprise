@@ -996,6 +996,8 @@ public class DatabaseManager : Singleton<DatabaseManager>
         return lastStd < boundary;
     }
 
+    #region  questData
+
     /// <summary>
     /// {_uid}/{subPath}에 데이터를 저장합니다.
     /// </summary>
@@ -1164,6 +1166,7 @@ public class DatabaseManager : Singleton<DatabaseManager>
         }
         return result;
     }
+    #endregion
     #endregion
     
     #region codex

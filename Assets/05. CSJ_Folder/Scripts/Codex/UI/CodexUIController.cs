@@ -57,14 +57,8 @@ namespace _05._CSJ_Folder.Scripts.Codex.UI
             gameObject.SetActive(false);
         }
 
-        private void Awake()
-        {
-
-        }
-
         private void OnEnable()
         {
-            Debug.Log("Enable");
             _closeButton.onClick.AddListener(CloseQuestTab);
             InitCodexTab();
             _stdButtonMap.Clear();

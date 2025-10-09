@@ -70,14 +70,12 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
 
     public void OnBossBattleEnter()
     {
-        Debug.Log("Boss Battle Enter");
         ETCAchieve("BossBattle");
         BossBattleEnter?.Invoke();
     }
 
     public void OnBossTutorial()
     {
-        Debug.Log("Boss Tutorial");
         Tutorial("BossTutorial");
     }
 
@@ -270,7 +268,6 @@ public class QuestSignalManager : Singleton<QuestSignalManager>
     public void Tutorial(string def, bool general = true, bool daily = true, bool weekly = true)
     {
         var key = QuestKeys.Tutorial(def);
-        Debug.Log($"tutorialkey {key}");
         SendSignal(key, 1, general, daily, weekly);
     }
 
