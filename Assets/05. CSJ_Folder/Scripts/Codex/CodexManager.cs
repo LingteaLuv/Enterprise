@@ -110,7 +110,6 @@ namespace _05._CSJ_Folder.Scripts.Codex
         {
             var factions = (Faction[])Enum.GetValues(typeof(Faction));
             var stds = (CodexStd_Enum[])Enum.GetValues(typeof(CodexStd_Enum));
-            Debug.Log(factions.Length);
             foreach (var faction in factions)
             {
                 if (!FactionData.TryGetValue(faction, out var codexData))

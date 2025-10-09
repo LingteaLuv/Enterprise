@@ -11,12 +11,15 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             get
             {
-                if (this is GeneralQuestInstance general) return general.GeneralQuestId;
-                else if(this is TemporaryInstance temporary) return temporary.TemporaryQuestId;
-                else
+                switch (this)
                 {
-                    Debug.LogError("QuestId 잘못된 접근");
-                    return "";
+                    case GeneralQuestInstance general:
+                        return general.GeneralQuestId;
+                    case TemporaryInstance temporary:
+                        return temporary.TemporaryQuestId;
+                    default:
+                        Debug.LogError("QuestId 잘못된 접근");
+                        return "";
                 }
             }
         }

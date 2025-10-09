@@ -700,7 +700,10 @@ namespace JHT
 
             ApplyDamageEffects(finalDamage);
         }
-
+        public Faction GetFaction()
+        {
+            return monsterStat.monsterFaction;
+        }
 
     }
 }
