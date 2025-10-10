@@ -15,6 +15,8 @@ public class BossBattleManager : Singleton<BossBattleManager>
     [Header("보스 스폰 위치 설정")]
     [SerializeField] private GameObject bossPos; // 팀원 방식 사용
 
+    [SerializeField] private GameObject monsterPrefab;
+    private Transform monsterParent;
 
     private List<GameObject> currentPlayers;
     private CameraFollow cameraFollow;
@@ -37,7 +39,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
     protected override void Awake()
     {
         base.Awake();
-
     }
 
     protected override void OnDestroy()
@@ -45,11 +46,9 @@ public class BossBattleManager : Singleton<BossBattleManager>
         base.OnDestroy();
     }
 
-
     public void Battle()
     {
         BattleAsync().Forget();
-
         //StartCoroutine(EnableMeleeAfterDelay());
     }
 
@@ -63,22 +62,24 @@ public class BossBattleManager : Singleton<BossBattleManager>
                     token[i] = new();
             }
 
-            if(bossPos == null)
-                await DataLoad();
 
             await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token[0].Token);
 
-            product = FindFirstObjectByType<BossBattleProduct>();//GameObject.FindGameObjectWithTag("BossBattleProduct").GetComponent<BossBattleProduct>();
-            direction = FindFirstObjectByType<BossBattleDirection>();//GameObject.FindGameObjectWithTag("BossBattleDirection").GetComponent<BossBattleDirection>();
+            product = FindFirstObjectByType<BossBattleProduct>();
+            direction = FindFirstObjectByType<BossBattleDirection>();
+            
 
             OnDieMonster += HandleBossDefeated;
-            Debug.Log("보스전 시작");
+
             cameraFollow = Camera.main?.GetComponent<CameraFollow>();
             monsterSpawnManager = JHT_MonsterSpawnManager.Instance;
 
-            product.Init();
+
+            await DataLoad();
+
             SpawnPlayers();
             SpawnBoss();
+            product.Init();
         }
         catch (OperationCanceledException) { }
     }
@@ -86,8 +87,11 @@ public class BossBattleManager : Singleton<BossBattleManager>
     private async UniTask DataLoad()
     {
         var monsterTransformHandle = await Addressables.LoadAssetAsync<GameObject>("MonsterTransform");
+        var monsterSampleHandle = await Addressables.LoadAssetAsync<GameObject>("SampleMonster");
 
         bossPos = monsterTransformHandle;
+        monsterPrefab = monsterSampleHandle;
+        monsterParent = product.transform.Find("MonsterShip").transform;
         //bossPos.transform.position += new Vector3(6, 0);
     }
 
@@ -103,7 +107,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
         {
             var c = character.ch;
             c.Initialize(c.CharacterStats);
-            c.transform.position = new Vector3(character.i * 0.3f - 1.5f, 0, 0);
+            c.transform.position = new Vector3(character.i * 0.3f - 9.5f, -2f, 0);
             c.gameObject.SetActive(true);
 
             var fsm = c.GetComponent<BaseCharacterFSM>();
@@ -114,8 +118,8 @@ public class BossBattleManager : Singleton<BossBattleManager>
             }
 
             // MeleeCharacter 스크립트 비활성화
-            //var melee = c.GetComponent<MeleeCharacter>();
-            //if (melee != null) melee.enabled = false;
+            var melee = c.GetComponent<MeleeCharacter>();
+            if (melee != null) melee.enabled = false;
 
 
             currentPlayers.Add(c.gameObject);
@@ -158,12 +162,22 @@ public class BossBattleManager : Singleton<BossBattleManager>
         // 몬스터 생성
         for (int i = 0; i < spawnBossMonster.Count; i++)
         {
-            JHT_BaseMonsterFSM obj = monsterSpawnManager.monsterPool.GetPooled() as JHT_BaseMonsterFSM;
+            JHT_BaseMonsterFSM obj = Instantiate(monsterPrefab).GetComponent<JHT_BaseMonsterFSM>();
             obj.Init(spawnBossMonster[i], SpawnType.BossStage);
             obj.transform.position = bossPosSpawn.SetPos(spawnBossMonster[i]).position;
-            //obj.GetComponent<JHT_NormalMonster>().enabled = false;
-            // 보스 사망 이벤트 연결
+            obj.transform.SetParent(monsterParent);
+            obj.GetComponent<JHT_NormalMonster>().enabled = false;
         }
+        
+        //for (int i = 0; i < spawnBossMonster.Count; i++)
+        //{
+        //    JHT_BaseMonsterFSM obj = monsterSpawnManager.monsterPool.GetPooled() as JHT_BaseMonsterFSM;
+        //    obj.Init(spawnBossMonster[i], SpawnType.BossStage);
+        //    obj.transform.position = bossPosSpawn.SetPos(spawnBossMonster[i]).position;
+        //    obj.transform.localScale *= 1.3f;
+        //    obj.GetComponent<JHT_NormalMonster>().enabled = false;
+        //    // 보스 사망 이벤트 연결
+        //}
     }
     #endregion
 
@@ -194,11 +208,20 @@ public class BossBattleManager : Singleton<BossBattleManager>
 
     private void EndBattle(bool isVictory)
     {
+        direction.defeatText.gameObject.SetActive(isVictory);
+        direction.victoryText.gameObject.SetActive(isVictory);
 
         IsBossBattle = false;
-
+        monsterParent = null;
         spawnBossMonster.Clear();
         currentPlayers.Clear();
+
+        if (isVictory)
+            direction.PlayVictoryDirection();
+        else
+            direction.PlayDefeatDirection();
+
+        product.LoseProduct(isVictory);
         // 카메라 추적 해제
         if (cameraFollow != null)
             cameraFollow.SetTargets(new List<Transform>());
@@ -216,7 +239,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
 
         if (isVictory)
         {
-            Debug.Log("보스전 승리!");
 
             // 스테이지 클리어 기록
             QuestSignalManager.Instance.StageClear(GlobalStageManager.Instance.CurrentStageIndex.Value);
@@ -235,7 +257,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
         }
         else
         {
-            Debug.Log("보스전 패배!");
             GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;
             GlobalStageManager.Instance.bossBattleTriggered = false;
             StartCoroutine(Delay2());
@@ -266,17 +287,14 @@ public class BossBattleManager : Singleton<BossBattleManager>
 
         if (delay2 != null)
         {
-
             StopCoroutine(delay2);
             delay2 = null;
         }
     }
     #endregion
 
-    private IEnumerator EnableMeleeAfterDelay()
+    public void EnableMeleeAfterDelay()
     {
-        Debug.Log("전투 개시 버튼 눌림 → 딜레이 시작");
-        yield return new WaitForSeconds(startDelay);
 
         foreach (var player in currentPlayers)
         {
@@ -284,7 +302,23 @@ public class BossBattleManager : Singleton<BossBattleManager>
             if (melee != null)
             {
                 melee.enabled = true;
-                Debug.Log($"{player.name} 의 MeleeCharacter 스크립트 활성화됨!");
+            }
+        }
+
+    }
+
+    public void EnableMonsterAfterDelay()
+    {
+        for (int i = 0; i < monsterParent.childCount; i++)
+        {
+            var m = monsterParent.GetChild(i);
+            if (m.TryGetComponent(out JHT_BaseMonsterFSM obj))
+            {
+                obj.enabled = true;
+            }
+            else
+            {
+                continue;
             }
         }
 

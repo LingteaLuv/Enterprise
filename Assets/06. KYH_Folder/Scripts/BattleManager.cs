@@ -279,7 +279,7 @@ public class BattleManager : MonoBehaviour
         }
         var field = battleFields[stageIdx];
 
-        SpawnEnemies(stageIdx);
+        SpawnEnemies(currentRoundIndex);
         SpawnPlayers(field);
         
 
@@ -345,11 +345,10 @@ public class BattleManager : MonoBehaviour
     {
         if (roundIndex >= JHT_MonsterSpawnManager.Instance.roundTable.roundCount)
         {
-            //Debug.LogError($"BattleManager IslandClear : Change Next Island");
-            //Debug.LogError($"{JHT_MonsterSpawnManager.Instance.roundTable.roundCount}");
-            //Debug.LogError($"{roundIndex}");
             //GlobalStageManager.Instance.currentStageIndex++; // todo 임시 : 보스 나오기전
+            currentRoundIndex = 0;
             IsStageEnd = true;
+
             return;
         }
 
