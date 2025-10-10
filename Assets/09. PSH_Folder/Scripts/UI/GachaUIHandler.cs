@@ -296,6 +296,7 @@ public class GachaUIHandler : UIBase
                     Debug.Log("<color=cyan>튜토리얼 캐릭터 뽑기를 실행합니다.</color>");
                     (manager as CharacterGachaManager).TutorialGacha();
                     PlayerDataManager.Instance.hasCompletedTutorialGacha = true;
+                    DatabaseManager.Instance.SaveField("UserData/HasCompleted", true);
                     gachaInitiated = true;
                 }
                 else

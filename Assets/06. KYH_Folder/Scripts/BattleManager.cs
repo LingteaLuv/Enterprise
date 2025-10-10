@@ -345,9 +345,9 @@ public class BattleManager : MonoBehaviour
     {
         if (roundIndex >= JHT_MonsterSpawnManager.Instance.roundTable.roundCount)
         {
-            Debug.LogError($"BattleManager IslandClear : Change Next Island");
-            Debug.LogError($"{JHT_MonsterSpawnManager.Instance.roundTable.roundCount}");
-            Debug.LogError($"{roundIndex}");
+            //Debug.LogError($"BattleManager IslandClear : Change Next Island");
+            //Debug.LogError($"{JHT_MonsterSpawnManager.Instance.roundTable.roundCount}");
+            //Debug.LogError($"{roundIndex}");
             //GlobalStageManager.Instance.currentStageIndex++; // todo 임시 : 보스 나오기전
             IsStageEnd = true;
             return;
