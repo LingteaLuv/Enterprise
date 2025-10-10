@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: d57c2ef2a91e36649ba5047cf7e60140
   m_currentHash:
     serializedVersion: 2
-    Hash: 6d7be79d497f91dd692858c3e29e065d
+    Hash: 9ac7d4ccb9be832af8deeca274c3a4a9
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 1
   m_CatalogRequestsTimeout: 0
@@ -33,6 +33,7 @@ MonoBehaviour:
   m_UniqueBundleIds: 0
   m_EnableJsonCatalog: 0
   m_NonRecursiveBuilding: 1
+  m_AllowNestedBundleFolders: 0
   m_CCDEnabled: 0
   m_maxConcurrentWebRequests: 3
   m_UseUWRForLocalBundles: 0
@@ -75,8 +76,8 @@ MonoBehaviour:
   m_ProfileSettings:
     m_Profiles:
     - m_InheritedParent: 
-      m_Id: 54a9a66c51f1c8a49812ba255f082a81
-      m_ProfileName: New Profile
+      m_Id: f496fef674a35f142832006cf50b3ca2
+      m_ProfileName: Default
       m_Values:
       - m_Id: 22ace1fc7a97fe644821a95168cf936c
         m_Value: 'ServerData/[BuildTarget]'
@@ -89,8 +90,8 @@ MonoBehaviour:
       - m_Id: 8a76d59d3936d3d44a81ac4c22c128ac
         m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
     - m_InheritedParent: 
-      m_Id: f496fef674a35f142832006cf50b3ca2
-      m_ProfileName: Default
+      m_Id: 54a9a66c51f1c8a49812ba255f082a81
+      m_ProfileName: New Profile
       m_Values:
       - m_Id: 22ace1fc7a97fe644821a95168cf936c
         m_Value: 'ServerData/[BuildTarget]'
@@ -132,6 +133,8 @@ MonoBehaviour:
     - Equips
     - MonsterAnimController
     - MonsterTransform
+    - SkillData
+    - SynergyData
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: efc385fbab4e3f645b4ecf38bd8fc178, type: 2}

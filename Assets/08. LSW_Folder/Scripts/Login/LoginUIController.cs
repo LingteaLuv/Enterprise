@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -74,9 +75,15 @@ public class LoginUIController : UIController<LoginUIController.LoginUIType>
                 };
             }
         }
+        StartCoroutine(ShowStartPanel());
         
-        ShowUI(LoginUIType.StartPanel);
         HideUI(LoginUIType.LoginPanel);
         HideUI(LoginUIType.InfoPanel);
+    }
+
+    IEnumerator ShowStartPanel()
+    {
+        yield return new WaitForSeconds(4f);
+        ShowUI(LoginUIType.StartPanel);
     }
 }
