@@ -92,6 +92,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         DataManager.Instance.OnWeaponReady += async () =>
         {
+            await SkillDatabase.InitializeAsync(); // 스킬 데이터베이스 초기화
             await InitDatabase();
             if (OwnedCharacters.Count == 0)
             {
