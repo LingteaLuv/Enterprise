@@ -249,6 +249,7 @@ public class IslandStageManager : MonoBehaviour
                 GlobalStageManager.Instance.bossBattleTriggered = true;
                 _bossDirection.OnBossChallenge();
                 yield return new WaitForSeconds(5f);
+                BossBattleManager.Instance.Battle();
                 SceneManager.LoadScene("BossBattleScene");
                 yield break;
             }
@@ -273,9 +274,7 @@ public class IslandStageManager : MonoBehaviour
         }
 
         // 다음 섬으로 이동
-        Debug.Log($" [HandleReturnAndNext] MoveToAndEnter({GlobalStageManager.Instance.CurrentIslandIndex.Value}) 호출 시도");
         moveToAndEnter = StartCoroutine(MoveToAndEnter(GlobalStageManager.Instance.CurrentIslandIndex.Value));
-        Debug.Log(" [HandleReturnAndNext] MoveToAndEnter 종료");
     }
 
     /// <summary>
@@ -304,7 +303,7 @@ public class IslandStageManager : MonoBehaviour
         SetBattleField(index);
 
         //BattleManager.Instance?.StartBattle(currentIndex);
-        BattleManager.Instance?.StartBattle(index);
+        BattleManager.Instance?.StartBattle(0);
         Debug.Log($"[MoveToAndEnter] StartBattle 호출 이후 정상 종료 index={index}");
 
         StopCoroutine(moveToAndEnter);

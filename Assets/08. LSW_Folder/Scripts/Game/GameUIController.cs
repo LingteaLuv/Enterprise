@@ -130,6 +130,8 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         JHT_MonsterSpawnManager.Instance.MonsterAllClear();
         BattleManager.Instance.ClearEnemies();
         BattleManager.Instance.ClearPlayers();
+
+        yield return new WaitForSeconds(1f);
         BossBattleManager.Instance.Battle();
         SceneManager.LoadScene("BossBattleScene");
     }

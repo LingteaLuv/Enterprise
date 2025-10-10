@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
@@ -103,9 +104,21 @@ namespace JHT
                 return;
             }
 
-            if(fsm.monsterSpawnType == SpawnType.IslandStage)
+            if (fsm.monsterSpawnType == SpawnType.IslandStage)
+            {
                 fsm.monsterSearch.SearchTarget();
-            else if(fsm.monsterSpawnType == SpawnType.BossStage)
+                //if (fsm.timeToken == null)
+                //{
+                //    fsm.monsterSearch.SearchTarget();
+                //    fsm.TimeCheck(1.5f).Forget();
+                //}
+
+                //if (fsm.moveCheck)
+                //{
+                //    fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position, 1 * Time.deltaTime);
+                //}
+            }
+            else if (fsm.monsterSpawnType == SpawnType.BossStage)
                 fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position, 1 * Time.deltaTime);
             
             fsm.Rotate();
