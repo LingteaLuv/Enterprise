@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -22,6 +23,7 @@ public class PlayerInfoPanel : UIBase
     private Sprite _curImage;
     private int _curImageId;
     private Vector2 _curPos;
+    private Dictionary<int, GameObject> _images = new Dictionary<int, GameObject>();
     
     public Action OnClickedExitBtn;
     public Action OnClickedNicknameChangeBtn;
@@ -41,6 +43,8 @@ public class PlayerInfoPanel : UIBase
             _googleLinkBtn.gameObject.SetActive(false);
             _playGamesLinkBtn.gameObject.SetActive(false);
         }
+        
+        PlayerDataManager.Instance.OnOwnedCharacterAdded += (key) => AddImage(key);
         
         _nicknameChangeBtn.onClick.AddListener(async () =>
         {
@@ -125,12 +129,13 @@ public class PlayerInfoPanel : UIBase
 
     private void InitImage()
     {
-        foreach (var kvp in PlayerDataManager.Instance.OwnedCharacters)
+        foreach (var kvp in PlayerDataManager.Instance.AllCharacters)
         {
             if (kvp.Value.characterdata.characterID == _curImageId)
             {
                 _curImage = kvp.Value.characterdata.characterSprite;
             }
+            
             GameObject go = Instantiate(_imagePrefab, _parent);
             go.GetComponent<CrewIcon>().IconImage = kvp.Value.characterdata.characterSprite;
             go.GetComponent<CrewIcon>().GetComponent<Button>().onClick.AddListener(() =>
@@ -138,8 +143,21 @@ public class PlayerInfoPanel : UIBase
                 _crewImage.sprite = go.GetComponent<CrewIcon>().IconImage;
                 _curImageId = kvp.Value.characterdata.characterID;
             });
-            
             go.transform.GetChild(0).GetComponent<Image>().sprite = kvp.Value.characterdata.characterSprite;
+            
+            if (!PlayerDataManager.Instance.OwnedCharacters.ContainsKey(kvp.Key))
+            {
+                go.GetComponent<CrewIcon>().GetComponent<Button>().enabled = false;
+                go.transform.GetChild(0).GetComponent<Image>().color = new Color(0.2f, 0.2f, 0.2f, 255);
+            }
+
+            _images[kvp.Value.characterdata.characterID] = go;
         }
+    }
+    
+    private void AddImage(int key)
+    {
+        _images[key].gameObject.GetComponent<CrewIcon>().GetComponent<Button>().enabled = true;
+        _images[key].gameObject.transform.GetChild(0).GetComponent<Image>().color = new Color(255, 255, 255, 255);
     }
 }

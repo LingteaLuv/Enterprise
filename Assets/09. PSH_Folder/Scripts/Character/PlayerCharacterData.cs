@@ -236,11 +236,12 @@ public class PlayerCharacterData
     //    return Resources.Load<Sprite>(path);
     //}
 
-    public void Init(int crewId, int star)
+    public void Init(int crewId, int star, bool save)
     {
         Level = new Property<int>(1);
         Star = new Property<int>(star);
         Soul = new Property<int>(0);
+        if (!save) return;
         
         DatabaseManager.Instance.SaveField($"StatusData/Crew/{crewId}/Level", 1);
         DatabaseManager.Instance.SaveField($"StatusData/Crew/{crewId}/Star", star);
@@ -263,10 +264,10 @@ public class PlayerCharacterData
         //Debug.LogError($"{crewId}저장 완료");
     }
 
-    public static async UniTask<PlayerCharacterData> Instantiate(CharacterData so, int star)
+    public static async UniTask<PlayerCharacterData> Instantiate(CharacterData so, int star, bool save = true)
     {
         PlayerCharacterData data = new PlayerCharacterData(so);
-        data.Init(so.characterID, star);
+        data.Init(so.characterID, star, save);
         return data;
     }
 }

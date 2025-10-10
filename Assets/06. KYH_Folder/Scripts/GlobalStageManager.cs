@@ -35,25 +35,32 @@ public class GlobalStageManager : MonoBehaviour
 
     private async UniTask Initialize()
     {
-        if(!await DatabaseManager.Instance.CheckFieldAsync("StageData/Stage", (long value) =>
+        if(await DatabaseManager.Instance.CheckFieldAsync("StageData/Stage", (long value) =>
            {
                CurrentStageIndex = new Property<int>((int)value);
            }))
         {
+            //Debug.LogError("CurrentStageIndex 불러오기 완료");
+        }
+        else
+        {
             CurrentStageIndex = new Property<int>(1);
             await DatabaseManager.Instance.SaveFieldAsync("StageData/Stage", 1);
         }
-        
         CurrentStageIndex.OnChanged += async (value) =>
         {
             await DatabaseManager.Instance.SaveFieldAsync("StageData/Stage", value);
         };
         
-        if(!await DatabaseManager.Instance.CheckFieldAsync("StageData/Island", (long value) =>
+        if(await DatabaseManager.Instance.CheckFieldAsync("StageData/Island", (long value) =>
            {
                CurrentIslandIndex = new Property<int>((int)value);
                IsChecked = true;
            }))
+        {
+            //Debug.LogError("CurrentIslandIndex 불러오기 완료");
+        }
+        else
         {
             CurrentIslandIndex = new Property<int>(0);
             await DatabaseManager.Instance.SaveFieldAsync("StageData/Island", 0);
@@ -64,8 +71,5 @@ public class GlobalStageManager : MonoBehaviour
         {
             await DatabaseManager.Instance.SaveFieldAsync("StageData/Island", value);
         };
-
-        CurrentStageIndex.Value = 1;
-        CurrentIslandIndex.Value = 0;
     }
 }

@@ -63,6 +63,11 @@ public class NicknameChangePanel : UIBase
             return;
         }
 
+        if (!IsValid(_nicknameField.text))
+        {
+            ShowPopup("비속어가 포함되어있습니다.\r\n다른 닉네임을 입력해 주세요.");
+            return;
+        }
         //NicknameCheck();
         
         // 닉네임 재설정 및 데이터베이스에 저장
@@ -77,5 +82,18 @@ public class NicknameChangePanel : UIBase
             
             OnClickNicknameChange?.Invoke();
         });
+    }
+
+    private bool IsValid(string nickname)
+    {
+        //Debug.LogError($"{DataManager.Instance.AllBadWords.Count}");
+        foreach (var word in DataManager.Instance.AllBadWords)
+        {
+            if (nickname.Contains(word, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using UnityEngine.AddressableAssets;
 
 // 이 클래스는 싱글톤으로 구현되었으며, 게임 내 시너지 효과를 총괄 관리합니다.
 // 1. 모든 SynergySO를 로드하여 '시너지 지도'를 구축합니다. (어떤 캐릭터가 어떤 시너지에 속하는지)
@@ -17,12 +19,15 @@ public class SynergyManager : Singleton<SynergyManager>
     public IReadOnlyList<SynergySO> PreviewSynergies => _previewSynergies;
 
     // --- Private Fields --- //
-    [SerializeField] private List<SynergySO> _allSynergies; // 로드된 모든 시너지 SO
-    [SerializeField] private Dictionary<int, List<SynergySO>> _characterToSynergiesMap; // 캐릭터 ID를 Key로, 해당 캐릭터가 포함된 시너지 리스트를 Value로 갖는 맵
-    
+    private List<SynergySO> _allSynergies; // 로드된 모든 시너지 SO
+    private Dictionary<int, List<SynergySO>> _characterToSynergiesMap; // 캐릭터 ID를 Key로, 해당 캐릭터가 포함된 시너지 리스트를 Value로 갖는 맵
+
     [Header("Synergy Lists")]
     [SerializeField] private List<SynergySO> _combatSynergies; // '실제 전투'에 적용되는 시너지 리스트
     [SerializeField] private List<SynergySO> _previewSynergies; // '편성 화면'에서 보여주기 위한 임시 시너지 리스트
+
+    private bool _isInitialized = false;
+    private const string SYNERGY_SO_LABEL = "SynergyData"; // 어드레서블 라벨
 
     protected override void Awake()
     {
@@ -33,9 +38,16 @@ public class SynergyManager : Singleton<SynergyManager>
         _characterToSynergiesMap = new Dictionary<int, List<SynergySO>>();
         _combatSynergies = new List<SynergySO>();
         _previewSynergies = new List<SynergySO>();
+    }
 
-        LoadAllSynergies();
+    public async Task InitializeAsync()
+    {
+        if (_isInitialized) return;
+
+        await LoadAllSynergiesAsync();
         BuildSynergyMap();
+        _isInitialized = true;
+        Debug.Log("[SynergyManager] 초기화 완료!");
     }
 
     private void OnEnable()
@@ -60,6 +72,7 @@ public class SynergyManager : Singleton<SynergyManager>
     /// </summary>
     private void HandleTempFormationChange()
     {
+        if (!_isInitialized) return;
         Debug.Log("[SynergyManager] 임시 편성 변경 감지. '미리보기' 시너지를 업데이트합니다.");
         var tempFormation = FormationManager.Instance.TempFormation;
 
@@ -78,6 +91,7 @@ public class SynergyManager : Singleton<SynergyManager>
     /// <param name="finalPartyIDs">최종 확정된 파티의 캐릭터 ID 리스트</param>
     public void ConfirmCombatSynergies(List<int> finalPartyIDs)
     {
+        if (!_isInitialized) return;
         Debug.Log("[SynergyManager] 파티 편성 확정! '전투용' 시너지를 업데이트합니다.");
         UpdateCombatSynergies(finalPartyIDs);
     }
@@ -87,6 +101,8 @@ public class SynergyManager : Singleton<SynergyManager>
     /// </summary>
     public void ApplySynergyEffectsForBattle()
     {
+        if (!_isInitialized) return;
+
         var party = PartyManager.Instance?.ActiveParty;
         if (party == null || party.Count == 0)
         {
@@ -214,10 +230,11 @@ public class SynergyManager : Singleton<SynergyManager>
 
     #region Data Loading
 
-    private void LoadAllSynergies()
+    private async Task LoadAllSynergiesAsync()
     {
-        _allSynergies = Resources.LoadAll<SynergySO>("SynergyData/Synergy").ToList();
-        Debug.Log($"[SynergyManager] {_allSynergies.Count}개의 시너지 정보를 로드했습니다.");
+        var handle = await Addressables.LoadAssetsAsync<SynergySO>(SYNERGY_SO_LABEL, null).Task;
+        _allSynergies = handle.ToList();
+        Debug.Log($"[SynergyManager] {_allSynergies.Count}개의 시너지 정보를 로드했어요!");
     }
 
     private void BuildSynergyMap()
@@ -235,7 +252,7 @@ public class SynergyManager : Singleton<SynergyManager>
             }
         }
     }
-    
+
     #endregion
 
     #region Synergy Check (CSJ Added)
@@ -246,9 +263,4 @@ public class SynergyManager : Singleton<SynergyManager>
     }
 
     #endregion
-
-    // 사용되지 않는 이전 함수들입니다. 필요하다면 참고 후 삭제하세요.
-    // private void UpdateActiveSynergies(List<int> currentPartyIDs) { ... }
-    // private void ActivateSynergy(SynergySO synergy) { ... }
-    // private void DeactivateSynergy(SynergySO synergy) { ... }
 }
