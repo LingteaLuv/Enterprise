@@ -16,6 +16,7 @@ namespace JHT
         public const string monsterDataURL = "https://docs.google.com/spreadsheets/d/1YVvWgG0PJYlX51LqkHn7emFqH58TzSgl7KFRFzwL1aU/export?format=csv&gid=1334569449";
         public const string monsterTableDataURL = "https://docs.google.com/spreadsheets/d/1W5YTINFy0XWnzm549uTDJL6Up4h81jeZhlc0A_9T_j8/export?format=csv&gid=1380546625";
         public const string skillDataURL = "https://docs.google.com/spreadsheets/d/1YVvWgG0PJYlX51LqkHn7emFqH58TzSgl7KFRFzwL1aU/export?format=csv";
+        private const string WordDataURL = "https://docs.google.com/spreadsheets/d/1tmOt55wipVzTxrFU190L_JSw6hZrGWI8oOP2J46H66k/export?format=csv";
         
         public event Action OnDataSetCompleted;
         public event Action OnMonsterDataTableSetCompleted;
@@ -312,6 +313,27 @@ namespace JHT
                 }
             }
         }
+        
+        public IEnumerator LoadWordCSV(Action<List<string>> onParsed, int startLine = 1)
+        {
+            using UnityWebRequest www = UnityWebRequest.Get(WordDataURL);
 
+            yield return www.SendWebRequest();
+
+            if (!string.IsNullOrEmpty(www.error))
+                yield break;
+
+            string raw = www.downloadHandler.text.Trim();
+            string[] lines = raw.Split('\n');
+            List<string> parsed = new();
+
+            for (int i = startLine - 1; i < lines.Length; i++)
+            {
+                string row = lines[i].Trim();
+                parsed.Add(row);
+            }
+
+            onParsed?.Invoke(parsed);
+        }
     }
 }
