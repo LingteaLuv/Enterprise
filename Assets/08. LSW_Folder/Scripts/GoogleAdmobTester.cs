@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
 {
-    private string _adID = "ca-app-pub-3940256099942544/5354046379";
+    private string _adID = "ca-app-pub-1273798790524004/7379492954";
     private InterstitialAd _loadedAd;
     private RewardedInterstitialAd _rewardedInterstitialAd;
     
@@ -57,7 +57,6 @@ public class GoogleAdmobTester : Singleton<GoogleAdmobTester>
             _rewardedInterstitialAd.OnAdFullScreenContentClosed -= LoadAdTest;
             _rewardedInterstitialAd.OnAdFullScreenContentClosed += LoadAdTest;
             QuestSignalManager.Instance.ETCAchieve("AdWatch");
-            Debug.LogError("[GoogleAdmobTester] : 광고 로드 완료");
         });
     }
     

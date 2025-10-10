@@ -1,9 +1,8 @@
-using System;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Action = System.Action;
 
 public class PlayerInfoPanel : UIBase
 {
@@ -14,12 +13,24 @@ public class PlayerInfoPanel : UIBase
     [SerializeField] private Button _playGamesLinkBtn;
     //[SerializeField] private Button _logoutBtn;
     [SerializeField] private Button _exitBtn;
+    [SerializeField] private Button _imageChangeBtn;
+    
+    [SerializeField] private Transform _parent;
+    [SerializeField] private GameObject _imagePrefab;
+    [SerializeField] private Image _crewImage;
+
+    private Sprite _curImage;
+    private int _curImageId;
+    private Vector2 _curPos;
     
     public Action OnClickedExitBtn;
     public Action OnClickedNicknameChangeBtn;
     
-    private void Start()
+    private async void Start()
     {
+        RectTransform rt = GetComponent<RectTransform>();
+        _curPos = rt.anchoredPosition;
+        rt.anchoredPosition = new Vector2(3000, -3000);
         _googleLinkBtn.onClick.AddListener(OnTouchGoogleLinkBtn);
         _playGamesLinkBtn.onClick.AddListener(async () => await OnTouchPlayGamesLinkBtn() );
         
@@ -40,7 +51,26 @@ public class PlayerInfoPanel : UIBase
         {
             OnClickedExitBtn?.Invoke();
         });
+        
+        _imageChangeBtn.onClick.AddListener(() =>
+        {
+            _curImage = _crewImage.sprite;
+            string path = $"UserData/image";
+            DatabaseManager.Instance.SaveField(path, _curImageId);
+        });
+        await Init();
+        rt.anchoredPosition = _curPos;
         gameObject.SetActive(false);
+    }
+    
+    private async UniTask Init()
+    {
+        string path = $"{FirebaseManager.Auth.CurrentUser.UserId}/UserData/image";
+        await DatabaseManager.Instance.LoadFieldAsync<int>(path, (value) =>
+        {
+            _curImageId = value;
+            InitImage();
+        }, true, value : 20001);
     }
     
     private void OnEnable()
@@ -53,6 +83,7 @@ public class PlayerInfoPanel : UIBase
     {
         _nicknameText.text = "";
         _uidText.text = "";
+        _crewImage.sprite = _curImage;
     }
     
     private async UniTask SetText()
@@ -90,5 +121,25 @@ public class PlayerInfoPanel : UIBase
         //AuthManager.Instance.Logout();
         Utility.OnDestroyAll.Invoke();
         SceneTransitionManager.Instance.LoadSceneWithLoading("LoginScene", 2f);
+    }
+
+    private void InitImage()
+    {
+        foreach (var kvp in PlayerDataManager.Instance.OwnedCharacters)
+        {
+            if (kvp.Value.characterdata.characterID == _curImageId)
+            {
+                _curImage = kvp.Value.characterdata.characterSprite;
+            }
+            GameObject go = Instantiate(_imagePrefab, _parent);
+            go.GetComponent<CrewIcon>().IconImage = kvp.Value.characterdata.characterSprite;
+            go.GetComponent<CrewIcon>().GetComponent<Button>().onClick.AddListener(() =>
+            {
+                _crewImage.sprite = go.GetComponent<CrewIcon>().IconImage;
+                _curImageId = kvp.Value.characterdata.characterID;
+            });
+            
+            go.transform.GetChild(0).GetComponent<Image>().sprite = kvp.Value.characterdata.characterSprite;
+        }
     }
 }

@@ -181,7 +181,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             
             // 현재 존재하는 퀘스트 목록들을 _defs 딕셔너리에 추가
             BuildCatalog();
-            _tutorialDirector.Init();
+            //_tutorialDirector.Init();
             
             // 시그널 SO가 존재할 경우dc
             if (_signal != null)
