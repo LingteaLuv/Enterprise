@@ -112,6 +112,7 @@ public class BossBattleDirection : MonoBehaviour
             {
                 BossBattleManager.Instance.EnableMeleeAfterDelay();
                 BossBattleManager.Instance.EnableMonsterAfterDelay();
+                BossBattleManager.Instance.product.CameraZoomIn();
             }
         }
 

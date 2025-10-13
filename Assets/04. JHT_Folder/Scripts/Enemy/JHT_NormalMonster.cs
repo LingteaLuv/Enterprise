@@ -70,6 +70,22 @@ namespace JHT
         public void NormalMonsterAttack()
         {
             monsterStat.normalSkill.Use(this);
+
+            if (monsterStat.projectileSprite != null && monsterStat.normalSkill.skillTargetType == ESkillTargetType.Offensive)
+            {
+                if (target == null) return;
+
+                JHT_MonsterProjectile obj = JHT_MonsterSpawnManager.Instance.projectilePool.GetPooled() as JHT_MonsterProjectile;
+
+                if (JHT_MonsterSpawnManager.Instance.projectilePool == null || obj == null)
+                    return;
+
+                Vector2 startPos = transform.position;
+                Vector2 targetPos = (Vector2)target.transform.position;
+
+                if (this != null)
+                    obj.Init(this,targetPos, startPos, monsterStat.projectileSprite,3f);// monsterStat.attackPower, monsterStat.attackPower, );
+            }
         }
 
         public void Skill1MonsterAttack()

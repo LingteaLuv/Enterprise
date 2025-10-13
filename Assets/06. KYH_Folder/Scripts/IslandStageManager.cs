@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
+using JHT;
 
 /// <summary>
 /// 섬 이동, 배 이동, 전투 흐름을 통합 관리하는 매니저
@@ -57,7 +58,6 @@ public class IslandStageManager : MonoBehaviour
     {
         if (scene.name == "Game")
         {
-            Debug.Log("IslandStageManager: Scene Loaded → InitReferences + StartStage");
             InitReferences();
             StartCoroutine(WaitUntilTravelUIReady());
         }
@@ -73,7 +73,6 @@ public class IslandStageManager : MonoBehaviour
             timer += Time.deltaTime;
             if (timer >= timeout)
             {
-                Debug.LogWarning("TravelUIController 초기화 시간 초과");
                 yield break;
             }
             yield return null;
@@ -81,15 +80,21 @@ public class IslandStageManager : MonoBehaviour
         
         if (GlobalStageManager.Instance.CurrentIslandIndex.Value >= islandSets.Count)
         {
-            Debug.Log(" [HandleReturnAndNext] 모든 섬 완료");
 
             if (!GlobalStageManager.Instance.bossBattleTriggered)
             {
-                Debug.Log("→ 보스전 자동 진입 조건 만족 (처음 클리어)");
                 GlobalStageManager.Instance.bossBattleTriggered = true;
                 _bossDirection.OnBossChallenge();
                 yield return new WaitForSeconds(5f);
                 BossBattleManager.Instance.Battle();
+
+                if (handleReturnAndNext != null)
+                {
+                    StopCoroutine(handleReturnAndNext);
+                    handleReturnAndNext = null;
+                }
+                isAdvancing = false;
+
                 SceneManager.LoadScene("BossBattleScene");
                 yield break;
             }
@@ -98,7 +103,6 @@ public class IslandStageManager : MonoBehaviour
                 // 보스전 이후 분기 추가
                 if (GlobalStageManager.Instance.CurrentStageIndex.Value >= 4)
                 {
-                    Debug.Log("→ 스테이지 5가 없으므로 4-1로 되돌림 (WaitUntilTravelUIReady)");
                     GlobalStageManager.Instance.CurrentStageIndex.Value = 4;   // 4로 고정
                     GlobalStageManager.Instance.CurrentIslandIndex.Value = 0; // 첫 섬부터
                     ResetClearMarkers();
@@ -106,7 +110,6 @@ public class IslandStageManager : MonoBehaviour
                     yield break;
                 }
 
-                Debug.Log("→ 이미 보스전 진입한 상태, 일반 반복 전투 재시작");
                 ResetClearMarkers();
                 StartStage();
                 yield break;
@@ -176,17 +179,26 @@ public class IslandStageManager : MonoBehaviour
     /// </summary>
     public void StartStage()
     {
-        Debug.Log("시작");
         GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;
         moveToAndEnter = StartCoroutine(MoveToAndEnter(GlobalStageManager.Instance.CurrentIslandIndex.Value));
+
+        if (handleReturnAndNext != null)
+        {
+            StopCoroutine(handleReturnAndNext);
+            handleReturnAndNext = null;
+        }
+        isAdvancing = false;
     }
 
     /// <summary>
     /// 전투가 끝나면 호출됨 → 다음 섬으로 이동
     /// </summary>
+    /// 
+    private bool isAdvancing;
     public void OnBattleComplete()
     {
-        Debug.Log($"[OnBattleComplete 호출됨] currentIndex: {GlobalStageManager.Instance.CurrentIslandIndex.Value}");
+        if (isAdvancing) return;       // 중복 진입 가드
+        isAdvancing = true;
 
         if (!GlobalStageManager.Instance.bossBattleTriggered)
         {
@@ -209,7 +221,8 @@ public class IslandStageManager : MonoBehaviour
         if (!this.gameObject.activeInHierarchy)
             Debug.LogError(" IslandStageManager GameObject가 비활성화됨");
 
-        handleReturnAndNext = StartCoroutine(HandleReturnAndNext());
+        if (handleReturnAndNext == null)
+            handleReturnAndNext = StartCoroutine(HandleReturnAndNext());
     }
 
     /// <summary>
@@ -231,21 +244,15 @@ public class IslandStageManager : MonoBehaviour
         });
         yield return new WaitUntil(() => done);
 
-        Debug.Log(" [HandleReturnAndNext] 진입");
-
         yield return new WaitForSeconds(1f);
 
         GlobalStageManager.Instance.CurrentIslandIndex.Value++;
-        Debug.Log($" [HandleReturnAndNext] currentIndex 증가됨: {GlobalStageManager.Instance.CurrentIslandIndex.Value}");
 
         // 모든 섬을 클리어했다면 → 보스전으로 이동
         if (GlobalStageManager.Instance.CurrentIslandIndex.Value >= islandSets.Count)
         {
-            Debug.Log(" [HandleReturnAndNext] 모든 섬 완료");
-
             if (!GlobalStageManager.Instance.bossBattleTriggered)
             {
-                Debug.Log("→ 보스전 자동 진입 조건 만족 (처음 클리어)");
                 GlobalStageManager.Instance.bossBattleTriggered = true;
                 _bossDirection.OnBossChallenge();
                 yield return new WaitForSeconds(5f);
@@ -258,7 +265,6 @@ public class IslandStageManager : MonoBehaviour
                 // 보스전 이후 분기 추가
                 if (GlobalStageManager.Instance.CurrentStageIndex.Value >= 4)
                 {
-                    Debug.Log("→ 스테이지 5가 없으므로 4-1로 되돌림");
                     GlobalStageManager.Instance.CurrentStageIndex.Value = 4;    // 현재 스테이지를 4로 고정
                     GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;   // 첫 섬부터 다시
                     ResetClearMarkers();
@@ -266,7 +272,6 @@ public class IslandStageManager : MonoBehaviour
                     yield break;
                 }
 
-                Debug.Log("→ 이미 보스전 진입한 상태, 일반 반복 전투 재시작");
                 ResetClearMarkers();
                 StartStage();
                 yield break;
@@ -282,14 +287,11 @@ public class IslandStageManager : MonoBehaviour
     /// </summary>
     private IEnumerator MoveToAndEnter(int index)
     {
-        Debug.Log($"[MoveToAndEnter] index={index} 시작");
-
         bool arrive = false;
         
         yield return travelUI.MoveShipToMarker(GlobalStageManager.Instance.CurrentStageIndex.Value, index, () =>
         {
             arrive = true;
-            Debug.Log($"[MoveToAndEnter] onArrive 수신 index={index}");
         });
 
         // 도착 후 스크롤 연출
@@ -304,7 +306,6 @@ public class IslandStageManager : MonoBehaviour
 
         //BattleManager.Instance?.StartBattle(currentIndex);
         BattleManager.Instance?.StartBattle(0);
-        Debug.Log($"[MoveToAndEnter] StartBattle 호출 이후 정상 종료 index={index}");
 
         StopCoroutine(moveToAndEnter);
     }
@@ -314,8 +315,6 @@ public class IslandStageManager : MonoBehaviour
     /// </summary>
     public void ResetStageAfterDefeat()
     {
-        Debug.Log("[ResetStageAfterDefeat] 패배로 인해 스테이지 재시작");
-
         foreach (var island in islandSets)
             island.SetActive(false);
         DeactivateAllBattleFields();
@@ -329,8 +328,6 @@ public class IslandStageManager : MonoBehaviour
     private void SetBattleField(int islandIndex)
     {
         int stageIndex = GlobalStageManager.Instance.CurrentStageIndex.Value - 1;
-
-        Debug.Log($"[SetBattleField] stage={stageIndex}, island={islandIndex}");
 
         // BattleFields 오브젝트 찾아서 모든 섬 비활성화
         GameObject battleFieldsRoot = GameObject.Find("BattleFields");
@@ -397,7 +394,6 @@ public class IslandStageManager : MonoBehaviour
         if (anchor != null && flagPrefab != null)
         {
             Instantiate(flagPrefab, anchor.position, Quaternion.identity, anchor);
-            Debug.Log($" 깃발 생성 완료: 섬 {islandIndex}");
         }
     }
 
@@ -413,8 +409,6 @@ public class IslandStageManager : MonoBehaviour
 
             for (int i = anchor.childCount - 1; i >= 0; i--)
                 Destroy(anchor.GetChild(i).gameObject);
-
-            Debug.Log($"플래그 제거 완료 - {island.name}");
         }
     }
 
