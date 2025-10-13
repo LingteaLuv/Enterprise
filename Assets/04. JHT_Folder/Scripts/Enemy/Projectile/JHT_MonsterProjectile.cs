@@ -13,23 +13,29 @@ public class JHT_MonsterProjectile : JHT_PooledObject
     [SerializeField] private Rigidbody2D rigid;
 
     Coroutine startCor;
-    public void Init(IAttacker owner, Vector2 _targetPos, Vector2 monsterPos,float projectileSpeed, float power, Sprite baseMonsterSprite)
+    public void Init(IAttacker owner, Vector2 _targetPos, Vector2 monsterPos, Sprite baseMonsterSprite, float projectileSpeed)//, float power, )
     {
         // target이 체력 0이 돼도 같은 타겟에게 계속 날라가서 효과 적용함
-        if (baseMonsterSprite == null || rigid == null)
+        if (rigid == null)// || baseMonsterSprite == null)
         {
             Release();
             return;
         }
 
         this.owner = owner;
-
         gameObject.transform.position = monsterPos;
-        totalPower = power;
+        //totalPower = power;
         rigid.linearVelocity = (_targetPos - (Vector2)transform.position).normalized * projectileSpeed;
         projectileImg.sprite = baseMonsterSprite;
 
-        if(startCor == null)
+        if ((_targetPos - (Vector2)gameObject.transform.position).magnitude > 0)
+        {
+            projectileImg.flipX = false;
+        }
+        else
+            projectileImg.flipX = true;
+
+        if (startCor == null)
         {
             StartCoroutine(CountForLimit());
         }
@@ -55,13 +61,13 @@ public class JHT_MonsterProjectile : JHT_PooledObject
     {
         if (collision.gameObject.CompareTag("Crew"))
         {
-            IDamageable target = collision.GetComponent<IDamageable>();
+            //IDamageable target = collision.GetComponent<IDamageable>();
 
-            if (target != null)
-            {
-                //Pool 파티클 사용
-                target.TakeDamage(this.owner, 1f);
-            }
+            //if (target != null)
+            //{
+            //    //Pool 파티클 사용
+            //    target.TakeDamage(this.owner, 1f);
+            //}
 
             Release();
 
