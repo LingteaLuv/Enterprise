@@ -9,10 +9,11 @@ using UnityEngine;
 
 namespace _05._CSJ_Folder.Scripts.Quest
 {
-    public class TutorialDirector : MonoBehaviour
+    public class TutorialDirector : Singleton<TutorialDirector>
     {
         [Header( "UI")]
         [SerializeField] private TutorialUIController tutorialUI;
+        [SerializeField] private Canvas tutorialCanvas;
 
 
         [Header("첫 시작 튜토리얼 아크")]
@@ -34,6 +35,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         private TutorialArcSO _currentArc;
         private bool _isPlaying;
         private bool _primed;
+        private bool _init;
         private bool _questHooksBound;
 
         public void PrimeFromSave(string arcId, int stepIndex, bool finished)
@@ -46,10 +48,17 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         public void Init()
         {
-
+            
             if (IsFinished) return;
 
-            if (!string.IsNullOrEmpty(_currentArcId))
+            if (_init) return;
+            _init = true;
+            
+            Time.timeScale = 0f;
+            
+            QuestManager.Instance.UnSubmitBattle();
+
+            if (_primed && !string.IsNullOrEmpty(_currentArcId))
             {
                 var arc = FindArcById(_currentArcId);
                 if (arc is not null)
@@ -78,6 +87,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             StartArc(arc, 0);
         }
         
+
         // public void BindQuestHooks()
         // {
         //     if (_questHooksBound) return;
@@ -96,14 +106,14 @@ namespace _05._CSJ_Folder.Scripts.Quest
         //     QuestManager.Instance.OnQuestUpdated -= HandleQuestUpdated;
         // }
 
-        public void HandleQuestActive(TutorialQuestDefinitionSO def, GeneralQuestInstance inst)
+        public void HandleQuestActive(GeneralQuestDefinitionSO def, GeneralQuestInstance inst)
         {
             if (def is null || inst is null) return;
             
             TryTriggerByQuest(def, inst);
         }
         
-        private void TryTriggerByQuest(TutorialQuestDefinitionSO def, GeneralQuestInstance inst)
+        private void TryTriggerByQuest(GeneralQuestDefinitionSO def, GeneralQuestInstance inst)
         {
             if (questLinks is null || questLinks.Length == 0) return;
 
@@ -137,7 +147,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (tutorialUI is not null)
             {
                 tutorialUI.StartSequence(
-                    arc.Sequence,
+                    arc,
                     _currentStepIndex,
                     OnStepChanged: idx =>
                     {
@@ -168,15 +178,18 @@ namespace _05._CSJ_Folder.Scripts.Quest
             _currentArc = null;
             _isPlaying = false;
 
+            if (_arcQueue.Count > 0)
+            {
+                TryPlayPending();
+                return;
+            }
+
             _currentArcId = "";
             _currentStepIndex = 0;
             IsFinished = true;
-            OnStepChanged?.Invoke();
 
             tutorialUI.Hide();
             OnStepChanged?.Invoke();
-
-            TryPlayPending();
         }
         
         private void EnqueueOrStart(TutorialArcSO arc, int stepIndex)

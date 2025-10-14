@@ -37,11 +37,13 @@
     
     public enum QuestRewardType_Enum
     {
-        Gem, Exp, Gold, CrewTicket, EquipmentTicket, CrewEnchantStone, 
+        Gem, Exp, Gold, CrewTicket, EquipmentTicket, CrewEnchantStone, Crew
     }
 
     public enum TutorialStepType
     {
-        Dialogue, Highlight, WaitSignal, CompleteQuest, ClaimReward,
+        Dialogue, Highlight, WaitQuestActivated, WaitQuestCompleted, OpenPanel, 
+        InvokeEvent, GrantRewards, ClaimReward, QuestCleared, GrantCrews,
+        WaitSignal
     }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -30,6 +31,12 @@ namespace _05._CSJ_Folder.Scripts.Quest
             img.raycastTarget = true;
         }
 
+        private void OnDisable()
+        {
+            target = null;
+            button = null;
+        }
+
         void LateUpdate()
         {
             if (!target || !rootCanvas) return;
@@ -37,16 +44,20 @@ namespace _05._CSJ_Folder.Scripts.Quest
             Vector3[] world = new Vector3[4];
             target.GetWorldCorners(world);
             
-            Vector2 min = RectTransformUtility.WorldToScreenPoint(null, world[0]);
-            Vector2 max = RectTransformUtility.WorldToScreenPoint(null, world[2]);
+            Camera cam = rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : rootCanvas.worldCamera;
+            
+            Vector2 min = RectTransformUtility.WorldToScreenPoint(cam, world[0]);
+            Vector2 max = RectTransformUtility.WorldToScreenPoint(cam, world[2]);
             
             Vector2 size = max - min;
             Vector2 center = min + size * 0.5f;
             
+            size += padding * 2f;
+            
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 rootCanvas.transform as RectTransform, 
                 center,
-                null, 
+                cam, 
                 out var local);
             
             self.anchoredPosition = local;

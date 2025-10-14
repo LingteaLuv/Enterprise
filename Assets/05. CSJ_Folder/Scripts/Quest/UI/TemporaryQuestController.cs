@@ -21,7 +21,7 @@ public class TemporaryQuestController : UIBase
     [SerializeField] private Sprite _activeSprite;
     [SerializeField] private Sprite _inactiveSprite;
 
-    [SerializeField] private Button[] _ChangeButtons;
+  //  [SerializeField] private Button[] _ChangeButtons;
 
     private List<TemporaryInstance> _dailyQuests;
     private List<TemporaryInstance> _weeklyQuests;
@@ -41,10 +41,10 @@ public class TemporaryQuestController : UIBase
         _closeButton.onClick.AddListener(CloseQuestTab);
         _dailyButton.onClick.AddListener(() => ChangeQuestType(QuestType_Enum.Daily));
         _weeklyButton.onClick.AddListener(() => ChangeQuestType(QuestType_Enum.Weekly));
-        foreach (var button in _ChangeButtons)
-        {
-            button.onClick.AddListener(() => ChangeQuestType(isDaily ? QuestType_Enum.Weekly : QuestType_Enum.Daily));
-        }
+        // foreach (var button in _ChangeButtons)
+        // {
+        //     button.onClick.AddListener(() => ChangeQuestType(isDaily ? QuestType_Enum.Weekly : QuestType_Enum.Daily));
+        // }
 
         _stdButtons = new[] {_dailyButton, _weeklyButton};
         OpenQuestTab();
@@ -55,10 +55,10 @@ public class TemporaryQuestController : UIBase
         _closeButton.onClick.RemoveAllListeners();
         _dailyButton.onClick.RemoveAllListeners();
         _weeklyButton.onClick.RemoveAllListeners();
-        foreach (var button in _ChangeButtons)
-        {
-            button.onClick.RemoveAllListeners();       
-        }
+        // foreach (var button in _ChangeButtons)
+        // {
+        //     button.onClick.RemoveAllListeners();       
+        // }
     }
     private void OpenQuestTab()
     {

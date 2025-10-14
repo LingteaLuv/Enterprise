@@ -15,18 +15,21 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             group.alpha = 0;
             group.blocksRaycasts = false;
+            nextButton.gameObject.SetActive(false);
         }
 
         public IEnumerator Show(string message)
         {
             text.text = message;
             group.blocksRaycasts = true;
+            nextButton.gameObject.SetActive(true);
             yield return Fade(0, 1, 0.15f);
 
             bool clicked = false;
             nextButton.onClick.AddListener(() => clicked = true);
             yield return new WaitUntil(() => clicked);
             nextButton.onClick.RemoveAllListeners();
+            nextButton.gameObject.SetActive(false);
             
             group.blocksRaycasts = false;
             yield return Fade(1, 0, 0.12f);

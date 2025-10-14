@@ -1,4 +1,5 @@
 using System;
+using _05._CSJ_Folder.Scripts.Quest;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +11,13 @@ public class PopupPanel : UIBase
     [SerializeField] private TMP_Text _leftButtonText;
     [SerializeField] private Button _rightButton;
     [SerializeField] private TMP_Text _rightButtonText;
-    
+
+    public void Start()
+    {
+        TutorialTargets.Register("leftButton", _leftButton.transform as RectTransform);
+        TutorialTargets.Register("rightButton", _rightButton.transform as RectTransform);
+    }
+
     public void SetShow(string message,
         string leftText, Action onLeftClick,
         string rightText, Action onRightClick)

@@ -99,12 +99,10 @@ public class GameUIController : UIController<GameUIController.GameUIType>
             GlobalStageManager.Instance.bossBattleTriggered = true;
             StartCoroutine(Delay());
         });
-        _bossBtn.onClick.AddListener(QuestSignalManager.Instance.OnBossBattleEnter);
         _dungeonBtn.onClick.AddListener(()=>
         {
             JHT_MonsterSpawnManager.Instance.MonsterAllClear();
             BattleManager.Instance.ClearEnemies();
-            QuestSignalManager.Instance.OnDungeonEntered();
             SceneManager.LoadScene("DungeonScene");
         });
         

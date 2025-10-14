@@ -1,3 +1,4 @@
+using _05._CSJ_Folder.Scripts.Quest;
 using JHT;
 using TMPro;
 using UnityEngine;
@@ -100,6 +101,8 @@ public class GachaUIHandler : UIBase
         characterGachaManager = FindAnyObjectByType<CharacterGachaManager>();
         equipmentGachaManager = FindAnyObjectByType<EquipmentGachaManager>();
         relicsGachaManager = FindAnyObjectByType<RelicsGachaManager>();
+        
+        TutorialTargets.Register("CharOneBtn", charSingleBtn.transform as RectTransform);
     }
     private void Start()
     {

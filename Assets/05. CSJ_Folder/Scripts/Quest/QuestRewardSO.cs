@@ -34,6 +34,13 @@ namespace _05._CSJ_Folder.Scripts.Quest
                     return RewardCalculate.CalculateReward(def, inst, VariableAmount);
                 return VariableAmount;
             }
+
+            public int GetAmount()
+            {
+                if (!IsVariableReward)
+                    return FixedAmount;
+                return VariableAmount;
+            }
         }
 
         public RewardEntry Reward;
