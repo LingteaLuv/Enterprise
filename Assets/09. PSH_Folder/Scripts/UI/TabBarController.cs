@@ -18,18 +18,23 @@ public class TabBarController : MonoBehaviour
     [SerializeField] UIBase shopPanel;
 
     [Header("공용 닫기 버튼")]
+    [SerializeField] GameObject closeFrame;
     [SerializeField] Button closeBtn;
     [SerializeField] Button homeBtn;
     [SerializeField] Button blocker;
+
+    [Header("애니메이션 블로커")]
+    [SerializeField] GameObject animationBlocker; // 애니메이션 중 입력을 막을 UI
+    [SerializeField] float blockDuration = 0.3f; // 블로커 활성화 시간
 
     private Dictionary<Button, UIBase> tabToPanel;
     private Dictionary<UIBase, Vector3> panelOriginalPositions;
     private UIBase currentOpenPanel;
 
     // 애니메이션을 위한 변수
-    private float animationDuration = 0.4f; // 애니메이션 시간
-    private float closeBtnOffsetY = 150f; // 버튼이 사라지거나 나타날 때의 Y 오프셋
-    private float panelOffsetY = 1000f; // 패널이 사라지거나 나타날 때의 Y 오프셋
+    [SerializeField] private float animationDuration = 0.2f; // 애니메이션 시간
+    [SerializeField] private float closeBtnOffsetY = 250f; // 버튼이 사라지거나 나타날 때의 Y 오프셋
+    [SerializeField] private float panelOffsetY = 1000f; // 패널이 사라지거나 나타날 때의 Y 오프셋
 
     private void Awake()
     {
@@ -56,6 +61,7 @@ public class TabBarController : MonoBehaviour
     {
         // 오브젝트가 비활성화될 때 모든 트윈을 정리하여 메모리 누수 방지
         closeBtn.transform.DOKill();
+        closeFrame.transform.DOKill();
         foreach (var panel in tabToPanel.Values)
         {
             if (panel != null)
@@ -73,6 +79,8 @@ public class TabBarController : MonoBehaviour
                 panel.gameObject.SetActive(false);
         }
         closeBtn.gameObject.SetActive(false);
+
+        if (animationBlocker != null) animationBlocker.SetActive(false); // 블로커 비활성화
 
         // 탭 버튼 이벤트 연결
         foreach (var item in tabToPanel)
@@ -92,13 +100,26 @@ public class TabBarController : MonoBehaviour
 
     public void OnTabSelected(Button tabBtn, UIBase panel)
     {
+        // 애니메이션 중복 실행 방지를 위해 블로커 활성화
+        if (animationBlocker != null)
+        {
+            animationBlocker.SetActive(true);
+            DOVirtual.DelayedCall(blockDuration, () => animationBlocker.SetActive(false));
+        }
+
+        // 기존 트윈 중단
+        closeFrame.transform.DOKill();
+
+        // 프레임을 선택된 탭의 위치로 애니메이션과 함께 이동
+        closeFrame.transform.DOMove(tabBtn.transform.position, animationDuration).SetEase(Ease.OutQuad);
+
         panel.ResetPanel();
         bool isFirstOpen = currentOpenPanel == null;
         bool isDifferentTab = currentOpenPanel != panel;
 
         if (isFirstOpen)
         {
-            AnimateCloseButtonIn(tabBtn);
+            AnimateCloseButtonIn();
             AnimatePanelIn(panel);
         }
         else if (isDifferentTab)
@@ -112,7 +133,6 @@ public class TabBarController : MonoBehaviour
                 }
             }
 
-            AnimateCloseButtonMove(tabBtn);
             AnimatePanelOut(currentOpenPanel);
             AnimatePanelIn(panel);
         }
@@ -122,35 +142,24 @@ public class TabBarController : MonoBehaviour
     }
 
     #region Close Button Animations
-    private void AnimateCloseButtonIn(Button targetTab)
+    private void AnimateCloseButtonIn()
     {
         closeBtn.transform.DOKill(); // 진행중인 트윈 중단
-        Vector3 startPos = targetTab.transform.position - new Vector3(0, closeBtnOffsetY, 0);
-        closeBtn.transform.position = startPos;
         closeBtn.gameObject.SetActive(true);
 
-        closeBtn.transform.DOMove(targetTab.transform.position, animationDuration).SetEase(Ease.OutQuad);
-    }
-
-    private void AnimateCloseButtonMove(Button targetTab)
-    {
-        closeBtn.transform.DOKill(); // 진행중인 트윈 중단
-
-        // Y축 위치를 즉시 보정합니다.
-        Vector3 pos = closeBtn.transform.position;
-        pos.y = targetTab.transform.position.y;
-        closeBtn.transform.position = pos;
-
-        // X축으로 수평 애니메이션을 실행합니다.
-        closeBtn.transform.DOMoveX(targetTab.transform.position.x, animationDuration).SetEase(Ease.OutQuad);
+        // 부모인 closeFrame을 기준으로 로컬 애니메이션을 실행합니다.
+        closeBtn.transform.localPosition = new Vector3(0, -closeBtnOffsetY, 0);
+        closeBtn.transform.DOLocalMove(Vector3.zero, animationDuration).SetEase(Ease.OutQuad);
     }
 
     private void AnimateCloseButtonOut()
     {
         closeBtn.transform.DOKill(); // 진행중인 트윈 중단
-        Vector3 endPos = closeBtn.transform.position - new Vector3(0, closeBtnOffsetY, 0);
 
-        closeBtn.transform.DOMove(endPos, animationDuration).SetEase(Ease.InQuad).OnComplete(() =>
+        // 부모인 closeFrame을 기준으로 로컬 애니메이션을 실행합니다.
+        Vector3 endPos = new Vector3(0, -closeBtnOffsetY, 0);
+
+        closeBtn.transform.DOLocalMove(endPos, animationDuration).SetEase(Ease.InQuad).OnComplete(() =>
         {
             closeBtn.gameObject.SetActive(false);
         });
@@ -187,6 +196,13 @@ public class TabBarController : MonoBehaviour
 
     void ClosePanelAndAnimateButtonOut()
     {
+        // 애니메이션 중복 실행 방지를 위해 블로커 활성화
+        if (animationBlocker != null)
+        {
+            animationBlocker.SetActive(true);
+            DOVirtual.DelayedCall(blockDuration, () => animationBlocker.SetActive(false));
+        }
+
         // 만약 현재 열린 패널이 캐릭터 목록이고 편성 모드 중이라면,
         // 모드 해제를 시도하고 실패 시 창을 닫지 않습니다.
         if (currentOpenPanel is CharacterScrollViewUI characterListPanel && characterListPanel.isFormationMode)
@@ -196,6 +212,12 @@ public class TabBarController : MonoBehaviour
                 return; // 모드 해제에 실패했으므로, 창 닫기 프로세스를 중단합니다.
             }
         }
+
+        // 기존 트윈 중단
+        closeFrame.transform.DOKill();
+
+        // 프레임을 홈 버튼 위치로 애니메이션과 함께 이동
+        closeFrame.transform.DOMove(homeBtn.transform.position, animationDuration).SetEase(Ease.OutQuad);
 
         AnimatePanelOut(currentOpenPanel);
         AnimateCloseButtonOut();
