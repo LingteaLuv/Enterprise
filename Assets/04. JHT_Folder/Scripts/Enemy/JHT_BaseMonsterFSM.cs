@@ -30,6 +30,7 @@ namespace JHT
         public JHT_BaseMonsterStat monsterStat;
         public GameObject monsterPrefab;
         public Canvas monsterUI;
+        public JHT_UIMonster bossHp; 
         SpriteRenderer head;
         [SerializeField] private Transform damageTextPos;
 
@@ -41,10 +42,12 @@ namespace JHT
         public bool skill2Active;
         public bool isAttacking;
         public bool isStun;
+        public bool moveCheck;
 
         private CancellationTokenSource[] Atoken;
         private CancellationTokenSource Stoken;
         private List<CancellationTokenSource> Btoken;
+        public CancellationTokenSource timeToken;
 
         private float curHP;
         public float CurHP { get { return curHP; } set { curHP = value; OnChangeHp?.Invoke(curHP); } }
@@ -78,6 +81,7 @@ namespace JHT
         private IEnumerator StartSetting(JHT_BaseMonsterStat stat, SpawnType spawnType)
         {
             // 풀에서 받은 이전의 값 정리
+            moveCheck = false;
             _initialized = false;
             target = null;
             isAttacking = false;
@@ -92,8 +96,12 @@ namespace JHT
             monsterSO = stat.curSO;
             monsterStat = stat;
             OnChangeHp += ShowMonsterUI;
+            if (spawnType == SpawnType.BossStage && monsterStat.monsterCrewRole == CrewRole.Captain)
+            {
+                bossHp = GameObject.Find("BossHPGuage").GetComponent<JHT_UIMonster>();
 
-            
+            }
+
             curHP = monsterStat.monsterStats[Stat.Health];
 
             // 이전의 코루틴 정리
@@ -239,6 +247,13 @@ namespace JHT
                 Stoken = null;
             }
 
+            if (timeToken != null)
+            {
+                timeToken.Cancel();
+                timeToken.Dispose();
+                timeToken = null;
+            }
+
             //canAttack = false;
             //OnChangeAttack -= CanAttackCor;
         }
@@ -365,7 +380,6 @@ namespace JHT
 
                     if (animator != null && !isAttacking)
                     {
-                        Debug.Log($"{monsterStat.monsterName} : 일반공격공격공격");
                         animator.Play(ATTACK, 0, 0f);
                     }
                     isAttacking = true;
@@ -396,7 +410,6 @@ namespace JHT
 
                         if (animator != null)
                         {
-                            Debug.Log($"{monsterStat.monsterName} : 스킬1공격공격공격");
                             animator.Play(SKILL1, 0, 0f);
                         }
 
@@ -428,7 +441,6 @@ namespace JHT
                         skill2Active = true;
                         if (animator != null)
                         {
-                            Debug.Log($"{monsterStat.monsterName} :스킬2공격공격공격");
                             animator.Play(SKILL2, 0, 0f);
                         }
 
@@ -506,7 +518,6 @@ namespace JHT
         public void ApplyOnHitDamageBuff(float value, float duration)
         {
             Buff newBuff = new Buff(Stat.Attack, value, duration, BuffType.Flat, false, BuffEffectType.ExtraDamageOnHit);
-            Debug.Log($"공격공격공격 버프버프 이름 :{newBuff.BuffType}");
             activeBuffs.Add(newBuff);
         }
 
@@ -626,7 +637,15 @@ namespace JHT
             if (monsterPrefab != null)
                 Destroy(monsterPrefab);
 
-            Release();
+            if (monsterSpawnType == SpawnType.IslandStage)
+            {
+                Release();
+            }
+            else if (monsterSpawnType == SpawnType.BossStage)
+            {
+
+                Destroy(this.gameObject);
+            }
         }
 
 
@@ -636,8 +655,19 @@ namespace JHT
                 return;
             curHP = value;
 
-            float percent = curHP / (float)monsterStat.monsterStats[Stat.Health];
-            monsterUI.GetComponentInChildren<JHT_UIMonster>().ChangeHP(percent);
+            if (monsterSpawnType == SpawnType.BossStage && monsterStat.monsterCrewRole == CrewRole.Captain)
+            {
+                float bossPercent = curHP / (float)monsterStat.monsterStats[Stat.Health];
+                bossHp.ChangeHP(bossPercent);
+
+                float percent = curHP / (float)monsterStat.monsterStats[Stat.Health];
+                monsterUI.GetComponentInChildren<JHT_UIMonster>().ChangeHP(percent);
+            }
+            else
+            {
+                float percent = curHP / (float)monsterStat.monsterStats[Stat.Health];
+                monsterUI.GetComponentInChildren<JHT_UIMonster>().ChangeHP(percent);
+            }
         }
 
         private void ChangeAnim(int temp, MonsterState curState)
@@ -647,7 +677,6 @@ namespace JHT
 
             if (currentState == MonsterState.ATTACK && curState != currentState)
             {
-                Debug.Log($"{monsterStat.monsterName} : 공격공격공격 바뀜");
                 for (int i = 0; i < Atoken.Length; i++)
                 {
                     if (Atoken[i] != null)
@@ -700,7 +729,26 @@ namespace JHT
 
             ApplyDamageEffects(finalDamage);
         }
+        public Faction GetFaction()
+        {
+            return monsterStat.monsterFaction;
+        }
 
+        public async UniTask TimeCheck(float value)
+        {
+            timeToken?.Cancel();
+            timeToken?.Dispose();
+            timeToken = new CancellationTokenSource();
 
+            try
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(value), cancellationToken: timeToken.Token);
+                moveCheck = true; 
+            }
+            catch (OperationCanceledException)
+            {
+                moveCheck = false;
+            }
+        }
     }
 }

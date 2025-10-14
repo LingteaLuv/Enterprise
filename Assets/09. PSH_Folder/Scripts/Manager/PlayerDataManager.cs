@@ -37,6 +37,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public BigInteger fixedLevelUpStoneCost = 20;
     
     public Dictionary<int, PlayerCharacterData> OwnedCharacters = new Dictionary<int, PlayerCharacterData>();
+    public Dictionary<int, PlayerCharacterData> AllCharacters = new Dictionary<int, PlayerCharacterData>();
     //public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
 
     public class ParsingPlayerData
@@ -64,8 +65,13 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     private const int CAPTAIN_FRAGMENT_GAIN_3 = 6;
     public int GachaPityCounter { get; set; }
 
+    // 튜토리얼가챠여부
+    public bool hasCompletedTutorialGacha = false;
+
     public event System.Action<PlayerCharacterData> OnCharacterDataUpdated;
     public event System.Action OnOwnedCharactersChanged;
+    public event System.Action<int> OnOwnedCharacterAdded;
+    public event System.Action OnAllCharacterAdded;
     public event System.Action OnFormationSaved;
 
     private bool isBatchUpdating = false;// 일괄 작업할 때 키는 불값
@@ -89,6 +95,8 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         DataManager.Instance.OnWeaponReady += async () =>
         {
+            await SynergyManager.Instance.InitializeAsync(); // 시너지 매니저 초기화
+            await SkillDatabase.InitializeAsync(); // 스킬 데이터베이스 초기화
             await InitDatabase();
             if (OwnedCharacters.Count == 0)
             {
@@ -113,6 +121,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
                 if (result.Count == 0)
                 {
                     AutoFormTeam();
+                    //Debug.LogError("[OnCrewReady] if문 진입");
                 }
                 else
                 {
@@ -121,7 +130,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
                         int id = Convert.ToInt32(crewId);
                         PlayerCharacterData crew = OwnedCharacters[id];
                         formation[crew.characterdata.crewRole].Add(crew);
-                        Debug.LogError($"{id}, {crew.characterdata.characterName}");
+                        //Debug.LogError($"{id}, {crew.characterdata.characterName}");
                     }
                 }
                 StartCoroutine(InitialCalculationCoroutine());
@@ -131,6 +140,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
 
     private async UniTask InitDatabase()
     {
+        await AllCharacter();
         await DatabaseManager.Instance.LoadCharactersAsync((result) =>
         {
             foreach (var kvp in result)
@@ -142,6 +152,8 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
                 OwnedCharacters[id] = character;
             }
         });
+        string path = $"{FirebaseManager.Auth.CurrentUser.UserId}/UserData/HasCompleted";
+        DatabaseManager.Instance.LoadFieldAsync<bool>(path, 0, b => hasCompletedTutorialGacha = b, true, false);
     }
     
     private async UniTask GrantStartingCharacters()
@@ -168,6 +180,54 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         }
         await UniTask.WhenAll(tasks);
         Debug.Log("기본 캐릭터 지급이 완료되었습니다.");
+    }
+
+    private async UniTask AllCharacter()
+    {
+        var tasks = new List<UniTask>();
+
+#if UNITY_EDITOR
+        Debug.Log("[테스트] 에디터 모드: AssetDatabase를 사용하여 모든 캐릭터를 로드합니다.");
+        string[] guids = UnityEditor.AssetDatabase.FindAssets("t:CharacterData");
+        Debug.Log($"[테스트] {guids.Length}개의 CharacterData 에셋을 찾았습니다.");
+
+        foreach (string guid in guids)
+        {
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+            CharacterData characterSO = UnityEditor.AssetDatabase.LoadAssetAtPath<CharacterData>(path);
+            if (characterSO != null)
+            {
+                tasks.Add(AddAllCharacter(characterSO).AsUniTask());
+            }
+        }
+#else
+        Debug.Log("[테스트] 빌드 모드: 어드레서블을 사용하여 모든 캐릭터를 로드합니다.");
+        var handle = Addressables.LoadAssetsAsync<CharacterData>("Characters");
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            var allCharacters = handle.Result;
+            Debug.Log($"[테스트] {allCharacters.Count}명의 캐릭터를 지급합니다.");
+            foreach (var characterSO in allCharacters)
+            {
+                if (characterSO != null)
+                {
+                    tasks.Add(AddAllCharacter(characterSO).AsUniTask());
+                }
+            }
+            Addressables.Release(handle);
+        }
+        else
+        {
+            Debug.LogError("[테스트] 캐릭터 에셋 로딩에 실패했습니다. 'Characters' 레이블을 확인해주세요.");
+            Addressables.Release(handle);
+        }
+#endif
+
+        await UniTask.WhenAll(tasks);
+        Debug.Log("<color=yellow>[테스트] 모든 캐릭터 지급이 완료되었습니다.</color>");
+        OnAllCharacterAdded?.Invoke();
     }
 
     private async UniTask GrantAllCharactersForTest()
@@ -217,7 +277,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
         await UniTask.WhenAll(tasks);
         Debug.Log("<color=yellow>[테스트] 모든 캐릭터 지급이 완료되었습니다.</color>");
     }
-
+    
     private IEnumerator InitialCalculationCoroutine()
     {
         yield return new WaitForEndOfFrame();
@@ -267,10 +327,19 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             Debug.Log($"[신규] {characterdata.characterName}({newCharData.Star}성) 획득!");
             newCharData.RecalculateStats();
             OnOwnedCharactersChanged?.Invoke();
+            OnOwnedCharacterAdded?.Invoke(characterdata.characterID);
             return newCharData;
         }
     }
 
+    public async Task<PlayerCharacterData> AddAllCharacter(CharacterData characterdata)
+    {
+        PlayerCharacterData newCharData = await PlayerCharacterData.Instantiate(characterdata, 1, false);
+        AllCharacters.Add(characterdata.characterID, newCharData);
+        newCharData.RecalculateStats();
+        return newCharData;
+    }
+    
     // 뽑기로 획득하는 캐릭터
     public async UniTask<PlayerCharacterData> AddCharacter(CharacterData characterdata, GachaGrade grade)
     {
@@ -323,6 +392,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
             Debug.Log($"[신규] {characterdata.characterName}({newCharData.Star.Value}성) 획득!");
             newCharData.RecalculateStats();
             OnOwnedCharactersChanged?.Invoke();
+            OnOwnedCharacterAdded?.Invoke(characterdata.characterID);
             return newCharData;
         }
     }
@@ -702,59 +772,18 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     {
         if (OwnedCharacters.Count == 0) return false;
 
-        // 역할별 최대 인원수 정의 (임시, FormationManager와 동기화 필요)
-        var roleLimits = new Dictionary<CrewRole, int>
-        {
-            { CrewRole.Captain, 1 },
-            { CrewRole.Deckhand, 2 },
-            { CrewRole.Sailor, 2 },
-            { CrewRole.Cook, 2 }
-        };
-
+        // 역할별 빈 리스트 생성
         var newFormation = new Dictionary<CrewRole, List<PlayerCharacterData>>();
-        var addedCharacters = new HashSet<PlayerCharacterData>();
         foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
         {
             newFormation[role] = new List<PlayerCharacterData>();
         }
 
-        // 1. 역할별 에이스 1명씩 선발
-        foreach (CrewRole role in System.Enum.GetValues(typeof(CrewRole)))
+        // 조건 무시 — 그냥 다 넣기
+        foreach (var character in OwnedCharacters.Values)
         {
-            var bestInRole = OwnedCharacters.Values
-                .Where(c => c.characterdata.crewRole == role)
-                .OrderByDescending(c => c.battlePower)
-                .FirstOrDefault();
-
-            if (bestInRole != null)
-            {
-                newFormation[role].Add(bestInRole);
-                addedCharacters.Add(bestInRole);
-            }
-        }
-
-        // 2. 남은 슬롯 충원
-        int currentTeamSize = addedCharacters.Count;
-        if (currentTeamSize < MAX_FORMATION_SIZE)
-        {
-            var remainingCandidates = OwnedCharacters.Values
-                .Except(addedCharacters)
-                .Where(c => c.characterdata.crewRole != CrewRole.Captain)
-                .OrderByDescending(c => c.battlePower)
-                .ToList();
-
-            foreach (var candidate in remainingCandidates)
-            {
-                if (currentTeamSize >= MAX_FORMATION_SIZE) break;
-
-                CrewRole role = candidate.characterdata.crewRole;
-                if (newFormation[role].Count < roleLimits[role])
-                {
-                    newFormation[role].Add(candidate);
-                    addedCharacters.Add(candidate);
-                    currentTeamSize++;
-                }
-            }
+            var role = character.characterdata.crewRole;
+            newFormation[role].Add(character);
         }
 
         // 3. 실제 편성에 적용

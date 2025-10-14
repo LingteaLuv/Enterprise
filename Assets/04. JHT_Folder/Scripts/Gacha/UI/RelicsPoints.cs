@@ -16,9 +16,17 @@ public class RelicsPoints : MonoBehaviour
 
     RelicsGachaManager gachaManager;
 
+    private void OnEnable()
+    {
+        if (relicsPointText) 
+            relicsPointText.text = "0";
+
+    }
+
     public void Init(RelicsGachaManager manager)
     {
         gachaManager = manager;
+
         relicsMaxPointText.text = manager.relicsSpecialCost.ToString();
 
         InventoryManager.Instance.OnChangeRelicsPoints -= ShowRelicsPoint;
@@ -32,7 +40,8 @@ public class RelicsPoints : MonoBehaviour
 
     private void ShowRelicsPoint()
     {
-        relicsPointText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon).ToString();
+        BigInteger haveCoupon = CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon);
+        relicsPointText.text = haveCoupon.ToString("N0");
         OnChangeValue?.Invoke();
     }
 

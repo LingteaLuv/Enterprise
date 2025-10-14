@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace JHT
 {
@@ -217,6 +218,7 @@ namespace JHT
                 obj.transform.position = new Vector2(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y));
             }
 
+            SynergyManager.Instance.ApplySynergyEffectsForBattle();
         }
 
         public List<JHT_BaseMonsterStat> GetMonsterDataList(int curRoundIndex, bool isBoss, int spawnCount)

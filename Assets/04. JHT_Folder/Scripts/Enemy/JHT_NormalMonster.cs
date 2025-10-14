@@ -32,12 +32,12 @@ namespace JHT
                     case CrewRole.Sailor:
                     case CrewRole.Deckhand:
                     case CrewRole.Cook:
-                        gameObject.transform.localScale = new Vector3(0.7f, 0.7f, 1);
+                        gameObject.transform.localScale = new Vector3(1.2f, 1.2f, 1);
                         monsterPrefab.transform.localScale = gameObject.transform.localScale;
                         monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.10f, 0);
                         break;
                     case CrewRole.Captain:
-                        gameObject.transform.localScale = Vector3.one;
+                        gameObject.transform.localScale = new Vector3(1.5f, 1.5f, 1);
                         monsterPrefab.transform.localScale = gameObject.transform.localScale;
                         monsterUI.transform.localPosition = new Vector3(0, monsterPrefab.transform.localScale.y - 0.15f, 0);
                         break;
@@ -70,6 +70,22 @@ namespace JHT
         public void NormalMonsterAttack()
         {
             monsterStat.normalSkill.Use(this);
+
+            if (monsterStat.projectileSprite != null && monsterStat.normalSkill.skillTargetType == ESkillTargetType.Offensive)
+            {
+                if (target == null) return;
+
+                JHT_MonsterProjectile obj = JHT_MonsterSpawnManager.Instance.projectilePool.GetPooled() as JHT_MonsterProjectile;
+
+                if (JHT_MonsterSpawnManager.Instance.projectilePool == null || obj == null)
+                    return;
+
+                Vector2 startPos = transform.position;
+                Vector2 targetPos = (Vector2)target.transform.position;
+
+                if (this != null)
+                    obj.Init(this,targetPos, startPos, monsterStat.projectileSprite,3f);// monsterStat.attackPower, monsterStat.attackPower, );
+            }
         }
 
         public void Skill1MonsterAttack()

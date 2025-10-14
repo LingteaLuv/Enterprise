@@ -15,7 +15,7 @@ public class MonsterSkillSO : ScriptableObject
     public ESkillTargetType skillTargetType;
     public ETargetLogic targetLogic;
     public CrewRole targetRole;
-    public MonsterSkillAttackType monsterSkillAttackType;
+    //public MonsterSkillAttackType monsterSkillAttackType;
 
     public float coolTime;
     public AnimationClip clip;

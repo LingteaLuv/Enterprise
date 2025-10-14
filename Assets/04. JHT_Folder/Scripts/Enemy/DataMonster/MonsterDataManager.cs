@@ -35,7 +35,6 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     //private AsyncOperationHandle<IList<AnimationClip>> animClipHandle;
 
     public JHT_DataDownLoader dataLoader;
-    public MonsterSkillSet skillManager;
 
     public bool isDataLoaded { get; private set; }
     public bool isTableLoaded { get; private set; }

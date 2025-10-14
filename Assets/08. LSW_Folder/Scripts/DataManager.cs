@@ -12,7 +12,9 @@ public class DataManager : Singleton<DataManager>
     public List<ItemSO> AllRelics = new List<ItemSO>();
     public List<CharacterData> AllCharacters = new List<CharacterData>();
     public List<ItemSO> AllWeapons = new List<ItemSO>();
+    public List<string> AllBadWords = new List<string>();
 
+    private JHT_DataDownLoader _loader;
     public Action OnWeaponReady;
     public Action OnCrewReady;
 
@@ -23,6 +25,7 @@ public class DataManager : Singleton<DataManager>
     protected override void Awake()
     {
         base.Awake(); // 싱글톤 유지!
+        _loader = new JHT_DataDownLoader();
         StartCoroutine(LoadInitialData());
     }
 
@@ -47,7 +50,11 @@ public class DataManager : Singleton<DataManager>
 
         IsDataLoaded = true;
         // 다른 시스템들에게 데이터 준비가 끝났다고 알려줍니다.
-        OnWeaponReady?.Invoke();
+        //OnCrewReady?.Invoke();
+        yield return _loader.LoadWordCSV((words) =>
+        {
+            AllBadWords = words;
+        });
     }
 
     protected override void OnDestroy()

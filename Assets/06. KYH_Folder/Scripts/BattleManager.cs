@@ -54,10 +54,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private AllHealthBarsPanel allHealthBarsPanel;
 
     #region JHT
-    private bool goNextStage = false;
+    private bool goNextIsland = false;
 
-    private bool isStageEnd;
-    public bool IsStageEnd { get { return isStageEnd; } set { isStageEnd = value; OnStageEnd?.Invoke(isStageEnd); } }
+    private bool isLandEnd;
+    public bool IslandEnd { get { return isLandEnd; } set { isLandEnd = value; OnStageEnd?.Invoke(isLandEnd); } }
     public Action<bool> OnStageEnd;
 
     private Coroutine enemySpawnDelay;
@@ -148,7 +148,7 @@ public class BattleManager : MonoBehaviour
         RefreshCameraTargets();
 
         // 보완 조건: 스테이지 클리어 후에는 재시작 금지
-        if (IsStageEnd)
+        if (IslandEnd)
         {
             Debug.LogWarning("[BattleManager] 이미 스테이지 클리어됨. 전투 재시작 불가");
             return;
@@ -242,7 +242,7 @@ public class BattleManager : MonoBehaviour
         }
         
 
-        IsStageEnd = false;
+        IslandEnd = false;
 
         battleRoutine = StartCoroutine(BattleRoutine());
        // Debug.Log("battleRoutine 시작됨");
@@ -268,8 +268,6 @@ public class BattleManager : MonoBehaviour
         while(JHT_MonsterSpawnManager.Instance.roundTable == null)
             yield return null;
 
-        Debug.Log("전투 시작");
-
         // 수정
         int stageIdx = GlobalStageManager.Instance.CurrentStageIndex.Value - 1;
         if (stageIdx < 0 || stageIdx >= battleFields.Count)
@@ -279,14 +277,14 @@ public class BattleManager : MonoBehaviour
         }
         var field = battleFields[stageIdx];
 
-        SpawnEnemies(stageIdx);
+        SpawnEnemies(currentRoundIndex);
         SpawnPlayers(field);
         
 
         yield return new WaitForSeconds(0.5f);      // 등장 연출 대기
 
         // 몬스터 수가 0이 될떄까지 반복
-        yield return new WaitUntil(() => goNextStage);
+        yield return new WaitUntil(() => goNextIsland);
 
         yield return new WaitForSeconds(1f);
 
@@ -345,11 +343,10 @@ public class BattleManager : MonoBehaviour
     {
         if (roundIndex >= JHT_MonsterSpawnManager.Instance.roundTable.roundCount)
         {
-            Debug.LogError($"BattleManager IslandClear : Change Next Island");
-            Debug.LogError($"{JHT_MonsterSpawnManager.Instance.roundTable.roundCount}");
-            Debug.LogError($"{roundIndex}");
             //GlobalStageManager.Instance.currentStageIndex++; // todo 임시 : 보스 나오기전
-            IsStageEnd = true;
+            currentRoundIndex = 0;
+            IslandEnd = true;
+
             return;
         }
 
@@ -404,7 +401,7 @@ public class BattleManager : MonoBehaviour
 
     private void SetBattleStop(bool value)
     {
-        goNextStage = value;
+        goNextIsland = value;
     }
 
     // 플레이어 사망 시 처리

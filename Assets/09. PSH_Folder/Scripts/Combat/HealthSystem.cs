@@ -77,6 +77,29 @@ public class HealthSystem : MonoBehaviour
         bool isCritical = UnityEngine.Random.value < attackerCritChance;
         float finalDamage = baseDamage;
 
+        // 속성 상성 데미지
+        Faction attackerFaction = attacker.GetFaction();
+        Faction defenderFaction = statProvider.GetFaction();
+        int a = (attackerFaction - defenderFaction) % 3;
+        float factionDamage = 1f;
+
+        switch (a)
+        {
+            case 0:
+                factionDamage = 1f;
+                break;
+            case 1:
+                factionDamage = 0.8f;
+                break;
+            case 2:
+                factionDamage = 1.2f;
+                break;
+            default:
+                break;
+        }
+
+        finalDamage *= factionDamage;
+
         if (isCritical)
         {
             finalDamage *= attackerCritDamage;

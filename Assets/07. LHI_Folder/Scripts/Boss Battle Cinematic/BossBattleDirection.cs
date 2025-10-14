@@ -10,11 +10,11 @@ public class BossBattleDirection : MonoBehaviour
     [SerializeField] private TextMeshProUGUI fightText;
 
     [Header("승리 연출 컴포넌트")]
-    [SerializeField] private TextMeshProUGUI victoryText;
+    public TextMeshProUGUI victoryText;
     private Vector3 victoryTextScale = Vector3.one * 5;
 
     [Header("패배 연출 컴포넌트")]
-    [SerializeField] private TextMeshProUGUI defeatText;
+    public TextMeshProUGUI defeatText;
     private Vector3 defeatTextScale = Vector3.one * 5;
 
     [Header("공통 컴포넌트")]
@@ -66,9 +66,14 @@ public class BossBattleDirection : MonoBehaviour
 
     private void InitialSetup()
     {
+        victoryText.gameObject.SetActive(false);
+        defeatText.gameObject.SetActive(false);
+
+        readyText.gameObject.SetActive(false);
+        fightText.gameObject.SetActive(false);
         // 초기 위치 및 세팅 저장
         readyTextPos = readyText.rectTransform.localPosition;
-        plankPos = plankTransform.localPosition;
+        plankPos = plankTransform.position;
 
         playerChestPos = playerTreasureChest.position;
         playerShipPos = playerShip.position;
@@ -95,7 +100,23 @@ public class BossBattleDirection : MonoBehaviour
     [ContextMenu("레디 파이트 연출 실행")]
     public void PlayReadyFightDirection() // 보스 전투를 시작할때 호출
     {
+        readyText.gameObject.SetActive(true);
+        fightText.gameObject.SetActive(true);
+
         readyFightSequence.Restart();
+
+        int done = 0;
+        void MarkDone() 
+        { 
+            if (++done == 1)
+            {
+                BossBattleManager.Instance.EnableMeleeAfterDelay();
+                BossBattleManager.Instance.EnableMonsterAfterDelay();
+                BossBattleManager.Instance.product.CameraZoomIn();
+            }
+        }
+
+        readyFightSequence.OnComplete(MarkDone);
     }
 
     [ContextMenu("패배 연출 실행")]
@@ -188,7 +209,7 @@ public class BossBattleDirection : MonoBehaviour
     private Tween PlankDrop()
     {
         var sequence = DOTween.Sequence();
-        sequence.Append(plankTransform.DOLocalMoveY(0f, 0.7f).SetEase(Ease.InCubic))
+        sequence.Append(plankTransform.DOLocalMoveY(-1f, 0.7f).SetEase(Ease.InCubic))
                 .AppendCallback(() => PlaySound(plankDropSound))
                 .AppendCallback(() => CameraShake()); // 카메라 흔들림
         return sequence;
@@ -216,6 +237,8 @@ public class BossBattleDirection : MonoBehaviour
                 .AppendCallback(() => PlaySound(fightSound))
                 .Append(fightText.transform.DOScale(3f, 0.2f).From(0f).SetEase(Ease.OutBack))
                 .Append(fightText.transform.DOScale(2f, 0.1f).SetEase(Ease.InCubic));
+
+        
         return sequence;
     }
     #endregion
