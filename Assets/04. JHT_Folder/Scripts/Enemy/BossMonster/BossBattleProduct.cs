@@ -16,6 +16,7 @@ public class BossBattleProduct : MonoBehaviour
     Vector2 playerShipPos;
     Vector2 monsterShipPos;
     private bool canBattleStart;
+    private bool isEnding;
 
     private Camera cam;
     
@@ -37,7 +38,7 @@ public class BossBattleProduct : MonoBehaviour
 
     private void OnDisable()
     {
-
+        cam.DOOrthoSize(12,0f);
         if (token != null)
         {
             for (int i = 0; i < token.Length; i++)
@@ -55,10 +56,16 @@ public class BossBattleProduct : MonoBehaviour
 
     public void  Init()
     {
+        for (int i = 0; i < token.Length; i++)
+        {
+            token[i] = new CancellationTokenSource();
+        }
+
         canBattleStart = false;
 
         cam = Camera.main;
         BossBattleStart().Forget();
+
         // 기존 트윈 정리(중복 방지)
         playerSequence?.Kill();
         monsterSequence?.Kill();
@@ -135,13 +142,12 @@ public class BossBattleProduct : MonoBehaviour
 
         while (!canBattleStart)
         {
-            await UniTask.Yield();
+            await UniTask.Yield(cancellationToken: token[1].Token);
         }
 
         BossBattleManager.Instance.direction.PlayReadyFightDirection();
 
     }
-    private bool isEnding; // 중복 호출 방지
 
     public void LoseProduct(bool isWin)
     {
@@ -194,15 +200,16 @@ public class BossBattleProduct : MonoBehaviour
             canBattleStart = false;
         });
     }
+
+    public void CameraZoomIn()
+    {
+        CameraSetting().Forget();
+    }
+
     private async UniTask CameraSetting()
     {
         await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token[0].Token);
-        float t = 10;
-        while (t >= 10)
-        {
-            t -= Time.deltaTime;
-            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, 5, t);
-        }
+        cam.DOOrthoSize(7, 1.3f);
     }
 
 }

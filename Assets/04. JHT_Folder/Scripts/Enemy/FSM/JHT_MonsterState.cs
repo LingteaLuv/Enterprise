@@ -106,17 +106,16 @@ namespace JHT
 
             if (fsm.monsterSpawnType == SpawnType.IslandStage)
             {
-                fsm.monsterSearch.SearchTarget();
-                //if (fsm.timeToken == null)
-                //{
-                //    fsm.monsterSearch.SearchTarget();
-                //    fsm.TimeCheck(1.5f).Forget();
-                //}
-
-                //if (fsm.moveCheck)
-                //{
-                //    fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position, 1 * Time.deltaTime);
-                //}
+                //fsm.monsterSearch.SearchTarget();
+                if (!fsm.moveCheck)
+                {
+                    fsm.monsterSearch.SearchTarget();
+                    fsm.TimeCheck(0.75f).Forget();
+                }
+                else
+                {
+                    fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position, 1 * Time.deltaTime);
+                }
             }
             else if (fsm.monsterSpawnType == SpawnType.BossStage)
                 fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position, 1 * Time.deltaTime);

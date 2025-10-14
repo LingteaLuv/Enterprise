@@ -19,7 +19,6 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     [SerializeField] private Button _codexBtn;
     [SerializeField] private Button _playerInfoBtn;
     [SerializeField] private Button _bossBtn;
-    [SerializeField] private Button _dungeonBtn;
     
     [SerializeField] private TextMeshProUGUI _goldText;
     [SerializeField] private TextMeshProUGUI _gemText;
@@ -100,13 +99,6 @@ public class GameUIController : UIController<GameUIController.GameUIType>
             StartCoroutine(Delay());
         });
         _bossBtn.onClick.AddListener(QuestSignalManager.Instance.OnBossBattleEnter);
-        _dungeonBtn.onClick.AddListener(()=>
-        {
-            JHT_MonsterSpawnManager.Instance.MonsterAllClear();
-            BattleManager.Instance.ClearEnemies();
-            QuestSignalManager.Instance.OnDungeonEntered();
-            SceneManager.LoadScene("DungeonScene");
-        });
         
         HideUI(GameUIType.AttendancePanel);
         HideUI(GameUIType.ToolPanel);
