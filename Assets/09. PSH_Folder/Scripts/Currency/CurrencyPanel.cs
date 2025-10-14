@@ -2,6 +2,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using TMPro;
+using UnityEngine.UI;
 
 /// <summary>
 /// 보유한 모든 재화를 표시하는 UI 패널을 관리합니다.
@@ -9,19 +11,31 @@ using System;
 public class CurrencyPanel : MonoBehaviour
 {
     [Header("UI 설정")]
-    [SerializeField] private GameObject currencyDisplayPrefab; // 재화 하나를 표시할 프리팹
-    [SerializeField] private Transform contentParent;      // 프리팹들이 생성될 부모 객체 (Vertical Layout Group이 있는 곳)
+    // [SerializeField] private GameObject currencyDisplayPrefab; // 재화 하나를 표시할 프리팹
+    // [SerializeField] private Transform contentParent;      // 프리팹들이 생성될 부모 객체 (Vertical Layout Group이 있는 곳)
+    [SerializeField] private TextMeshProUGUI t1;
+    [SerializeField] private TextMeshProUGUI t2;
+    [SerializeField] private TextMeshProUGUI t3;
+    [SerializeField] private TextMeshProUGUI t4;
+    [SerializeField] private TextMeshProUGUI t5;
+    [SerializeField] private Button blocker;
 
-    private List<CurrencyDisplay> currencyDisplays = new List<CurrencyDisplay>();
+    // private List<CurrencyDisplay> currencyDisplays = new List<CurrencyDisplay>();
 
     private void Start()
     {
-        InitializePanel();
+        UpdatePanel();
+    }
+    private void OnEnable()
+    {
         // 재화 정보가 변경될 때마다 패널을 업데이트하도록 이벤트에 등록합니다.
         if (CurrencyManager.Instance != null)
         {
             CurrencyManager.Instance.OnCurrencyChanged += UpdatePanel;
         }
+
+        if (blocker != null)
+            blocker.onClick.AddListener(()=>gameObject.SetActive(false));
     }
 
     private void OnDestroy()
@@ -31,13 +45,16 @@ public class CurrencyPanel : MonoBehaviour
         {
             CurrencyManager.Instance.OnCurrencyChanged -= UpdatePanel;
         }
+
+        if (blocker != null)
+            blocker.onClick.RemoveListener(() => gameObject.SetActive(false));
     }
 
     /// <summary>
     /// 패널을 초기화하고 모든 재화 UI를 생성합니다.
     /// </summary>
     private void InitializePanel()
-    {
+    {/*
         if (currencyDisplayPrefab == null || contentParent == null)
         {
             Debug.LogError("[CurrencyPanel] 프리팹 또는 부모 Transform이 설정되지 않았습니다!");
@@ -69,7 +86,7 @@ public class CurrencyPanel : MonoBehaviour
             {
                 Debug.LogWarning($"[CurrencyPanel] {currencyDisplayPrefab.name} 프리팹에 CurrencyDisplay 스크립트가 없습니다.");
             }
-        }
+        }*/
     }
 
     /// <summary>
@@ -77,11 +94,17 @@ public class CurrencyPanel : MonoBehaviour
     /// </summary>
     public void UpdatePanel()
     {
-        Debug.Log("재화 패널 업데이트를 시작합니다.");
+        t1.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.EnhancementStone));
+        t2.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsPoint));
+        t3.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.CrewDrawTicket));
+        t4.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.EquipDrawTicket)); 
+        t5.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.RelicsCoupon));
+
+        /*Debug.Log("재화 패널 업데이트를 시작합니다.");
         foreach (var display in currencyDisplays)
         {
             var amount = CurrencyManager.Instance.GetCurrency(display.CurrencyType);
             display.UpdateDisplay(display.CurrencyType, amount);
-        }
+        }*/
     }
 }
