@@ -32,7 +32,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public BigInteger teamBattlePower;
 
     [Header("캐릭터 레벨업 설정")]
-    public const int MAX_CHARACTER_LEVEL = 10;
+    public const int MAX_CHARACTER_LEVEL = 100;
     public BigInteger fixedLevelUpGoldCost = 1000;
     public BigInteger fixedLevelUpStoneCost = 20;
     
@@ -766,7 +766,7 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     }
 
     /// <summary>
-    /// [게임 시작 시 전용] 소유한 캐릭터 중 가장 강력한 캐릭터들로 기본 편성을 구성합니다.
+    /// [게임 시작 시 전용] 4명의 임시 편성으로 시작
     /// </summary>
     public bool AutoFormTeam()
     {

@@ -9,8 +9,8 @@ public class BasicStatUI : UIBase
     public BasicStatUIGroup[] statUIGroups; // 각 스탯별 UI 요소를 담을 배열
 
     [Header("레벨업 배수 버튼")]
-    public Button levelUpMultiplierButton; // x1 / x10 토글 버튼
-    public TextMeshProUGUI levelUpMultiplierText; // 버튼 텍스트 (x1, x10)
+    public Button enhanceOnceButton; // 1회 강화 버튼
+    public Button enhanceTenTimesButton; // 10회 강화 버튼
 
     [Header("닫기 버튼")]
     public Button closeButton;
@@ -42,11 +42,15 @@ public class BasicStatUI : UIBase
             }
         }
 
-        if (levelUpMultiplierButton != null)
+        if (enhanceOnceButton != null)
         {
-            levelUpMultiplierButton.onClick.AddListener(ToggleLevelsToGain);
+            enhanceOnceButton.onClick.AddListener(() => SelectEnhancementAmount(1));
         }
-        UpdateMultiplierButtonText();
+        if (enhanceTenTimesButton != null)
+        {
+            enhanceTenTimesButton.onClick.AddListener(() => SelectEnhancementAmount(10));
+        }
+        SelectEnhancementAmount(1); // 기본값으로 1회 강화 선택
     }
 
     private void OnEnable()
@@ -76,7 +80,7 @@ public class BasicStatUI : UIBase
         // 단계 텍스트 갱신
         if (stageText != null)
         {
-            stageText.text = $"단계 {BasicStatManager.Instance.GetCurrentStage()}";
+            stageText.text = $"Lv {BasicStatManager.Instance.GetCurrentStage()}";
         }
 
         foreach (var group in statUIGroups)
@@ -117,8 +121,8 @@ public class BasicStatUI : UIBase
 
         if (goldText != null)
         {
-            // goldText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.Gold));
-            goldText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.Gold).ToString();
+            goldText.text = DataUtility.FormatNumber(CurrencyManager.Instance.GetCurrency(CurrencyType.Gold));
+            // goldText.text = CurrencyManager.Instance.GetCurrency(CurrencyType.Gold).ToString();
         }
     }
 
@@ -144,18 +148,20 @@ public class BasicStatUI : UIBase
         }
     }
 
-    private void ToggleLevelsToGain()
+    private void SelectEnhancementAmount(int amount)
     {
-        _levelsToGain = (_levelsToGain == 1) ? 10 : 1;
-        UpdateMultiplierButtonText();
-        RefreshUI();
-    }
+        _levelsToGain = amount;
 
-    private void UpdateMultiplierButtonText()
-    {
-        if (levelUpMultiplierText != null)
+        // 선택된 버튼은 비활성화해서 어둡게, 나머지는 활성화
+        if (enhanceOnceButton != null)
         {
-            levelUpMultiplierText.text = $"x{_levelsToGain}";
+            enhanceOnceButton.interactable = (amount != 1);
         }
+        if (enhanceTenTimesButton != null)
+        {
+            enhanceTenTimesButton.interactable = (amount != 10);
+        }
+
+        RefreshUI();
     }
 }

@@ -206,7 +206,7 @@ public class PlayerCharacterData
         // 전투력이 변경되었는지 확인하고 이벤트 호출
         if (oldPower != battlePower)
         {
-            Debug.Log($"전투력 변경 감지: {oldPower} -> {battlePower}");
+            // Debug.Log($"전투력 변경 감지: {oldPower} -> {battlePower}");
             StatEvents.RaiseCharacterBattlePowerChanged(this, oldPower, battlePower);
         }
     }
