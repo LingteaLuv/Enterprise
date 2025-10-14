@@ -65,7 +65,8 @@ public class MeleeCharacter : BaseCharacterFSM
 
     protected override void HandleIdle()
     {
-        animator.SetBool("0_Idle", false);
+        animator.SetBool("0_Idle", true);
+        animator.SetBool("1_Move", false);
         UpdateLookByTarget();
 
         if (!IsTargetValid()) return;
@@ -84,6 +85,7 @@ public class MeleeCharacter : BaseCharacterFSM
 
     protected override void HandleMove()
     {
+        animator.SetBool("0_Idle", false);
         animator.SetBool("1_Move", true);
         UpdateLookByTarget();
 
@@ -146,6 +148,9 @@ public class MeleeCharacter : BaseCharacterFSM
                 ChangeState(State.Move);
                 yield break;
             }
+            // 불 기반 애니메이션들은 꺼줌.
+            animator.SetBool("0_Idle", false);
+            animator.SetBool("1_Move", false);
 
             animator.SetTrigger("8_normal");
 
@@ -169,6 +174,9 @@ public class MeleeCharacter : BaseCharacterFSM
             ChangeState(State.Idle);
             yield break;
         }
+        // 불 기반 애니메이션들은 꺼줌.
+        animator.SetBool("0_Idle", false);
+        animator.SetBool("1_Move", false);
 
         animator.SetTrigger("2_Attack");
 
@@ -254,7 +262,7 @@ public class MeleeCharacter : BaseCharacterFSM
         else if (IsTargetInAttackRange()) ChangeState(State.Attack);
         else ChangeState(State.Move);
 
-        moveRoutine = null; // 🚨 끝난 뒤 반드시 null
+        moveRoutine = null; //  끝난 뒤 반드시 null
     }
 
     private void StartFindTargetLoop()
@@ -349,7 +357,7 @@ public class MeleeCharacter : BaseCharacterFSM
         }
         else ChangeState(State.Idle);
 
-        moveRoutine = null; // 🚨 반드시 null 처리
+        moveRoutine = null; //  반드시 null 처리
     }
 
     private void FindClosestEnemy()
