@@ -24,8 +24,10 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
 
 
             //if (CodexManager.Instance is null) return;
-            if (codexUIController is null) return;
-            CodexManager.Instance.BindUI(codexUIController);
+            if (codexUIController is not null)
+            {
+                CodexManager.Instance.BindUI(codexUIController);
+            }
         }
 
         private void OnDestroy()

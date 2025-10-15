@@ -10,8 +10,11 @@ public class TutorialSignalSO : ScriptableObject
 {
     
     public Action<TutorialQuestDefinitionSO> OnSignal;
+    public Action<bool> EndSignal;
 
     public void OnComplete(string tutorialName) => QuestSignalManager.Instance.Tutorial(tutorialName);
     
     public void OnStart(TutorialQuestDefinitionSO tutorial) => OnSignal?.Invoke(tutorial);
+    
+    public void OnEnd() => EndSignal?.Invoke(true);
 }

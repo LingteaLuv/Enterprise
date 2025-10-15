@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace _05._CSJ_Folder.Scripts.Quest.SO.Tutorial
 {
@@ -9,7 +10,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.SO.Tutorial
         public string arcId;
         
         [Header("해당 아크의 튜토리얼 시퀀스")]
-        public TutorialStepSequenceSO Sequence;
+        public List<TutorialStepSO> steps = new();
         
         [Header("연결된 다음 아크")]
         public TutorialArcSO NextArc;

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using _05._CSJ_Folder.Scripts.Quest.Data;
 using _05._CSJ_Folder.Scripts.Quest.Definition;
 using _05._CSJ_Folder.Scripts.Quest.Sequence;
+using _05._CSJ_Folder.Scripts.Quest.UI;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -79,7 +80,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         // 추후 보상관련 사용
         public event Action<QuestRewardSO.RewardEntry> OnRewardGranted;
-        public event Action<TutorialQuestDefinitionSO> OnTutorialQuestCompleted;
+        public event Action<TutorialQuestDefinitionSO, GeneralQuestInstance> OnTutorialQuestCompleted;
 
         // 퀘스트 초기화 확인용 코루틴
         private Coroutine _nextResetCoroutine;
@@ -196,7 +197,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             }
             // 기간 퀘스트 
             RegisterTemporaryQuests();
-
+            
 
             if (loaded != null)
             {
@@ -216,13 +217,25 @@ namespace _05._CSJ_Folder.Scripts.Quest
             
             ActiveQuestUI();
             
-
-            
             bool dailyCheck = DatabaseManager.Instance.QuickDailyCheck();
             bool weeklyCheck = DatabaseManager.Instance.QuickWeeklyCheck();
             yield return CheckTemporaryQuestsReset(dailyCheck, weeklyCheck).AsIEnumerator();
 
             ScheduleNextResetTick();
+
+            yield return WaitForBattle();
+        }
+
+        private IEnumerator WaitForBattle()
+        {
+            yield return new WaitUntil(() => BattleManager.Instance is not null);
+            BattleManager.Instance.OnBattleStart += _tutorialDirector.Init;
+            
+        }
+
+        public void UnSubmitBattle()
+        {
+            BattleManager.Instance.OnBattleStart -= _tutorialDirector.Init;
         }
 
         private IEnumerator WaitForLogin()
@@ -238,6 +251,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             AuthManager.Instance.LoginCompleted -= Handler;
         }
 
+
         #endregion
         
         #region public
@@ -249,7 +263,11 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
             if (tutorialDirector is not null)
             {
-                _tutorialDirector = _tutorialDirector;
+                _tutorialDirector = tutorialDirector;
+            }
+            else
+            {
+                Debug.LogError("TutorialDirector is null");
             }
             
             ActiveQuestUI();
@@ -266,6 +284,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 }
             }
         }
+
 
         public void UnBindUI()
         {
@@ -492,7 +511,8 @@ namespace _05._CSJ_Folder.Scripts.Quest
                     _completedInstance = g;
                 }
 
-                if (def is TutorialQuestDefinitionSO t && state == QuestState_Enum.Active)
+                if (def is TutorialQuestDefinitionSO t && state == QuestState_Enum.Active &&
+                    _tutorialDirector is not null)
                     _tutorialDirector.HandleQuestActive(t, g);
                 isLoaded = false;
             }
@@ -723,7 +743,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             if (def.isGeneral)
             {
                 if (def is TutorialQuestDefinitionSO tutorialQuestDef)
-                    OnTutorialQuestCompleted?.Invoke(tutorialQuestDef);
+                    OnTutorialQuestCompleted?.Invoke(tutorialQuestDef, inst as GeneralQuestInstance);
                 // 일반 퀘스트의 보상처리를 마무리합니다.
                 OnGeneralCompleted();
             }
@@ -785,7 +805,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             // 퀘스트 UI에 값 지정
             _questUI.QuestDef = so;
             _questUI.QuestInst = inst;
-            
+                
             // 퀘스트 ui 활성화
             QuestUI.SetActive(true);
             
@@ -1189,6 +1209,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
                 if (_tutorialDirector is not null)
                 {
+                    _clearedTutorialQuestIds = data.Tutorial.ClearedTutorialQuestIds;
                     _tutorialDirector.PrimeFromSave(
                         data.Tutorial.CurrentArcId,
                         Mathf.Max(0, data.Tutorial.StepIndex),
@@ -1244,7 +1265,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
             for (int i = 0; i < index && _tutorialQuests.Count > 0; i++)
             {
                 var tutorial = _tutorialQuests.Dequeue();
-                QuestSignalManager.Instance.UnSubscribeTutorial(tutorial);
             }
 
 

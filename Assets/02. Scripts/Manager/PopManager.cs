@@ -1,4 +1,5 @@
 using System;
+using _05._CSJ_Folder.Scripts.Quest;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,6 +18,8 @@ public class PopManager : Singleton<PopManager>
         {
             HidePopup();
         };
+        
+        TutorialTargets.Register("PopUpPanel", _popupPanel.transform as RectTransform);
     }
     
     /// <summary>

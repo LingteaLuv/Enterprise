@@ -19,12 +19,12 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     [SerializeField] private Button _codexBtn;
     [SerializeField] private Button _playerInfoBtn;
     [SerializeField] private Button _bossBtn;
-    
+
     [SerializeField] private TextMeshProUGUI _goldText;
     [SerializeField] private TextMeshProUGUI _gemText;
 
     //public WeaponStatPanel StatPanel;
-    
+
     public enum GameUIType
     {
         AttendancePanel,
@@ -39,10 +39,10 @@ public class GameUIController : UIController<GameUIController.GameUIType>
     private void Awake()
     {
         CurrencyManager.Instance.OnUpdateCurrency += UpdateText;
-        
+
         DragAndDropController.Instance.GetCanvas(GetComponent<Canvas>());
     }
-    
+
     private void Start()
     {
         DatabaseManager.Instance.DisplayCreditData();
@@ -64,7 +64,7 @@ public class GameUIController : UIController<GameUIController.GameUIType>
                     {
                         HideUI((GameUIType)(j));
                     }
-                    ShowUI((GameUIType)(index+2));
+                    ShowUI((GameUIType)(index + 2));
                     _toolToggle.isOn = false;
                 };
             }
@@ -87,19 +87,18 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         {
             ShowUI(GameUIType.PlayerInfoPanel);
         });
-        
+
         _codexBtn.onClick.AddListener(() =>
         {
             ShowUI(GameUIType.CodexPanel);
         });
-        
+
         _bossBtn.onClick.AddListener(() =>
         {
             GlobalStageManager.Instance.bossBattleTriggered = true;
             StartCoroutine(Delay());
         });
-        _bossBtn.onClick.AddListener(QuestSignalManager.Instance.OnBossBattleEnter);
-        
+
         HideUI(GameUIType.AttendancePanel);
         HideUI(GameUIType.ToolPanel);
 
