@@ -167,7 +167,6 @@ namespace JHT
                     so.skill1 = int.Parse(row[15]);
                     so.skill2 = -1;
                     //so.skill2
-                    so.monsterStat[0].amount = float.Parse(row[17]);
                     so.chaseRange = float.Parse(row[18]);
                     so.moveSpeed = float.Parse(row[19]);
                     
