@@ -19,9 +19,9 @@ public class GachaItemPanel : MonoBehaviour
     public TextMeshProUGUI nameText;
     public Image backgroundImage;
     public Image[] starImages;
-    public TextMeshProUGUI levelText;
+    // public TextMeshProUGUI levelText;
     public TextMeshProUGUI pointText;
-    public Slider pointSlider;
+    public Image pointGaugeImage;
 
     [Header("머테리얼")]
     [Tooltip("등급별 테두리 효과")]
@@ -61,7 +61,7 @@ public class GachaItemPanel : MonoBehaviour
             if (nameText != null) this.nameText.text = weapon.itemName;
             if (itemImage != null) this.itemImage.sprite = weapon.itemIcon;
 
-            levelText.text = $"LV {weapon.ItemLevel}";
+            // levelText.text = $"LV {weapon.ItemLevel}";
 
             // 별
             UpdateStarDisplay(weapon.ItemStar);
@@ -136,7 +136,7 @@ public class GachaItemPanel : MonoBehaviour
             var img = starImages[i];
             if (img == null) continue;  // Destroy되었거나 참조 끊긴 경우 스킵
 
-            img.color = (i < currentStars) ? Color.yellow : Color.grey;
+            img.color = (i < currentStars) ? Color.white : Color.black;
         }
     }
 
@@ -145,6 +145,6 @@ public class GachaItemPanel : MonoBehaviour
         int requirePoint = InventoryManager.Instance.GetRequiredPointsForLevelUp(curWeapon);
         int currentPoint = InventoryManager.Instance.GetEnhancementPoints(curWeapon.itemNum);
         pointText.text = $"{currentPoint} / {requirePoint}";
-        pointSlider.value = Mathf.Min((float)currentPoint / requirePoint, 1);
+        pointGaugeImage.fillAmount = Mathf.Min((float)currentPoint / requirePoint, 1);
     }
 }

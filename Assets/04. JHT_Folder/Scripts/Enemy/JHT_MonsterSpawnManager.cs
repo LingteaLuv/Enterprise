@@ -33,7 +33,7 @@ namespace JHT
         public Dictionary<int, JHT_MonsterDataTable> stageDic;
         public List<JHT_MonsterSetManager> posList;
         public List<JHT_BaseMonsterStat> curMonsterCountList;
-        
+
 
         public int stageIndex;
         public int roundIndex;
@@ -119,7 +119,7 @@ namespace JHT
                 if(!stageDic.ContainsKey(i))
                 {
                     stageDic.Add(i, monsterDataManager.monsterTableList[i]);
-                };
+                }
             }
         }
 
@@ -181,7 +181,6 @@ namespace JHT
         {
             if (roundTable.monsterData == null || roundTable.monsterData.Count == 0)
             {
-                Debug.LogError($"MonsterTable empty: {roundTable.ID}");
                 yield break;
             }
 
@@ -209,7 +208,7 @@ namespace JHT
 
             posList[curRoundIndex].checkList = new();
 
-
+            Debug.LogError("aaaaa");
             for (int i = 0; i < curMonsterCountList.Count; i++)
             {
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;
@@ -238,7 +237,6 @@ namespace JHT
 
             float roundStart = Time.realtimeSinceStartup;
 
-            // 다음 스테이지나 씬으로 연결 **************************************************** 제발
             
             while (count < spawnCount)
             {

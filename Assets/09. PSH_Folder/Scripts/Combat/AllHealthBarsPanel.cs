@@ -1,15 +1,24 @@
 using System.Collections.Generic;
-using System.Linq;
 using _05._CSJ_Folder.Scripts.Quest; // OrderBy를 사용하기 위해 추가해주세요!
+using System.Linq; // OrderBy를 사용하기 위해 추가해주세요!
+using DG.Tweening; // 닷트윈 사용을 위해 추가
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// PartyManager로부터 파티 준비 완료 신호를 받아 체력바를 초기화합니다.
 /// </summary>
 public class AllHealthBarsPanel : MonoBehaviour
 {
-    // [SerializeField]를 제거! 이제 에디터에서 연결하지 않고 코드로 직접 찾을 거예요.
     private List<HealthBarDisplay> healthBars = new List<HealthBarDisplay>();
+
+    [Header("패널 이동 설정")]
+    [SerializeField] private Button toggleMoveButton; // 이동 토글 버튼
+    [SerializeField] private float moveDistance = 300f; // 이동할 거리
+    [SerializeField] private float moveDuration = 0.5f; // 이동 시간
+
+    private bool isMoved = false; // 현재 패널이 이동했는지 여부
+    private Vector3 originalPosition; // 원래 위치
 
     // Start 대신 Awake를 사용해서 OnEnable보다 먼저 실행되도록 보장합니다.
     private void Awake()
@@ -23,8 +32,15 @@ public class AllHealthBarsPanel : MonoBehaviour
         healthBars = healthBars.OrderBy(hb => hb.name).ToList();
 
         Debug.Log($"[AllHealthBarsPanel] 자식 오브젝트에서 {healthBars.Count}개의 체력바를 찾아 리스트에 등록했습니다.");
-        
+
         TutorialTargets.Register("HpBar", transform as RectTransform);
+
+        // 패널 이동 기능 초기화
+        originalPosition = transform.position;
+        if (toggleMoveButton != null)
+        {
+            toggleMoveButton.onClick.AddListener(TogglePanelPosition);
+        }
     }
 
     private void Start()
@@ -85,6 +101,26 @@ public class AllHealthBarsPanel : MonoBehaviour
         if (partyCharacters.Count > healthBars.Count)
         {
             Debug.LogWarning($"파티 캐릭터 수({partyCharacters.Count})가 체력바 수({healthBars.Count})보다 많습니다. 일부 캐릭터는 체력바가 없습니다.");
+        }
+    }
+
+    /// <summary>
+    /// 패널의 위치를 토글하는 애니메이션을 재생합니다.
+    /// </summary>
+    private void TogglePanelPosition()
+    {
+        // isMoved 상태를 반전시킵니다.
+        isMoved = !isMoved;
+
+        if (isMoved)
+        {
+            // 왼쪽으로 이동
+            transform.DOMoveX(originalPosition.x - moveDistance, moveDuration);
+        }
+        else
+        {
+            // 원래 위치로 복귀
+            transform.DOMoveX(originalPosition.x, moveDuration);
         }
     }
 }

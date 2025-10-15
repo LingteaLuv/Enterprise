@@ -114,7 +114,7 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
         float percentBonus = statBuffs.Where(b => b.BuffType == BuffType.Percent).Sum(b => b.Value);
         float finalValue = (baseValue + flatBonus) * (1 + percentBonus);
 
-        Debug.Log($"[CombatCharacter] {charName}의 {stat} 최종 스탯: {finalValue} (기본: {baseValue}, 고정 버프: {flatBonus}, 퍼센트 버프: {percentBonus})");
+        // Debug.Log($"[CombatCharacter] {charName}의 {stat} 최종 스탯: {finalValue} (기본: {baseValue}, 고정 버프: {flatBonus}, 퍼센트 버프: {percentBonus})");
 
         return finalValue;
     }
