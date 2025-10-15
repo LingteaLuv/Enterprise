@@ -63,7 +63,8 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
             foreach (var it in bundle.items)
             {
                 var view = Instantiate(itemPrefab, content);
-                view.Set(it);
+                if (it.rewardType == QuestRewardType_Enum.Crew) view.SetChar(it);
+                else view.Set(it);
                 _spawned.Add(view.gameObject);
             }
             

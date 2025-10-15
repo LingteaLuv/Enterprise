@@ -83,7 +83,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         Pause(true);
                         highlighter.gameObject.SetActive(false);
                         forwarder.gameObject.SetActive(false);
-                        yield return dialog.Show(step.Speaker, step.text);
+                        yield return dialog.Show(step.text, step.speaker);
                         break;
                     
                     case TutorialStepType.Highlight:
