@@ -208,7 +208,6 @@ namespace JHT
 
             posList[curRoundIndex].checkList = new();
 
-            Debug.LogError("aaaaa");
             for (int i = 0; i < curMonsterCountList.Count; i++)
             {
                 JHT_BaseMonsterFSM obj = monsterPool.GetPooled() as JHT_BaseMonsterFSM;

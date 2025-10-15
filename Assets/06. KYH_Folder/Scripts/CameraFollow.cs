@@ -19,7 +19,7 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private float followSpeed = 5f;
 
     [Header("추적 대상들 (여러 플레이어들)")]
-    [SerializeField] private List<Transform> multipleTargets = new();
+    public List<Transform> multipleTargets = new();
 
     private bool isFollowing = false;
 

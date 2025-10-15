@@ -93,7 +93,6 @@ public class BattleManager : MonoBehaviour
         // 지정된 씬에서만 초기화
         if (scene.name == "Game" && !isInitialized)
         {
-            Debug.Log(" BattleManager: Scene Loaded → Init");
             isInitialized = true;
 
             InitUI();
@@ -154,7 +153,7 @@ public class BattleManager : MonoBehaviour
         // 보완 조건: 스테이지 클리어 후에는 재시작 금지
         if (IslandEnd)
         {
-            Debug.LogWarning("[BattleManager] 이미 스테이지 클리어됨. 전투 재시작 불가");
+            Debug.LogError($"BattleManager : isLandEnd - {isLandEnd} 111");
             return;
         }
 
@@ -168,7 +167,6 @@ public class BattleManager : MonoBehaviour
         // 전투 중이면 멈추고 다시 시작
         if (battleRoutine != null)
         {
-            Debug.Log("[BattleManager] 기존 전투 중단 후 재시작");
             StopCoroutine(battleRoutine);
             battleRoutine = null;
             JHT_MonsterSpawnManager.Instance.MonsterAllClear();
@@ -192,7 +190,6 @@ public class BattleManager : MonoBehaviour
                 .ToList();
 
             cameraFollow.StartFollowing(playerTransforms);
-            Debug.Log("[BattleManager] OnFormationSaved → CameraFollow SetTargets 갱신 완료");
         }
     }
 
@@ -249,6 +246,7 @@ public class BattleManager : MonoBehaviour
         
 
         IslandEnd = false;
+        Debug.LogError($"BattleManager : isLandEnd - {isLandEnd} 222");
 
         battleRoutine = StartCoroutine(BattleRoutine());
        // Debug.Log("battleRoutine 시작됨");
@@ -290,8 +288,11 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);      // 등장 연출 대기
 
         // 몬스터 수가 0이 될떄까지 반복
-        yield return new WaitUntil(() => goNextIsland);
+        //yield return new WaitUntil(() => goNextIsland);
 
+        yield return new WaitUntil(() => goNextIsland);
+        
+        Debug.LogError("BattleManager 대기끝");
         yield return new WaitForSeconds(1f);
 
         battleRoutine = null;
@@ -352,7 +353,7 @@ public class BattleManager : MonoBehaviour
             //GlobalStageManager.Instance.currentStageIndex++; // todo 임시 : 보스 나오기전
             currentRoundIndex = 0;
             IslandEnd = true;
-
+            Debug.LogError($"BattleManager : isLandEnd - {isLandEnd} 333");
             return;
         }
 
