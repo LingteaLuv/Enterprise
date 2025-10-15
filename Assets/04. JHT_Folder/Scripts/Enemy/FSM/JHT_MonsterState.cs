@@ -104,24 +104,8 @@ namespace JHT
                 return;
             }
 
-            if (fsm.monsterSpawnType == SpawnType.IslandStage)
-            {
-                //fsm.monsterSearch.SearchTarget();
-                if (!fsm.moveCheck)
-                {
-                    fsm.monsterSearch.SearchTarget();
-                    fsm.TimeCheck(0.75f).Forget();
-                }
-                else
-                {
-                    fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position, 1 * Time.deltaTime);
-                }
-            }
-            else if (fsm.monsterSpawnType == SpawnType.BossStage)
-                fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position, 1 * Time.deltaTime);
-            
             fsm.Rotate();
-            
+
             float dist = Vector2.Distance(fsm.target.transform.position, fsm.gameObject.transform.position);
 
             if (dist <= fsm.monsterStat.attackRange)
@@ -130,10 +114,14 @@ namespace JHT
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.ATTACK]);
             }
 
-            //if (dist > fsm.monsterStat.chaseRange)
-            //{
-            //    fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[PlayerState.IDLE]);
-            //}
+            if (fsm.monsterSpawnType == SpawnType.IslandStage)
+            {
+                fsm.monsterSearch.SearchTarget();
+                fsm.TimeCheck(2.5f).Forget();
+            }
+            else if (fsm.monsterSpawnType == SpawnType.BossStage)
+                fsm.transform.position = Vector3.MoveTowards(fsm.transform.position, fsm.target.transform.position, 1 * Time.deltaTime);
+            
         }
 
         public override void Exit()
@@ -159,12 +147,12 @@ namespace JHT
         {
             base.Update();
 
+            fsm.monsterSearch.StopRoutine();
             if (fsm.target == null)
             {
                 fsm.stateMachine.ChangeState(fsm.stateMachine.stateDic[JHT_BaseMonsterFSM.MonsterState.IDLE]);
                 return;
             }
-
             fsm.Rotate();
 
             if (Vector2.Distance(fsm.target.transform.position,

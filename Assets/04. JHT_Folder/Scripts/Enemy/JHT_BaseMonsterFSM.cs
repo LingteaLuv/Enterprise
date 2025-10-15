@@ -42,7 +42,6 @@ namespace JHT
         public bool skill2Active;
         public bool isAttacking;
         public bool isStun;
-        public bool moveCheck;
 
         private CancellationTokenSource[] Atoken;
         private CancellationTokenSource Stoken;
@@ -81,7 +80,6 @@ namespace JHT
         private IEnumerator StartSetting(JHT_BaseMonsterStat stat, SpawnType spawnType)
         {
             // 풀에서 받은 이전의 값 정리
-            moveCheck = false;
             _initialized = false;
             target = null;
             isAttacking = false;
@@ -736,19 +734,17 @@ namespace JHT
 
         public async UniTask TimeCheck(float value)
         {
-            timeToken?.Cancel();
-            timeToken?.Dispose();
+            if (timeToken != null)
+                return;
+
             timeToken = new CancellationTokenSource();
 
             try
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(value), cancellationToken: timeToken.Token);
-                moveCheck = true; 
+                monsterSearch.SearchTarget();
             }
-            catch (OperationCanceledException)
-            {
-                moveCheck = false;
-            }
+            catch (OperationCanceledException) { }
         }
     }
 }
