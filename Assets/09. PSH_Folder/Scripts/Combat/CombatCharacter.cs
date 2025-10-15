@@ -84,7 +84,7 @@ public class CombatCharacter : MonoBehaviour, IAttacker, IDamageable
         moveSpeed = PartyManager.Instance.moveSpeed;
         attackRange = data.characterdata.atkRangeType == AtkRangeType.Ranged_Attack ? PartyManager.Instance.attackRange : PartyManager.Instance.attackRange2;
         activeBuffs.Clear();
-        Debug.Log($"'{charName}' 데이터 적용 완료.");
+        //Debug.Log($"'{charName}' 데이터 적용 완료.");
         if (healthSystem != null)
         {
             healthSystem.Initialize();

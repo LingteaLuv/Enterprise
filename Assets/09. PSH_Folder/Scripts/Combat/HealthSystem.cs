@@ -32,7 +32,7 @@ public class HealthSystem : MonoBehaviour
         this.maxHealth = statProvider.GetCurrentStat(Stat.Health);
         this.currentHealth = this.maxHealth;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        Debug.Log($"'{statProvider.GetName()}' 체력 초기화: {currentHealth}/{maxHealth}");
+        //Debug.Log($"'{statProvider.GetName()}' 체력 초기화: {currentHealth}/{maxHealth}");
     }
 
     /// <summary>

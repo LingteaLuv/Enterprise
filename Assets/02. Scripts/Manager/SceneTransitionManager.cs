@@ -129,13 +129,13 @@ public class SceneTransitionManager : Singleton<SceneTransitionManager>
             float loadProgress = Mathf.Clamp01(_asyncLoad.progress / 0.9f);
             float progressPercent = loadProgress * 100f;
             float elapsed = Time.time - _loadStartTime;
-            Debug.Log($"[최소 로드 시간 보장] [{sceneName}] 로딩 진행도: {progressPercent:F0}%, 소요 시간: {elapsed:F1}/{minTime:F1}초");
+            //Debug.Log($"[최소 로드 시간 보장] [{sceneName}] 로딩 진행도: {progressPercent:F0}%, 소요 시간: {elapsed:F1}/{minTime:F1}초");
             yield return null;
         }
 
         _asyncLoad.allowSceneActivation = true;
         while (!_asyncLoad.isDone) yield return null;
 
-        Debug.Log($"[{sceneName}] 로딩 완료 (최소 {minTime:F1}초 보장) 총 소요 시간: {(Time.time - _loadStartTime):F1}초");
+        //Debug.Log($"[{sceneName}] 로딩 완료 (최소 {minTime:F1}초 보장) 총 소요 시간: {(Time.time - _loadStartTime):F1}초");
     }
 }

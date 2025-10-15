@@ -128,7 +128,7 @@ public class PlayerInfoPanel : UIBase
     {
         //AuthManager.Instance.Logout();
         Utility.OnDestroyAll.Invoke();
-        SceneTransitionManager.Instance.LoadSceneWithLoading("LoginScene", 2f);
+        SceneTransitionManager.Instance.LoadSceneWithLoading("LoginScene", 1f);
     }
 
     private void InitImage()

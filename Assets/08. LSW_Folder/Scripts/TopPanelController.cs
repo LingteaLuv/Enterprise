@@ -38,7 +38,7 @@ public class TopPanelController : MonoBehaviour
         
         LoginManager.Instance.OnNicknameChanged += OnNicknameUpdated;
         OnNicknameUpdated();
-        OnProfileImageUpdated(_infoPanel.GetCurImage());
+        //OnProfileImageUpdated(_infoPanel.GetCurImage());
     }
     
     private void OnNicknameUpdated()
