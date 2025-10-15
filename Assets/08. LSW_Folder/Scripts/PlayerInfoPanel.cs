@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using TMPro;
@@ -27,6 +28,7 @@ public class PlayerInfoPanel : UIBase
     
     public Action OnClickedExitBtn;
     public Action OnClickedNicknameChangeBtn;
+    public Action<Sprite> OnImageChanged;
     
     private async void Start()
     {
@@ -61,8 +63,10 @@ public class PlayerInfoPanel : UIBase
             _curImage = _crewImage.sprite;
             string path = $"UserData/image";
             DatabaseManager.Instance.SaveField(path, _curImageId);
+            OnImageChanged?.Invoke(_curImage);
         });
         await Init();
+        OnImageChanged?.Invoke(_curImage);
         rt.anchoredPosition = _curPos;
         gameObject.SetActive(false);
     }
@@ -124,7 +128,7 @@ public class PlayerInfoPanel : UIBase
     {
         //AuthManager.Instance.Logout();
         Utility.OnDestroyAll.Invoke();
-        SceneTransitionManager.Instance.LoadSceneWithLoading("LoginScene", 2f);
+        SceneTransitionManager.Instance.LoadSceneWithLoading("LoginScene", 1f);
     }
 
     private void InitImage()
@@ -159,5 +163,10 @@ public class PlayerInfoPanel : UIBase
     {
         _images[key].gameObject.GetComponent<CrewIcon>().GetComponent<Button>().enabled = true;
         _images[key].gameObject.transform.GetChild(0).GetComponent<Image>().color = new Color(255, 255, 255, 255);
+    }
+
+    public Sprite GetCurImage()
+    {
+        return _curImage;
     }
 }

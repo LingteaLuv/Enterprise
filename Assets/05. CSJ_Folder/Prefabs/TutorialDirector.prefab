@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1737002958539768660
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2482620934766944480}
+  - component: {fileID: 8103973512934784960}
+  m_Layer: 0
+  m_Name: TutorialDirector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2482620934766944480
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737002958539768660}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 152.18033, y: 1298.1632, z: 0.012150632}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8103973512934784960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737002958539768660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4a1c50b0e1b45ddb1c0cfabb9473a56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dontDestroyOnLoad: 1
+  _isStatic: 1
+  tutorialUI: {fileID: 0}
+  tutorialCanvas: {fileID: 0}
+  defaultArc: {fileID: 11400000, guid: 96e6f5b6559480949a99571a048ac989, type: 2}
+  allArcs:
+  - {fileID: 11400000, guid: 96e6f5b6559480949a99571a048ac989, type: 2}
+  - {fileID: 11400000, guid: 4cdb53d719b298545905ebf6f6f48617, type: 2}
+  - {fileID: 11400000, guid: 27ca96b4ce6c11541a930b85665ce5a8, type: 2}
+  - {fileID: 11400000, guid: ef2dce5656a379b418b3b1a3fc475f8d, type: 2}
+  - {fileID: 11400000, guid: e00a4e4f4e7dbde44b1ddd9a3c52e74f, type: 2}
+  - {fileID: 11400000, guid: aa38186ece278dd44be03bd2c3bf2fdb, type: 2}
+  - {fileID: 11400000, guid: cc2cadea680b0454a95bd860bc6b5178, type: 2}
+  - {fileID: 11400000, guid: e867d4c8dd9399b41966b62b6cbce5a9, type: 2}
+  - {fileID: 11400000, guid: d76c5cd9b90134f43ade9d815bd1efb8, type: 2}
+  - {fileID: 11400000, guid: e5e642f4aac5dff42b8112f0963912ad, type: 2}
+  - {fileID: 11400000, guid: e766e765981312d4fb48d5e95322bd55, type: 2}
+  questLinks:
+  - quest: {fileID: 11400000, guid: 7a460e34fe7270e45a0ab4e2ddf319d2, type: 2}
+    trigger: 1
+    arc: {fileID: 11400000, guid: ef2dce5656a379b418b3b1a3fc475f8d, type: 2}
+  - quest: {fileID: 11400000, guid: 83bdd1f2e1829d342903e2768bc5ae9f, type: 2}
+    trigger: 1
+    arc: {fileID: 11400000, guid: e867d4c8dd9399b41966b62b6cbce5a9, type: 2}
+  - quest: {fileID: 11400000, guid: fc706136b6f463d4eafc5857c67201f1, type: 2}
+    trigger: 1
+    arc: {fileID: 11400000, guid: d76c5cd9b90134f43ade9d815bd1efb8, type: 2}
+  playDefaultOnFirst: 1

@@ -47,21 +47,34 @@ public class IAPManager : MonoBehaviour
     
     public void PurchaseDiaPack()
     {
-        DatabaseManager.Instance.AddCurrency("Gem", 1000);
+        DatabaseManager.Instance.AddCurrency("Gem", 450);
     }
     
     public void PurchaseDia1200()
     {
-        DatabaseManager.Instance.AddCurrency("Gem", 1200);
+        DatabaseManager.Instance.AddCurrency("Gem", 1250);
     }
     
     public void PurchaseDia2500()
     {
-        DatabaseManager.Instance.AddCurrency("Gem", 2500);
+        DatabaseManager.Instance.AddCurrency("Gem", 2750);
     }
     
     public void PurchaseDia5500()
     {
-        DatabaseManager.Instance.AddCurrency("Gem", 5500);
+        DatabaseManager.Instance.AddCurrency("Gem", 6300);
+    }
+
+    public void PurchaseGold1()
+    {
+        DatabaseManager.Instance.AddCurrency("Gold", 10000);
+    }
+    public void PurchaseGold2()
+    {
+        DatabaseManager.Instance.AddCurrency("Gold", 30000);
+    }
+    public void PurchaseGold3()
+    {
+        DatabaseManager.Instance.AddCurrency("Gold", 80000);
     }
 }

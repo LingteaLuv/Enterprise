@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ public class LoginManager : Singleton<LoginManager>
     public string Nickname { get; private set; }
     public LoginTypeEnum LoginType { get; private set; }
 
+    public Action OnNicknameChanged;
+    
     public void Start()
     {
         AuthManager.Instance.LoginCompleted += SetNickname;
@@ -23,6 +26,7 @@ public class LoginManager : Singleton<LoginManager>
         DatabaseManager.Instance.LoadNickname((nickname) =>
         {
             Nickname = nickname;
+            OnNicknameChanged?.Invoke();
         });
     }
     
