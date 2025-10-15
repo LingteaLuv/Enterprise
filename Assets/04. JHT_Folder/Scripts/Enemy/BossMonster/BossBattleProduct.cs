@@ -210,6 +210,7 @@ public class BossBattleProduct : MonoBehaviour
     {
         await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token[0].Token);
         cam.DOOrthoSize(7, 1.3f);
+        BossBattleManager.Instance.cameraFollow?.SetBattleActive(true);
     }
 
 }

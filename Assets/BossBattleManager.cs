@@ -19,7 +19,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
     private Transform monsterParent;
 
     private List<GameObject> currentPlayers;
-    private CameraFollow cameraFollow;
+    public CameraFollow cameraFollow;
 
     public static bool IsBossBattle = false;
     private readonly string _returnSceneName = "Game";
@@ -48,6 +48,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
 
     public void Battle()
     {
+        cameraFollow = Camera.main?.GetComponent<CameraFollow>();
         BattleAsync().Forget();
         //StartCoroutine(EnableMeleeAfterDelay());
     }
@@ -56,6 +57,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
     {
         try
         {
+            RefreshCameraTargets();
             for (int i = 0; i < token.Length; i++)
             {
                 if(token[i] == null)
@@ -93,6 +95,22 @@ public class BossBattleManager : Singleton<BossBattleManager>
         monsterPrefab = monsterSampleHandle;
         monsterParent = product.transform.Find("MonsterShip").transform;
         //bossPos.transform.position += new Vector3(6, 0);
+    }
+
+    private void RefreshCameraTargets()
+    {
+        if (cameraFollow == null)
+            cameraFollow = Camera.main?.GetComponent<CameraFollow>();
+
+        if (cameraFollow != null)
+        {
+            var playerTransforms = PartyManager.Instance.GetAllPartyMembers()
+                .Select(p => p.transform)
+                .ToList();
+
+            cameraFollow.StartFollowing(playerTransforms);
+        }
+
     }
 
     #region 플레이어 스폰
@@ -169,15 +187,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
             obj.GetComponent<JHT_NormalMonster>().enabled = false;
         }
         
-        //for (int i = 0; i < spawnBossMonster.Count; i++)
-        //{
-        //    JHT_BaseMonsterFSM obj = monsterSpawnManager.monsterPool.GetPooled() as JHT_BaseMonsterFSM;
-        //    obj.Init(spawnBossMonster[i], SpawnType.BossStage);
-        //    obj.transform.position = bossPosSpawn.SetPos(spawnBossMonster[i]).position;
-        //    obj.transform.localScale *= 1.3f;
-        //    obj.GetComponent<JHT_NormalMonster>().enabled = false;
-        //    // 보스 사망 이벤트 연결
-        //}
     }
     #endregion
 
@@ -208,6 +217,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
 
     private void EndBattle(bool isVictory)
     {
+        cameraFollow?.SetBattleActive(false);
         direction.defeatText.gameObject.SetActive(isVictory);
         direction.victoryText.gameObject.SetActive(isVictory);
 

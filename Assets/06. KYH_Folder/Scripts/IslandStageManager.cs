@@ -93,7 +93,6 @@ public class IslandStageManager : MonoBehaviour
                     StopCoroutine(handleReturnAndNext);
                     handleReturnAndNext = null;
                 }
-                isAdvancing = false;
 
                 SceneManager.LoadScene("BossBattleScene");
                 yield break;
@@ -187,19 +186,15 @@ public class IslandStageManager : MonoBehaviour
             StopCoroutine(handleReturnAndNext);
             handleReturnAndNext = null;
         }
-        isAdvancing = false;
     }
 
     /// <summary>
     /// 전투가 끝나면 호출됨 → 다음 섬으로 이동
     /// </summary>
     /// 
-    private bool isAdvancing;
     public void OnBattleComplete()
     {
-        if (isAdvancing) return;       // 중복 진입 가드
-        isAdvancing = true;
-
+        Debug.LogError("BattleManager - 다음섬이동으로 싸움시작");
         if (!GlobalStageManager.Instance.bossBattleTriggered)
         {
             SpawnClearMarker(GlobalStageManager.Instance.CurrentIslandIndex.Value);
@@ -221,8 +216,12 @@ public class IslandStageManager : MonoBehaviour
         if (!this.gameObject.activeInHierarchy)
             Debug.LogError(" IslandStageManager GameObject가 비활성화됨");
 
-        if (handleReturnAndNext == null)
-            handleReturnAndNext = StartCoroutine(HandleReturnAndNext());
+        if (handleReturnAndNext != null)
+        {
+            StopCoroutine(handleReturnAndNext);
+            handleReturnAndNext = null;
+        }
+        handleReturnAndNext = StartCoroutine(HandleReturnAndNext());
     }
 
     /// <summary>
@@ -265,6 +264,11 @@ public class IslandStageManager : MonoBehaviour
                 // 보스전 이후 분기 추가
                 if (GlobalStageManager.Instance.CurrentStageIndex.Value >= 4)
                 {
+                    if (handleReturnAndNext != null)
+                    {
+                        handleReturnAndNext = null;
+                    }
+
                     GlobalStageManager.Instance.CurrentStageIndex.Value = 4;    // 현재 스테이지를 4로 고정
                     GlobalStageManager.Instance.CurrentIslandIndex.Value = 0;   // 첫 섬부터 다시
                     ResetClearMarkers();
@@ -279,6 +283,7 @@ public class IslandStageManager : MonoBehaviour
         }
 
         // 다음 섬으로 이동
+
         moveToAndEnter = StartCoroutine(MoveToAndEnter(GlobalStageManager.Instance.CurrentIslandIndex.Value));
     }
 
