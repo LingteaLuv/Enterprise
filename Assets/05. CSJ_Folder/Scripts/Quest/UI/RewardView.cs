@@ -15,5 +15,11 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
             if (icon) icon.sprite = item.icon;
             if (amountText) amountText.text = $"X{item.amount:N0}";
         }
+
+        public void SetChar(RewardBundleSO.Item item)
+        {
+            if (icon){ icon.sprite = item.data.characterSprite;}
+            if (amountText) amountText.text = $"X{item.amount:N0}";
+        }
     }
 }

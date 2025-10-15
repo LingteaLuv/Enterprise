@@ -13,7 +13,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.SO.Tutorial
         public TutorialStepType type;
 
         [Header("contents")]
-        public string Speaker;
+        public CharacterData speaker;
         [TextArea] public string text;
         
         [Header("딜레이 시간")]

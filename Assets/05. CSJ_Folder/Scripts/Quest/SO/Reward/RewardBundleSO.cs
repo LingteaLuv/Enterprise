@@ -10,6 +10,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.SO.Reward
         [Serializable]
         public struct Item
         {
+            public CharacterData data;
             public Sprite icon;            // 표시 아이콘
             public string displayName;     // 표기 이름
             public QuestRewardType_Enum rewardType;

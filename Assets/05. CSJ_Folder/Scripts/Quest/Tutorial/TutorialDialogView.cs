@@ -11,6 +11,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         public TextMeshProUGUI Speaker;
         public TextMeshProUGUI text;
         public Button nextButton;
+        public Image background;
 
         void Awake()
         {
@@ -19,18 +20,20 @@ namespace _05._CSJ_Folder.Scripts.Quest
             nextButton.gameObject.SetActive(false);
         }
 
-        public IEnumerator Show(string speaker, string message)
+        public IEnumerator Show(string message, CharacterData speaker = null)
         {
             if (speaker is not null)
             {
                 Speaker.gameObject.SetActive(true);
-                Speaker.text = speaker;
+                Speaker.text = $"[{speaker.name}]";
+                background.sprite = speaker.characterSprite;
             }
             else
             {
+                background.sprite = null;
                 Speaker.gameObject.SetActive(false);
             }
-
+            
             text.text = message;
             group.blocksRaycasts = true;
             nextButton.gameObject.SetActive(true);
