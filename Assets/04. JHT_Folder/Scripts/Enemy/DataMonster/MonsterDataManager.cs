@@ -5,6 +5,7 @@ using JHT;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.UI;
 
 public class MonsterDataManager : Singleton<MonsterDataManager>
 {
@@ -26,7 +27,7 @@ public class MonsterDataManager : Singleton<MonsterDataManager>
     public Dictionary<string, GameObject> monsterPrefabDic;
     //public Dictionary<string,  MonsterSkillSO> monsterSkillDic;
     public Dictionary<int, MonsterSkillSO> monsterSkillDic;
-    
+    public Sprite[] projectile; 
 
     private AsyncOperationHandle<IList<JHT_MonsterDataTable>> monsterTableHandle;
     private AsyncOperationHandle<IList<JHT_MonsterDataSO>> monsterDataHandle;
