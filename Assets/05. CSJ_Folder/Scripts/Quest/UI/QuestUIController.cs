@@ -27,6 +27,11 @@ public class QuestUIController : MonoBehaviour
 
     public Action<QuestDefinitionSO, QuestInstance> OnRewardRequest;
 
+    private void Start()
+    {
+        TutorialTargets.Register("QuestButton", _questButton.transform as RectTransform);
+    }
+    
     private void Awake()
     {
         _questButton.onClick.AddListener(OnClickQuest);

@@ -8,6 +8,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
     public class TutorialDialogView : MonoBehaviour
     {
         public CanvasGroup group;
+        public TextMeshProUGUI Speaker;
         public TextMeshProUGUI text;
         public Button nextButton;
 
@@ -18,8 +19,18 @@ namespace _05._CSJ_Folder.Scripts.Quest
             nextButton.gameObject.SetActive(false);
         }
 
-        public IEnumerator Show(string message)
+        public IEnumerator Show(string speaker, string message)
         {
+            if (speaker is not null)
+            {
+                Speaker.gameObject.SetActive(true);
+                Speaker.text = speaker;
+            }
+            else
+            {
+                Speaker.gameObject.SetActive(false);
+            }
+
             text.text = message;
             group.blocksRaycasts = true;
             nextButton.gameObject.SetActive(true);

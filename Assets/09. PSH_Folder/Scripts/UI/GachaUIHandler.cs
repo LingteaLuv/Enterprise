@@ -103,6 +103,7 @@ public class GachaUIHandler : UIBase
         relicsGachaManager = FindAnyObjectByType<RelicsGachaManager>();
         
         TutorialTargets.Register("CharOneBtn", charSingleBtn.transform as RectTransform);
+        TutorialTargets.Register("CharFiveBtn", charMultipleBtn.transform as RectTransform);
     }
     private void Start()
     {

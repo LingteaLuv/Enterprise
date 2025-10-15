@@ -42,7 +42,7 @@
 
     public enum TutorialStepType
     {
-        Dialogue, Highlight, WaitQuestActivated, WaitQuestCompleted, OpenPanel, 
+        Dialogue, Highlight, WaitQuestActivated, WaitQuestCompleted, WaitTime, 
         InvokeEvent, GrantRewards, ClaimReward, QuestCleared, GrantCrews,
         WaitSignal
     }

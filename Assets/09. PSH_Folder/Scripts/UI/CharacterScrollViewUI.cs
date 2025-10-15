@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using _05._CSJ_Folder.Scripts.Quest;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -107,6 +108,9 @@ public class CharacterScrollViewUI : UIBase
         PopulateSortDropdown();
         PopulateCrewRoleFilterDropdown();
         PopulateFactionFilterDropdown();
+        
+        TutorialTargets.Register("FormationButton", formationButton?.transform as RectTransform);
+        TutorialTargets.Register("SaveButton", saveButton?.transform as RectTransform);
     }
 
     private void OnEnable()
@@ -227,6 +231,7 @@ public class CharacterScrollViewUI : UIBase
             Sequence sequence = DOTween.Sequence();
             sequence.Append(scrollViewRectTransform.DOSizeDelta(new Vector2(scrollViewRectTransform.sizeDelta.x, targetHeight), heightAnimationDuration));
             sequence.Join(scrollViewRectTransform.DOAnchorPos(targetPosition, heightAnimationDuration));
+            sequence.SetUpdate(true);
         }
     }
 

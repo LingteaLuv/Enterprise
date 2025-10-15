@@ -91,6 +91,8 @@ public class TabBarController : MonoBehaviour
         blocker.onClick.AddListener(ClosePanelAndAnimateButtonOut);
         
         TutorialTargets.Register("GachaPanel", gachaBtn.transform as RectTransform);
+        TutorialTargets.Register("CharacterPanel", characterListBtn.transform as RectTransform);
+        TutorialTargets.Register("PanelCloseBtn", closeBtn.transform as RectTransform);
     }
 
     public void OnTabSelected(Button tabBtn, UIBase panel)
@@ -153,10 +155,10 @@ public class TabBarController : MonoBehaviour
         closeBtn.transform.DOKill(); // 진행중인 트윈 중단
         Vector3 endPos = closeBtn.transform.position - new Vector3(0, closeBtnOffsetY, 0);
 
-        closeBtn.transform.DOMove(endPos, animationDuration).SetEase(Ease.InQuad).OnComplete(() =>
+        closeBtn.transform.DOMove(endPos, animationDuration).SetEase(Ease.InQuad).SetUpdate(true).OnComplete(() =>
         {
             closeBtn.gameObject.SetActive(false);
-        }).SetUpdate(true);
+        });
     }
     #endregion
 
@@ -170,7 +172,8 @@ public class TabBarController : MonoBehaviour
         panel.transform.localPosition = startPos;
         panel.SetShow(); // SetActive(true) 및 RefreshUI() 호출
 
-        panel.transform.DOLocalMove(originalPos, animationDuration).SetEase(Ease.OutBack).SetUpdate(true);
+        panel.transform.DOLocalMove(originalPos, animationDuration).SetEase(Ease.OutBack)
+            .SetUpdate(UpdateType.Normal,true);
     }
 
     private void AnimatePanelOut(UIBase panel)
@@ -181,10 +184,10 @@ public class TabBarController : MonoBehaviour
         Vector3 originalPos = panelOriginalPositions[panel];
         Vector3 endPos = originalPos - new Vector3(0, panelOffsetY, 0);
 
-        panel.transform.DOLocalMove(endPos, animationDuration).SetEase(Ease.InBack).OnComplete(() =>
+        panel.transform.DOLocalMove(endPos, animationDuration).SetEase(Ease.InBack).SetUpdate(UpdateType.Normal,true).OnComplete(() =>
         {
             panel.SetHide(); // SetActive(false) 호출
-        }).SetUpdate(true);
+        });
     }
     #endregion
 

@@ -6,6 +6,7 @@ using _05._CSJ_Folder.Scripts.Quest.Definition;
 using _05._CSJ_Folder.Scripts.Quest.SO.Tutorial;
 using _05._CSJ_Folder.Scripts.Quest.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace _05._CSJ_Folder.Scripts.Quest
 {
@@ -56,6 +57,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             
             Time.timeScale = 0f;
             
+            
             QuestManager.Instance.UnSubmitBattle();
 
             if (_primed && !string.IsNullOrEmpty(_currentArcId))
@@ -73,6 +75,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
             if (playDefaultOnFirst && defaultArc is not null)
             {
+                StartCoroutine(TutorialUtils.WaitAndSetAlpha("HpBar", 0f, false, false));
                 StartArc(defaultArc, 0);
                 return;
             }

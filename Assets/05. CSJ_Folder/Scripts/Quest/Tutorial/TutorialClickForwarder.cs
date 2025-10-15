@@ -17,6 +17,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         
         
         public Button button;
+        public Action Clicked;
 
         private RectTransform self;
 
@@ -35,6 +36,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             target = null;
             button = null;
+            Clicked = null;
         }
 
         void LateUpdate()
@@ -67,7 +69,12 @@ namespace _05._CSJ_Folder.Scripts.Quest
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            button?.onClick.Invoke();
+            if (button)
+            {
+                button?.onClick.Invoke();
+            }
+            
+            Clicked?.Invoke();
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using System.Linq; // OrderBy를 사용하기 위해 추가해주세요!
+using System.Linq;
+using _05._CSJ_Folder.Scripts.Quest; // OrderBy를 사용하기 위해 추가해주세요!
 using UnityEngine;
 
 /// <summary>
@@ -22,6 +23,8 @@ public class AllHealthBarsPanel : MonoBehaviour
         healthBars = healthBars.OrderBy(hb => hb.name).ToList();
 
         Debug.Log($"[AllHealthBarsPanel] 자식 오브젝트에서 {healthBars.Count}개의 체력바를 찾아 리스트에 등록했습니다.");
+        
+        TutorialTargets.Register("HpBar", transform as RectTransform);
     }
 
     private void Start()

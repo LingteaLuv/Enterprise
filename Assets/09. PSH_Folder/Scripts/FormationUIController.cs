@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using _05._CSJ_Folder.Scripts.Quest;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -54,6 +55,8 @@ public class FormationUIController : MonoBehaviour
         {
             autoFormationButton.onClick.AddListener(AutoFormating);
         }
+        
+        TutorialTargets.Register("AutoFormationButton", autoFormationButton.transform as RectTransform);
     }
 
     private void HandleCharacterDataUpdated(PlayerCharacterData updatedCharacter)

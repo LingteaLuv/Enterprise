@@ -13,7 +13,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
     public class TutorialUIController : Singleton<TutorialUIController>
     {
         [SerializeField] private Image overlay;
-        [SerializeField] private TutorialHighlighter highlighter;
+        [SerializeField] private TutorialHighlighterV2 highlighter;
         [SerializeField] private TutorialClickForwarder forwarder;
         [SerializeField] private TutorialDialogView dialog;
         [SerializeField] private RewardPanel RewardPanel;
@@ -83,7 +83,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         Pause(true);
                         highlighter.gameObject.SetActive(false);
                         forwarder.gameObject.SetActive(false);
-                        yield return dialog.Show(step.text);
+                        yield return dialog.Show(step.Speaker, step.text);
                         break;
                     
                     case TutorialStepType.Highlight:
@@ -108,10 +108,14 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         }
                         else
                         {
-                            Debug.LogError("Tutorial Highlighter : Target is not Button");
-                            yield return null;
+                            void OnForwarderClicked() => done = true;
+                            forwarder.Clicked += OnForwarderClicked;
+                            yield return new WaitUntil(() => done);
+                            forwarder.Clicked -= OnForwarderClicked;
                         }
                         forwarder.gameObject.SetActive(false);
+                        highlighter.SetTarget(null);
+                        highlighter.gameObject.SetActive(false);
                         break;
                     
                     case TutorialStepType.WaitQuestActivated:
@@ -128,11 +132,25 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         target = null; 
                         yield return new WaitUntil(() => (target = TutorialTargets.TryGet(step.targetKey)) is not null);
                         
-                        yield return WaitSignal(target);
+                        overlay.gameObject.SetActive(false);
+                        yield return new WaitUntil(() => target == null || !target.gameObject.activeInHierarchy);
                         break;
 
-                    case TutorialStepType.OpenPanel:
-                        step.onInvoke?.Invoke(); // 예: GachaPanel.Open()
+                    case TutorialStepType.WaitTime:
+                        Pause(false);
+                        
+                        if (step.waitEvent is not null)
+                        {
+                            bool arrived = false;
+                            void OnInvoke() => arrived = true;
+                            step.waitEvent.tutoEvent += OnInvoke;
+                            
+                            yield return new WaitUntil(() => arrived);
+
+                            step.waitEvent.tutoEvent -= OnInvoke;
+                        }
+                        
+                        Pause(true);
                         break;
 
                     case TutorialStepType.InvokeEvent:
@@ -144,7 +162,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         break;
                     
                     case TutorialStepType.QuestCleared:
-                        step.signal.OnComplete(step.quest.Goal.enumKey.ToKeyString());
+                        QuestSignalManager.Instance.Tutorial(step.quest.Goal.enumKey.ToKeyString());
                         break;
                     
                     case TutorialStepType.GrantCrews:
@@ -157,7 +175,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                     case TutorialStepType.ClaimReward:
                         RectTransform targetTransform = null;
                         yield return new WaitUntil(() => 
-                            (targetTransform = TutorialTargets.TryGet("QuestClaimButton")) is not null);
+                            (targetTransform = TutorialTargets.TryGet("QuestButton")) is not null);
                         
                         highlighter.gameObject.SetActive(true);
                         highlighter.SetTarget(targetTransform);
@@ -221,11 +239,6 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                 yield return new WaitUntil(() => arrived);
                 qm.OnTutorialQuestCompleted -= OnCompleted;
             }
-        }
-
-        private IEnumerator WaitSignal(RectTransform target)
-        {
-            yield return new WaitWhile(() => !target.gameObject.activeSelf);
         }
 
         // private void Grant(RewardBundle r)

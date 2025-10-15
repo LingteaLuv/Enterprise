@@ -13,6 +13,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.SO.Tutorial
         public TutorialStepType type;
 
         [Header("contents")]
+        public string Speaker;
         [TextArea] public string text;
         
         [Header("딜레이 시간")]
@@ -30,6 +31,9 @@ namespace _05._CSJ_Folder.Scripts.Quest.SO.Tutorial
         [Header("튜토리얼 퀘스트 (연결되어 있을 시)")]
         public TutorialSignalSO signal;
         public TutorialQuestDefinitionSO quest;
+        
+        [Header("기다릴 이벤트")]
+        public TutorialEventSO waitEvent;
 
         public void TutorialQuestClear()
         {
