@@ -214,6 +214,11 @@ namespace JHT
                 obj.Init(curMonsterCountList[i], SpawnType.IslandStage);
                 Vector2 pos = posList[curRoundIndex].SetPos(curMonsterCountList[i]).position;
                 obj.transform.position = new Vector2(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y));
+                if (obj.monsterStat.monsterAttackRangeType == AtkRangeType.Ranged_Attack)
+                {
+                    int a = UnityEngine.Random.Range(0, MonsterDataManager.Instance.projectile.Length);
+                    obj.monsterStat.projectileSprite = MonsterDataManager.Instance.projectile[a];
+                }
             }
 
             SynergyManager.Instance.ApplySynergyEffectsForBattle();

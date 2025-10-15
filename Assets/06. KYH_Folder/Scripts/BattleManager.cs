@@ -160,7 +160,6 @@ public class BattleManager : MonoBehaviour
         // 보완 조건: 패배 처리 중이면 전투 재시작 방지
         if (isHandlingDefeat)
         {
-            Debug.LogWarning("[BattleManager] 패배 처리 중... 전투 재시작 차단됨");
             return;
         }
 
@@ -246,7 +245,6 @@ public class BattleManager : MonoBehaviour
         
 
         IslandEnd = false;
-        Debug.LogError($"BattleManager : isLandEnd - {isLandEnd} 222");
 
         battleRoutine = StartCoroutine(BattleRoutine());
        // Debug.Log("battleRoutine 시작됨");
@@ -292,7 +290,6 @@ public class BattleManager : MonoBehaviour
 
         yield return new WaitUntil(() => goNextIsland);
         
-        Debug.LogError("BattleManager 대기끝");
         yield return new WaitForSeconds(1f);
 
         battleRoutine = null;
@@ -353,7 +350,6 @@ public class BattleManager : MonoBehaviour
             //GlobalStageManager.Instance.currentStageIndex++; // todo 임시 : 보스 나오기전
             currentRoundIndex = 0;
             IslandEnd = true;
-            Debug.LogError($"BattleManager : isLandEnd - {isLandEnd} 333");
             return;
         }
 
@@ -417,11 +413,9 @@ public class BattleManager : MonoBehaviour
         if (currentPlayers.Contains(deadPlayer))
             currentPlayers.Remove(deadPlayer);
 
-        Debug.Log($"{deadPlayer.name} 사망 → 남은 플레이어 수: {currentPlayers.Count}");
 
         if (currentPlayers.Count == 0)
         {
-            Debug.Log("모든 플레이어 사망 → 패배 처리 시작");
 
             isbattleover = true;
 
@@ -471,7 +465,6 @@ public class BattleManager : MonoBehaviour
         }*/
         spawnedEnemies.Clear();
 
-        Debug.Log("몬스터 제거됨");
     }
 
     // 플레이어 제거
@@ -487,7 +480,6 @@ public class BattleManager : MonoBehaviour
         }
         currentPlayers.Clear();
 
-        Debug.Log("플레이어 제거됨");
     }
 
 }
