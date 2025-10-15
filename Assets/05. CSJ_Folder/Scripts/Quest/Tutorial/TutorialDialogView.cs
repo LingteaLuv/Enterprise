@@ -24,13 +24,14 @@ namespace _05._CSJ_Folder.Scripts.Quest
         {
             if (speaker is not null)
             {
+                background.gameObject.SetActive(true);
                 Speaker.gameObject.SetActive(true);
-                Speaker.text = $"[{speaker.name}]";
-                background.sprite = speaker.characterSprite;
+                Speaker.text = $"[{speaker.characterName}]";
+                background.sprite = speaker.characterStanding;
             }
             else
             {
-                background.sprite = null;
+                background.gameObject.SetActive(false);
                 Speaker.gameObject.SetActive(false);
             }
             
