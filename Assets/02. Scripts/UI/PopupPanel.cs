@@ -12,7 +12,7 @@ public class PopupPanel : UIBase
     [SerializeField] private Button _rightButton;
     [SerializeField] private TMP_Text _rightButtonText;
 
-    public void Start()
+    public void Awake()
     {
         TutorialTargets.Register("leftButton", _leftButton.transform as RectTransform);
         TutorialTargets.Register("rightButton", _rightButton.transform as RectTransform);

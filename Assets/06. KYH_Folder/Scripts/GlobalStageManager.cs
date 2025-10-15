@@ -12,6 +12,8 @@ public class GlobalStageManager : MonoBehaviour
     public bool IsChecked { get; private set; }
 
     public bool bossBattleTriggered = false;
+    public bool isTutorialLose = false;
+    public bool isTutorialWin = false;
 
     private void Awake()
     {

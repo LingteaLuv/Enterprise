@@ -27,7 +27,9 @@ namespace _05._CSJ_Folder.Scripts.Quest
                 background.gameObject.SetActive(true);
                 Speaker.gameObject.SetActive(true);
                 Speaker.text = $"[{speaker.characterName}]";
-                background.sprite = speaker.characterStanding;
+                background.sprite = speaker.characterID == 10001
+                    ?TutorialDirector.Instance.Standing1 
+                    : TutorialDirector.Instance.Standing2;
             }
             else
             {

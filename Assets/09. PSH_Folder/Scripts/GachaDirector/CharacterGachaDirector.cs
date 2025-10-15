@@ -96,11 +96,11 @@ public class CharacterGachaDirector : MonoBehaviour
         StartBackgroundAnimation();
 
         mainSequence.AppendInterval(startDelay);
-        mainSequence.Append(container.DOScale(zoomScale, zoomDuration).SetEase(Ease.OutQuad));
+        mainSequence.Append(container.DOScale(zoomScale, zoomDuration).SetEase(Ease.OutQuad).SetUpdate(true));
         mainSequence.Append(
             ropeImage.transform.DOScale(1f, ropeThrowDuration)
                 .SetEase(Ease.OutBack)
-                .OnStart(() => ropeImage.gameObject.SetActive(true))
+                .OnStart(() => ropeImage.gameObject.SetActive(true)).SetUpdate(true)
         );
 
         // 마지막에 여운을 남기기 위한 딜레이 추가
@@ -161,7 +161,8 @@ public class CharacterGachaDirector : MonoBehaviour
         // DOTween을 사용하여 왕복 애니메이션을 설정합니다.
         element.image.rectTransform.DOAnchorPos(targetPos, element.moveDuration)
             .SetLoops(-1, LoopType.Yoyo)
-            .SetEase(Ease.InOutSine);
+            .SetEase(Ease.InOutSine)
+            .SetUpdate(true);
     }
 
     [ContextMenu("Test Play Animation")]

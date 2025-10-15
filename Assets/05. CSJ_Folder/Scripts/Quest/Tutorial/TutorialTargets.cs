@@ -10,6 +10,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
         public static void Register(string key, RectTransform rt)
         {
             if (string.IsNullOrEmpty(key) || rt == null) return;
+            Unregister(key, rt);
             map[key] = rt;
         }
 
