@@ -97,7 +97,7 @@ public class GachaCharacterPanel : MonoBehaviour
         while (elapsed < flipDuration / 2)
         {
             transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, elapsed / (flipDuration / 2));
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
         transform.rotation = targetRotation;
@@ -114,7 +114,7 @@ public class GachaCharacterPanel : MonoBehaviour
         while (elapsed < flipDuration / 2)
         {
             transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, elapsed / (flipDuration / 2));
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
         transform.rotation = Quaternion.identity; // 최종 각도 보정
@@ -138,7 +138,8 @@ public class GachaCharacterPanel : MonoBehaviour
         mat.DOKill();
         mat.SetFloat("_ShineLocation", 0);
         mat.DOFloat(1f, "_ShineLocation", duration)
-            .SetEase(Ease.InOutCubic);
+            .SetEase(Ease.InOutCubic)
+            .SetUpdate(true);
     }
 
     public event System.Action OnCardFlipped; // 카드가 뒤집혔을 때 호출될 이벤트

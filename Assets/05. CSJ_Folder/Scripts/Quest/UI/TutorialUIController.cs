@@ -10,33 +10,39 @@ using UnityEngine.XR;
 
 namespace _05._CSJ_Folder.Scripts.Quest.UI
 {
-    public class TutorialUIController : MonoBehaviour
+    public class TutorialUIController : Singleton<TutorialUIController>
     {
-        [SerializeField] private Canvas overlayCanvas;
         [SerializeField] private Image overlay;
-        [SerializeField] private TutorialHighlighter highlighter;
+        [SerializeField] private TutorialHighlighterV2 highlighter;
         [SerializeField] private TutorialClickForwarder forwarder;
         [SerializeField] private TutorialDialogView dialog;
+        [SerializeField] private RewardPanel RewardPanel;
+        [SerializeField] private GameObject _rewardPanelRoot;
 
-        private Coroutine running;
+        public Coroutine running;
 
 
-        public void StartSequence(TutorialStepSequenceSO sequence,
+        public void StartSequence(TutorialArcSO arc,
             int startIndex = 0,
             Action<int> OnStepChanged = null,
             Action onCompleted = null)
         {
             StopIfRunning();
-            running = StartCoroutine(Run(sequence?.steps, startIndex, OnStepChanged, onCompleted));
+            running = StartCoroutine(Run(arc, startIndex, OnStepChanged, onCompleted));
         }
 
         public void Hide()
         {
             StopIfRunning();
-            overlayCanvas.enabled = false;
             overlay.raycastTarget = false;
             highlighter.gameObject.SetActive(false);
             forwarder.gameObject.SetActive(false);
+            overlay.gameObject.SetActive(false);
+        }
+
+        public void Show()
+        {
+            overlay.gameObject.SetActive(true);
         }
 
         void StopIfRunning()
@@ -46,30 +52,42 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
             running = null;
         }
 
+        void Pause(bool on)
+        {
+            Time.timeScale = on ? 0f : 1f;
+        }
+
         private IEnumerator Run(
-            IList<TutorialStepSO> steps,
+            TutorialArcSO arc,
             int startIndex,
             Action<int> OnStepChanged,
             Action onCompleted)
         {
-            if ( steps is null || steps.Count == 0 ) yield break;
-            
-            overlayCanvas.enabled = true;
-            overlay.raycastTarget = true;
-
-            for (int i = Mathf.Clamp(startIndex, 0, steps.Count - 1); i < steps.Count; i++)
+            if (arc?.steps is null || arc.steps.Count == 0)
             {
-                var step = steps[i];
-                if (step.delay > 0) yield return new WaitForSeconds(step.delay);
+                onCompleted?.Invoke();
+                yield break;
+            }
+            
+            overlay.raycastTarget = true;
+            Show();
+
+            for (int i = startIndex; i < arc.steps.Count; i++)
+            {
+                var step = arc.steps[i];
+                if (step.delay > 0) yield return new WaitForSecondsRealtime(step.delay);
 
                 switch (step.type)
                 {
                     case TutorialStepType.Dialogue:
+                        Pause(true);
                         highlighter.gameObject.SetActive(false);
                         forwarder.gameObject.SetActive(false);
-                        yield return dialog.Show(step.text);
+                        yield return dialog.Show(step.Speaker, step.text);
                         break;
+                    
                     case TutorialStepType.Highlight:
+                        Pause(true);
                         RectTransform target = null; 
                         yield return new WaitUntil(() => (target = TutorialTargets.TryGet(step.targetKey)) is not null);
                         
@@ -90,29 +108,74 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         }
                         else
                         {
-                            Debug.LogError("Tutorial Highlighter : Target is not Button");
-                            yield return null;
+                            void OnForwarderClicked() => done = true;
+                            forwarder.Clicked += OnForwarderClicked;
+                            yield return new WaitUntil(() => done);
+                            forwarder.Clicked -= OnForwarderClicked;
                         }
                         forwarder.gameObject.SetActive(false);
+                        highlighter.SetTarget(null);
+                        highlighter.gameObject.SetActive(false);
+                        break;
+                    
+                    case TutorialStepType.WaitQuestActivated:
+                        Pause(false);
+                        yield return WaitQuestActivated(step.quest.questId);
+                        break;
+
+                    case TutorialStepType.WaitQuestCompleted:
+                        yield return WaitQuestCompleted(step.quest.questId);
                         break;
                     
                     case TutorialStepType.WaitSignal:
-                        if (step.signal is null) break;
-                        bool arrived = false; 
-                        void Handler(TutorialQuestDefinitionSO _) => arrived = true;
-                        step.signal.OnSignal += Handler;
-                        yield return new WaitUntil(() => arrived);
-                        step.signal.OnSignal -= Handler;
+                        Pause(true);
+                        target = null; 
+                        yield return new WaitUntil(() => (target = TutorialTargets.TryGet(step.targetKey)) is not null);
+                        
+                        overlay.gameObject.SetActive(false);
+                        yield return new WaitUntil(() => target == null || !target.gameObject.activeInHierarchy);
+                        break;
+
+                    case TutorialStepType.WaitTime:
+                        Pause(false);
+                        
+                        if (step.waitEvent is not null)
+                        {
+                            bool arrived = false;
+                            void OnInvoke() => arrived = true;
+                            step.waitEvent.tutoEvent += OnInvoke;
+                            
+                            yield return new WaitUntil(() => arrived);
+
+                            step.waitEvent.tutoEvent -= OnInvoke;
+                        }
+                        
+                        Pause(true);
+                        break;
+
+                    case TutorialStepType.InvokeEvent:
+                        step.onInvoke?.Invoke(); // 보상연출, 컷씬 등
+                        break;
+
+                    case TutorialStepType.GrantRewards:
+                        //Grant(step.reward);
                         break;
                     
-                    case TutorialStepType.CompleteQuest:
-                        //TODO
+                    case TutorialStepType.QuestCleared:
+                        QuestSignalManager.Instance.Tutorial(step.quest.Goal.enumKey.ToKeyString());
+                        break;
+                    
+                    case TutorialStepType.GrantCrews:
+                        Pause(true);
+                        RewardPanel.gameObject.SetActive(true);
+                        RewardPanel.Show(step.reward);
+                        yield return new WaitUntil(() => RewardPanel.gameObject.activeSelf == false);
                         break;
                     
                     case TutorialStepType.ClaimReward:
                         RectTransform targetTransform = null;
                         yield return new WaitUntil(() => 
-                            (targetTransform = TutorialTargets.TryGet("QuestClaimButton")) is not null);
+                            (targetTransform = TutorialTargets.TryGet("QuestButton")) is not null);
                         
                         highlighter.gameObject.SetActive(true);
                         highlighter.SetTarget(targetTransform);
@@ -140,12 +203,56 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                 }
                 OnStepChanged?.Invoke(i + 1);
             }
-            highlighter.gameObject.SetActive(false);
-            forwarder.gameObject.SetActive(false);
-            overlayCanvas.enabled = false;
-            overlay.raycastTarget = false;
-
+            Pause(false);
+            Hide();
             onCompleted?.Invoke();
         }
+        private IEnumerator WaitQuestActivated(string questId)
+        {
+            bool arrived = false;
+            void OnUpdated(GeneralQuestDefinitionSO def, GeneralQuestInstance inst)
+            {
+                if (def != null && def.questId == questId) arrived = true;
+            }
+
+            var qm = QuestManager.Instance;
+            if (qm != null)
+            {
+                qm.OnQuestUpdated += OnUpdated;
+                yield return new WaitUntil(() => arrived);
+                qm.OnQuestUpdated -= OnUpdated;
+            }
+        }
+
+        private IEnumerator WaitQuestCompleted(string questId)
+        {
+            bool arrived = false;
+            void OnCompleted(GeneralQuestDefinitionSO def, GeneralQuestInstance inst)
+            {
+                if (def != null && def.questId == questId) arrived = true;
+            }
+
+            var qm = QuestManager.Instance;
+            if (qm != null)
+            {
+                qm.OnTutorialQuestCompleted += OnCompleted;
+                yield return new WaitUntil(() => arrived);
+                qm.OnTutorialQuestCompleted -= OnCompleted;
+            }
+        }
+
+        // private void Grant(RewardBundle r)
+        // {
+        //     if (r == null) return;
+        //     if (r.gold > 0) DatabaseManager.Instance.AddCurrency(nameof(QuestRewardType_Enum.Gold), r.gold);
+        //     if (r.diamond > 0) DatabaseManager.Instance.AddCurrency(nameof(QuestRewardType_Enum.Gem), r.diamond);
+        //     if (r.crewIds != null && r.crewIds.Length > 0)
+        //     {
+        //         foreach (var id in r.crewIds)
+        //             CrewManager.Instance.AddCrewById(id, stars: 0);
+        //     }
+        // }
     }
+    
+
 }

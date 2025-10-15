@@ -62,6 +62,10 @@ public class BattleManager : MonoBehaviour
 
     private Coroutine enemySpawnDelay;
     #endregion
+    
+    #region CSJ
+    public Action OnBattleStart;
+    #endregion
     private void Awake()
     {
         Instance = this;    // 싱글톤 등록
@@ -223,6 +227,8 @@ public class BattleManager : MonoBehaviour
                 return;
             }
         }
+        
+        OnBattleStart?.Invoke();
 
         if (!MonsterDataManager.Instance.isTableLoadedFinish)
             return;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using _05._CSJ_Folder.Scripts.Quest;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
@@ -96,6 +97,10 @@ public class TabBarController : MonoBehaviour
         closeBtn.onClick.AddListener(ClosePanelAndAnimateButtonOut);
         homeBtn.onClick.AddListener(ClosePanelAndAnimateButtonOut);
         blocker.onClick.AddListener(ClosePanelAndAnimateButtonOut);
+
+        TutorialTargets.Register("GachaPanel", gachaBtn.transform as RectTransform);
+        TutorialTargets.Register("CharacterPanel", characterListBtn.transform as RectTransform);
+        TutorialTargets.Register("PanelCloseBtn", closeBtn.transform as RectTransform);
     }
 
     public void OnTabSelected(Button tabBtn, UIBase panel)
@@ -149,7 +154,7 @@ public class TabBarController : MonoBehaviour
 
         // 부모인 closeFrame을 기준으로 로컬 애니메이션을 실행합니다.
         closeBtn.transform.localPosition = new Vector3(0, -closeBtnOffsetY, 0);
-        closeBtn.transform.DOLocalMove(Vector3.zero, animationDuration).SetEase(Ease.OutQuad);
+        closeBtn.transform.DOLocalMove(Vector3.zero, animationDuration).SetEase(Ease.OutQuad).SetUpdate(true);
     }
 
     private void AnimateCloseButtonOut()
@@ -159,7 +164,7 @@ public class TabBarController : MonoBehaviour
         // 부모인 closeFrame을 기준으로 로컬 애니메이션을 실행합니다.
         Vector3 endPos = new Vector3(0, -closeBtnOffsetY, 0);
 
-        closeBtn.transform.DOLocalMove(endPos, animationDuration).SetEase(Ease.InQuad).OnComplete(() =>
+        closeBtn.transform.DOLocalMove(endPos, animationDuration).SetEase(Ease.InQuad).SetUpdate(true).OnComplete(() =>
         {
             closeBtn.gameObject.SetActive(false);
         });
@@ -176,7 +181,8 @@ public class TabBarController : MonoBehaviour
         panel.transform.localPosition = startPos;
         panel.SetShow(); // SetActive(true) 및 RefreshUI() 호출
 
-        panel.transform.DOLocalMove(originalPos, animationDuration).SetEase(Ease.OutBack);
+        panel.transform.DOLocalMove(originalPos, animationDuration).SetEase(Ease.OutBack)
+            .SetUpdate(UpdateType.Normal, true);
     }
 
     private void AnimatePanelOut(UIBase panel)
@@ -187,7 +193,7 @@ public class TabBarController : MonoBehaviour
         Vector3 originalPos = panelOriginalPositions[panel];
         Vector3 endPos = originalPos - new Vector3(0, panelOffsetY, 0);
 
-        panel.transform.DOLocalMove(endPos, animationDuration).SetEase(Ease.InBack).OnComplete(() =>
+        panel.transform.DOLocalMove(endPos, animationDuration).SetEase(Ease.InBack).SetUpdate(UpdateType.Normal, true).OnComplete(() =>
         {
             panel.SetHide(); // SetActive(false) 호출
         });
