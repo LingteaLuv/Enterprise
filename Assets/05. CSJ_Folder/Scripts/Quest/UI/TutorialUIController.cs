@@ -86,7 +86,6 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         Pause(true);
                         highlighter.gameObject.SetActive(false);
                         forwarder.gameObject.SetActive(false);
-                        Debug.LogError("Dialogue");
                         yield return dialog.Show(step.text, step.speaker);
                         break;
                     
