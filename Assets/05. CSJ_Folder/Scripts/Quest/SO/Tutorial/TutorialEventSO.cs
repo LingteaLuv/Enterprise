@@ -7,10 +7,6 @@ namespace _05._CSJ_Folder.Scripts.Quest.SO.Tutorial
     public class TutorialEventSO :ScriptableObject
     {
         public Action tutoEvent;
-        public void Raise()
-        {
-            tutoEvent?.Invoke();
-            Debug.LogError("tutoEvent");
-        }
+        public void Raise() => tutoEvent?.Invoke();
     }
 }

@@ -56,10 +56,6 @@ public class FormationUIController : MonoBehaviour
             autoFormationButton.onClick.AddListener(AutoFormating);
         }
         
-    }
-
-    private void Awake()
-    {
         TutorialTargets.Register("AutoFormationButton", autoFormationButton.transform as RectTransform);
     }
 

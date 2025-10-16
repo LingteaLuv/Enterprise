@@ -1,4 +1,3 @@
-using System;
 using JHT;
 using System.Collections.Generic;
 using _05._CSJ_Folder.Scripts.Quest;
@@ -34,10 +33,6 @@ public class GachaListUI : MonoBehaviour
             closeButton.onClick.AddListener(ClosePanel);
             closeButton.gameObject.SetActive(false); // 초기에는 닫기 버튼 숨김
         }
-    }
-
-    private void Awake()
-    {
         TutorialTargets.Register("GachaList", transform as RectTransform);
     }
 

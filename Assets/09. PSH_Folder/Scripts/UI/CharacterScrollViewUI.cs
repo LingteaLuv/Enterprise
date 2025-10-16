@@ -109,10 +109,6 @@ public class CharacterScrollViewUI : UIBase
         PopulateCrewRoleFilterDropdown();
         PopulateFactionFilterDropdown();
         
-    }
-
-    private void Awake()
-    {
         TutorialTargets.Register("FormationButton", formationButton?.transform as RectTransform);
         TutorialTargets.Register("SaveButton", saveButton?.transform as RectTransform);
     }

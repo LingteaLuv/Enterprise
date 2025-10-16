@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using _05._CSJ_Folder.Scripts.Quest;
 using Cysharp.Threading.Tasks;
 using JHT;
 using TMPro;
@@ -42,8 +41,6 @@ public class GameUIController : UIController<GameUIController.GameUIType>
         CurrencyManager.Instance.OnUpdateCurrency += UpdateText;
 
         DragAndDropController.Instance.GetCanvas(GetComponent<Canvas>());
-        
-        TutorialTargets.Register("BossEnterButton", _bossBtn.transform as RectTransform);
     }
 
     private void Start()

@@ -25,10 +25,6 @@ namespace _05._CSJ_Folder.Scripts.Quest
         [SerializeField] private TutorialQuestLink[] questLinks;
 
         [Header("동작 옵션")] [SerializeField] private bool playDefaultOnFirst = true;
-        
-        [Header("캐릭터 id와 스탠딩 연결")]
-        [SerializeField] public Sprite Standing1;
-        [SerializeField] public Sprite Standing2;
 
         public string _currentArcId { get; private set; } = "";
         public int _currentStepIndex { get; private set; } = 0;

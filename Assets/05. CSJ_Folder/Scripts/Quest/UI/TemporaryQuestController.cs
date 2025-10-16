@@ -18,7 +18,6 @@ public class TemporaryQuestController : UIBase
     [SerializeField] private Button _weeklyButton;
     //[SerializeField] private GameObject _weeklyPanel;
     
-    
     [SerializeField] private Sprite _activeSprite;
     [SerializeField] private Sprite _inactiveSprite;
 

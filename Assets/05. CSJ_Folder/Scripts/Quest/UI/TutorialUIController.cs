@@ -5,7 +5,6 @@ using _05._CSJ_Folder.Scripts.Quest.Definition;
 using _05._CSJ_Folder.Scripts.Quest.SO.Tutorial;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.XR;
 
@@ -19,8 +18,6 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
         [SerializeField] private TutorialDialogView dialog;
         [SerializeField] private RewardPanel RewardPanel;
         [SerializeField] private GameObject _rewardPanelRoot;
-
-        public TutorialStepSO step;
 
         public Coroutine running;
 
@@ -77,7 +74,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
 
             for (int i = startIndex; i < arc.steps.Count; i++)
             {
-                step = arc.steps[i];
+                var step = arc.steps[i];
                 if (step.delay > 0) yield return new WaitForSecondsRealtime(step.delay);
 
                 switch (step.type)
@@ -105,10 +102,9 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         var btn = target.GetComponent<Button>();
                         if (btn)
                         {
-                            UnityAction onClick = () => done = true;
-                            btn.onClick.AddListener(onClick);
+                            btn.onClick.AddListener(() => done = true);
                             yield return new WaitUntil(() => done);
-                            btn.onClick.RemoveListener(onClick);
+                            btn.onClick.RemoveAllListeners();
                         }
                         else
                         {
@@ -137,7 +133,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         yield return new WaitUntil(() => (target = TutorialTargets.TryGet(step.targetKey)) is not null);
                         
                         overlay.gameObject.SetActive(false);
-                        yield return new WaitUntil(() => target is null || !target.gameObject.activeInHierarchy);
+                        yield return new WaitUntil(() => target == null || !target.gameObject.activeInHierarchy);
                         break;
 
                     case TutorialStepType.WaitTime:
@@ -192,10 +188,9 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         var btn2 = targetTransform.GetComponent<Button>();
                         if (btn2)
                         {
-                            UnityAction onClick = () => got = true;
-                            btn2.onClick.AddListener(onClick);
+                            btn2.onClick.AddListener(() => got = true);
                             yield return new WaitUntil(() => got);
-                            btn2.onClick.RemoveListener(onClick);
+                            btn2.onClick.RemoveAllListeners();
                         }
                         else
                         {

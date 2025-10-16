@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 using System;
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using _05._CSJ_Folder.Scripts.Quest.SO.Tutorial;
 using UnityEngine.AddressableAssets;
 
 public class BossBattleManager : Singleton<BossBattleManager>
@@ -17,8 +16,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
     [SerializeField] private GameObject bossPos; // 팀원 방식 사용
 
     [SerializeField] private GameObject monsterPrefab;
-    
-    
     private Transform monsterParent;
 
     private List<GameObject> currentPlayers;
@@ -32,11 +29,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
     public List<JHT_BaseMonsterStat> spawnBossMonster;
     public BossBattleProduct product;
     public BossBattleDirection direction;
-    
-    [Header("튜토리얼 시그널 (CSJ)")]
-    [SerializeField] private TutorialEventSO WinTutorial;
-    [SerializeField] private TutorialEventSO LoseTutorial;
-    [SerializeField] private TutorialEventSO EnterTutorial;
 
     public Action<JHT_BaseMonsterStat> OnDieMonster;
 
@@ -90,21 +82,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
             SpawnPlayers();
             SpawnBoss();
             product.Init();
-            
-            if (GlobalStageManager.Instance.isTutorialWin || GlobalStageManager.Instance.isTutorialLose)
-            {
-                EnterTutorial.Raise();
-            }
-
-            if (GlobalStageManager.Instance.isTutorialWin)
-            {
-                EndBattle(true);
-            }
-
-            if (GlobalStageManager.Instance.isTutorialLose)
-            {
-                EndBattle(false);
-            }
         }
         catch (OperationCanceledException) { }
     }
@@ -113,17 +90,10 @@ public class BossBattleManager : Singleton<BossBattleManager>
     {
         var monsterTransformHandle = await Addressables.LoadAssetAsync<GameObject>("MonsterTransform");
         var monsterSampleHandle = await Addressables.LoadAssetAsync<GameObject>("SampleMonster");
-        var win = await Addressables.LoadAssetAsync<TutorialEventSO>("WinSignal");
-        var lose = await Addressables.LoadAssetAsync<TutorialEventSO>("DefeatSignal");
-        var enter = await Addressables.LoadAssetAsync<TutorialEventSO>("EnterBossSignal");
 
         bossPos = monsterTransformHandle;
         monsterPrefab = monsterSampleHandle;
         monsterParent = product.transform.Find("MonsterShip").transform;
-        
-        WinTutorial = win;
-        LoseTutorial = lose;
-        EnterTutorial = enter;
         //bossPos.transform.position += new Vector3(6, 0);
     }
 
@@ -310,11 +280,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
         yield return new WaitForSeconds(8f);
         cameraFollow = null;
         SceneManager.LoadScene(_returnSceneName);
-        
-        if (GlobalStageManager.Instance.isTutorialWin)
-        {
-            WinTutorial.Raise();
-        }
 
         if (delay1 != null)
         {
@@ -330,11 +295,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
         cameraFollow = null;
         SceneManager.LoadScene(_returnSceneName);
 
-        if (GlobalStageManager.Instance.isTutorialLose)
-        {
-            LoseTutorial.Raise();
-        }
-        
         if (delay2 != null)
         {
             StopCoroutine(delay2);
