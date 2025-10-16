@@ -24,6 +24,9 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
         public TutorialStepSO step;
 
         public Coroutine running;
+        
+        private Color half = new Color(0, 0, 0, 0.5f);
+        private Color full = new Color(0, 0, 0, 0);
 
 
         public void StartSequence(TutorialArcSO arc,
@@ -74,6 +77,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
             }
             
             overlay.raycastTarget = true;
+            HighlightOverlay.raycastTarget = true;
             Show();
 
             for (int i = startIndex; i < arc.steps.Count; i++)
@@ -94,7 +98,8 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         Pause(true);
                         RectTransform target = null; 
                         yield return new WaitUntil(() => (target = TutorialTargets.TryGet(step.targetKey)) is not null);
-                        overlay.gameObject.SetActive(false);
+                        overlay.gameObject.SetActive(true);
+                        overlay.color = full;
                         HighlightOverlay.gameObject.SetActive(true);
                         highlighter.gameObject.SetActive(false);
                         highlighter.SetTarget(target);
@@ -123,6 +128,8 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         highlighter.SetTarget(null);
                         highlighter.gameObject.SetActive(false);
                         HighlightOverlay.gameObject.SetActive(false);
+                        overlay.color = half;
+                        overlay.gameObject.SetActive(false);
                         break;
                     
                     case TutorialStepType.WaitQuestActivated:
