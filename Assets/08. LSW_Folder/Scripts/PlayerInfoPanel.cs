@@ -25,6 +25,7 @@ public class PlayerInfoPanel : UIBase
     private int _curImageId;
     private Vector2 _curPos;
     private Dictionary<int, GameObject> _images = new Dictionary<int, GameObject>();
+    private bool _isInit;
     
     public Action OnClickedExitBtn;
     public Action OnClickedNicknameChangeBtn;
@@ -46,7 +47,7 @@ public class PlayerInfoPanel : UIBase
             _playGamesLinkBtn.gameObject.SetActive(false);
         }
         
-        PlayerDataManager.Instance.OnOwnedCharacterAdded += (key) => AddImage(key);
+        PlayerDataManager.Instance.OnOwnedCharacterAdded += async (key) => await AddImage(key);
         
         _nicknameChangeBtn.onClick.AddListener(async () =>
         {
@@ -78,6 +79,7 @@ public class PlayerInfoPanel : UIBase
         {
             _curImageId = value;
             InitImage();
+            _isInit = true;
         }, true, value : 20001);
     }
     
@@ -159,8 +161,9 @@ public class PlayerInfoPanel : UIBase
         }
     }
     
-    private void AddImage(int key)
+    private async UniTask AddImage(int key)
     {
+        if(!_isInit) await Init();
         _images[key].gameObject.GetComponent<CrewIcon>().GetComponent<Button>().enabled = true;
         _images[key].gameObject.transform.GetChild(0).GetComponent<Image>().color = new Color(255, 255, 255, 255);
     }

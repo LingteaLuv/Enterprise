@@ -329,9 +329,10 @@ public class BossBattleManager : Singleton<BossBattleManager>
         yield return new WaitForSeconds(8f);
         cameraFollow = null;
         SceneManager.LoadScene(_returnSceneName);
-
+        Debug.LogError("[Delay2] 진입1");
         if (GlobalStageManager.Instance.isTutorialLose)
         {
+            Debug.LogError("[Delay2] 진입2");
             LoseTutorial.Raise();
         }
         

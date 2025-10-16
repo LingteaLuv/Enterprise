@@ -28,7 +28,7 @@ namespace _05._CSJ_Folder.Scripts.Quest
             rootCanvas = GetComponentInParent<Canvas>();
             
             var img = GetComponent<Image>();
-            img.color = new Color(255, 255, 255, 100);
+            img.color = new Color(255, 255, 255, 0.4f);
             img.raycastTarget = true;
         }
 

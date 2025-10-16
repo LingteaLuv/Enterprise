@@ -13,6 +13,7 @@ using UnityEditor;
 #endif
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using Vector2 = UnityEngine.Vector2;
 
 public class PlayerDataManager : Singleton<PlayerDataManager>
 {
@@ -39,7 +40,8 @@ public class PlayerDataManager : Singleton<PlayerDataManager>
     public Dictionary<int, PlayerCharacterData> OwnedCharacters = new Dictionary<int, PlayerCharacterData>();
     public Dictionary<int, PlayerCharacterData> AllCharacters = new Dictionary<int, PlayerCharacterData>();
     //public Dictionary<int, int> characterSoulFragments = new Dictionary<int, int>();
-
+    
+    
     public class ParsingPlayerData
     {
         public int Level;
