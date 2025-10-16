@@ -14,6 +14,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
     public class TutorialUIController : Singleton<TutorialUIController>
     {
         [SerializeField] private Image overlay;
+        [SerializeField] private Image HighlightOverlay;
         [SerializeField] private TutorialHighlighterV2 highlighter;
         [SerializeField] private TutorialClickForwarder forwarder;
         [SerializeField] private TutorialDialogView dialog;
@@ -93,8 +94,9 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         Pause(true);
                         RectTransform target = null; 
                         yield return new WaitUntil(() => (target = TutorialTargets.TryGet(step.targetKey)) is not null);
-                        
-                        highlighter.gameObject.SetActive(true);
+                        overlay.gameObject.SetActive(false);
+                        HighlightOverlay.gameObject.SetActive(true);
+                        highlighter.gameObject.SetActive(false);
                         highlighter.SetTarget(target);
                         
                         forwarder.gameObject.SetActive(true);
@@ -120,6 +122,7 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         forwarder.gameObject.SetActive(false);
                         highlighter.SetTarget(null);
                         highlighter.gameObject.SetActive(false);
+                        HighlightOverlay.gameObject.SetActive(false);
                         break;
                     
                     case TutorialStepType.WaitQuestActivated:
