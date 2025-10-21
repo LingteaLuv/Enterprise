@@ -156,11 +156,16 @@ namespace _05._CSJ_Folder.Scripts.Quest.UI
                         if (step.waitEvent is not null)
                         {
                             bool arrived = false;
-                            void OnInvoke() => arrived = true;
+                            void OnInvoke()
+                            {
+                                Debug.LogError("너 들어오냐?");
+                                arrived = true;
+                            }
+                            Debug.LogError($"등록한 WaitEvent instance ID: {step.waitEvent.GetInstanceID()}");
                             step.waitEvent.tutoEvent += OnInvoke;
-                            
+                            Debug.LogError("[WaitTime] 진입");
                             yield return new WaitUntil(() => arrived);
-
+                            Debug.LogError("[WaitTime] 탈출");
                             step.waitEvent.tutoEvent -= OnInvoke;
                         }
                         

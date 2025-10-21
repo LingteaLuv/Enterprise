@@ -10,7 +10,8 @@ namespace _05._CSJ_Folder.Scripts.Quest.SO.Tutorial
         public void Raise()
         {
             tutoEvent?.Invoke();
-            Debug.LogError("tutoEvent");
+            Debug.LogError("튜토 이벤");
+            Debug.LogError($"이벤트 발생한 WaitEvent instance ID: {this.GetInstanceID()}");
         }
     }
 }

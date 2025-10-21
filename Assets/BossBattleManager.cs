@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using System;
 using Cysharp.Threading.Tasks;
 using System.Threading;
+using _05._CSJ_Folder.Scripts.Quest;
 using _05._CSJ_Folder.Scripts.Quest.SO.Tutorial;
 using UnityEngine.AddressableAssets;
 
@@ -32,11 +33,6 @@ public class BossBattleManager : Singleton<BossBattleManager>
     public List<JHT_BaseMonsterStat> spawnBossMonster;
     public BossBattleProduct product;
     public BossBattleDirection direction;
-    
-    [Header("튜토리얼 시그널 (CSJ)")]
-    [SerializeField] private TutorialEventSO WinTutorial;
-    [SerializeField] private TutorialEventSO LoseTutorial;
-    [SerializeField] private TutorialEventSO EnterTutorial;
 
     public Action<JHT_BaseMonsterStat> OnDieMonster;
 
@@ -93,7 +89,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
             
             if (GlobalStageManager.Instance.isTutorialWin || GlobalStageManager.Instance.isTutorialLose)
             {
-                EnterTutorial.Raise();
+                TutorialSignalManager.Instance.ConnectEvent("Enter");
             }
 
             if (GlobalStageManager.Instance.isTutorialWin)
@@ -113,17 +109,10 @@ public class BossBattleManager : Singleton<BossBattleManager>
     {
         var monsterTransformHandle = await Addressables.LoadAssetAsync<GameObject>("MonsterTransform");
         var monsterSampleHandle = await Addressables.LoadAssetAsync<GameObject>("SampleMonster");
-        var win = await Addressables.LoadAssetAsync<TutorialEventSO>("WinSignal");
-        var lose = await Addressables.LoadAssetAsync<TutorialEventSO>("DefeatSignal");
-        var enter = await Addressables.LoadAssetAsync<TutorialEventSO>("EnterBossSignal");
 
         bossPos = monsterTransformHandle;
         monsterPrefab = monsterSampleHandle;
         monsterParent = product.transform.Find("MonsterShip").transform;
-        
-        WinTutorial = win;
-        LoseTutorial = lose;
-        EnterTutorial = enter;
         //bossPos.transform.position += new Vector3(6, 0);
     }
 
@@ -313,7 +302,7 @@ public class BossBattleManager : Singleton<BossBattleManager>
         
         if (GlobalStageManager.Instance.isTutorialWin)
         {
-            WinTutorial.Raise();
+            TutorialSignalManager.Instance.ConnectEvent("Win");
         }
 
         if (delay1 != null)
@@ -329,10 +318,11 @@ public class BossBattleManager : Singleton<BossBattleManager>
         yield return new WaitForSeconds(8f);
         cameraFollow = null;
         SceneManager.LoadScene(_returnSceneName);
-
+        Debug.LogError("[Delay2] 진입1");
         if (GlobalStageManager.Instance.isTutorialLose)
         {
-            LoseTutorial.Raise();
+            Debug.LogError("[Delay2] 진입2");
+            TutorialSignalManager.Instance.ConnectEvent("Defeat");
         }
         
         if (delay2 != null)

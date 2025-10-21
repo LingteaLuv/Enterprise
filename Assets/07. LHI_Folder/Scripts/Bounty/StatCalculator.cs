@@ -65,10 +65,6 @@ public static class StatCalculator
         // 총 전투력 합산
         float totalPower = attackPower + healthPower + defensePower + critPower + speedPower;
 
-        /*Debug.Log($"[전투력 계산] {characterData.characterdata.characterName}: " +
-                  $"공격:{attackPower:F0} + 체력:{healthPower:F0} + 방어:{defensePower:F0} + " +
-                  $"치명타:{critPower:F0} + 속도:{speedPower:F0} = {totalPower:F0} ");*/
-
         return totalPower;
     }
 
