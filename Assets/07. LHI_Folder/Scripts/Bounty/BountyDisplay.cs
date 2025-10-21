@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Numerics;
 using UnityEngine;
 
@@ -66,6 +67,16 @@ public class BountyDisplay : MonoBehaviour
         }
     }
 
+    private IEnumerator HideChangeTextAfterDelay()
+    {
+        yield return new WaitForSeconds(changeTextDisplayDuration);
+        if (bountyChangeText != null)
+        {
+            bountyChangeText.gameObject.SetActive(false);
+        }
+    }
+    
+    
     /// <summary>
     /// 현상금 변경량을 표시
     /// </summary>
@@ -101,14 +112,4 @@ public class BountyDisplay : MonoBehaviour
         // 일정 시간 후 텍스트 숨기기
         hideChangeTextCoroutine = StartCoroutine(HideChangeTextAfterDelay());
     }
-
-    private System.Collections.IEnumerator HideChangeTextAfterDelay()
-    {
-        yield return new WaitForSeconds(changeTextDisplayDuration);
-        if (bountyChangeText != null)
-        {
-            bountyChangeText.gameObject.SetActive(false);
-        }
-    }
-    
 }

@@ -141,8 +141,6 @@ public class DatabaseManager : Singleton<DatabaseManager>
             if (init)
             {
                 await dataRef.SetValueAsync(value);
-                //DataSnapshot newSnapshot = await dataRef.GetValueAsync();
-                //T newData = (T)Convert.ChangeType(newSnapshot.Value, typeof(T));
                 callback(value);
             }
             return;
